@@ -174,7 +174,9 @@ execute function public.validate_profile_language_service ();
 
 alter table public.profile_language_services enable row level security;
 
--- 1. Publicly readable only when the linked profile is active, the
+-- 1. Publicly readable only when the linked profile is published (not
+-- just active: is_public = true, is_active = true, deleted_at is null,
+-- the unified visibility formula used across the Persone domain), the
 -- service type is active, and any linked language is active.
 create policy "Public can view services of active profiles"
   on public.profile_language_services
@@ -186,7 +188,9 @@ create policy "Public can view services of active profiles"
       from public.profiles p
       where
         p.id = profile_language_services.profile_id
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
     )
     and exists (
       select 1

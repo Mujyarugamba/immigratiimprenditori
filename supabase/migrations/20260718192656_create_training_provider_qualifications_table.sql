@@ -104,8 +104,10 @@ execute function public.validate_training_provider_qualification ();
 alter table public.training_provider_qualifications enable row level security;
 
 -- 1. Publicly readable only when not rejected/expired, the profile is
--- active and the course type is active. Rejected/expired declarations are
--- not shown publicly.
+-- published (is_public = true, is_active = true, deleted_at is null, the
+-- unified visibility formula used across the Persone domain) and the
+-- course type is active. Rejected/expired declarations are not shown
+-- publicly.
 create policy "Public can view standing qualifications of active profiles"
   on public.training_provider_qualifications
   for select
@@ -117,7 +119,9 @@ create policy "Public can view standing qualifications of active profiles"
       from public.profiles p
       where
         p.id = training_provider_qualifications.profile_id
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
     )
     and exists (
       select 1

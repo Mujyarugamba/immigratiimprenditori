@@ -58,7 +58,10 @@ execute function public.validate_training_offer_venue_type ();
 alter table public.training_offer_venue_types enable row level security;
 
 -- 1. Publicly readable only when the underlying offer is itself publicly
--- visible and the venue type is active.
+-- visible (active offer, published provider profile - is_public = true,
+-- is_active = true, deleted_at is null, the unified visibility formula
+-- used across the Persone domain -, active course type, active delivery
+-- mode) and the venue type is active.
 create policy "Public can view venue types of active training offers"
   on public.training_offer_venue_types
   for select
@@ -72,7 +75,9 @@ create policy "Public can view venue types of active training offers"
       where
         o.id = training_offer_venue_types.training_offer_id
         and o.is_active = true
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
         and t.is_active = true
         and (
           o.delivery_mode_id is null

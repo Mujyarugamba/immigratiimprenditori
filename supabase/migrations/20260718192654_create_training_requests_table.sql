@@ -132,7 +132,8 @@ execute function public.validate_training_request ();
 alter table public.training_requests enable row level security;
 
 -- 1. Publicly readable only when the request is open and the requester
--- profile is active.
+-- profile is published (is_public = true, is_active = true, deleted_at is
+-- null, the unified visibility formula used across the Persone domain).
 create policy "Public can view open training requests"
   on public.training_requests
   for select
@@ -144,7 +145,9 @@ create policy "Public can view open training requests"
       from public.profiles p
       where
         p.id = training_requests.requester_profile_id
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
     )
   );
 

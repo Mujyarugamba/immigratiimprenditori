@@ -50,7 +50,9 @@ create index training_request_languages_language_level_idx on public.training_re
 alter table public.training_request_languages enable row level security;
 
 -- 1. Publicly readable only when the underlying request is open and the
--- requester profile is active, and the language is active.
+-- requester profile is published (is_public = true, is_active = true,
+-- deleted_at is null, the unified visibility formula used across the
+-- Persone domain), and the language is active.
 create policy "Public can view languages of open training requests"
   on public.training_request_languages
   for select
@@ -63,7 +65,9 @@ create policy "Public can view languages of open training requests"
       where
         r.id = training_request_languages.training_request_id
         and r.status = 'open'
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
     )
     and exists (
       select 1

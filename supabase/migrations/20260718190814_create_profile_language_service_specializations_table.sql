@@ -31,8 +31,10 @@ create index profile_language_service_specializations_specialization_idx on publ
 alter table public.profile_language_service_specializations enable row level security;
 
 -- 1. Publicly readable only when the underlying service is itself publicly
--- visible (active profile, active service type, any linked language
--- active) and the specialization is active.
+-- visible (published profile - is_public = true, is_active = true,
+-- deleted_at is null, the unified visibility formula used across the
+-- Persone domain -, active service type, any linked language active) and
+-- the specialization is active.
 create policy "Public can view specializations of active services"
   on public.profile_language_service_specializations
   for select
@@ -45,7 +47,9 @@ create policy "Public can view specializations of active services"
       join public.language_service_types t on t.id = pls.service_type_id
       where
         pls.id = profile_language_service_specializations.profile_language_service_id
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
         and t.is_active = true
         and (
           pls.source_language_id is null

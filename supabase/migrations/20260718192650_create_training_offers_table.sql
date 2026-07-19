@@ -153,8 +153,10 @@ execute function public.validate_training_offer ();
 
 alter table public.training_offers enable row level security;
 
--- 1. Publicly readable only when the offer, the provider profile and the
--- course type are all active, and the delivery mode (when set) is active.
+-- 1. Publicly readable only when the offer is active, the provider profile
+-- is published (is_public = true, is_active = true, deleted_at is null,
+-- the unified visibility formula used across the Persone domain), the
+-- course type is active, and the delivery mode (when set) is active.
 create policy "Public can view active training offers"
   on public.training_offers
   for select
@@ -166,7 +168,9 @@ create policy "Public can view active training offers"
       from public.profiles p
       where
         p.id = training_offers.provider_profile_id
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
     )
     and exists (
       select 1

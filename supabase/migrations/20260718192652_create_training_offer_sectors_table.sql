@@ -22,7 +22,10 @@ create index training_offer_sectors_sector_idx on public.training_offer_sectors 
 alter table public.training_offer_sectors enable row level security;
 
 -- 1. Publicly readable only when the underlying offer is itself publicly
--- visible and the sector is active.
+-- visible (active offer, published provider profile - is_public = true,
+-- is_active = true, deleted_at is null, the unified visibility formula
+-- used across the Persone domain -, active course type, active delivery
+-- mode) and the sector is active.
 create policy "Public can view sectors of active training offers"
   on public.training_offer_sectors
   for select
@@ -36,7 +39,9 @@ create policy "Public can view sectors of active training offers"
       where
         o.id = training_offer_sectors.training_offer_id
         and o.is_active = true
+        and p.is_public = true
         and p.is_active = true
+        and p.deleted_at is null
         and t.is_active = true
         and (
           o.delivery_mode_id is null
