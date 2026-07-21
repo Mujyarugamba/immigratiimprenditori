@@ -256,6 +256,38 @@ Riattivazione → stato: Attiva, tutto torna visibile senza necessità di ridich
 
 ---
 
+## 11. Eventi di dominio
+
+> Nota di riconciliazione (v. `docs/architecture/logical/reconciliation-report.md`). Questa sezione non era presente nella versione originaria del documento, mentre tutti i documenti logici successivi (Imprese, Appartenenze, Mercati Internazionali, Opportunità, Collaborazioni, Professionisti, Eventi, Contenuti Editoriali, Osservatorio, Identità & Accessi) la includono in modo omogeneo. Viene aggiunta in sede di riconciliazione architetturale per colmare un vuoto strutturale reale — il dominio più fondativo della piattaforma era l'unico privo di un vocabolario esplicito di eventi accaduti, pur essendo referenziato da eventi altrui (es. `AccountAssociatoAPersona` nel dominio Identità & Accessi) — senza alterare nessuna delle decisioni concettuali già prese nelle sezioni precedenti.
+
+Un evento di dominio descrive un fatto già avvenuto nel dominio Persone, non un comando né un'intenzione. Ogni evento è espresso al passato. Gli eventi non definiscono un meccanismo tecnico di trasmissione: descrivono solo cosa può essere accaduto, così che altri domini (Notifiche, Osservatorio, Ricerca, Identità & Accessi) possano eventualmente reagire per riferimento, senza mai modificare il dominio Persone.
+
+**Eventi relativi a Persona**
+- `PersonaRegistrata` — una Persona ha completato la registrazione minima (stato: Registrata).
+- `PersonaAttivata` — una Persona ha completato il profilo minimo richiesto e ha raggiunto lo stato Attiva per la prima volta.
+- `PersonaSospesa` — una Persona è stata sospesa, per scelta propria o per moderazione (stato: Inattiva/Sospesa).
+- `PersonaRiattivata` — una Persona precedentemente sospesa è tornata allo stato Attiva.
+- `PersonaCancellata` — una Persona ha esercitato la cancellazione definitiva del proprio profilo (stato: Cancellata, terminale e irreversibile; si veda §6, regola 9).
+
+**Eventi relativi a CompetenzaDichiarata**
+- `CompetenzaDichiarataAggiunta` — una Persona ha dichiarato una nuova competenza.
+- `CompetenzaDichiarataRimossa` — una Persona ha rimosso una propria dichiarazione di competenza.
+
+**Eventi relativi a LinguaParlata**
+- `LinguaParlataAggiunta` — una Persona ha dichiarato una nuova lingua d'uso.
+- `LinguaParlataRimossa` — una Persona ha rimosso una propria dichiarazione linguistica.
+
+**Eventi relativi a StoriaPersonale**
+- `StoriaPersonaleCreata` — una Persona ha creato una nuova StoriaPersonale (stato: Bozza).
+- `StoriaPersonaleInviataInRevisione` — l'autore ha inviato la StoriaPersonale a revisione redazionale (stato: In revisione).
+- `StoriaPersonalePubblicata` — una StoriaPersonale ha raggiunto lo stato Pubblicata ed è diventata visibile e classificabile.
+- `StoriaPersonaleAggiornata` — una StoriaPersonale già pubblicata è stata modificata dall'autore (stato: Aggiornata).
+- `StoriaPersonaleArchiviata` — una StoriaPersonale è stata archiviata (stato: Archiviata).
+
+**Cosa questi eventi non sono.** Non sono un meccanismo di sincronizzazione dati, non sono comandi (`SospendiPersona` non è un evento di questo dominio: `PersonaSospesa` sì), e non implicano che un altro dominio debba reagire in un modo particolare. In coerenza con la Decisione Architetturale n. 1, un evento come `PersonaCancellata` non implica alcuna cancellazione retroattiva delle Appartenenze storiche o di altri fatti di dominio esterni (si veda §6, regola 11): ogni dominio a valle decide autonomamente come e se reagire.
+
+---
+
 ## DECISIONI ARCHITETTURALI
 
 **Decisione 1 — Appartenenza come dominio/aggregato indipendente, non come parte di Persona o di Impresa.**
