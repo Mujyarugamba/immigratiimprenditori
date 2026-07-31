@@ -16,13 +16,17 @@
 6. [Classificazioni](#6-classificazioni)
 7. [Sedi e presenza territoriale](#7-sedi-e-presenza-territoriale)
 8. [Contatti e presenza digitale](#8-contatti-e-presenza-digitale)
+8A. [Offerta di servizi (ServizioImpresa)](#8a-offerta-di-servizi-servizioimpresa)
+8B. [Offerta di prodotti (ProdottoImpresa)](#8b-offerta-di-prodotti-prodottoimpresa)
 9. [Relazioni con Persone](#9-relazioni-con-persone)
 10. [Relazioni con altri domini](#10-relazioni-con-altri-domini)
 11. [Assi di stato](#11-assi-di-stato)
 12. [Verifiche](#12-verifiche)
+12.1. [Rappresentazione fisica futura — M6.1 (`business_verifications`)](#121-rappresentazione-fisica-futura--m61-business_verifications)
 13. [Certificazioni, attestazioni e riconoscimenti](#13-certificazioni-attestazioni-e-riconoscimenti)
 14. [Temporalità e storicizzazione](#14-temporalità-e-storicizzazione)
 15. [Visibilità e pubblicazione](#15-visibilità-e-pubblicazione)
+15.1. [Rappresentazione fisica della coerenza di pubblicazione e visibilità (M7.1)](#151-rappresentazione-fisica-della-coerenza-di-pubblicazione-e-visibilità-m71)
 16. [Dati sorgente, dichiarati, derivati e aggregati](#16-dati-sorgente-dichiarati-derivati-e-aggregati)
 17. [Documenti e prove](#17-documenti-e-prove)
 18. [Eventi di dominio](#18-eventi-di-dominio)
@@ -103,7 +107,7 @@ Applicando la procedura decisionale di `03` §3 a ciascuna delle entità logiche
 | **ProdottoImpresa** | Entity dipendente (**E02**) | Rappresentare un prodotto o una categoria di prodotti offerti (`imprese.md` §2) | Come ServizioImpresa | Imprese |
 | **LinguaOperativaImpresa** | Entity dipendente (**E02**) — rappresenta la singola dichiarazione di lingua operativa per un dato contesto d'uso, non il valore di lingua in sé, che è **VO03** verso la Tassonomia condivisa | Rappresentare che l'Impresa è realmente operativa in una data lingua, per un dato contesto (`imprese.md` §2) | Minimale: Dichiarata → Rimossa, per analogia diretta con LinguaParlata di Persone (§21) | Imprese (per la dichiarazione); Tassonomia condivisa (per il valore di lingua referenziato) |
 | **CertificazioneImpresa** | Entity dipendente (**E02**) | Rappresentare una certificazione, qualificazione, iscrizione o attestazione dichiarata o riconosciuta all'Impresa (`imprese.md` §2) | Articolato: stato sostanziale e stato di verifica indipendenti, con validità temporale (§11, §14) | Imprese |
-| **CanaleImpresa** | Entity dipendente (**E02**) | Rappresentare un canale attraverso cui l'Impresa opera o comunica con l'esterno (`imprese.md` §2) | Con propria visibilità (§8, §11) | Imprese |
+| **CanaleImpresa** | Entity dipendente (**E02**) | Rappresentare un canale concreto attraverso cui l'Impresa opera o comunica con l'esterno, con natura e ValoreCanale obbligatorio (`imprese.md` §2, §10 regola 14) | Con propria visibilità (§8, §11) | Imprese |
 | **MediaImpresa** | Entity dipendente (**E02**) | Rappresentare il materiale visivo e documentale pubblico dell'Impresa (`imprese.md` §2) | Con propria visibilità e propri ruoli (es. logo principale) (§11) | Imprese |
 
 **Perché AppartenenzaImpresa e MercatoImpresa non compaiono in questa tabella.** Applicando la domanda 1 della procedura di `03` §3 ("è già l'Aggregate Root del dominio, secondo il documento logico?") e verificando la titolarità reale dichiarata da `appartenenze.md` e da `reconciliation-report.md` §11.2, entrambi i concetti risultano appartenere per intero a un altro Aggregate Root (Appartenenza per il primo, Presenza/Interesse di mercato per il secondo): non sono quindi concetti persistenti del dominio Imprese, ma relazioni referenziate (§9, §10). Includerli in questa tabella come se fossero concetti propri di Imprese violerebbe il principio "nessun dominio duplica fatti altrui" (`01` §2, principio 2) e l'anti-pattern "perdita del proprietario del dato" (`03` §14).
@@ -123,10 +127,12 @@ I concetti seguenti non ricevono una rappresentazione persistente autonoma: rest
 | Denominazione, Nome pubblico, Descrizione sintetica, Presentazione estesa | Impresa | Value Object incorporato (**VO01**), con finalità descrittiva (**C06**) | Cambiano sempre solidalmente con l'Impresa che li contiene; non hanno un proprio ciclo di vita né una propria cardinalità (`imprese.md` §2) |
 | Anno di avvio | Impresa | Value Object incorporato (**VO01**) | Un singolo dato di decorrenza (**T03**, §14), non un fatto autonomamente referenziabile |
 | Dimensione | Impresa | Value Object incorporato (**VO01**), riferito a un Elenco controllato (**C03**, §6) | Un'indicazione di scala per fasce, non un dato contabile preciso né un valore governato con proprio ciclo di gestione |
-| Nome, descrizione, destinatari, territorio servito, eventuali lingue disponibili (attributi di ServizioImpresa/ProdottoImpresa) | ServizioImpresa / ProdottoImpresa | Value Object incorporato (**VO01**) | Descrivono la singola offerta, cambiano insieme a essa, non richiedono di essere referenziati singolarmente da altri concetti (`imprese.md` §2) |
+| Nome, descrizione, destinatari, territorio servito (attributi di ServizioImpresa; nome e descrizione anche di ProdottoImpresa) | ServizioImpresa / ProdottoImpresa | Value Object incorporato (**VO01**) | Descrivono la singola offerta, cambiano insieme a essa, non richiedono di essere referenziati singolarmente da altri concetti (`imprese.md` §2). Destinatari e territorio servito di ServizioImpresa sono testo dichiarativo, non cataloghi né VO03 |
+| Eventuali lingue disponibili per un ServizioImpresa | ServizioImpresa | Riferimento strutturato (rinviato) a **LinguaOperativaImpresa** già owned | `imprese.md` §2: "riferimento a LinguaOperativaImpresa, quando rilevante". Non è VO01 testuale libero né duplicazione di literal linguistici; la relazione strutturata non è richiesta nella persistenza minima di M4.1 (§8A) |
 | Contesto d'uso (commerciale/amministrativa/servizio clienti/tecnica/formazione) | LinguaOperativaImpresa | Value Object incorporato (**VO01**), come Tipologia (**C05**) applicata all'uso della singola dichiarazione | Qualifica la singola dichiarazione, non introduce un fatto a sé (`imprese.md` §2) |
 | Nome/tipo della certificazione, ente emittente dichiarato | CertificazioneImpresa | Value Object incorporato (**VO01**) | Descrive la singola certificazione, cambia con essa |
-| Natura del canale (sito proprio, e-commerce, marketplace, social, telefono commerciale, punto vendita, rete distributiva) | CanaleImpresa | Tipologia (**C05**) | Classifica la natura della singola Entity CanaleImpresa, non un valore condiviso tra domini |
+| Natura del canale (sito proprio, e-commerce, marketplace, social, telefono commerciale, email commerciale, punto vendita come canale, rete distributiva) | CanaleImpresa | Tipologia (**C05**) | Classifica la natura della singola Entity CanaleImpresa, non un valore condiviso tra domini |
+| Valore del canale (ValoreCanale) | CanaleImpresa | Value Object incorporato (**VO01**), con finalità descrittiva (**C06**) | Riferimento concreto obbligatorio del canale; distinto dalla natura; non ha ciclo di vita autonomo (`imprese.md` §2, §10 regola 14). Rappresentazione fisica futura: `channel_value` (§8) |
 | Tipologia di sede (sede legale, operativa, punto vendita, laboratorio, stabilimento, magazzino, ufficio, sede secondaria) | SedeImpresa | Tipologia (**C05**) | Come sopra, per SedeImpresa |
 | Ruolo di un elemento multimediale (es. "logo principale" vs immagine secondaria) | MediaImpresa | Value Object incorporato (**VO01**) | Qualifica la singola Entity MediaImpresa, non un fatto autonomo |
 
@@ -181,7 +187,7 @@ Applicando la procedura di scelta tra Classificazione e Dato derivato (`03` §3,
 | **Forma organizzativa** | Locale | No — `imprese.md` §2 la presenta come un insieme enumerato di alternative (impresa individuale, società, cooperativa, startup, attività professionale organizzata, impresa sociale, ente economico, attività commerciale/artigianale), senza un proprio processo di gestione nel tempo | No, un solo valore per Impresa | Non trattata come storicizzabile in modo esplicito da `imprese.md` (il cambiamento di forma è trattato come possibile evento futuro, "Fusione, cessione o trasformazione societaria", §11, questione aperta) | Dichiarabile; nessuna verifica specifica censita | Imprese | C03 (Elenco controllato) |
 | **Dimensione** (fasce) | Locale | No — un insieme di fasce, non un catalogo gestito autonomamente | No | Non trattata come storicizzabile in modo esplicito | Dichiarabile | Imprese | C03 |
 | **Tipologia di sede** (legale, operativa, punto vendita, laboratorio, stabilimento, magazzino, ufficio, sede secondaria) | Locale | No | Sì, per Impresa (più sedi di tipologie diverse); non multipla per la singola SedeImpresa | Non applicabile alla classificazione in sé | Dichiarabile | Imprese | C05 (Tipologia), applicata a SedeImpresa |
-| **Natura del canale** (sito proprio, e-commerce, marketplace, social, telefono commerciale, punto vendita, rete distributiva) | Locale | No | Sì, per Impresa | Non applicabile | Dichiarabile | Imprese | C05, applicata a CanaleImpresa |
+| **Natura del canale** (sito proprio / `own_site`, e-commerce / `ecommerce`, marketplace / `marketplace`, social / `social`, telefono commerciale / `commercial_phone`, email commerciale / `commercial_email`, punto vendita come canale / `retail_point`, rete distributiva / `distribution_network`) | Locale | No | Sì, per Impresa | Non applicabile | Dichiarabile | Imprese | C05, applicata a CanaleImpresa |
 | **Stato di certificazione** (autodichiarata, verificata, scaduta, revocata, in verifica) | Locale | No — enumerazione chiusa | Non applicabile (è lo stato di una singola CertificazioneImpresa) | Sì, per costruzione (§13, §14) | È essa stessa in parte l'esito di una Verifica | Imprese | Non è una Classificazione in senso proprio: è l'asse di stato di verifica (S03) della singola CertificazioneImpresa, trattato in dettaglio al §13; qui riportato solo per completezza dell'inventario |
 
 **Perché "Settore" applica sia E02 sia VO03 insieme, e non un solo pattern.** SettoreImpresa (§3) è la singola dichiarazione — un'Entity dipendente con una propria identità (posso rimuovere questa dichiarazione senza toccare le altre) — mentre il valore di settore che essa referenzia è un Value Object riutilizzato da catalogo (VO03), posseduto dalla Tassonomia condivisa. La combinazione E02+VO03+C02 è la stessa già applicata da `domain-mapping/persone.md` §21 (implicitamente, per CompetenzaDichiarata/LinguaParlata) e qui esplicitamente confermata come riuso corretto (`03` §4), non copia: entrambi i documenti citano gli stessi codici per lo stesso tipo di problema.
@@ -226,26 +232,127 @@ Applicando la procedura di scelta tra Classificazione e Dato derivato (`03` §3,
 
 ## 8. Contatti e presenza digitale
 
-**Assenza di un concetto "Contatto" distinto in `imprese.md`.** A differenza della struttura richiesta da questo mapping, che elenca separatamente telefono, email, sito, canali social, piattaforme digitali, canali pubblici, contatti riservati e contatti temporanei, il documento logico non introduce un'Entity "Contatto": unifica tutti questi concetti in **CanaleImpresa** (`imprese.md` §2), di cui "telefono commerciale" è esplicitamente uno degli esempi di natura del canale (§6 di questo documento, Tipologia C05), insieme a sito proprio, e-commerce, marketplace, social, punto vendita e rete distributiva. Questo mapping non introduce quindi una nuova Entity "Contatto" accanto a CanaleImpresa: sarebbe un'invenzione non autorizzata dal livello logico (`01` §2, principio 3). Ogni concetto della struttura richiesta viene ricondotto esplicitamente, sotto, a CanaleImpresa o dichiarato non applicabile.
+**Assenza di un concetto "Contatto" distinto in `imprese.md`.** A differenza della struttura richiesta da questo mapping, che elenca separatamente telefono, email, sito, canali social, piattaforme digitali, canali pubblici, contatti riservati e contatti temporanei, il documento logico non introduce un'Entity "Contatto": unifica tutti questi concetti in **CanaleImpresa** (`imprese.md` §2, §10 regola 14). Questo mapping non introduce quindi una nuova Entity "Contatto" accanto a CanaleImpresa: sarebbe un'invenzione non autorizzata dal livello logico (`01` §2, principio 3). L'unificazione implica che CanaleImpresa assorba sia la **natura** sia il **ValoreCanale** (riferimento concreto) del contatto dell'Impresa: eliminare Contatto senza conservare il valore svuoterebbe il fatto.
 
-| Concetto richiesto | Corrispondenza in `imprese.md` |
+| Concetto richiesto | Corrispondenza |
 |---|---|
-| Telefono, email, sito, canali social, piattaforme digitali, canali pubblici | Tutti Tipologie (C05) della stessa Entity CanaleImpresa (E02) |
+| Telefono commerciale | CanaleImpresa con NaturaCanale = telefono commerciale (`commercial_phone`) + ValoreCanale |
+| Email commerciale | CanaleImpresa con NaturaCanale = email commerciale (`commercial_email`) + ValoreCanale |
+| Sito, e-commerce, marketplace, social, piattaforme digitali, canali pubblici | CanaleImpresa con la relativa NaturaCanale (C05) + ValoreCanale |
 | Contatti riservati | Non un concetto distinto: la visibilità propria di ogni CanaleImpresa (`imprese.md` §9, tabella) può essere non pubblica, realizzando lo stesso effetto senza una nuova Entity |
 | Contatti temporanei | Non previsto da `imprese.md`: nessuna Tipologia o regola prevede una scadenza per un CanaleImpresa — dichiarato non applicabile, non omesso |
 | Contatti verificati | Non censito tra gli aspetti verificati di `imprese.md` §8: nessuna Verifica specifica di un CanaleImpresa è prevista dal documento logico (§12 di questo documento) |
 | Preferenze di visibilità | La visibilità propria di CanaleImpresa (`imprese.md` §9), applicazione locale del pattern Visibilità (VIS04/VIS06, §15 di questo documento) |
 | Referente di contatto | Non un attributo di CanaleImpresa: è il ruolo "Referente operativo" di un'AppartenenzaImpresa (`imprese.md` §7) — una Persona, non un canale (§9 di questo documento) |
 
-**Titolarità, verificabilità, priorità, riusabilità.** Ogni CanaleImpresa è posseduto interamente dall'Impresa (Entity dipendente, E02, relazione strutturale R01 con l'Aggregate); non ha una propria Verifica dedicata secondo `imprese.md` §8 (nessun aspetto "canale verificato" è censito nella tassonomia consolidata delle verifiche, `reconciliation-report.md` §9.1, applicabile a questo dominio); non ha una priorità dichiarata esplicitamente tra più canali dello stesso tipo (`imprese.md` non prevede un ordinamento tra CanaleImpresa, a differenza del ruolo di "sede principale" per SedeImpresa, §7 di questo documento); è storicizzabile per default (S08/T07/D08, `03` §8) alla rimozione.
+### 8.1 NaturaCanale (C05) — vocabolario chiuso
+
+Vocabolario locale chiuso della Tipologia C05 applicata a CanaleImpresa. Literal fisici raccomandati per lo schema futuro (M3.2):
+
+| Literal fisico | Significato | Significato minimo di ValoreCanale (`channel_value`) |
+|---|---|---|
+| `own_site` | Sito proprio | Indirizzo o riferimento testuale del sito proprio, normalmente un URL |
+| `ecommerce` | E-commerce | Riferimento concreto del canale di commercio elettronico (URL o identificatore dichiarativo); ogni riga identifica un canale concreto |
+| `marketplace` | Marketplace (natura del canale, non un dominio) | Indirizzo, profilo, nome identificativo o riferimento concreto della presenza su un marketplace; non crea né anticipa un dominio Marketplace |
+| `social` | Social | Indirizzo, handle, profilo o riferimento concreto; piattaforme o profili diversi = righe distinte |
+| `commercial_phone` | Telefono commerciale | Numero telefonico commerciale dichiarato; non è contatto personale di una Persona |
+| `commercial_email` | Email commerciale | Indirizzo email commerciale dichiarato; non è credenziale di Account né fatto di Identità & Accessi |
+| `retail_point` | Punto vendita come canale commerciale | Riferimento dichiarativo a un punto attraverso cui l'Impresa raggiunge commercialmente il pubblico (denominazione commerciale, riferimento pubblico o recapito utilizzabile). **Non** sostituisce SedeImpresa; **non** è localizzazione strutturale; **non** richiede FK verso `business_locations`; l'eventuale relazione strutturata con una sede fisica è fuori M3.2 e non va anticipata |
+| `distribution_network` | Rete distributiva | Denominazione, riferimento o recapito concreto della rete distributiva; non crea un dominio ReteDistributiva |
+
+### 8.2 ValoreCanale — rappresentazione fisica futura (`channel_value`)
+
+Prescrizione per lo schema futuro di M3.2 (non una Entity autonoma):
+
+| Aspetto | Decisione |
+|---|---|
+| Nome fisico raccomandato | `channel_value` |
+| Pattern | VO01 + C06 incorporato in CanaleImpresa |
+| Tipo fisico | `text` |
+| Nullability | `NOT NULL` |
+| Default | Assente |
+| Vincolo concettuale | Valore non vuoto e non composto soltanto da spazi |
+| FK | Assente |
+| UNIQUE | Non prescritto; eventuali duplicati letteralmente identici restano gestibili applicativamente o in decisione fisica successiva |
+| Validazione specifica (URL, email, telefono, regex, normalizzazione, protocolli, lunghezze, parsing, JSON) | **Non** prescritta in questa fase; resta applicativa finché non esiste un contratto dedicato |
+| Significato | Variabile in funzione di `channel_type` (tabella §8.1); sempre riferimento concreto interpretabile, distinto dalla natura |
+| Conservazione | Il ValoreCanale resta conservato anche quando il canale è rimosso (S08), salvo future regole specifiche |
+
+**Cosa ValoreCanale non è.** Non è una foreign key; non è un'identità autonoma; non è un Account; non è una credenziale, password o token; non è un catalogo; non è un JSON; non è un insieme di colonne tipizzate per natura; non è una relazione automatica con SedeImpresa; non è un dato verificato o autenticato; non è una prova di proprietà del canale.
+
+**Titolarità, verificabilità, priorità, riusabilità.** Ogni CanaleImpresa è posseduto interamente dall'Impresa (Entity dipendente, E02, relazione strutturale R01 con l'Aggregate); non ha una propria Verifica dedicata secondo `imprese.md` §8 (nessun aspetto "canale verificato" è censito nella tassonomia consolidata delle verifiche, `reconciliation-report.md` §9.1, applicabile a questo dominio); non ha una priorità dichiarata esplicitamente tra più canali dello stesso tipo (`imprese.md` non prevede un ordinamento tra CanaleImpresa, a differenza del ruolo di "sede principale" per SedeImpresa, §7 di questo documento); è storicizzabile per default (S08/T07/D08, `03` §8) alla rimozione. Più canali della stessa natura sono ammessi quando i ValoreCanale differiscono.
 
 **Separazione rigorosa tra contatto dell'Impresa, contatto personale, relazione con il referente e identità digitale di accesso.** Applicando esplicitamente la richiesta di separazione di questo mapping:
-- il **contatto dell'Impresa** (CanaleImpresa) è posseduto da Imprese ed esiste indipendentemente da quale Persona in un dato momento vi risponde (`imprese.md` §2, motivo dell'esistenza di LinguaOperativaImpresa, applicabile per analogia diretta anche a CanaleImpresa: "la capacità... è un attributo dell'organizzazione, non la somma casuale di chi vi lavora in un dato istante");
+- il **contatto dell'Impresa** (CanaleImpresa: natura + ValoreCanale) è posseduto da Imprese ed esiste indipendentemente da quale Persona in un dato momento vi risponde (`imprese.md` §2, motivo dell'esistenza di LinguaOperativaImpresa, applicabile per analogia diretta anche a CanaleImpresa: "la capacità... è un attributo dell'organizzazione, non la somma casuale di chi vi lavora in un dato istante"); telefono commerciale ed email commerciale appartengono a Imprese, non a Persone né a Identità & Accessi;
 - il **contatto personale di un referente** (per esempio il telefono personale di una Persona) non è un concetto del dominio Imprese: appartiene, se mai modellato, al dominio Persone, che questo documento non incorpora né referenzia per questo aspetto;
 - la **relazione con il referente** (chi è il Referente operativo di questa Impresa) è un attributo di ruolo dell'AppartenenzaImpresa (`imprese.md` §7), posseduto da Appartenenze secondo la riconciliazione (§9 di questo documento), non da Imprese;
 - l'**identità digitale usata per accedere alla piattaforma** appartiene interamente a Identità & Accessi (`imprese.md` §1, "Non comprende l'infrastruttura tecnica di autenticazione... Il dominio Imprese descrive solo il significato di business della facoltà di gestione"), fuori dal perimetro di questo documento.
 
-**CanaleImpresa come pattern riutilizzabile.** Come per SedeImpresa (§7), CanaleImpresa non introduce alcun pattern nuovo: applica E02 (Entity dipendente) + R01 (Relazione strutturale) + C05 (Tipologia) + VIS04/VIS06 (visibilità propria) + storicizzazione di default. Questo mapping conferma (§21) che la stessa combinazione, già osservata per le sedi, si applica identicamente ai canali: è un secondo esempio dello stesso pattern combinato "Entity dipendente classificata per tipo, con visibilità propria", non una soluzione diversa per un problema simile (evitando così l'anti-pattern "riuso apparente ma incoerente", `03` §14).
+**CanaleImpresa come pattern riutilizzabile.** Come per SedeImpresa (§7), CanaleImpresa applica E02 (Entity dipendente) + R01 (Relazione strutturale) + C05 (Tipologia) + VO01 (ValoreCanale) + VIS04/VIS06 (visibilità propria) + storicizzazione di default. Questo mapping conferma (§21) che la stessa combinazione, già osservata per le sedi (con VO03 Territorio al posto di ValoreCanale testuale), si applica ai canali come "Entity dipendente classificata per tipo, con valore concreto e visibilità propria", evitando l'anti-pattern "riuso apparente ma incoerente" (`03` §14).
+
+---
+
+## 8A. Offerta di servizi (ServizioImpresa)
+
+**Perimetro.** ServizioImpresa è Entity dipendente (**E02**) owned da Imprese: offerta concreta dichiarata dall'Impresa, consultabile come parte della scheda, distinta da SettoreImpresa, da ProdottoImpresa, da Opportunità, da ServizioProfessionale (Professionisti) e da ogni catalogo generale di servizi della piattaforma (`imprese.md` §2; `logical/professionisti.md` §1, §7).
+
+**Cosa rende concreto un servizio.** Il *nome* obbligatorio non vuoto (`imprese.md` §10 regola 15). Una riga con solo identità e ownership senza nome non è un ServizioImpresa.
+
+### 8A.1 Attributi descrittivi (VO01) — rappresentazione fisica futura (M4.1)
+
+| Aspetto | Nome fisico raccomandato | Tipo | Nullability | Default | Vincolo | Significato |
+|---|---|---|---|---|---|---|
+| Nome del servizio | `name` | text | `NOT NULL` | Assente | Anti-vuoto (non solo spazi) | Denominazione dichiarativa dell'offerta; libera; non UNIQUE per Impresa |
+| Descrizione | `description` | text | Nullable | Assente | Nessuno oltre al tipo | Testo dichiarativo facoltativo; non Contenuto editoriale |
+| Destinatari | `target_audience` | text | Nullable | Assente | Nessun CHECK chiuso | Dichiarazione aperta (es. «PMI manifatturiere», «famiglie e privati»); non catalogo Destinatari; non array/JSON; non relazione a soggetti nominati |
+| Territorio servito | `served_territory` | text | Nullable | Assente | Se valorizzato: anti-vuoto (non solo spazi) | Area geografica dichiarata in cui il servizio è disponibile; **non** SedeImpresa; **non** VO03 Territori; **non** MercatoImpresa; **non** `territory_id` / UUID opaco; **non** ISO/GIS/indirizzo |
+
+**Cosa questi attributi non sono.** Non sono FK; non sono cataloghi C02/C03; non sono coordinate; non sono punti vendita (`retail_point` di CanaleImpresa); non sono rete distributiva; non deducono MercatoImpresa.
+
+### 8A.2 Lingue del servizio — rinvio
+
+Le lingue «quando rilevanti» (`imprese.md` §2) sono un riferimento a **LinguaOperativaImpresa**, non letterali liberi sul servizio. **Fuori perimetro M4.1:** nessuna colonna lingua, nessun array, nessuna FK a `business_operational_language_declarations` in M4.1. M4.1 resta dipendente solo da M1.1. Una futura unità additiva potrà introdurre la relazione strutturata (cardinalità 0..N, ownership Imprese) senza alterare il nucleo del servizio.
+
+**Perché non derivare automaticamente tutte le lingue operative dell'Impresa.** Il logico parla di lingue *per quel servizio*, quando rilevante: non afferma che ogni servizio erediti l'intero insieme di LinguaOperativaImpresa.
+
+### 8A.3 Assi S04 e S08 — vocabolari distinti da Sede/Canale
+
+| Asse | Nome fisico raccomandato | Literal | Default | Note |
+|---|---|---|---|---|
+| **S04** Stato di pubblicazione proprio | `publication_status` | `draft` \| `published` | `draft` | Corrisponde a Bozza / Pubblicato (`imprese.md` §2, §9). **Non** usare `visibility_status` / `non_public`\|`public` (vocabolario di SedeImpresa/CanaleImpresa/MediaImpresa). **Non** introdurre un secondo asse S02. Ceiling rispetto all'Impresa = esposizione / presentazione **M7.1** (§15.1), non CHECK composito in M4.1 |
+| **S08** Esistenza/rimozione | `service_status` | `active` \| `removed` | `active` | Rimozione storicizzata: riga e contenuti conservati. Distinto da `draft` e da soft-delete Impresa (`deleted_at`). Riattivazione (`removed` → `active`) ammessa (non terminale come Dichiarata→Rimossa di Settore/Lingua). Relazione con S04: assi indipendenti a livello dati; un servizio `removed` può conservare `publication_status = published` — la non esposizione pubblica è regola di presentazione / M7.1, non fusione degli assi |
+
+**Tabella fisica raccomandata.** `public.business_services` (parallelo a `business_locations` / `business_channels`). Identità locale UUID; `business_id` NOT NULL FK → `businesses(id)` ON DELETE CASCADE; timestamps `created_at` / `updated_at`; trigger `updated_at`; RLS abilitata senza policy; `REVOKE ALL` da `anon`/`authenticated` (stesso schema difensivo delle Entity owned già approvate). Nessuna identità pubblica autonoma (§5). Nessun UNIQUE sul nome. Indice su `business_id`.
+
+**Confine con ProdottoImpresa.** M4.2 resta tabella separata: stessi assi S04/S08 e pattern E02, attributi non identici (ProdottoImpresa non ha destinatari/territorio/lingue nel logico). Vietata super-entità polimorfica `business_offerings`. Dettaglio prescrittivo: §8B.
+
+---
+
+## 8B. Offerta di prodotti (ProdottoImpresa)
+
+**Perimetro.** ProdottoImpresa è Entity dipendente (**E02**) owned da Imprese: offerta concreta o linea dichiarativa di prodotti della scheda Impresa (`imprese.md` §2). Distinta da ServizioImpresa (§8A), SettoreImpresa, MercatoImpresa, Opportunità, MediaImpresa, ServizioProfessionale e da ogni catalogo centrale di prodotti. Non è e-commerce.
+
+**Cosa rende concreto un prodotto.** Il *nome* obbligatorio non vuoto (`imprese.md` §10 regola 16). Una riga con solo identità e ownership senza nome non è un ProdottoImpresa.
+
+### 8B.1 Attributi descrittivi (VO01) — rappresentazione fisica futura (M4.2)
+
+| Aspetto | Nome fisico raccomandato | Tipo | Nullability | Default | Vincolo | Significato |
+|---|---|---|---|---|---|---|
+| Nome del prodotto | `name` | text | `NOT NULL` | Assente | Anti-vuoto (non solo spazi) | Denominazione dichiarativa dell'offerta o della linea; libera; non UNIQUE per Impresa |
+| Descrizione | `description` | text | Nullable | Assente | Nessuno oltre al tipo | Testo dichiarativo facoltativo; non Contenuto editoriale |
+
+**Attributi esplicitamente esclusi da M4.2.** Destinatari; territorio servito; lingue; prezzo; valuta; disponibilità; modalità di acquisto; contatto; URL; media; marchio come Entity; origine; unità di misura; categoria/raggruppamento strutturato (questione aperta `imprese.md` §12 — **non** introdotta); FK a Settore, Mercato, Sede, Canale, Servizio.
+
+### 8B.2 Assi S04 e S08
+
+| Asse | Nome fisico raccomandato | Literal | Default | Note |
+|---|---|---|---|---|
+| **S04** Stato di pubblicazione proprio | `publication_status` | `draft` \| `published` | `draft` | Stesso vocabolario di ServizioImpresa (§8A.3 / §11.2). Ceiling vs Impresa = esposizione **M7.1** (§15.1). Non `visibility_status` |
+| **S08** Esistenza/rimozione | `product_status` | `active` \| `removed` | `active` | Analogo a `service_status` di ServizioImpresa. Rimozione storicizzata; riattivazione ammessa; indipendente da S04; `removed`+`published` ammesso a livello dati |
+
+**Tabella fisica raccomandata.** `public.business_products`. Identità locale UUID; `business_id` NOT NULL FK → `businesses(id)` ON DELETE CASCADE; timestamps; trigger `updated_at` dedicato; RLS abilitata senza policy; `REVOKE ALL` da `anon`/`authenticated`. Nessuna identità pubblica autonoma. Nessun UNIQUE sul nome. Indice su `business_id`. Nessuna FK verso `business_services`.
+
+**Blocco M4.** Le sole unità del blocco M4 sono M4.1 (ServizioImpresa, chiusa) e M4.2 (ProdottoImpresa). La relazione lingue-servizio (§8A.2, §24 punto 24) **non** appartiene a M4 e non riceve numero M4.x in questo piano.
 
 ---
 
@@ -315,13 +422,13 @@ Per ciascuna Entity persistente, questo documento percorre gli otto assi catalog
 | Asse | Applicabile | Valori | Motivazione |
 |---|---|---|---|
 | **S01** Stato sostanziale | Non applicabile in modo distinto | — | Nessuna di queste Entity ha una condizione operativa di fatto distinta dalla propria esistenza/rimozione: `imprese.md` §2 non attribuisce loro un "stato reale" separato da quello dell'Impresa |
-| **S02** Stato editoriale | Sì, solo per ServizioImpresa e ProdottoImpresa | Stato di pubblicazione proprio, indipendente da quello dell'Impresa (`imprese.md` §2: "un servizio può restare in bozza mentre il resto della scheda è già pubblico") | Coincide in parte con S04 per queste due entità: `imprese.md` non distingue esplicitamente una fase di "completezza redazionale" da una di "pubblicazione" per Servizio/Prodotto, a differenza di quanto fa per l'Impresa nel suo complesso — trattato quindi come un singolo asse S04 con valori Bozza/Pubblicato, non come S02 distinto (si veda sotto) |
+| **S02** Stato editoriale | Non applicabile come asse distinto | — | Per ServizioImpresa/ProdottoImpresa la narrazione "bozza" coincide con S04 (sotto), non con un S02 separato. Per Sede/Canale/Media non è modellato |
 | **S03** Stato di verifica | Non applicabile | — | Nessuno di questi cinque concetti compare tra gli aspetti verificati di `imprese.md` §8: la verifica non riguarda "la sede" o "il canale" in quanto tali, ma i dati aziendali nel loro insieme o le certificazioni (§12 di questo documento) |
-| **S04** Stato di pubblicazione | Sì, per tutte le cinque | Non pubblico / Pubblico, sempre subordinato a "l'Impresa è pubblica" (`imprese.md` §9, tabella) | Ogni entità ha una propria visibilità, "che può essere più restrittiva (mai più permissiva) di quella dell'Impresa" (`imprese.md` §9): trattato in dettaglio al §15 di questo documento |
+| **S04** Stato di pubblicazione | Sì, per tutte le cinque, con **due vocabolari** | **SedeImpresa / CanaleImpresa / MediaImpresa:** Non pubblico / Pubblico (`non_public` \| `public`, colonna `visibility_status`). **ServizioImpresa / ProdottoImpresa:** Bozza / Pubblicato (`draft` \| `published`, colonna `publication_status`) — §8A | Entrambi i vocabolari rispondono alla stessa domanda S04 ("è reso pubblicabile?") con terminologia fedele a `imprese.md` §9. Un solo asse per ciascuna Entity; mai `visibility_status` e `publication_status` insieme sulla stessa Entity. Ceiling rispetto all'Impresa: esposizione §15.1 / M7.1 |
 | **S05-S07** | Non applicabili | — | Nessun fatto di accesso tecnico, sicurezza o intervento amministrativo distinto è modellato per queste cinque entità in `imprese.md` |
-| **S08** Stato storico | Sì (per default, §14) | — | In assenza di un'indicazione contraria in `imprese.md`, la rimozione di una sede, di un servizio, di un prodotto, di un canale o di un elemento multimediale resta un fatto storicamente ricostruibile (regola di continuità di default, `03` §8) |
+| **S08** Stato storico | Sì (per default, §14) | Per ServizioImpresa: `active` \| `removed` (`service_status`, §8A); per ProdottoImpresa: `active` \| `removed` (`product_status`, §8B); analogo per le altre Entity owned della composizione | In assenza di un'indicazione contraria in `imprese.md`, la rimozione resta un fatto storicamente ricostruibile (regola di continuità di default, `03` §8). Distinto da Bozza/Non pubblico |
 
-**Correzione: il "Stato di pubblicazione proprio" di ServizioImpresa/ProdottoImpresa resta S04, non S02.** Una prima lettura potrebbe assimilare "un servizio può restare in bozza" a uno stato editoriale (S02) distinto dalla pubblicazione (S04), per analogia con Impresa (§11.1). Verificato però che `imprese.md` §2 non distingue, per queste due entità, una fase di completezza redazionale separata da una decisione di pubblicazione — usa un'unica espressione ("stato di pubblicazione proprio") — questo mapping tratta il caso come un solo asse S04 con valori Bozza/Pubblicato, evitando di introdurre una distinzione S02/S04 che il documento logico non fa per questi due concetti specifici (a differenza di quanto fa esplicitamente per l'Impresa, §11.1). Questa è una applicazione corretta della convenzione "verificare la natura della domanda, non il nome dei valori" (`03` §6): qui la domanda posta da `imprese.md` è una sola, non due.
+**Correzione: il "Stato di pubblicazione proprio" di ServizioImpresa/ProdottoImpresa resta S04, non S02.** Una prima lettura potrebbe assimilare "un servizio può restare in bozza" a uno stato editoriale (S02) distinto dalla pubblicazione (S04), per analogia con Impresa (§11.1). Verificato però che `imprese.md` §2 non distingue, per queste due entità, una fase di completezza redazionale separata da una decisione di pubblicazione — usa un'unica espressione ("stato di pubblicazione proprio") — questo mapping tratta il caso come un solo asse S04 con valori Bozza/Pubblicato (`draft`/`published`). **Correzione della tensione tabellare:** non si applica a Servizio/Prodotto il vocabolario Non pubblico/Pubblico di Sede/Canale/Media; i due vocabolari sono varianti locali dello stesso asse S04, non due assi (`03` §6).
 
 ### 11.3 SettoreImpresa e LinguaOperativaImpresa
 
@@ -333,7 +440,11 @@ Per ciascuna Entity persistente, questo documento percorre gli otto assi catalog
 
 ### 11.4 CertificazioneImpresa
 
-Trattata separatamente al §13 di questo documento (Certificazioni, attestazioni e riconoscimenti), per la sua natura composita (stato sostanziale, stato di verifica e temporalità intrecciati). Anticipazione degli assi: **S01** non applicabile in modo distinto da S03 (§13); **S03** sì, con valori Autodichiarata/Verificata/In verifica (`imprese.md` §2); **S04** sì, subordinata alla pubblicazione dell'Impresa (`imprese.md` §9); **S08** sì, in combinazione con **T04** (Scadenza) per il valore "Scaduta" e con l'Annullamento per il valore "Revocata" (§14 di questo documento).
+Trattata separatamente al §13 di questo documento. Anticipazione degli assi per M5.1 (§13.1):
+- **S01** non applicabile in modo distinto dallo stato corrente della certificazione;
+- **S03 / esiti temporali**: un unico stato corrente a cinque valori Autodichiarata / In verifica / Verificata / Scaduta / Revocata (`imprese.md` §2; Scaduta = T04, Revocata = Annullamento, tenuti distinti — D10);
+- **S04 locale**: **non** una colonna `visibility_status` / `publication_status` distinta — `imprese.md` §9: lo stato della certificazione determina *come* viene presentata, non un asse di bozza/pubblicazione separato; il cancello Impresa resta M7.1;
+- **S08 come rimozione composizionale separata**: **non** introdotta — Scaduta/Revocata sono gli stati storici di non-validità; la riga resta conservata.
 
 ### 11.5 Segnale di allarme verificato e non confermato
 
@@ -361,6 +472,74 @@ Applicando il modello multidimensionale (`01` §10, `02` §8) alla tassonomia es
 
 **Nessuna verifica introdotta senza corrispondenza nel documento logico.** Applicando `03` §7 ("come aggiungere nuove verifiche... solo se il proprio aspetto verificato è già presente nella tassonomia consolidata"): tutti e sette gli aspetti sopra corrispondono a voci già censite in `reconciliation-report.md` §9.1 (esistenza, identità, documentale, relazione, rappresentanza, fonte/qualità del dato) applicate al contesto specifico di Imprese; nessun nuovo tipo di verifica, non già presente nella tassonomia consolidata, è stato introdotto da questo documento.
 
+### 12.1 Rappresentazione fisica futura — M6.1 (`business_verifications`)
+
+**Perimetro.** Persistenza del **current-state** delle verifiche **owned da Imprese a livello di scheda Impresa** (S03 multidimensionale, §11.1 / §12). Pattern: Entity dipendente (**E02**) dell'Aggregate Impresa, analogo concettuale a `opportunity_verifications` (Opportunità), adattato alla tassonomia di `imprese.md` §8.
+
+**Aspetti persistiti in M6.1 (C05 chiuso `aspect`).** Solo le righe 1, 2 e 7 della tabella §12:
+
+| Literal `aspect` | Aspetto §12 | Significato |
+|---|---|---|
+| `existence` | #1 Esistenza dell'impresa | La piattaforma ha o non ha confermato che il soggetto economico esiste |
+| `company_data` | #2 Dati aziendali | Denominazione / forma organizzativa (e analoghi dati aziendali) confermati rispetto a una fonte attendibile |
+| `contested_profile` | #7 Profilo sospetto o contestato | Segnale trasversale di attenzione sulla scheda; può sovrapporsi ad altri assi |
+
+**Aspetti esplicitamente esclusi da `business_verifications`.**
+
+| Aspetto §12 | Destino | Motivo |
+|---|---|---|
+| #3 Identità Persona | Fuori M6; Identità & Accessi / Persone | Non owned da Imprese |
+| #4 Relazione con l'impresa | Fuori M6; Appartenenze | Non owned da Imprese |
+| #5 Rappresentanza | Fuori M6; Appartenenze | Non owned da Imprese |
+| #6 Singola CertificazioneImpresa | **M5.1** `business_certifications.certification_status` | Stato della certificazione già sull'Entity; non si duplica come riga Impresa-level né come FK a certificazioni |
+| Badge “Impresa verificata” | Vietato | `02` §8; `imprese.md` §8; invariante Plan |
+| Affidabilità osservabile (V05) | Non persistita | Derivata / presentazione; mai dato sorgente |
+| History / audit / transition log | Fuori M6.1 | Current-state only; ogni nuovo V04 aggiorna la riga corrente |
+
+**Dipendenza dura.** Solo `public.businesses` (M1.1). **M5.1 non è dipendenza di schema** di M6.1: la coerenza certificazione↔verifica è semantica (stato su M5.1), non strutturale. Nessuna FK verso `business_certifications`, Persone, Appartenenze, Storage, Evidence.
+
+| Aspetto | Nome fisico | Tipo | Nullability | Default | Vincolo | Significato |
+|---|---|---|---|---|---|---|
+| Identità locale | `id` | uuid PK | NOT NULL | `gen_random_uuid()` | — | Identità locale E02; non pubblica autonoma |
+| Ownership | `business_id` | uuid | NOT NULL | Assente | FK → `businesses(id)` ON DELETE CASCADE | Impresa proprietaria |
+| Aspetto | `aspect` | text | NOT NULL | Assente | CHECK chiuso sotto | Piano verificato (tre literal) |
+| Esito corrente | `status` | text | NOT NULL | Assente | CHECK chiuso + CHECK aspect↔status sotto | Risultato V04 corrente |
+| Conclusione | `verified_at` | timestamptz | Nullable | Assente | NULL se non conclusivo; NOT NULL se `verified` o `flagged` | Momento della conclusione corrente |
+| Nota sintetica | `source_note` | text | Nullable | Assente | Se valorizzato: anti-vuoto (`btrim`) | Nota locale; non Entity Fonte; non Evidence; non audit |
+| Timestamp | `created_at` / `updated_at` | timestamptz | NOT NULL | `now()` | Trigger `updated_at` dedicato | Pattern Entity owned |
+
+**Vocabolario `aspect`:** `existence` \| `company_data` \| `contested_profile`.
+
+**Vocabolario `status` e compatibilità con `aspect`.**
+
+| `aspect` | `status` ammessi | Mapping logico |
+|---|---|---|
+| `existence`, `company_data` | `unverified` \| `self_declared` \| `verified` | Non verificata / Autodichiarata / Verificata (`imprese.md` §8; §12 #1–#2) |
+| `contested_profile` | `not_flagged` \| `flagged` | Non segnalato / Segnalato (§12 #7) |
+
+**CHECK compositi prescritti.**
+
+1. `aspect` ∈ vocabolario chiuso sopra.
+2. `status` ∈ unione dei cinque literal; **e** compatibilità aspect↔status come tabella.
+3. `(status IN ('unverified','self_declared','not_flagged') AND verified_at IS NULL) OR (status IN ('verified','flagged') AND verified_at IS NOT NULL)`.
+4. `source_note IS NULL OR length(btrim(source_note)) > 0`.
+
+**Non introdurre.** `expires_at` (scadenza non prevista esplicitamente per #1/#2/#7 in §12); `failed` / `pending` / `expired` (vocabolario Opportunità, non Imprese); `in_verification` a livello Impresa (appartiene a CertificazioneImpresa M5.1); colonna badge; FK certificazione; JSON; history table; seed.
+
+**Cardinalità e unicità.** 0..N righe per Impresa, al più **una riga corrente per `(business_id, aspect)`** → `UNIQUE (business_id, aspect)`. Assenza di riga per `existence`/`company_data` = Non verificata implicita; assenza di riga per `contested_profile` = Non segnalato implicito. Righe esplicite con `unverified` / `not_flagged` ammesse.
+
+**Indici.** (1) non UNIQUE su `business_id`; (2) UNIQUE `(business_id, aspect)`. Nessun altro indice obbligatorio.
+
+**Updated_at.** Funzione dedicata `public.set_business_verifications_updated_at()` — `SECURITY INVOKER`, `search_path = ''`; trigger `BEFORE UPDATE FOR EACH ROW`.
+
+**RLS e privilegi.** `ENABLE ROW LEVEL SECURITY`; nessuna policy in M6.1; `REVOKE ALL` da `anon`, `authenticated`; nessun `GRANT`.
+
+**Tabella.** `public.business_verifications`. Soft-delete Impresa (`deleted_at`) non rimuove le righe; hard-delete Impresa CASCADE.
+
+**Cosa M6.1 non è.** Non è M7.1 (pubblicazione/visibilità/gate); non è moderazione come dominio; non è Appartenenze; non è Identità & Accessi; non è duplicato di `certification_status`; non è un indicatore Osservatorio.
+
+**Composizione del blocco M6.** Solo **M6.1**. Nessuna M6.2 / M6.3.
+
 ---
 
 ## 13. Certificazioni, attestazioni e riconoscimenti
@@ -382,6 +561,24 @@ Applicando il modello multidimensionale (`01` §10, `02` §8) alla tassonomia es
 **Perché CertificazioneImpresa non applica DOC01 direttamente.** L'Entity stessa non è il Documento: è il fatto dichiarato (o riconosciuto) a cui un Documento può fornire supporto (DOC05, Supporto documentale, o DOC04, Riferimento, §17 di questo documento). Applicare DOC01 direttamente a CertificazioneImpresa confonderebbe il fatto certificato con il documento che eventualmente lo prova, un errore che `02` §13 (Pattern Documento) esclude esplicitamente ("distinguere il documento dal fatto che prova").
 
 **Perché "Scaduta" e "Revocata" restano due valori distinti, non un unico "non più valida".** Applicando la distinzione già stabilita in `02` §14 tra Scadenza (T04, "per decorso del tempo previsto") e Annullamento ("una cessazione anticipata e dichiarata", `01` §8): "Scaduta" è il decorso naturale di una validità temporale (T01/T04), mentre "Revocata" è un atto deliberato di invalidazione, concettualmente più vicino a un Annullamento che a una Scadenza. Comprimere i due valori in un'unica etichetta "non più valida" perderebbe la distinzione tra "il tempo è passato" e "qualcuno ha deciso di invalidarla", violando l'anti-pattern "fusione impropria di stati" (`03` §14).
+
+### 13.1 Rappresentazione fisica futura — M5.1 (`business_certifications`)
+
+| Aspetto | Nome fisico | Tipo | Nullability | Default | Vincolo | Significato |
+|---|---|---|---|---|---|---|
+| Identità locale | `id` | uuid PK | NOT NULL | `gen_random_uuid()` | — | Identità locale E02 |
+| Ownership | `business_id` | uuid | NOT NULL | Assente | FK → `businesses(id)` ON DELETE CASCADE | Impresa proprietaria |
+| Nome/tipo | `name` | text | NOT NULL | Assente | Anti-vuoto (`btrim`) | Nome o tipo dichiarato (`imprese.md` §10 regola 17) |
+| Ente emittente | `issuer` | text | Nullable | Assente | Nessun CHECK chiuso | Dichiarazione testuale; non FK Ente |
+| Stato corrente | `certification_status` | text | NOT NULL | `self_declared` | CHECK chiuso sotto | Stato unico corrente (cinque literal) |
+| Data di scadenza | `expires_at` | date | Nullable | Assente | Nessun CHECK che obblighi `expired` | T04 opzionale; non sincronizzata automaticamente dallo stato |
+| Timestamp | `created_at` / `updated_at` | timestamptz | NOT NULL | `now()` | Trigger `updated_at` dedicato | Pattern Entity owned |
+
+**Vocabolario `certification_status`:** `self_declared` \| `in_verification` \| `verified` \| `expired` \| `revoked`.
+
+**Esclusi da M5.1.** Colonna file/storage/path/MIME; Entity Documento; FK a MediaImpresa; `visibility_status`; `publication_status`; `active`/`removed` separato; badge Impresa verificata; Organizzazioni istituzionali; modello multi-aspetto Impresa (M6.1 `business_verifications`, §12.1 — lo stato della singola certificazione resta in questa Entity e non viene duplicato in M6).
+
+**Tabella.** `public.business_certifications`. Indice su `business_id`. Nessun UNIQUE su `name`. RLS + REVOKE come altre Entity owned. Pattern difensivo identico a M3/M4.
 
 ---
 
@@ -442,6 +639,144 @@ Applicando i sei pattern di Visibilità (`02` §15, VIS01-VIS06) alle condizioni
 
 **Come evitare un singolo stato globale che controlli tutto.** Applicando esplicitamente il divieto di fusione impropria di stati (`03` §14): questo documento non introduce alcun valore composito che riassuma contemporaneamente stato sostanziale, editoriale, di verifica e di pubblicazione dell'Impresa (per esempio un improprio "stato complessivo della scheda"). Ciascuno dei quattro assi (S01, S02, S03, S04) più S07 e S08 resta distinto e indipendente, coerentemente con §11 di questo documento.
 
+### 15.1 Rappresentazione fisica della coerenza di pubblicazione e visibilità (M7.1)
+
+**Perimetro.** Formalizzazione fisica del ceiling Impresa → Entity owned e delle condizioni cumulative di `imprese.md` §9 / §15 di questo documento, senza introdurre strutture nuove. Pattern: contratto di **presentazione** (VIS04) documentato su colonne già esistenti; nessuna materializzazione di publishability (D05 vietato come stato sorgente).
+
+#### 15.1.1 Responsabilità
+
+M7.1:
+
+- non introduce nuovi stati né nuovi vocabolari;
+- non fonde gli assi già presenti su `businesses` e sulle Entity owned;
+- non materializza né persiste uno stato sintetico di publishability;
+- formalizza il rapporto tra: decisione di pubblicazione dell'Impresa (`publication_status`); stati editoriali, sostanziali, amministrativi e di archivio; stati locali S04/S08 delle Entity owned; presentazione pubblica effettiva (predicato di lettura).
+
+La unit chiude i rinvii a M7.1 già presenti nelle migration M1.2 e M3–M5.
+
+#### 15.1.2 Assi indipendenti dell'Impresa
+
+Restano distinti e non comprimibili in un unico campo:
+
+| Asse / fatto | Colonna o sede | Ruolo rispetto alla pubblicazione |
+|---|---|---|
+| S02 editoriale | `editorial_status` | Completezza redazionale per la rappresentabilità |
+| S01 sostanziale | `substantial_status` | Condizione operativa; cessata ≠ presentata come attiva |
+| S04 pubblicazione | `publication_status` | Decisione corrente di pubblicazione della scheda |
+| S07 amministrativo | `administrative_status` | Overlay revisione/sospensione (volontaria o moderazione) |
+| S08/VR06 archivio | `is_archived` | Fuori dai percorsi di discovery ordinari se `true` |
+| S03 verifica | `business_verifications` (M6.1) | Indipendente dalla pubblicazione; non gate M7.1 |
+| Certificazioni | `business_certifications` (M5.1) | Presentazione di validità distinta dal cancello scheda |
+| Referente | Appartenenze | Condizione 5; non colonna Imprese |
+| Moderazione | Dominio/funzione trasversale (+ overlay S07) | Condizione 6; non ownership Imprese |
+
+Nessuna combinazione di questi fatti è salvata come campo sintetico di publishability.
+
+#### 15.1.3 Pubblicazione effettiva dell'Impresa
+
+**Predicato logico di rappresentabilità pubblica** (non SQL eseguibile). L'Impresa è pubblicamente rappresentabile nei percorsi ordinari soltanto quando tutte le condizioni seguenti sono soddisfatte simultaneamente (PF12):
+
+1. `publication_status = public`;
+2. stato editoriale compatibile: `editorial_status = complete`;
+3. stato sostanziale compatibile: se `substantial_status = ceased`, la scheda non è presentata come attività in corso (consultabilità storica distinta, se ammessa);
+4. non archiviazione nei percorsi ordinari: `is_archived = false`;
+5. qualità minima: nome pubblico valido (già vincolo di riga su `public_name`); completezza redazionale allineata al punto 2;
+6. referente valido: almeno una Persona responsabile tramite Appartenenza (fuori schema Imprese);
+7. moderazione compatibile: assenza di blocco di moderazione; overlay locale `administrative_status` diverso da sospensione che ritira la visibilità (`suspended_voluntary`, `suspended_moderation`); `in_review` non autorizza da solo l'esposizione pubblica.
+
+| Condizione | Dato già in Imprese | Dipendenza esterna | FK / schema in M7.1 |
+|---|---|---|---|
+| 1–5 (pubblicazione, editoriale, sostanziale, archivio, qualità) | Sì (assi M1.2 + nome) | Nessuna | Nessuna |
+| 6 referente | No | **Appartenenze** (utilizzo / gate applicativo) | Nessuna |
+| 7 moderazione | Solo overlay S07 | Funzione di moderazione trasversale | Nessuna |
+
+M7.1 non introduce FK né dipendenze strutturali verso Appartenenze, Moderazione, Editoriali o Identità & Accessi.
+
+#### 15.1.4 Ceiling Impresa → entità owned
+
+Un'entità owned è **esposta** pubblicamente soltanto se:
+
+1. l'Impresa è effettivamente pubblicabile secondo §15.1.3;
+2. lo stato locale dell'entità è permissivo (`visibility_status = public` oppure `publication_status = published`, secondo il vocabolario della Entity);
+3. l'entità non è rimossa, quando possiede uno stato S08 di composizione (`active` / `removed`).
+
+Lo stato locale può restringere l'esposizione. Lo stato locale non rende effettiva l'esposizione pubblica quando l'Impresa non è pubblicabile. Il ceiling riguarda l'**esposizione**, non la validità della persistenza dello stato locale.
+
+#### 15.1.5 Persistenza degli stati locali
+
+È ammesso conservare `visibility_status = public` e `publication_status = published` anche quando l'Impresa è `unpublished` o temporaneamente non rappresentabile. Questa scelta:
+
+- conserva l'intenzione editoriale locale;
+- evita aggiornamenti distruttivi sulle owned;
+- rende reversibile la depubblicazione dell'Impresa;
+- elimina la necessità di history o propagazioni automatiche dedicate al ceiling;
+- non produce esposizione pubblica finché il ceiling non è soddisfatto.
+
+#### 15.1.6 Comportamento per entità
+
+| Entità | Stato locale | Gate Impresa | Ulteriore gate locale | Stato persistito durante depubblicazione | Esposizione effettiva |
+|---|---|---|---|---|---|
+| `business_locations` | `visibility_status` | Impresa rappresentabile | — | Invariato (anche `public`) | Impresa ok ∧ `public` |
+| `business_channels` | `visibility_status` | Impresa rappresentabile | — | Invariato | Impresa ok ∧ `public` |
+| `business_media` | `visibility_status` | Impresa rappresentabile | `media_status = active` | Invariato | Impresa ok ∧ `public` ∧ `active` |
+| `business_services` | `publication_status` | Impresa rappresentabile | `service_status = active` | Invariato (anche `published`) | Impresa ok ∧ `published` ∧ `active` |
+| `business_products` | `publication_status` | Impresa rappresentabile | `product_status = active` | Invariato | Impresa ok ∧ `published` ∧ `active` |
+| `business_certifications` | Nessun S04 locale; `certification_status` governa la **forma** di presentazione | Impresa rappresentabile | Non presentare come valida se `expired` o `revoked` | Riga e stato invariati | Impresa ok; validità secondo `certification_status` |
+| Settore (`business_sector_declarations`) | Nessun S04 locale | Impresa rappresentabile | — | Invariato | Segue esclusivamente l'Impresa |
+| Lingua (`business_operational_language_declarations`) | Nessun S04 locale | Impresa rappresentabile | — | Invariato | Segue esclusivamente l'Impresa |
+
+Sedi, canali e media usano `visibility_status` (`non_public` \| `public`). Servizi e prodotti usano `publication_status` (`draft` \| `published`). Servizi/prodotti `removed` non sono esposti anche se `published`.
+
+#### 15.1.7 Eventi
+
+| Evento | Stato persistito | Stato effettivo | Azione database | Azione applicativa |
+|---|---|---|---|---|
+| 1. Owned pubblico con Impresa `unpublished` | Owned locale permissivo ammesso | Owned non esposto | Nessuna riscrittura | Non esporre; eventuale avviso UX |
+| 2. Depubblicazione dell'Impresa | Owned restano ai valori locali | Scheda e owned non esposti | Nessuna riscrittura owned | Filtri di presentazione |
+| 3. Ripubblicazione dell'Impresa | Assi Impresa aggiornati; owned invariati | Owned già locali permissivi tornano esposti se gli altri gate locali sono ok | Nessuna riscrittura owned | Rivalutare predicato Impresa |
+| 4. Archiviazione | `is_archived = true` | Fuori discovery ordinario | Nessuna | Path storico ≠ discovery |
+| 5. Cessazione sostanziale | `substantial_status = ceased` | Non presentata come attiva | Nessuna | Presentazione conforme a PC7 |
+| 6. Incompletezza editoriale | `editorial_status` ≠ `complete` | Non rappresentabile come pubblica | Nessuna | Gate + filtri |
+| 7. Sospensione amministrativa | `administrative_status` di sospensione | Visibilità ritirata | Nessuna | Gate + filtri |
+| 8. Perdita del referente | Nessun dato Imprese | Non pubblicamente attiva senza controllo | Nessuna | Gate Appartenenze |
+| 9. Moderazione negativa | Overlay S07 e/o fatto esterno | Blocco indipendente dalle altre condizioni | Nessuna in M7.1 | Gate moderazione |
+| 10. Certificazione scaduta o revocata | `expired` / `revoked`; riga conservata | Non rappresentata come valida | Nessuna cancellazione | Query/presentazione |
+
+#### 15.1.8 Enforcement
+
+**Database.** Continua a garantire: vocabolari chiusi; integrità referenziale; vincoli di riga già esistenti; stati locali validi. M7.1 **non** introduce nuovi vincoli che garantiscano: publishability cumulativa; ceiling cross-table; presenza del referente; moderazione; presentazione effettiva.
+
+**Applicazione / presentazione.** Garantisce: predicati di lettura pubblica; gate di presentazione; eventuali avvisi o limitazioni UX; corretta rappresentazione di cessazione, archiviazione e certificazioni non valide.
+
+#### 15.1.9 Oggetti SQL M7.1
+
+M7.1 prescrive esclusivamente:
+
+- `COMMENT ON COLUMN`;
+- eventuali `COMMENT ON TABLE` strettamente descrittivi e non ridondanti.
+
+Esclusi espressamente: `ALTER TABLE` strutturali; nuove colonne; nuovi CHECK; trigger; funzioni; viste; materialized view; policy RLS; GRANT; tabelle di history; badge; score; campi derivati persistiti.
+
+#### 15.1.10 Commenti obbligatori
+
+La futura migration M7.1 aggiorna almeno i seguenti commenti:
+
+**`public.businesses`:** `editorial_status`; `substantial_status`; `publication_status`; `administrative_status`; `is_archived`.
+
+**Owned:** `business_locations.visibility_status`; `business_channels.visibility_status`; `business_media.visibility_status`; `business_media.media_status`; `business_services.publication_status`; `business_services.service_status`; `business_products.publication_status`; `business_products.product_status`; `business_certifications.certification_status`.
+
+Eventuali `COMMENT ON TABLE` solo se aggiungono informazione non già presente nei commenti di colonna (chiusura del rinvio a M7.1; ceiling = esposizione).
+
+#### 15.1.11 RLS e privilegi
+
+M7.1 non introduce policy RLS definitive; non modifica lo stato RLS esistente; non esegue GRANT. VIS02 resta responsabilità di Identità & Accessi. VIS04 resta contratto di rappresentazione del dominio Imprese (questo §15 / §15.1).
+
+#### 15.1.12 Elementi esclusi
+
+Verifica M6 (riapertura o fusione con pubblicazione); badge; score; Appartenenze come ownership; moderazione come ownership; StoriaImpresa; Contenuti Editoriali; Storage; seed; validazione M8; history/audit di pubblicazione; nuove API fisiche di publishability (view/funzione dedicate).
+
+**Composizione del blocco M7.** Solo **M7.1**. Nessuna M7.2 / M7.3.
+
 ---
 
 ## 16. Dati sorgente, dichiarati, derivati e aggregati
@@ -479,7 +814,30 @@ Applicando la famiglia di pattern Dato (`02` §11, D01-D09) a ciascuna categoria
 
 **Distinzione tra il documento e il fatto che prova, applicata rigorosamente.** Per CertificazioneImpresa, il fatto è "questa Impresa possiede questa certificazione" (l'Entity stessa, con il proprio stato di verifica, §13): un documento a supporto (un certificato scansionato, per esempio) non è la certificazione, ne è solo l'evidenza documentale (DOC03/V02, quando usata per sostenere una Verifica). Per MediaImpresa, invece, non c'è un "fatto diverso" che il documento proverebbe: un documento pubblico caricato dall'Impresa è esso stesso il contenuto che si vuole rendere disponibile, non la prova di un fatto ulteriore. Questa distinzione, richiesta esplicitamente dalla struttura di questo mapping, evita di trattare allo stesso modo due concetti che il documento logico distingue chiaramente per finalità (credibilità verificabile per CertificazioneImpresa; identità visiva e comunicazione per MediaImpresa).
 
-**Nessuna descrizione di archiviazione tecnica dei file.** Coerentemente con `02` §13 ("nessuna delle cinque forme implica alcuna decisione su come un contenuto documentale venga effettivamente conservato, trasferito o reso disponibile"), questo paragrafo non descrive alcun meccanismo di caricamento, conservazione o distribuzione dei materiali di MediaImpresa o delle eventuali evidenze documentali di CertificazioneImpresa: resta interamente rinviato alla futura rappresentazione fisica concreta (§24).
+**Nessuna descrizione di archiviazione tecnica dei file.** Coerentemente con `02` §13 ("nessuna delle cinque forme implica alcuna decisione su come un contenuto documentale venga effettivamente conservato, trasferito o reso disponibile"), questo paragrafo non descrive alcun meccanismo di caricamento, conservazione o distribuzione dei materiali di MediaImpresa o delle eventuali evidenze documentali di CertificazioneImpresa: resta interamente rinviato alla futura rappresentazione fisica concreta (§24). In M5.2 si persiste soltanto un **riferimento dichiarativo** (`media_reference`), non un bucket né policy Storage.
+
+### 17.1 Rappresentazione fisica futura — MediaImpresa M5.2 (`business_media`)
+
+**Perimetro.** MediaImpresa (E02) owned dall'Impresa: materiale di presentazione della scheda. Distinto da CertificazioneImpresa (il media non è la prova del fatto certificazione), da StorieImpresa/Contenuti editoriali, da ServizioImpresa/ProdottoImpresa (nessuna FK verso `business_services` / `business_products`).
+
+| Aspetto | Nome fisico | Tipo | Nullability | Default | Vincolo | Significato |
+|---|---|---|---|---|---|---|
+| Identità locale | `id` | uuid PK | NOT NULL | `gen_random_uuid()` | — | Identità locale E02 |
+| Ownership | `business_id` | uuid | NOT NULL | Assente | FK → `businesses(id)` ON DELETE CASCADE | Impresa proprietaria |
+| Natura | `media_kind` | text | NOT NULL | Assente | C05 chiuso sotto | Classifica il media |
+| Riferimento concreto | `media_reference` | text | NOT NULL | Assente | Anti-vuoto (`btrim`) | URL/etichetta/riferimento dichiarativo; non FK Storage; non byte |
+| Logo principale | `is_primary` | boolean | NOT NULL | `false` | Se `true` allora `media_kind = 'logo'`; al più un `true` attivo per Impresa | Ruolo "logo principale" (`imprese.md` §2, §10 regola 18) |
+| Visibilità S04 | `visibility_status` | text | NOT NULL | `non_public` | `non_public` \| `public` | Come Sede/Canale; ceiling M7.1 |
+| Rimozione S08 | `media_status` | text | NOT NULL | `active` | `active` \| `removed` | Rimozione storicizzata; riattivazione ammessa |
+| Timestamp | `created_at` / `updated_at` | timestamptz | NOT NULL | `now()` | Trigger dedicato | Pattern Entity owned |
+
+**Vocabolario C05 `media_kind`:** `logo` \| `cover` \| `image` \| `video` \| `public_document`.
+
+**Unicità logo principale.** Indice UNIQUE parziale: un solo `(business_id)` con `is_primary = true` AND `media_kind = 'logo'` AND `media_status = 'active'`.
+
+**Esclusi da M5.2.** Bucket Supabase; policy Storage; MIME; size; alt text; title/description CMS; ordinamento/priority generici; JSON; FK a servizi/prodotti/sedi; tabella asset centrale; relazione polimorfica; condivisione cross-Impresa dello stesso file come Entity condivisa.
+
+**Tabella.** `public.business_media`. Indice su `business_id`. RLS + REVOKE come altre Entity owned. Soft-delete Impresa non cancella le righe; hard-delete Impresa CASCADE.
 
 ---
 
@@ -558,9 +916,10 @@ Ogni decisione architetturale presa in questo documento, classificata come **Loc
 | D4 | SettoreImpresa e LinguaOperativaImpresa applicano E02+VO03+C02 (§3, §4, §6) | Riutilizzabile | §4, criteri di persistenza; §5, VO03 | §4, E02; §5, VO03; §12, C02 | §3, domanda 3; §4, "Riuso corretto" | Coerenza, Estendibilità | Stessa combinazione già applicata a CompetenzaDichiarata/LinguaParlata in `domain-mapping/persone.md`: seconda conferma indipendente della sua riusabilità (§21) | Ogni futuro dominio con dichiarazioni multiple verso una Tassonomia condivisa |
 | D5 | Forma organizzativa e Dimensione applicano C03 (Elenco controllato), non C02 (Tassonomia) (§6) | Locale | §5, criteri di Classificazione | §12, C03 | §3, criterio di scelta "è semplice classificazione" | Coerenza | `imprese.md` non dichiara per questi due concetti un catalogo con proprio ciclo di gestione: applicare C02 introdurrebbe un catalogo condiviso non richiesto dal logico | Nessuno specificamente, salvo dominio con enumerazioni chiuse simili |
 | D6 | SedeImpresa applica E02+R01+VO03+C05, confermato come pattern riutilizzabile per concetti "dipendenti, classificati per tipo, localizzati su catalogo condiviso" (§7, §21) | Riutilizzabile | §4, §6, §7 | §4, E02; §6, R01; §5, VO03; §12, C05 | §3, §5 | Estendibilità, Evolvibilità | La stessa combinazione ricorre già per CanaleImpresa (§8) all'interno dello stesso documento: è quindi verificata come riutilizzabile internamente prima ancora di proiettarla su altri domini | Organizzazioni istituzionali (dominio candidato, `reconciliation-report.md` §13), se e quando modellato |
-| D7 | CanaleImpresa unifica tutti i concetti di "contatto" richiesti dalla struttura di questo mapping (telefono, email, sito, social, ecc.), senza introdurre una nuova Entity "Contatto" (§8) | Locale | §2, principio 3 (il fisico non modifica il logico) | §4, E02 | §3, "criterio di scelta... non presupporre" | Fedeltà al logico (non un attributo di `04`, ma criterio metodologico esplicito di `01`) | `imprese.md` unifica deliberatamente questi concetti in una sola Entity: introdurne una nuova sarebbe un'aggiunta non autorizzata | Nessuno — è una constatazione di fedeltà al documento logico specifico di questo dominio |
+| D7 | CanaleImpresa unifica tutti i concetti di "contatto" (telefono/email commerciale, sito, social, ecc.) senza Entity "Contatto", conservando natura C05 e ValoreCanale obbligatorio (`channel_value`) (§8) | Locale | §2, principio 3; `imprese.md` §10 regola 14 | §4, E02; §5, VO01 | §3, "criterio di scelta... non presupporre" | Fedeltà al logico (non un attributo di `04`, ma criterio metodologico esplicito di `01`) | Unificare Contatto in CanaleImpresa senza ValoreCanale svuoterebbe il fatto di contatto | Nessuno — decisione locale di Imprese |
 | D8 | La sequenza editoriale di Impresa (`imprese.md` §5) è scomposta in assi indipendenti S01, S02, S03 (multidimensionale), S04, S07, S08 (§11.1) | Riutilizzabile | §9, principio degli assi indipendenti | §7, S01/S02/S03/S04/S07/S08 | §6, "quando riutilizzare un asse esistente" | Coerenza, Comprensibilità | Stessa metodologia già applicata a Persona in `domain-mapping/persone.md` §6.1 (Decisione 5): seconda applicazione indipendente, che rafforza la conferma di generalità del pattern | Ogni futuro dominio con un ciclo di vita narrato come sequenza unica ma logicamente multi-asse (Eventi, Opportunità) |
-| D9 | ServizioImpresa e ProdottoImpresa applicano un solo asse S04 (non S02+S04 distinti), a differenza di Impresa (§11.2) | Locale | §9, "la natura della domanda, non il nome dei valori" | §7, S04 | §6, "quando riutilizzare un asse esistente" | Coerenza | `imprese.md` §2 usa un'unica espressione ("stato di pubblicazione proprio") per questi due concetti, senza distinguere completezza redazionale da pubblicazione | Nessuno — dipende da una scelta di granularità specifica di `imprese.md` |
+| D9 | ServizioImpresa e ProdottoImpresa applicano un solo asse S04 con vocabolario Bozza/Pubblicato (`draft`/`published`), distinto dal vocabolario Non pubblico/Pubblico di Sede/Canale/Media; non S02+S04 (§11.2, §8A) | Locale | §9, "la natura della domanda, non il nome dei valori" | §7, S04 | §6, "quando riutilizzare un asse esistente" | Coerenza | `imprese.md` §2/§9 usa "stato di pubblicazione" e "bozza" per Servizio/Prodotto; "scelta come pubblicabile" per Sede/Canale/Media | Nessuno — dipende da una scelta di granularità specifica di `imprese.md` |
+| D15 | ServizioImpresa persiste nome obbligatorio, descrizione/destinatari/territorio dichiarativi facoltativi; lingue come relazione a LinguaOperativaImpresa rinviata; S08 `active`/`removed`; tabella `business_services` (§8A) | Locale | §2, principio 3; `imprese.md` §10 regola 15 | §4 E02; §5 VO01; §7 S04/S08 | §3, non anticipare cataloghi | Fedeltà al logico, Minimalismo | Risolve forma fisica senza UUID Territori, senza catalogo Destinatari, senza dipendenza M2.2 in M4.1 | ProdottoImpresa (M4.2) per parallelismo controllato, non per polimorfismo |
 | D10 | CertificazioneImpresa distingue "Scaduta" (T04) da "Revocata" (Annullamento), non un'unica etichetta "non più valida" (§13, §14) | Riutilizzabile | §8, scadenza vs. annullamento | §14, T04; §9, VR03 (per analogia con l'Annullamento) | §8, "Archiviazione... distinta dalla semplice sostituzione" | Coerenza, Robustezza concettuale | La distinzione tra decorso del tempo e atto deliberato di invalidazione è una domanda ricorrente per ogni concetto con validità temporale e possibilità di revoca | Ogni futuro dominio con concetti a scadenza e revocabili (Professionisti, per le qualifiche) |
 | D11 | Nessuna Verifica (V01) è introdotta per aspetti (identità della Persona, relazione con l'impresa, rappresentanza) che `imprese.md` §8 elenca ma che appartengono ad altri domini (§12) | Fondazionale | §10, "la responsabilità di una verifica appartiene sempre al dominio che la possiede" | §8, V01-V05 (assenza di applicazione locale) | §7, "come aggiungere nuove verifiche" | Separazione delle responsabilità | Un documento logico può elencare, per completezza narrativa, aspetti che influenzano l'affidabilità percepita senza per questo attribuirne la proprietà al proprio dominio: il mapping deve distinguere i due piani | Ogni dominio la cui narrazione elenca verifiche "di supporto" possedute da altri domini |
 | D12 | Nessun dato aggregato o derivato (D05/D06) è attribuito a Imprese: ogni Indicatore o statistica resta posseduto dall'Osservatorio (§16) | Fondazionale | §13, dati derivati; §14, dipendenze vietate | §11, D05/D06 | §9, "quando produrre dati derivati... quando evitarli" | Separazione delle responsabilità, Accoppiamento | Applicazione diretta del principio "nessun dominio duplica fatti altrui" al caso specifico dei dati calcolati e aggregati | Ogni dominio sorgente di dati per l'Osservatorio (tutti gli 11 domini) |
@@ -576,7 +935,7 @@ Valutazione esplicita dei pattern del Reference Model che il mapping di Imprese 
 | Area | Pattern (`02`) | Applicazione in Imprese | Motivo della riusabilità | Domini futuri interessati | Limiti del riutilizzo | Aspetti che restano specifici del dominio |
 |---|---|---|---|---|---|---|
 | **Sedi** | E02+R01+VO03+C05 | SedeImpresa: Entity dipendente, relazione strutturale con l'Aggregate, riferimento a Territorio, Tipologia locale (§7) | La stessa combinazione è già confermata due volte nello stesso documento (Sedi, §7; Canali, §8): non è un caso isolato | Organizzazioni istituzionali (`reconciliation-report.md` §13), se modellato | Non copre il caso in cui una sede debba essere referenziata individualmente da un altro dominio (non richiesto oggi, §4) | Le Tipologie specifiche (sede legale, punto vendita, ecc.) restano un vocabolario locale di Imprese |
-| **Contatti/Canali digitali** | E02+R01+C05+VIS04/VIS06 | CanaleImpresa: Entity dipendente, Tipologia locale, visibilità propria (§8) | Stessa struttura di Sedi, applicata a un concetto diverso: conferma che il pattern combinato non dipende dal contenuto semantico specifico | Ogni dominio con punti di contatto multipli e classificabili | Non introduce un concetto "Contatto" distinto da "Canale": un futuro dominio con questa distinzione dovrà valutarla separatamente | La natura specifica dei canali (sito, social, ecc.) resta locale |
+| **Contatti/Canali digitali** | E02+R01+C05+VO01+VIS04/VIS06 | CanaleImpresa: Entity dipendente, Tipologia locale, ValoreCanale obbligatorio (`channel_value`), visibilità propria (§8) | Stessa struttura di Sedi, applicata a un concetto diverso, con valore concreto testuale al posto del VO03 Territorio | Ogni dominio con punti di contatto multipli e classificabili | Non introduce un concetto "Contatto" distinto da "Canale": tipo e valore restano nella stessa Entity | La natura specifica dei canali (sito, social, email commerciale, ecc.) resta locale |
 | **Classificazioni** | E02+VO03+C02 (per Settore/Lingua); C03 (per enumerazioni chiuse come Forma organizzativa) | §6 | Identica alla combinazione già usata in Persone per CompetenzaDichiarata/LinguaParlata: seconda conferma indipendente | Ogni dominio con dichiarazioni multiple verso Tassonomie condivise | La scelta tra C02 e C03 richiede sempre una verifica esplicita dell'esistenza di un ciclo di gestione autonomo (§6) | Il contenuto specifico delle classificazioni (quali settori, quali forme) resta locale a ciascun dominio proprietario del catalogo |
 | **Verifiche** | V01/V03/V04, con esclusione esplicita degli aspetti posseduti da altri domini | §12 | Conferma, in un dominio che possiede una propria ricca tassonomia di verifica (a differenza di Persone), che la disciplina di separazione tra aspetti propri e aspetti solo elencati resta applicabile anche quando le Verifiche locali sono numerose | Ogni dominio con una propria tassonomia di verifica articolata (Professionisti, Mercati Internazionali) | Non risolve automaticamente quali aspetti siano "propri": richiede sempre una verifica puntuale contro la matrice di responsabilità (`reconciliation-report.md` §3.2) | La tassonomia specifica dei sette aspetti verificati di Imprese resta locale |
 | **Certificazioni** | E02+R01+V01/V03/V04+T04+S08/D08, con distinzione Scaduta/Revocata | §13 | Prima applicazione esplicita, in questo insieme di documenti di mapping, della distinzione Scadenza/Annullamento a un concetto concreto e ricorrente (certificazioni, qualifiche, accreditamenti) | Professionisti (qualifiche professionali), Mercati Internazionali (eventuali autorizzazioni all'export) | Il pattern non copre da solo la scelta se un ente emittente esterno debba diventare un Aggregate referenziato (§24) | Le cinque etichette specifiche di stato (Autodichiarata, Verificata, Scaduta, Revocata, In verifica) restano un vocabolario locale |
@@ -624,12 +983,17 @@ Raccolta sintetica e prescrittiva delle decisioni approvate in questo documento,
 3. **AppartenenzaImpresa è una vista di sintesi non normativa dell'Aggregate Appartenenza**, la cui fonte autorevole per ruoli, ciclo di vita e Autorizzazione a gestire è il futuro `domain-mapping/appartenenze.md` (§2, §9, §12, §18). *Fondazionale* — `01` §2; `02` §6 R07; `03` §5, RC12-RC13.
 4. **SettoreImpresa e LinguaOperativaImpresa sono Entity dipendenti (E02) con riferimento a Tassonomia condivisa (VO03)**, non Value Object incorporati né relazioni dirette (§3, §4, §6). *Riutilizzabile* — `01` §4-5; `02` §4-5, §12; `03` §3-4.
 5. **Forma organizzativa e Dimensione sono Elenchi controllati (C03), non Tassonomie condivise (C02)** (§6). *Locale* — `01` §5; `02` §12; `03` §3.
-6. **SedeImpresa e CanaleImpresa applicano entrambe la combinazione E02+R01+(VO03)+C05**, confermata riutilizzabile internamente e candidabile ad altri domini (§7, §8, §21). *Riutilizzabile* — `01` §4, §7; `02` §4, §6, §12; `03` §3-5.
-7. **Nessuna Entity "Contatto" distinta da CanaleImpresa è introdotta**, in fedeltà alla scelta di unificazione già operata da `imprese.md` (§8). *Locale* — `01` §2, principio 3.
+6. **SedeImpresa e CanaleImpresa applicano entrambe E02+R01+C05 con un valore di localizzazione/riferimento** (VO03 Territorio per la sede; VO01 ValoreCanale / `channel_value` per il canale), confermata riutilizzabile internamente e candidabile ad altri domini (§7, §8, §21). *Riutilizzabile* — `01` §4, §7; `02` §4, §6, §12; `03` §3-5.
+7. **Nessuna Entity "Contatto" distinta da CanaleImpresa è introdotta**; CanaleImpresa assorbe natura e ValoreCanale del contatto dell'Impresa (§8; `imprese.md` §10 regola 14). *Locale* — `01` §2, principio 3.
 8. **La sequenza editoriale di Impresa (`imprese.md` §5) è scomposta negli assi indipendenti S01, S02, S03 (multidimensionale), S04, S07, S08** (§11.1). *Riutilizzabile* — `01` §9; `02` §7; `03` §6.
-9. **ServizioImpresa e ProdottoImpresa applicano un solo asse S04**, senza distinguere S02 da S04 come invece avviene per Impresa (§11.2). *Locale* — `02` §7; `03` §6.
+9. **ServizioImpresa e ProdottoImpresa applicano un solo asse S04** con vocabolario Bozza/Pubblicato (`draft`/`published`), distinto dal Non pubblico/Pubblico di Sede/Canale/Media; senza S02 separato (§11.2, §8A). *Locale* — `02` §7; `03` §6.
+9a. **ServizioImpresa (M4.1): `business_services` con nome obbligatorio; descrizione/destinatari/territorio testuali facoltativi; lingue rinviate; S08 `service_status`; nessun UNIQUE sul nome; ≠ ServizioProfessionale (§8A).** *Locale* — `imprese.md` §2, §10 regola 15.
+9b. **ProdottoImpresa (M4.2): `business_products` con nome obbligatorio; descrizione facoltativa; S04 `draft`/`published`; S08 `product_status`; nessun destinatario/territorio/lingua/prezzo/categoria strutturata; nessun UNIQUE sul nome; tabella distinta da `business_services` (§8B).** *Locale* — `imprese.md` §2, §10 regola 16.
+9c. **CertificazioneImpresa (M5.1): `business_certifications` con nome obbligatorio; issuer facoltativo; stato a cinque literal; `expires_at` opzionale; niente file/visibility; storage rinviato (§13.1).** *Locale* — `imprese.md` §2, §10 regola 17.
+9d. **MediaImpresa (M5.2): `business_media` con `media_kind` C05, `media_reference` obbligatorio, `is_primary` per logo, S04 `visibility_status`, S08 `media_status`; niente bucket/FK servizi-prodotti (§17.1).** *Locale* — `imprese.md` §2, §10 regola 18.
+9e. **Verifica Impresa owned (M6.1): `business_verifications` current-state per aspetto `existence` \| `company_data` \| `contested_profile`; UNIQUE `(business_id, aspect)`; certificazione resta su M5.1; aspetti Persona/Appartenenza esclusi; nessun badge unico (§12.1).** *Locale* — `imprese.md` §8, §10 regola 19.
 10. **CertificazioneImpresa distingue esplicitamente Scadenza (T04) da Revoca (Annullamento)**, applicando E02+R01+V01/V03/V04+T04+S08/D08 (§13, §14). *Riutilizzabile* — `01` §8; `02` §9, §14; `03` §8.
-11. **Nessuna Verifica propria è introdotta per aspetti elencati da `imprese.md` §8 ma posseduti da altri domini** (identità della Persona, relazione con l'impresa, rappresentanza) (§12). *Fondazionale* — `01` §10; `02` §8; `03` §7.
+11. **Nessuna Verifica propria è introdotta per aspetti elencati da `imprese.md` §8 ma posseduti da altri domini** (identità della Persona, relazione con l'impresa, rappresentanza) (§12, §12.1). *Fondazionale* — `01` §10; `02` §8; `03` §7.
 12. **Nessun dato calcolato o aggregato (D05/D06) è attribuito a Imprese**: ogni Indicatore resta posseduto dall'Osservatorio (§16). *Fondazionale* — `01` §13; `02` §11; `03` §9.
 13. **MediaImpresa applica DOC01 quando di natura documentale; CertificazioneImpresa applica DOC05/DOC03 per il proprio supporto documentale**, mantenendo distinto il documento dal fatto che prova (§17). *Riutilizzabile* — `02` §13; `03` §12.
 14. **Gli eventi AppartenenzaDichiarata, AppartenenzaVerificata e AppartenenzaContestata sono riportati da `imprese.md` §13 ma non posseduti da Imprese** (§18). *Locale* (applicazione) / *Riutilizzabile* (criterio) — `01` §12; `02` §10; `03` §12.
@@ -659,12 +1023,12 @@ Eredità diretta di `imprese.md` §12, non risolte né forzate da questo documen
 
 Decisioni che richiederanno il futuro schema tecnologico (PostgreSQL/Supabase o altro) e non sono anticipate da questo documento:
 
-10. **Rappresentazione tecnica degli assi indipendenti di Impresa (S01, S02, S03, S04, S07, S08, §11.1).** Se realizzati come colonne distinte, tabelle distinte o altra struttura, resta una decisione del futuro schema.
+10. **Rappresentazione tecnica degli assi indipendenti di Impresa (S01, S02, S04, S07, S08, §11.1).** S01/S02/S04/S07/S08 sono colonne su `businesses` (M1.2). **S03** è determinato come tabella owned `business_verifications` (M6.1, §12.1), non come colonna unica su `businesses`. Eventuale history table resta rinviata.
 11. **Meccanismo di garanzia dell'unicità del settore principale per Impresa (`imprese.md` §10, regola 5).** Il vincolo è logico; la sua applicazione fisica resta rinviata.
 12. **Meccanismo di garanzia dell'unicità della sede principale per tipologia (`imprese.md` §10, regola 4).** Come sopra.
 13. **Tecnica di storicizzazione (S08/T07/D08) per tutte le nove Entity dipendenti.** Se realizzata con tabelle storiche separate, versionamento in linea, log di audit o altra tecnica, è una decisione del futuro schema.
 14. **Struttura fisica del catalogo Tassonomia condivisa (voci di Settore, Lingua) e del catalogo Territori, referenziati tramite VO03.** Nessuno dei due è ancora oggetto di un proprio documento di mapping fisico (`domain-model.md` §2): la struttura fisica del riferimento resta sospesa fino a quando questi domini non riceveranno, a loro volta, un proprio mapping.
-15. **Rappresentazione tecnica del supporto documentale di CertificazioneImpresa e MediaImpresa (§17).** Nessuna decisione di caricamento, conservazione o distribuzione dei materiali è anticipata da questo documento.
+15. **Archiviazione tecnica (bucket, policy Storage, byte) di CertificazioneImpresa e MediaImpresa (§17).** Rinviata. M5.1 non persiste file; M5.2 persiste solo `media_reference` dichiarativo (§13.1, §17.1), senza creare Storage.
 16. **Meccanismo tecnico di propagazione degli eventi di dominio elencati al §18.** Coerentemente con `01` §12, nessuna tecnologia di comunicazione (coda, broker, trigger) è anticipata.
 17. **Applicazione tecnica dell'accesso (S05) all'Impresa da parte di Identità & Accessi.** Rinviata al futuro `domain-mapping/identita-accessi.md`.
 18. **Rappresentazione tecnica degli identificativi legali dell'Impresa, se e quando introdotti, in modo neutrale rispetto alla giurisdizione (§5).** Nessuna soluzione tecnica è anticipata; resta anche aperta la scelta se tali identificativi debbano essere conservati come dato proprio o solo verificati (questione logica 4, sopra).
@@ -676,6 +1040,7 @@ Decisioni che richiederanno il futuro schema tecnologico (PostgreSQL/Supabase o 
 21. **Struttura fisica delle StorieImpresa e del loro processo editoriale.** Rinviata al futuro `domain-mapping/contenuti-editoriali.md` (§1, §9, §10 di questo documento).
 22. **Struttura fisica degli Indicatori e delle aggregazioni che coinvolgono Imprese, SettoreImpresa e MercatoImpresa.** Rinviata al futuro `domain-mapping/osservatorio.md` (§10, §16 di questo documento).
 23. **Struttura fisica della relazione con Professionisti (contesto organizzativo, collaborazioni professionali).** Rinviata al futuro `domain-mapping/professionisti.md` (§10, §19 di questo documento).
+24. **Relazione strutturata ServizioImpresa → LinguaOperativaImpresa** (lingue disponibili per il singolo servizio). Concetto riconosciuto (`imprese.md` §2; §4, §8A di questo documento); **rinviata fuori dal blocco M4** (né M4.1 né M4.2). Non riceve numero M4.x in questo piano.
 
 ---
 
@@ -713,7 +1078,7 @@ Il presente documento (`docs/architecture/physical/domain-mapping/imprese.md`) a
 
 **Concetti persistenti individuati (9):** Impresa (A01+E03), SedeImpresa (E02), SettoreImpresa (E02+VO03), ServizioImpresa (E02), ProdottoImpresa (E02), LinguaOperativaImpresa (E02+VO03), CertificazioneImpresa (E02), CanaleImpresa (E02), MediaImpresa (E02) — §3.
 
-**Concetti incorporati (9):** Denominazione/Nome pubblico/Descrizione/Presentazione, Anno di avvio, Dimensione, attributi di Servizio/Prodotto, Contesto d'uso di LinguaOperativaImpresa, Nome/ente emittente di CertificazioneImpresa, Natura del canale, Tipologia di sede, Ruolo del media — §4.
+**Concetti incorporati (10):** Denominazione/Nome pubblico/Descrizione/Presentazione, Anno di avvio, Dimensione, attributi di Servizio/Prodotto, Contesto d'uso di LinguaOperativaImpresa, Nome/ente emittente di CertificazioneImpresa, Natura del canale, ValoreCanale (`channel_value`), Tipologia di sede, Ruolo del media — §4, §8.
 
 **Assi di stato applicati:** S01, S02, S03 (multidimensionale), S04, S07, S08 per Impresa; sottoinsiemi per le Entity dipendenti (§11).
 

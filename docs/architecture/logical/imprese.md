@@ -76,7 +76,7 @@ Il dominio esiste per rendere la scheda impresa uno strumento utile — visibili
 - *Stato operativo* — se l'attività economica è realmente in corso, sospesa o cessata: un fatto del mondo reale, distinto dallo stato editoriale della scheda (§5).
 - *Anno di avvio* — da quando l'impresa opera, un dato di credibilità e di contesto storico.
 - *Dimensione* — un'indicazione di scala (es. numero di persone coinvolte, per fasce), utile per networking e ricerca, non un dato contabile preciso.
-- *Sito e canali pubblici* — i punti di contatto verso l'esterno, descritti in dettaglio come CanaleImpresa (§2, entità dedicata) quando è utile distinguerne la natura.
+- *Sito e canali pubblici* — i punti di contatto verso l'esterno, descritti in dettaglio come CanaleImpresa (§2, entità dedicata) con natura e ValoreCanale.
 - *Immagine coordinata* — logo, colori, materiali visivi che identificano l'impresa, gestiti come MediaImpresa.
 - *Livello di verifica* — quanto la piattaforma può confermare rispetto a ciò che l'impresa dichiara, modellato come asse multiplo e non come singolo indicatore (§8).
 - *Stato di pubblicazione* — se e quanto la scheda è visibile pubblicamente, distinto sia dallo stato operativo sia dal livello di verifica (§5, §9).
@@ -135,17 +135,31 @@ Il dominio esiste per rendere la scheda impresa uno strumento utile — visibili
 
 **Motivo dell'esistenza.** Rendere l'offerta dell'impresa concreta e consultabile, non genericamente dedotta dal settore.
 
-**Proprietà di significato.** Nome del servizio; descrizione; destinatari (a chi è pensato: consumatori finali, altre imprese, pubblica amministrazione, ecc.); territorio servito; eventuali lingue disponibili per quel servizio (riferimento a LinguaOperativaImpresa, quando rilevante); stato di pubblicazione proprio, indipendente da quello dell'impresa (§9).
+**Proprietà di significato.**
+- *Nome del servizio* — obbligatorio e non vuoto: è ciò che rende concreta e distinguibile l'offerta dichiarata.
+- *Descrizione* — testo dichiarativo facoltativo; non è contenuto editoriale autonomo.
+- *Destinatari* — testo dichiarativo facoltativo su a chi è pensato il servizio (es. consumatori finali, altre imprese, pubblica amministrazione, PMI, famiglie); non è un catalogo chiuso né una relazione verso Persone/Imprese nominate.
+- *Territorio servito* — testo dichiarativo facoltativo sull'area geografica in cui il servizio è disponibile; distinto da SedeImpresa, dal catalogo Territori e da MercatoImpresa; non implica sede fisica né presenza di mercato.
+- *Eventuali lingue del servizio* — quando rilevanti, sono un riferimento strutturato a LinguaOperativaImpresa già dichiarate dall'Impresa, non letterali linguistici liberi duplicati sul servizio; la relazione strutturata è facoltativa e può essere introdotta in un'unità successiva rispetto alla persistenza minima del servizio.
+- *Stato di pubblicazione proprio* — un solo asse con valori *Bozza* / *Pubblicato*, indipendente da quello dell'impresa (§9); distinto dalla rimozione storica del servizio.
+- *Esistenza nella composizione* — un servizio può essere rimosso dalla composizione corrente restando conservato come fatto storico, distinto da Bozza e da non pubblicazione.
 
-**Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può offrire più ServizioImpresa.
+**Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può offrire più ServizioImpresa. Non è ServizioProfessionale (dominio Professionisti): l'offerta è dell'Impresa, non del Profilo professionale di una Persona.
 
 ### ProdottoImpresa
 
-**Responsabilità.** Rappresentare un prodotto o una categoria di prodotti offerti dall'impresa.
+**Responsabilità.** Rappresentare un prodotto o una linea/categoria dichiarativa di prodotti offerti dall'impresa (beni materiali o immateriali, prodotti, commercializzati o distribuiti), come fatto informativo della scheda.
 
-**Motivo dell'esistenza.** Dare visibilità concreta a cosa l'impresa produce o vende, come elemento informativo e commerciale — non come catalogo transazionale: il dominio Imprese non deve trasformarsi in un e-commerce (vendite, carrelli, pagamenti, logistica restano fuori perimetro).
+**Motivo dell'esistenza.** Dare visibilità concreta a cosa l'impresa produce o vende, come elemento informativo e commerciale — non come catalogo transazionale: il dominio Imprese non deve trasformarsi in un e-commerce (vendite, carrelli, pagamenti, logistica, prezzi, disponibilità operativa restano fuori perimetro).
 
-**Proprietà di significato.** Nome; descrizione; eventuale categoria o raggruppamento (questione aperta sulla granularità, §12); stato di pubblicazione proprio.
+**Proprietà di significato.**
+- *Nome del prodotto* — obbligatorio e non vuoto: rende concreta e distinguibile l'offerta dichiarata (può denominare un singolo prodotto o una linea/categoria dichiarativa, senza introdurre un catalogo Categorie).
+- *Descrizione* — testo dichiarativo facoltativo; non è contenuto editoriale autonomo.
+- *Eventuale categoria o raggruppamento strutturato* — questione aperta (§12): **non** è proprietà persistita obbligatoria né catalogo in M4; non viene introdotta finché non è risolta.
+- *Stato di pubblicazione proprio* — un solo asse con valori *Bozza* / *Pubblicato*, indipendente da quello dell'impresa (§9); distinto dalla rimozione storica.
+- *Esistenza nella composizione* — un prodotto può essere rimosso dalla composizione corrente restando conservato come fatto storico, distinto da Bozza e da non pubblicazione.
+
+**Cosa ProdottoImpresa non è.** Non è ServizioImpresa; non ha destinatari, territorio servito o lingue proprie nel modello logico (a differenza di ServizioImpresa); non è SettoreImpresa; non è MercatoImpresa; non è Opportunità; non è MediaImpresa; non è ServizioProfessionale; non è un catalogo centrale di prodotti della piattaforma.
 
 **Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può presentare più ProdottoImpresa.
 
@@ -175,19 +189,30 @@ Il dominio esiste per rendere la scheda impresa uno strumento utile — visibili
 
 **Motivo dell'esistenza.** La credibilità economica passa spesso da riconoscimenti verificabili (iscrizioni ad albi, certificazioni di qualità, qualificazioni settoriali): renderli strutturati, invece che testo libero nella presentazione, li rende ricercabili e verificabili nel tempo.
 
-**Stati previsti.** Autodichiarata; verificata; scaduta; revocata; in verifica.
+**Proprietà di significato.**
+- *Nome o tipo della certificazione* — obbligatorio e non vuoto: identifica il riconoscimento dichiarato.
+- *Ente emittente dichiarato* — testo dichiarativo facoltativo; non è un Aggregate "Ente" né un dominio Organizzazioni istituzionali.
+- *Stato della certificazione* — un unico stato corrente tra: Autodichiarata; In verifica; Verificata; Scaduta; Revocata. Scaduta e Revocata restano distinti (decorso del tempo vs invalidazione deliberata). Una certificazione scaduta o revocata non deve essere presentata come valida (§10 regola 7).
+- *Eventuale data di scadenza* — decorrenza di fine validità, quando nota; non obbligatoria per dichiarare lo stato Scaduta.
+- *Supporto documentale* — eventuale; distinto dal fatto CertificazioneImpresa e **non** obbligatorio per l'esistenza della dichiarazione; la conservazione tecnica dei file è fuori da questo livello.
+
+**Cosa CertificazioneImpresa non è.** Non è MediaImpresa; non è una prova di Appartenenza; non è un workflow di moderazione; non è un badge unico "Impresa verificata"; non è un documento CMS editoriale.
 
 **Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può avere più CertificazioneImpresa.
 
 ### CanaleImpresa
 
-**Responsabilità.** Rappresentare i canali attraverso cui l'impresa opera o comunica con l'esterno.
+**Responsabilità.** Rappresentare i canali concreti attraverso cui l'impresa opera o comunica con l'esterno, assorbendo la funzione di contatto dell'Impresa senza introdurre un'entità Contatto separata.
 
-**Motivo dell'esistenza.** Un'impresa reale comunica e vende attraverso più canali contemporaneamente (sito proprio, marketplace, social, rete di vendita fisica): trattarli come un'unica lista di link impoverirebbe sia la presentazione sia l'analisi di come l'impresa raggiunge il mercato.
+**Motivo dell'esistenza.** Un'impresa reale comunica e vende attraverso più canali contemporaneamente (sito proprio, marketplace, social, rete di vendita fisica): trattarli come un'unica lista di link impoverirebbe sia la presentazione sia l'analisi di come l'impresa raggiunge il mercato. Distinguere la natura del canale senza conservare il riferimento concreto impoverirebbe ugualmente il fatto: un canale senza ValoreCanale non è un punto di contatto utilizzabile.
 
-**Esempi di natura del canale.** Sito proprio; e-commerce; marketplace; social; telefono commerciale; punto vendita; rete distributiva.
+**Natura del canale (NaturaCanale).** Sito proprio; e-commerce; marketplace; social; telefono commerciale; email commerciale; punto vendita (come canale commerciale, distinto da SedeImpresa); rete distributiva.
 
-**Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può avere più CanaleImpresa, anche di natura diversa.
+**Valore del canale (ValoreCanale).** Il riferimento concreto attraverso cui il canale può essere riconosciuto o utilizzato (ad esempio un URL, un numero telefonico, un indirizzo email, un handle o un altro riferimento dichiarativo leggibile). È distinto dalla natura: la natura classifica il canale; il valore lo identifica concretamente. Ogni CanaleImpresa deve identificare un canale concreto mediante un ValoreCanale non vuoto.
+
+**Visibilità e rimozione.** Ogni CanaleImpresa ha una propria visibilità pubblica (§9) e può essere rimosso restando un fatto storico, senza distruggere il ValoreCanale dichiarato.
+
+**Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può avere più CanaleImpresa, anche della stessa natura, quando rappresentano riferimenti concreti differenti.
 
 ### MediaImpresa
 
@@ -195,9 +220,18 @@ Il dominio esiste per rendere la scheda impresa uno strumento utile — visibili
 
 **Motivo dell'esistenza.** L'identità visiva è parte della credibilità e della riconoscibilità di un'impresa quanto la sua descrizione testuale.
 
-**Responsabilità e visibilità (senza dettagli tecnici di archiviazione).** Ogni elemento multimediale ha un responsabile logico (l'Impresa, tramite chi ha la facoltà di gestione, §7) e una propria visibilità, che può essere più restrittiva di quella della scheda nel suo complesso (es. un documento pubblico non ancora pronto per la pubblicazione, §9).
+**Proprietà di significato.**
+- *Natura del media* — classificazione chiusa: logo; copertina; immagine; video; documento pubblico.
+- *Riferimento concreto del media* — obbligatorio e non vuoto: URL, etichetta o altro riferimento dichiarativo che rende l'elemento utilizzabile; distinto dalla natura. Non coincide con la decisione di storage tecnico (bucket, policy, byte).
+- *Ruolo di principale* — per il logo, al più un logo principale per Impresa tra quelli attivi; le altre nature non usano questo ruolo.
+- *Visibilità propria* — Non pubblico / Pubblico, più restrittiva (mai più permissiva) di quella dell'Impresa (§9).
+- *Esistenza nella composizione* — rimozione storicizzata, distinta dalla sola non pubblicazione.
 
-**Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può avere più MediaImpresa, con ruoli diversi (es. un solo logo "principale", più immagini secondarie).
+**Cosa MediaImpresa non è.** Non è StoriaImpresa né Contenuto editoriale CMS; non è il supporto documentale di CertificazioneImpresa; non è media di ServizioImpresa o ProdottoImpresa (nessuna relazione obbligatoria verso servizi/prodotti); non è un DAM/CMS generico della piattaforma.
+
+**Responsabilità e visibilità (senza dettagli tecnici di archiviazione).** Ogni elemento multimediale ha un responsabile logico (l'Impresa, tramite chi ha la facoltà di gestione, §7). La conservazione, i bucket e le policy di Storage restano fuori da questo livello.
+
+**Relazioni principali.** Appartiene a esattamente un'Impresa; un'Impresa può avere più MediaImpresa.
 
 ---
 
@@ -350,6 +384,12 @@ Un singolo indicatore generico "verificato" nasconderebbe più di quanto chiaris
 11. Un'Impresa pubblica dovrebbe avere almeno un referente responsabile individuabile (§9, punto 5); l'assenza di qualunque referente è una condizione che richiede attenzione, non una configurazione stabile prevista.
 12. Un elemento collegato (Sede, Servizio, Prodotto, Certificazione, Canale, Media) non pubblico non deve comparire nei percorsi di consultazione pubblica dell'Impresa, anche se l'Impresa stessa è pubblica (§9).
 13. Uno stesso Territorio non implica un'unica SedeImpresa: più imprese, e più sedi della stessa impresa, possono condividere lo stesso Territorio.
+14. Ogni CanaleImpresa deve identificare un canale concreto mediante un ValoreCanale non vuoto, distinto dalla natura del canale; due canali della stessa natura possono coesistere se rappresentano riferimenti concreti differenti. CanaleImpresa assorbe la funzione di contatto dell'Impresa: non viene creata un'entità Contatto separata.
+15. Ogni ServizioImpresa deve avere un nome non vuoto. Descrizione, destinatari e territorio servito, se presenti, sono dichiarazioni testuali dell'offerta e non cataloghi né relazioni strutturate obbligatorie. Due ServizioImpresa della stessa Impresa possono condividere lo stesso nome quando rappresentano offerte distinte. Un ServizioImpresa non è un ServizioProfessionale.
+16. Ogni ProdottoImpresa deve avere un nome non vuoto. La descrizione, se presente, è dichiarazione testuale facoltativa. Due ProdottoImpresa della stessa Impresa possono condividere lo stesso nome. Un ProdottoImpresa non è un ServizioImpresa, non è un catalogo prodotti della piattaforma e non introduce categorie strutturate finché la questione aperta (§12) non è risolta.
+17. Ogni CertificazioneImpresa deve avere un nome o tipo non vuoto. L'ente emittente, se presente, è dichiarazione testuale e non un Aggregate Ente. Scaduta e Revocata restano stati distinti; nessuna delle due presenta la certificazione come valida. Il supporto documentale non sostituisce il fatto CertificazioneImpresa.
+18. Ogni MediaImpresa deve identificare un media concreto mediante un riferimento non vuoto, distinto dalla natura. Può esistere al più un logo principale attivo per Impresa. MediaImpresa non è Contenuto editoriale né supporto di CertificazioneImpresa.
+19. La verifica dell'Impresa è multidimensionale e per aspetto nominato (§8). A livello di scheda, il dominio Imprese possiede gli aspetti: esistenza; dati aziendali; profilo sospetto o contestato. La verifica di una singola CertificazioneImpresa resta sullo stato di quella CertificazioneImpresa. Identità della Persona collegata, relazione con l'impresa e rappresentanza legale restano di altri domini (Persone/Identità & Accessi; Appartenenze). Non esiste un badge unico "Impresa verificata".
 
 ---
 
@@ -398,7 +438,7 @@ Le seguenti decisioni richiedono una scelta progettuale futura e non vengono for
 - I ProdottoImpresa devono essere singoli elementi o devono poter essere raggruppati in categorie proprie?
 - I dati fiscali dell'impresa devono essere memorizzati come informazione propria del dominio, o solo verificati contro una fonte esterna senza essere conservati?
 - Chi può legittimamente rivendicare (ossia dichiarare per la prima volta la gestione di) una scheda impresa già esistente ma non ancora collegata a nessuna Persona?
-- Quali livelli di verifica tra quelli descritti al §8 saranno realmente implementati, e in quale ordine di priorità?
+- Quali livelli di verifica tra quelli descritti al §8 saranno realmente implementati, e in quale ordine di priorità? — **Parzialmente chiusa per M6:** a livello di scheda Impresa sono determinati esistenza, dati aziendali e profilo sospetto/contestato; la certificazione resta sull'Entity CertificazioneImpresa; identità Persona / relazione / rappresentanza restano fuori ownership Imprese (§10 regola 19). Priorità operativa di processo resta applicativa.
 - Le sedi estere di un'impresa italiana, o le unità operative italiane di un'impresa estera, devono essere gestite con le stesse regole delle sedi italiane?
 - Come rappresentare in modo stabile cessazioni, fusioni e trasformazioni societarie, mantenendo la continuità storica delle relazioni (§11)?
 - Quali informazioni tra quelle descritte in questo documento alimenteranno effettivamente l'Osservatorio, e con quale livello di aggregazione o anonimizzazione?

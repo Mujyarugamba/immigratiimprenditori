@@ -249,9 +249,13 @@ La classificazione non introduce gerarchie: un dominio "di supporto" come Identi
 
 **Dipendenze in uscita da limitare**: Imprese dipende da Appartenenze (per la propria "vista di sintesi" AppartenenzaImpresa, non normativa, §9 di `domain-mapping/imprese.md`), da Tassonomia condivisa e Territori (per settore, lingua, sede), e da Identità & Accessi in direzione di supporto. Imprese **non** dipende da Mercati Internazionali per la propria validità (la relazione MercatoImpresa è posseduta da Mercati Internazionali, non da Imprese: decisione consolidata D2 di `domain-mapping/imprese.md` §2, §10, §19), né da Professionisti, Opportunità, Collaborazioni o Eventi.
 
+**Contatti commerciali dell'Impresa (CanaleImpresa).** Telefono commerciale ed email commerciale dichiarati appartengono a Imprese come CanaleImpresa (natura + ValoreCanale), non a Persone e non a Identità & Accessi (`domain-mapping/imprese.md` §8). La natura `marketplace` è soltanto una Tipologia C05 del canale in M3.2, non una dipendenza da un dominio Marketplace. La natura `retail_point` (punto vendita come canale commerciale) **non** crea una dipendenza necessaria da SedeImpresa: sede e canale restano fatti distinti; nessuna FK da canale a sede è richiesta per la validità di Imprese.
+
 **Perché non deve assorbire relazioni esterne**: `domain-mapping/imprese.md` §1 ("Regola fondamentale: impresa e relazioni") ha già escluso esplicitamente che soci, amministratori, fondatori, referenti, mercati, eventi, opportunità, collaborazioni, contenuti editoriali e indicatori statistici siano incorporati nell'Aggregate Impresa. Questa mappa conferma tale esclusione come vincolo trasversale (P11).
 
 **Distinzione tra ciclo di vita del soggetto e ciclo di vita delle relazioni**: gli assi di stato di Impresa (S01-S04, S07-S08: `domain-mapping/imprese.md` §11.1) restano indipendenti dallo stato delle Appartenenze che la riguardano, dalle sue presenze di mercato, dalle opportunità che pubblica o dalle collaborazioni in cui è coinvolta. Un'Impresa resta valida anche se tutte le persone ad essa collegate cessano la propria Appartenenza (`imprese.md` §12, questione aperta 5, non risolta ma non necessaria a questo livello).
+
+**Pubblicazione e visibilità (M7.1).** La coerenza di pubblicazione è contratto di presentazione formalizzato in `domain-mapping/imprese.md` §15.1: nessun campo sintetico di publishability; ceiling = esposizione; nessuna FK/trigger cross-table verso Appartenenze o Moderazione; VIS02 fuori ownership Imprese.
 
 ### Domini con caratteristiche fondazionali limitate
 
@@ -312,7 +316,7 @@ Questa Dependency Map registra formalmente tale decisione come vincolante per il
 | Concetto | Dominio proprietario | Natura |
 |---|---|---|
 | Sede estera | Imprese (`SedeImpresa`) | Luogo fisico di operatività dell'impresa, può trovarsi in un altro paese |
-| Territorio servito | Imprese (`ServizioImpresa`, ambito del servizio) | Estensione geografica in cui un servizio specifico è offerto, non necessariamente internazionale |
+| Territorio servito | Imprese (`ServizioImpresa`, ambito del servizio) | Estensione geografica in cui un servizio specifico è offerto, non necessariamente internazionale; in M4.1 forma dichiarativa testuale (`served_territory`), non catalogo Territori né UUID opaco (`domain-mapping/imprese.md` §8A) |
 | Mercato di interesse | Mercati Internazionali | Area geo-economica verso cui l'impresa dichiara un interesse, senza necessariamente operarvi |
 | Mercato in cui l'impresa opera | Mercati Internazionali | Area geo-economica in cui l'impresa ha una presenza operativa effettiva (import, export, sede, attività continuativa) |
 | Origine delle persone collegate all'impresa | Persone (paese di origine della Persona, `domain-mapping/persone.md` §5) | Attributo del soggetto individuale, non dell'impresa; non implica automaticamente alcuna relazione di mercato (principio di non-automatismo, P3) |
@@ -346,6 +350,16 @@ Professionisti può essere referenziato da Opportunità (D16) e da Collaborazion
 ### ServizioProfessionale
 
 `ServizioProfessionale` è un'Entity dipendente del Profilo professionale (`domain-mapping/professionisti.md`): non costituisce un dominio Servizi. Può essere referenziato da Collaborazioni (nell'ambito di D21) e, facoltativamente, da Opportunità (D16) senza ownership del servizio né della sua erogazione; non produce dipendenze verso un dominio Servizi inesistente.
+
+**Distinzione da ServizioImpresa.** `ServizioImpresa` è owned da Imprese (offerta aziendale, M4.1 / `business_services`); `ServizioProfessionale` è owned da Professionisti. Non condividono tabella né ownership. Le lingue per-servizio di `ServizioImpresa` (riferimento a `LinguaOperativaImpresa`) restano fuori dal blocco M4 e non creano dipendenza M2.2 in M4.1 (`domain-mapping/imprese.md` §8A).
+
+**ProdottoImpresa (M4.2).** Owned da Imprese (`business_products`); tabella distinta da `business_services`; nessun e-commerce, prezzo, categoria strutturata, destinatari, territorio o lingue in M4.2 (`domain-mapping/imprese.md` §8B). Blocco M4 = solo M4.1 + M4.2.
+
+**Blocco M5.** Solo M5.1 CertificazioneImpresa (`business_certifications`) e M5.2 MediaImpresa (`business_media`). Media ≠ supporto Certificazione ≠ Contenuti editoriali. Storage/bucket fuori M5. Nessuna FK media→servizi/prodotti (`domain-mapping/imprese.md` §13.1, §17.1).
+
+**Blocco M6.** Solo M6.1 Verifica Impresa owned (`business_verifications`): aspetti `existence` \| `company_data` \| `contested_profile`; current-state; UNIQUE `(business_id, aspect)`. Certificazione verificata resta su M5.1 (`certification_status`), non duplicata in M6. Aspetti identità Persona / relazione / rappresentanza fuori ownership (Identità & Accessi, Appartenenze). Nessun badge “Impresa verificata”. Nessuna dipendenza di schema da M5. Pubblicazione/gate = M7.1 (`domain-mapping/imprese.md` §15.1). Non riaperto da M7.
+
+**Blocco M7.** Solo M7.1 — coerenza di pubblicazione e visibilità (`domain-mapping/imprese.md` §15.1): contratto di **presentazione** (VIS04), non di vincolo strutturale. Ceiling Impresa → owned sull’**esposizione**; stati locali owned (`visibility_status` / `publication_status`) restano persistiti e indipendenti anche se l’Impresa è `unpublished`. Migration **comment-only** (`COMMENT ON`); nessun CHECK cross-table, trigger, funzione, view, colonna derivata, badge o score. Appartenenze è **utilizzata** esclusivamente per il gate applicativo del referente (condizione 5); Moderazione resta gate trasversale (condizione 6); Editoriali/StoriaImpresa restano indipendenti; Identità & Accessi gestisce VIS02 e le future policy. M7.1 non introduce dipendenze strutturali ulteriori.
 
 ### Verifiche
 
