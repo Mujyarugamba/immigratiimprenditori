@@ -2,9 +2,9 @@
 
 ## Nota introduttiva di esclusione
 
-Questo documento rappresenta il passaggio tra il modello logico del dominio Mercati Internazionali e la sua futura rappresentazione fisica. Non crea uno schema di database, non scrive SQL, non crea tabelle, non usa PostgreSQL o Supabase come riferimento progettuale, non indica tipi di dato, non parla di colonne, chiavi, indici, trigger, vincoli tecnici, RLS, API o codice, non descrive endpoint o implementazioni, non anticipa decisioni implementative.
+Questo documento rappresenta il passaggio tra il modello logico del dominio Mercati Internazionali e la sua rappresentazione fisica. Le sezioni 1–34 restano al livello concettuale di mapping. Il **§35** chiude i contratti DDL-ready necessari al Migration Plan (nomi, colonne, tipi, nullability, vincoli, RLS difensiva, esclusioni), **senza** SQL eseguibile e senza anticipare policy di Identità & Accessi.
 
-Le eventuali menzioni tecnologiche compaiono esclusivamente in questa nota, in §33 "Questioni aperte e aspetti rinviati" e in §34 "Controllo finale", per confermarne l'assenza altrove nel testo.
+Le menzioni tecnologiche ammesse sono: questa nota, §33, §34 e §35.
 
 Il documento applica integralmente la baseline architetturale (`architecture-baseline.md`), il Reference Model (`02-reference-model.md`), le convenzioni architetturali (`03-convenzioni-architetturali.md`), gli attributi di qualità (`04-quality-attributes.md`), la Dependency Map approvata (`domain-dependency-map.md`) e le decisioni già consolidate nei mapping di Persone (`domain-mapping/persone.md`), Imprese (`domain-mapping/imprese.md`) e Appartenenze (`domain-mapping/appartenenze.md`). Non ridefinisce la metodologia generale: la applica concretamente al dominio Mercati Internazionali, confermando integralmente — senza alcuna eccezione — le decisioni già consolidate nella Dependency Map (`domain-dependency-map.md`, righe D6-D9) e nei mapping già approvati. Il dominio possiede il modello concettuale della relazione tra un soggetto e un Mercato (§9) e referenzia i soggetti coinvolti (Imprese, Persone, Professionisti) tramite un riferimento esterno opaco alla loro identità, senza conoscerne il modello interno: lo stesso pattern già adottato dal dominio Appartenenze.
 
@@ -130,6 +130,7 @@ Queste quattro nozioni sono tipologie di Esigenza di internazionalizzazione (§1
 32. [Decisioni di mapping consolidate](#32-decisioni-di-mapping-consolidate)
 33. [Questioni aperte e aspetti rinviati](#33-questioni-aperte-e-aspetti-rinviati)
 34. [Controllo finale](#34-controllo-finale)
+35. [Contratti DDL-ready (ciclo 1 Persona–Impresa)](#35-contratti-ddl-ready-ciclo-1-personaimpresa)
 
 Riepilogo finale
 
@@ -254,7 +255,7 @@ Ciascuno dei concetti seguenti resta incorporato nella descrizione del Mercato (
 
 ## 7. Tipologie di attività e canale di accesso
 
-**Tipologia di attività internazionale (C05).** Le diciannove forme già elencate in `mercati-internazionali.md` §5 (Esportazione, Importazione, Distribuzione, Intermediazione, Produzione, Fornitura di servizi, Consulenza, Commercio elettronico transfrontaliero, Investimento diretto, Partecipazione societaria, Franchising, Licenza, Rappresentanza commerciale, Approvvigionamento, Subfornitura, Cooperazione industriale, Ricerca e sviluppo, Formazione, Trasferimento tecnologico, Attività istituzionale o associativa) costituiscono una Classificazione di tipo Tipologia (C05, `02-reference-model.md` §12): non un attributo condiviso da riferire (VO03), ma la natura stessa di un'istanza di Attività internazionale, secondo la distinzione già stabilita in `03-convenzioni-architetturali.md` §3 ("questo valore esisterebbe anche se nessuno lo calcolasse, come una delle alternative già disponibili? Sì → Classificazione").
+**Tipologia di attività internazionale (C05).** Le **venti** forme già elencate in `mercati-internazionali.md` §5 (Esportazione, Importazione, Distribuzione, Intermediazione, Produzione, Fornitura di servizi, Consulenza, Commercio elettronico transfrontaliero, Investimento diretto, Partecipazione societaria, Franchising, Licenza, Rappresentanza commerciale, Approvvigionamento, Subfornitura, Cooperazione industriale, Ricerca e sviluppo, Formazione, Trasferimento tecnologico, Attività istituzionale o associativa) costituiscono una Classificazione di tipo Tipologia (C05, `02-reference-model.md` §12): non un attributo condiviso da riferire (VO03), ma la natura stessa di un'istanza di Attività internazionale, secondo la distinzione già stabilita in `03-convenzioni-architetturali.md` §3 ("questo valore esisterebbe anche se nessuno lo calcolasse, come una delle alternative già disponibili? Sì → Classificazione").
 
 **Perché questa classificazione è di Mercati Internazionali, così come le istanze che la applicano.** Il vocabolario delle tipologie di attività è un elenco chiuso e stabile (Elenco controllato, C03, oppure Tassonomia leggera C02 se il dominio prevede in futuro l'aggiunta di nuove tipologie con un proprio ciclo di gestione, §33), indipendente da qualunque soggetto dichiarante: la sua esistenza precede e non presuppone alcuna Impresa, Persona o Professionista specifica. Coerentemente con il principio di autonomia (§9), sia il vocabolario sia le singole *istanze* che lo applicano (questa Impresa fa Esportazione verso questo Mercato, tramite la propria Attività internazionale) restano possedute da Mercati Internazionali (§12): l'istanza referenzia il soggetto dichiarante tramite un riferimento esterno opaco, non conoscendone il modello interno.
 
@@ -341,7 +342,7 @@ Coerentemente con il principio del §9, questa tabella distingue i domini la cui
 
 **Perché queste tre Entity/Aggregate sono di competenza di Mercati Internazionali, pur referenziando sempre un soggetto dichiarante.** Tutte e tre richiedono, per esistere, un soggetto dichiarante: un'Attività internazionale non ha senso senza la Presenza di un'Impresa o di una Persona che la svolge; una Relazione commerciale non ha senso senza un dichiarante che la afferma; un'Esigenza non ha senso senza chi la esprime. Questo, per il principio del §9, non le rende di competenza del dominio del dichiarante: il fatto di business "relazione con il mercato" resta unico e proprietario di Mercati Internazionali, che referenzia il dichiarante solo per identità, mai per incorporarne il modello.
 
-**Cosa resta comunque di competenza di Mercati Internazionali in questo gruppo di concetti.** Il vocabolario delle diciannove Tipologie di attività internazionale (§7); il vocabolario dei Canali di accesso al mercato (§7); il Mercato stesso come bersaglio del riferimento; e, per il principio del §9, ogni istanza di Attività, Relazione commerciale o Esigenza dichiarata da un soggetto.
+**Cosa resta comunque di competenza di Mercati Internazionali in questo gruppo di concetti.** Il vocabolario delle venti Tipologie di attività internazionale (§7); il vocabolario dei Canali di accesso al mercato (§7); il Mercato stesso come bersaglio del riferimento; e, per il principio del §9, ogni istanza di Attività, Relazione commerciale o Esigenza dichiarata da un soggetto.
 
 **Relazione con Opportunità e Collaborazioni.** Confermato dal logico (§8, regola 16 del §12): un'Esigenza può generare un'Opportunità o una Collaborazione in quei domini, senza che Mercati Internazionali ne acquisisca la proprietà. Il collegamento è trattato al §22.
 
@@ -593,7 +594,7 @@ Questa sezione raccoglie, secondo lo schema in tre parti stabilito da `03-conven
 |---|---|---|---|---|---|---|
 | **Aggregate Root a bassa cardinalità di attributi propri ma alta cardinalità di riferimento** | A01+E03 | Il Mercato è referenziato da un numero potenzialmente molto ampio di domini e relazioni (§10-§12) pur avendo pochi attributi propri (§4-§8) | Conferma, con un profilo diverso da Persona e Impresa (referenziato da molti ma "leggero" nei propri dati), che A01+E03 non richiede un Aggregate ricco di contenuto proprio | Ogni futuro Aggregate di governance centrale con funzione principalmente di riferimento (es. un futuro dominio Territori, se mai reso esplicito) | Non copre da solo il caso in cui il dominio possieda anche relazioni che referenziano soggetti esterni (§9): quella è una scelta aggiuntiva di questo specifico mapping, coperta dal pattern del riferimento opaco (sotto) | Il contenuto specifico della composizione geo-economica resta locale |
 | **Riferimento esterno opaco all'identità del soggetto, senza incorporarne il modello interno** | R02, applicato all'identità (E03) | Presenza, Interesse, Attività, Relazione commerciale ed Esigenza referenziano l'identità di Imprese/Persone/Professionisti senza mai incorporarne i dati descrittivi (§9-§12, §26) | Stesso pattern già adottato da Appartenenze verso Persone e Imprese (`domain-mapping/appartenenze.md` §4-§5): un dominio può possedere una relazione autonoma pur avendo una dipendenza in uscita necessaria, purché limitata alla sola identità | Ogni futuro dominio che possiede una relazione tra soggetti senza incorporarne il modello interno | Non elimina la dipendenza in uscita: la rende opaca e limitata alla sola identità, non l'annulla | Il contenuto specifico delle cinque relazioni resta locale a Mercati Internazionali |
-| **Vocabolario condiviso posseduto dal dominio di significato, applicato dallo stesso dominio alle istanze dichiarate da un soggetto** | C05 (Tipologia) + R02 | La Tipologia di attività internazionale e il Canale di accesso, e le singole istanze che li applicano, restano di Mercati Internazionali (§7, §12) | Separa nettamente "il vocabolario esiste indipendentemente da chi dichiara" da "l'istanza referenzia chi dichiara, senza appartenergli": la stessa distinzione già vista per SettoreImpresa/LinguaOperativaImpresa (E02+VO03) in `domain-mapping/imprese.md` §6, qui applicata a una Classificazione (C05) invece che a un riferimento (VO03) | Ogni dominio che definisce un vocabolario condiviso di tipologie applicabile a relazioni che referenziano più soggetti | Richiede che il vocabolario non abbia mai bisogno di conoscere il modello interno dei soggetti referenziati, condizione qui verificata esplicitamente (§7) | Il contenuto specifico delle diciannove Tipologie resta locale a Mercati Internazionali |
+| **Vocabolario condiviso posseduto dal dominio di significato, applicato dallo stesso dominio alle istanze dichiarate da un soggetto** | C05 (Tipologia) + R02 | La Tipologia di attività internazionale e il Canale di accesso, e le singole istanze che li applicano, restano di Mercati Internazionali (§7, §12) | Separa nettamente "il vocabolario esiste indipendentemente da chi dichiara" da "l'istanza referenzia chi dichiara, senza appartenergli": la stessa distinzione già vista per SettoreImpresa/LinguaOperativaImpresa (E02+VO03) in `domain-mapping/imprese.md` §6, qui applicata a una Classificazione (C05) invece che a un riferimento (VO03) | Ogni dominio che definisce un vocabolario condiviso di tipologie applicabile a relazioni che referenziano più soggetti | Richiede che il vocabolario non abbia mai bisogno di conoscere il modello interno dei soggetti referenziati, condizione qui verificata esplicitamente (§7) | Il contenuto specifico delle venti Tipologie resta locale a Mercati Internazionali |
 | **Entity di riferimento propria in assenza di un dominio dedicato** | E01/E03, in attesa di VO03/R02 | La Risorsa di supporto al mercato (§8), in attesa di un eventuale dominio "Organizzazioni istituzionali" | Stessa soluzione provvisoria già applicata da `domain-mapping/imprese.md` per l'ente emittente di una Certificazione (§21 di quel documento): seconda applicazione indipendente, che conferma la generalità del criterio | Professionisti (enti di certificazione professionale), Appartenenze | Non è una soluzione permanente: richiede revisione quando il dominio mancante viene formalizzato (§33) | — |
 | **Composizione descrittiva multi-criterio senza equivalenza tra criteri** | VO01/VO02 multipli sullo stesso Aggregate | Il Mercato incorpora Area geografica, economica, linguistica, commerciale, culturale (§5) senza che nessuno sia l'unico criterio costitutivo | Conferma che un Aggregate Root può incorporare più Value Object descrittivi indipendenti, nessuno dei quali necessario o sufficiente da solo, quando il documento logico lo richiede esplicitamente (`mercati-internazionali.md` §3) | Ogni futuro dominio con un concetto "costruito" da più criteri non equivalenti e non gerarchici | Richiede una verifica esplicita, come fatta al §5, che nessuno dei criteri richieda una propria identità referenziabile: altrimenti diventa un'Entity, non un Value Object | Il contenuto specifico dei cinque criteri resta locale |
 
@@ -676,15 +677,13 @@ Eredità diretta di `mercati-internazionali.md` §15, non risolte né forzate da
 
 ### Aspetti rinviati alla rappresentazione fisica concreta
 
-Decisioni che richiederanno il futuro schema tecnologico e non sono anticipate da questo documento:
-
-9. **Rappresentazione tecnica degli assi di stato del Mercato e della Risorsa di supporto (S01, S02, S08, §15).** Se realizzati come colonne distinte, tabelle distinte o altra struttura, resta una decisione del futuro schema.
-10. **Meccanismo di garanzia dell'unicità della composizione geo-economica di un Mercato (§4, A03).** Il vincolo è concettuale; la sua applicazione fisica resta rinviata.
-11. **Tecnica di storicizzazione (S08/T07/D08) per le revisioni di composizione del Mercato (§17).** Se realizzata con tabelle storiche separate, versionamento in linea, log di audit o altra tecnica, è una decisione del futuro schema.
-12. **Struttura fisica del catalogo territoriale condiviso e della Tassonomia condivisa, referenziati tramite VO03 (§6, §7).** Nessuno dei due è ancora oggetto di un proprio documento di mapping fisico: la struttura fisica del riferimento resta sospesa fino a quando questi domini non riceveranno, a loro volta, un proprio mapping (coerente con `domain-mapping/imprese.md` §24, questione 14).
-13. **Meccanismo tecnico di propagazione degli eventi di dominio elencati al §24.** Coerentemente con `01-principi-mapping.md`, nessuna tecnologia di comunicazione (coda, broker, trigger) è anticipata.
-14. **Applicazione tecnica dell'accesso (S05) al Mercato da parte di Identità & Accessi.** Rinviata al futuro `domain-mapping/identita-accessi.md`.
-15. **Rappresentazione tecnica di Presenza, Interesse, Attività internazionale, Relazione commerciale internazionale ed Esigenza di internazionalizzazione, incluso il riferimento tecnico opaco all'identità del soggetto dichiarante (§9, §11-§12).** Se realizzato come chiave esterna, identificatore referenziato o altra tecnica, resta una decisione del futuro schema di questo stesso dominio, non di un altro.
+9. **Rappresentazione tecnica degli assi di stato del Mercato e della Risorsa di supporto.** **Chiuso per il ciclo 1 in §35:** colonne distinte sugli AR; nessuno stato sintetico unico.
+10. **Unicità della composizione geo-economica.** **Chiuso per il ciclo 1 in §35:** `UNIQUE (market_id, country_ref)` sulla composizione; nessun vincolo globale di unicità di composizione tra Mercati distinti (controllo applicativo/governance).
+11. **Tecnica di storicizzazione avanzata (S08/T07/D08) per revisioni di composizione.** Rinviata: il ciclo 1 è current-state; nessuna history/audit table.
+12. **Struttura fisica del catalogo territoriale condiviso.** Catalogo Territori **non ancora migrato** in SQL: il ciclo 1 usa `country_ref` testo opaco (§35.4); nessuna tabella Paesi locale; FK Territori rinviata a mapping Territori.
+13. **Meccanismo tecnico di propagazione degli eventi di dominio (§24).** Rinviato; nessuna coda/broker/trigger cross-domain.
+14. **Applicazione tecnica dell'accesso (S05).** Rinviata a Identità & Accessi.
+15. **Rappresentazione tecnica di Presenza, Interesse, Attività, Relazione commerciale, Esigenza e soggetto dichiarante.** **Chiuso per il ciclo 1 in §35:** FK a `profiles` / `businesses` con discriminatore `subject_kind`; `membership_id` opzionale; Professionisti fuori ciclo 1.
 
 ### Aspetti rinviati ad altri domini
 
@@ -709,11 +708,292 @@ Decisioni che richiederanno il futuro schema tecnologico e non sono anticipate d
 | 8 | Utilizzo corretto di `02-reference-model.md` | Verificato — ogni concetto trattato cita il codice del pattern applicato (A01, A02, A03, A04, E01, E02, E03, VO01, VO02, VO03, C02, C03, C05, C06, R01, R02, R05, S01-S03, S08, V01-V04, EV01-EV04, D01-D02, D04-D09, T01, T07, VIS01-VIS06); nessun pattern non catalogato è stato introdotto (§29 conferma esplicitamente l'assenza di lacune) |
 | 9 | Conformità a `03-convenzioni-architetturali.md` | Verificato — la procedura decisionale del §3 di `03` è stata applicata esplicitamente (§5, §7-§8); l'unica eccezione a una soluzione uniforme, relativa alla Risorsa di supporto (§28), è motivata secondo lo schema in tre parti del §2/§12 (RC33); le decisioni architetturali applicate sono elencate esplicitamente (RC34, §31-§32) |
 | 10 | Applicazione di `04-quality-attributes.md` | Verificato — checklist applicata punto per punto al §30, senza alcuna riga segnalata come impatto su altri documenti |
-| 11 | Assenza di contenuti tecnici fuori dalle sezioni consentite | Verificato — nessuna occorrenza di SQL, PostgreSQL, Supabase, schema fisico, tabelle, colonne, trigger, foreign key, indici, endpoint, API o implementazioni al di fuori della nota introduttiva e di questa sezione |
+| 11 | Assenza di contenuti tecnici fuori dalle sezioni consentite | Verificato — menzioni tecnologiche confinate a nota introduttiva, §33, §34 e contratti DDL-ready §35; nessuna SQL eseguibile |
 | 12 | Assenza di duplicazioni | Verificato — nessun concetto è descritto due volte con contenuto ridondante; le tabelle di §3, §10, §26 riassumono senza ripetere la motivazione discorsiva già fornita nel corpo del testo |
 | 13 | Assenza di contraddizioni interne | Verificato — il principio del §9 (ownership della relazione, riferimento opaco all'identità del soggetto) è applicato in modo coerente in tutte le sezioni successive (§10-§27), senza alcun residuo testuale che attribuisca la proprietà delle relazioni d'uso al dominio del soggetto dichiarante |
 | 14 | Correttezza dei riferimenti ai documenti esistenti | Verificato — ogni citazione a `mercati-internazionali.md`, `domain-dependency-map.md`, `imprese.md`, `persone.md`, `appartenenze.md`, `01`, `02`, `03`, `04` e `reconciliation-report.md` è stata controllata contro il testo effettivo di quei documenti durante la stesura |
-| 15 | Rispetto della struttura documentale richiesta | Verificato — nota introduttiva, vincoli, documenti letti, regola fondamentale, distinzioni obbligatorie, indice, 34 sezioni numerate, riepilogo finale, nello stesso ordine e con lo stesso livello di profondità di `persone.md`, `imprese.md` e `appartenenze.md` |
+| 15 | Rispetto della struttura documentale richiesta | Verificato — nota introduttiva, vincoli, documenti letti, regola fondamentale, distinzioni obbligatorie, indice, 35 sezioni (34 di mapping + §35 DDL-ready ciclo 1), riepilogo finale |
+| 16 | Contratti DDL-ready ciclo 1 | Verificato — §35 definisce tabelle, colonne, tipi, vincoli, RLS difensiva ed esclusioni Persona–Impresa; Migration Plan in `docs/architecture/migrations/mercati-internazionali-migration-plan.md` |
+
+---
+
+## 35. Contratti DDL-ready (ciclo 1 Persona–Impresa)
+
+**Scopo.** Chiudere le ambiguità di schema necessarie al Migration Plan Mercati Internazionali. Non è SQL eseguibile. Perimetro ciclo 1: soggetti **Persona** e **Impresa** soltanto. Nessuna FK polimorfica. Nessun soggetto Professionista. Nessun catalogo Paesi locale. Nessuna Organizzazione istituzionale generale.
+
+**Autorità collegata.** `docs/architecture/migrations/mercati-internazionali-migration-plan.md`.
+
+**Pattern RLS/privilegi (tutte le tabelle §35).** `ENABLE ROW LEVEL SECURITY`; nessun `FORCE ROW LEVEL SECURITY`; nessuna policy; `REVOKE ALL` da `anon` e `authenticated`; nessun `GRANT`; nessun `auth.uid()`.
+
+**Pattern timestamps.** `created_at` / `updated_at` timestamptz NOT NULL DEFAULT now(); funzione `set_<table>_updated_at` dedicata per tabella (`SECURITY INVOKER`, `SET search_path = ''`); un solo trigger locale `BEFORE UPDATE` `*_set_updated_at`. Nomi ≤ 63 byte (abbreviazioni `im_` / `intl_` ammesse se necessario).
+
+**Pattern soggetto dichiarante (Presenza, Interesse, Relazione commerciale, Esigenza).**
+
+| Campo | Regola |
+|---|---|
+| `subject_kind` | text NOT NULL ∈ `business` \| `person` |
+| `business_id` | uuid NULL → `public.businesses(id)` ON DELETE RESTRICT |
+| `person_id` | uuid NULL → `public.profiles(id)` ON DELETE RESTRICT |
+| `membership_id` | uuid NULL → `public.business_memberships(id)` ON DELETE RESTRICT |
+| CHECK soggetto | (`subject_kind='business'` ∧ `business_id` NOT NULL ∧ `person_id` IS NULL) ∨ (`subject_kind='person'` ∧ `person_id` NOT NULL ∧ `business_id` IS NULL) |
+| CHECK membership | `membership_id` IS NULL ∨ `subject_kind='business'` |
+
+**Professionisti.** Fuori ciclo 1: nessuna colonna `professional_id`; nessuna FK verso tabelle inesistenti. Estensione futura documentata nel Plan (non bloccante).
+
+**Territori.** Nessuna tabella Territori in SQL oggi. Composizione usa `country_ref` text opaco (codice/convenzione piattaforma). Nessun catalogo Paesi in questo dominio. Eventuale FK futura → catalogo Territori condiviso.
+
+**Elementi esclusi dal ciclo 1 (tutte le tabelle).** FK a `auth.users`; CASCADE da `profiles`/`businesses` verso le relazioni; FK Opportunità/Collaborazioni/Eventi; history/audit table; badge/score/ranking; seed demo; policy VIS02; Storage; volumi commerciali strutturati; soggetto Professionista; Organizzazioni istituzionali come dominio.
+
+---
+
+### 35.1 `public.international_activity_types` (M1.1)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Catalogo C03/C05 tipologie di attività internazionale |
+| PK | `code` text |
+| Colonne (ordine) | `code`; `label_it` text NOT NULL; `description` text NULL; `sort_order` int NOT NULL; `is_active` boolean NOT NULL DEFAULT true; `created_at`; `updated_at` |
+| CHECK | code/label non blank; `sort_order >= 0` |
+| Seed normativo | **20** code (elenco Logical §5, chiuso): `export`, `import`, `distribution`, `intermediation`, `production`, `service_provision`, `consulting`, `cross_border_ecommerce`, `direct_investment`, `equity_participation`, `franchising`, `licensing`, `commercial_representation`, `procurement`, `subcontracting`, `industrial_cooperation`, `research_development`, `training`, `technology_transfer`, `institutional_associative` |
+| Note | Conteggio normativo = **20** (enumerazione Logical §5). Eventuali riferimenti a «19» sono errori di conteggio; il seed M1.1 usa queste 20 code. Non è seed demo. |
+
+---
+
+### 35.2 `public.international_access_channels` (M1.2)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Catalogo C05/C06 canali di accesso al mercato |
+| PK | `code` text |
+| Colonne | `code`; `label_it` text NOT NULL; `sort_order` int NOT NULL; `is_active` boolean NOT NULL DEFAULT true; timestamps |
+| CHECK | code/label non blank; `sort_order >= 0` |
+| Seed normativo | `distributor`, `marketplace`, `direct_branch`, `agent`, `trade_fair`, `sales_network` |
+| Esclusione | Non duplica `business_channels` (Imprese) |
+
+---
+
+### 35.3 `public.internationalization_need_types` (M1.3)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Catalogo C03 categorie di Esigenza di internazionalizzazione |
+| PK | `code` text |
+| Colonne | `code`; `label_it` text NOT NULL; `sort_order` int NOT NULL; `is_active` boolean NOT NULL DEFAULT true; timestamps |
+| Seed normativo | 19 code da Logical §8: `find_customers`, `find_suppliers`, `find_distributors`, `find_agents`, `find_industrial_partners`, `find_investors`, `find_financing`, `open_site`, `access_trade_fairs`, `regulatory_adaptation`, `certifications`, `logistics`, `international_payments`, `contractual_protection`, `ip_protection`, `language_mediation`, `intercultural_training`, `find_staff`, `access_institutional_networks` |
+
+---
+
+### 35.4 `public.international_markets` (M2.1) — Aggregate Root governance
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Mercato internazionale (A01/E03), governance centrale |
+| PK | `id` uuid DEFAULT gen_random_uuid() |
+| Colonne (ordine) | `id`; `code` text NOT NULL; `name` text NOT NULL; `summary` text NULL; `description` text NULL; `market_kind` text NOT NULL; `substantial_status` text NOT NULL DEFAULT `'proposed'`; `editorial_status` text NOT NULL DEFAULT `'drafting'`; `geographic_note` text NULL; `economic_area_note` text NULL; `linguistic_area_note` text NULL; `commercial_area_note` text NULL; `cultural_area_note` text NULL; `created_at`; `updated_at` |
+| UNIQUE | `code` |
+| CHECK kind | `country` \| `country_group` \| `transnational_region` \| `economic_union` \| `linguistic_area` \| `commercial_area` \| `economic_corridor` \| `sectoral_international` |
+| CHECK substantial | `proposed` \| `active` \| `featured` \| `maintenance` \| `unmonitored` |
+| CHECK editorial | `drafting` \| `published` \| `in_review` \| `needs_update` |
+| CHECK | code/name non blank; note anti-blank se presenti |
+| Indici | `(substantial_status)`, `(editorial_status)`, `(market_kind)` |
+| Assi | Distinti: sostanziale ≠ editoriale; nessun asse pubblicazione S04 separato (assorbito da editorial `published`, §15) |
+| Current-state | Sì; nessuna history table |
+| Dipendenze | Nessuna FK esterna obbligatoria |
+
+---
+
+### 35.5 `public.international_market_countries` (M2.2) — composizione
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Associazione Mercato–Paese (owned); riferimento opaco a Territori |
+| PK | `id` uuid DEFAULT gen_random_uuid() |
+| Colonne | `id`; `market_id` uuid NOT NULL; `country_ref` text NOT NULL; `country_label` text NULL; `is_primary` boolean NOT NULL DEFAULT false; `sort_order` int NOT NULL DEFAULT 0; timestamps |
+| FK | `market_id` → `international_markets(id)` ON DELETE CASCADE |
+| UNIQUE | `(market_id, country_ref)` |
+| UNIQUE parziale | al più un `is_primary = true` per `market_id` |
+| CHECK | `country_ref` non blank; `sort_order >= 0` |
+| Cardinalità | Mercato 0..N Paesi; Paese (ref) in 0..N Mercati |
+| Esclusione | Nessuna tabella `countries` locale; nessuna FK Territori finché assente |
+
+---
+
+### 35.6 `public.international_market_support_resources` (M2.3)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Risorsa di supporto al mercato (E01); ownership locale provvisoria vs Organizzazioni |
+| PK | `id` uuid DEFAULT gen_random_uuid() |
+| Colonne | `id`; `market_id` uuid NOT NULL; `name` text NOT NULL; `resource_kind` text NOT NULL; `summary` text NULL; `website_url` text NULL; `contact_note` text NULL; `territorial_scope_note` text NULL; `substantial_status` text NOT NULL DEFAULT `'signaled'`; `verification_status` text NOT NULL DEFAULT `'unverified'`; `visibility_status` text NOT NULL DEFAULT `'editorial'`; timestamps |
+| FK | `market_id` → `international_markets(id)` ON DELETE CASCADE |
+| CHECK kind | `chamber_of_commerce` \| `embassy_consulate` \| `association` \| `entrepreneurial_network` \| `public_agency` \| `other_support` |
+| CHECK substantial | `signaled` \| `active` \| `archived` |
+| CHECK verification | `unverified` \| `in_review` \| `confirmed` \| `rejected` |
+| CHECK visibility | `private` \| `editorial` \| `public` \| `historical` |
+| Indici | `(market_id)`, `(substantial_status)` |
+| Note | Non è Partner piattaforma; non è dominio Organizzazioni |
+
+---
+
+### 35.7 `public.international_market_presences` (M3.1) — Aggregate Root
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | PresenzaDiMercato: soggetto opera nel Mercato |
+| PK | `id` uuid DEFAULT gen_random_uuid() |
+| Colonne | `id`; `market_id` uuid NOT NULL; `subject_kind`; `business_id`; `person_id`; `membership_id`; `editorial_status` text NOT NULL DEFAULT `'proposed'`; `relation_status` text NOT NULL DEFAULT `'under_evaluation'`; `verification_status` text NOT NULL DEFAULT `'unverified'`; `is_contested` boolean NOT NULL DEFAULT false; `visibility_status` text NOT NULL DEFAULT `'private'`; `presence_configuration` text NOT NULL DEFAULT `'ongoing'`; `started_at` date NULL; `ended_at` date NULL; `motivation_note` text NULL; `declaration_origin` text NOT NULL DEFAULT `'subject_declaration'`; `created_at`; `updated_at` |
+| FK | `market_id` → markets RESTRICT; soggetto come pattern §35; membership RESTRICT |
+| CHECK editorial | `signaled` \| `proposed` \| `declared` |
+| CHECK relation | `under_evaluation` \| `planned` \| `started` \| `active` \| `consolidated` \| `suspended` \| `interrupted` \| `concluded` \| `archived` |
+| CHECK verification | `unverified` \| `in_review` \| `confirmed` (**senza** contested) |
+| CHECK visibility | `private` \| `involved` \| `editorial` \| `partners` \| `public` \| `historical` |
+| CHECK configuration | `occasional` \| `ongoing` \| `export_oriented` \| `import_oriented` \| `stable_presence` \| `via_intermediary` \| `abandoned` |
+| CHECK origin | `subject_declaration` \| `editorial` \| `informative_import` \| `institutional_source` |
+| CHECK temporali | (1) `ended_at IS NULL OR started_at IS NULL OR ended_at >= started_at`; (2) `relation_status IN ('under_evaluation','planned','started','active','consolidated','suspended')` ⇒ `ended_at IS NULL`; (3) `relation_status IN ('interrupted','concluded','archived')` ⇒ `ended_at IS NOT NULL`; (4) `presence_configuration = 'abandoned'` ⇒ `ended_at IS NOT NULL` |
+| UNIQUE | nessuna UNIQUE forzata (soggetto, market) — multi-presenza/successione consentite |
+| Funzione/trigger | `set_international_market_presences_updated_at` INVOKER; trigger `international_market_presences_set_updated_at` BEFORE UPDATE |
+| RLS/privilegi | Pattern §35 comune |
+| Indici | `(market_id)`, `(business_id)`, `(person_id)`, `(relation_status)` |
+| Contestazione | `is_contested` overlay indipendente |
+
+---
+
+### 35.8 `public.international_market_interests` (M3.2) — Aggregate Root
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | InteresseDiMercato distinto dalla Presenza |
+| PK | `id` uuid |
+| Colonne | `id`; `market_id`; soggetto (pattern); `membership_id`; `editorial_status` DEFAULT `'proposed'`; `interest_level` text NOT NULL DEFAULT `'future'`; `relation_status` text NOT NULL DEFAULT `'under_evaluation'`; `verification_status` DEFAULT `'unverified'`; `is_contested` DEFAULT false; `visibility_status` DEFAULT `'private'`; `started_at` date NULL; `ended_at` date NULL; `motivation_note` text NULL; `declaration_origin` DEFAULT `'subject_declaration'`; timestamps |
+| CHECK interest_level | `future` \| `under_assessment` |
+| CHECK relation | `under_evaluation` \| `planned` \| `withdrawn` \| `archived` |
+| CHECK verification | conferma sola della dichiarazione: `unverified` \| `in_review` \| `confirmed` \| `rejected` |
+| Note | Nessuna deduzione automatica da/verso Presenza; nessuna tabella Verifiche multi-aspetto (asse sulla radice) |
+
+---
+
+### 35.9 `public.international_market_activities` + `international_market_activity_type_links` (M3.3)
+
+**Attività (E02 owned da Presenza)**
+
+| Campo | Valore |
+|---|---|
+| Tabella | `public.international_market_activities` |
+| PK | `id` uuid |
+| Colonne | `id`; `presence_id` uuid NOT NULL; `summary` text NULL; `description` text NULL; `activity_status` text NOT NULL DEFAULT `'planned'`; `primary_access_channel_code` text NULL; `sector_id` bigint NULL; `location_note` text NULL; `visibility_status` text NOT NULL DEFAULT `'private'`; `started_at` date NULL; `ended_at` date NULL; timestamps |
+| FK | `presence_id` → `international_market_presences(id)` ON DELETE CASCADE; `primary_access_channel_code` → `international_access_channels(code)` ON DELETE RESTRICT; `sector_id` → `public.business_sectors(id)` ON DELETE RESTRICT |
+| CHECK status | `planned` \| `started` \| `active` \| `suspended` \| `concluded` \| `interrupted` |
+| CHECK visibility | `private` \| `involved` \| `editorial` \| `public` \| `historical` |
+| Esclusione | Nessuna FK diretta a Persona/Impresa (passa dalla Presenza) |
+
+**Link tipologie (0..N per Attività)**
+
+| Campo | Valore |
+|---|---|
+| Tabella | `public.international_market_activity_type_links` |
+| Colonne | `id`; `activity_id` uuid NOT NULL; `activity_type_code` text NOT NULL; timestamps |
+| FK | CASCADE da activity; `activity_type_code` → activity_types RESTRICT |
+| UNIQUE | `(activity_id, activity_type_code)` |
+
+---
+
+### 35.10 `public.international_commercial_relations` (M4.1) — Aggregate Root
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Relazione commerciale internazionale |
+| PK | `id` uuid |
+| Colonne | `id`; `market_id`; soggetto (pattern); `membership_id`; `relation_nature` text NOT NULL; `counterpart_kind` text NOT NULL DEFAULT `'external'`; `counterpart_business_id` uuid NULL; `counterpart_person_id` uuid NULL; `counterpart_label` text NULL; `editorial_status` DEFAULT `'proposed'`; `relation_status` DEFAULT `'active'`; `verification_status` DEFAULT `'unverified'`; `is_contested` DEFAULT false; `visibility_status` DEFAULT `'private'`; `started_at` date NULL; `ended_at` date NULL; `notes` text NULL; timestamps |
+| FK | market RESTRICT; soggetto RESTRICT; `counterpart_business_id` → businesses RESTRICT; `counterpart_person_id` → profiles RESTRICT |
+| CHECK nature | `customer` \| `supplier` \| `distributor` \| `agent` \| `partner` \| `investor` |
+| CHECK counterpart_kind | `external` \| `business` \| `person` |
+| CHECK counterpart | se `external` ⇒ label NOT NULL e entrambe FK controparte NULL; se `business` ⇒ counterpart_business_id NOT NULL; se `person` ⇒ counterpart_person_id NOT NULL |
+| CHECK relation | `active` \| `suspended` \| `concluded` \| `contested_hold` \| `archived` |
+| Esclusione | Non è Collaborazione; nessun volume/valore strutturato nel ciclo 1 |
+
+---
+
+### 35.11 `public.internationalization_needs` (M4.2) — Aggregate Root
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Esigenza di internazionalizzazione |
+| PK | `id` uuid |
+| Colonne | `id`; `market_id` uuid NULL; soggetto (pattern); `membership_id`; `need_type_code` text NOT NULL; `summary` text NOT NULL; `description` text NULL; `priority` text NOT NULL DEFAULT `'normal'`; `editorial_status` DEFAULT `'proposed'`; `need_status` text NOT NULL DEFAULT `'open'`; `visibility_status` DEFAULT `'private'`; `opened_at` date NULL; `closed_at` date NULL; timestamps |
+| FK | `market_id` → markets ON DELETE SET NULL (Mercato può essere non ancora individuato); `need_type_code` → need_types RESTRICT; soggetto RESTRICT |
+| CHECK priority | `low` \| `normal` \| `high` |
+| CHECK need_status | `open` \| `in_progress` \| `fulfilled` \| `withdrawn` \| `archived` |
+| Esclusione | Non genera automaticamente Opportunità/Collaborazione; nessuna FK verso quei domini |
+
+---
+
+### 35.12 Fonti / Evidenze / Verifiche — Presenza (M5.1–M5.3)
+
+#### `public.international_market_presence_sources` (M5.1)
+
+| Campo | Valore |
+|---|---|
+| Colonne | `id`; `presence_id` NOT NULL; `source_kind` text NOT NULL; `reliability_note` text NULL; `reference_label` text NULL; `declared_at` timestamptz NULL; timestamps |
+| FK | CASCADE da presence |
+| CHECK source_kind | `business_declaration` \| `person_declaration` \| `commercial_documentation` \| `public_source` \| `institutional_body` \| `association` \| `verified_partner` \| `editorial` \| `informative_import` |
+
+#### `public.international_market_presence_evidences` (M5.2)
+
+| Campo | Valore |
+|---|---|
+| Colonne | `id`; `presence_id` NOT NULL; `source_id` uuid NULL; `supported_aspect` text NOT NULL; `summary` text NOT NULL; `observed_at` timestamptz NULL; timestamps |
+| FK | presence CASCADE; source ON DELETE SET NULL |
+| CHECK aspect | `effective_presence` \| `declared_activity` \| `foreign_site` \| `export_import` \| `person_experience` \| `linguistic_competence` \| `network_membership` |
+
+#### `public.international_market_presence_verifications` (M5.3)
+
+| Campo | Valore |
+|---|---|
+| Colonne | `id`; `presence_id` NOT NULL; `aspect` text NOT NULL; `status` text NOT NULL DEFAULT `'unverified'`; `verified_at` timestamptz NULL; `expires_at` timestamptz NULL; `source_note` text NULL; timestamps |
+| FK | CASCADE da presence |
+| UNIQUE | `(presence_id, aspect)` |
+| CHECK aspect | stessi 7 di evidenze Presenza |
+| CHECK status | `unverified` \| `in_review` \| `confirmed` \| `rejected` |
+| Note | Nessuna sync automatica con `presences.verification_status`; nessun badge/score; current-state |
+
+---
+
+### 35.13 Fonti / Evidenze / Verifiche — Relazione commerciale (M5.4–M5.6)
+
+Tabelle speculari con ownership `commercial_relation_id` → `international_commercial_relations` CASCADE:
+
+- `international_commercial_relation_sources` (M5.4) — stessi `source_kind` della Presenza
+- `international_commercial_relation_evidences` (M5.5) — aspetti: `commercial_relation` \| `partner_recognition`
+- `international_commercial_relation_verifications` (M5.6) — UNIQUE `(commercial_relation_id, aspect)`; stessi 2 aspetti; status come sopra
+
+---
+
+### 35.14 Funzioni, indici, commenti, privilegi
+
+| Elemento | Prescrizione |
+|---|---|
+| Funzioni | Solo `updated_at` per tabella mutabile; nessun gate applicativo; nessun trigger cross-table |
+| Commenti SQL | Obbligatori su tabelle e colonne di significato (assi, RESTRICT, country_ref opaco, non-Collaborazione, non-Opportunità) |
+| Privilegi | REVOKE ALL; nessun GRANT |
+| Dipendenze esterne ciclo 1 | `profiles`, `businesses`, `business_memberships`, `business_sectors` (facoltativa su attività) |
+| Integrazione Opportunità/Collaborazioni/Eventi | Fuori dominio; nessuna FK |
+
+### 35.15 Mapping Logical → fisico (decisioni chiuse)
+
+| Punto | Decisione fisica |
+|---|---|
+| Radice governance | `international_markets` |
+| Composizione Paese | tabella owned + `country_ref` opaco |
+| Presenza ≠ Interesse | due AR |
+| Attività | owned da Presenza + link tipologie 0..N |
+| Tipologie | 20 code catalogo |
+| Canali | 6 code catalogo; non `business_channels` |
+| Esigenza | AR con catalogo 19 tipi; `market_id` nullable |
+| Soggetto ciclo 1 | business XOR person + membership opzionale |
+| Professionisti | rinviati |
+| Contestazione | `is_contested` |
+| Fonti/Evidenze/Verifiche | separate per Presenza e Relazione commerciale |
+| Interesse | verifica sulla radice, senza tabella multi-aspetto |
 
 ---
 
@@ -725,4 +1005,4 @@ L'autonomia del dominio non consiste nell'assenza di ogni riferimento verso Impr
 
 Questa scelta produce l'effetto richiesto in modo verificabile, non solo dichiarato: la matrice delle dipendenze di questo dominio (§26) mostra dipendenze in uscita necessarie ma limitate al solo riferimento opaco all'identità, mai al modello interno di Imprese, Persone, Professionisti o Appartenenze; la tavola dei cicli (§27) non registra alcun ciclo reale con nessuno di questi domini, perché ciascuna coppia di direzioni referenzia sempre oggetti diversi e indipendenti tra loro; ogni dominio che in futuro avrà bisogno di collegarsi a un contesto internazionale — oggi Opportunità, Collaborazioni, Eventi, Contenuti Editoriali, Osservatorio, Ricerca, Notifiche, e potenzialmente altri domini non ancora previsti — può farlo referenziando il Mercato senza che questo debba mai essere modificato per accoglierlo.
 
-Questo documento non introduce alcuna modifica né alcuna eccezione architetturale rispetto a `domain-mapping/imprese.md`, `domain-dependency-map.md` o `reconciliation-report.md`: le decisioni qui assunte sono piena conferma di quanto quei documenti già stabiliscono (righe D6-D9, decisione consolidata 2 di `imprese.md`, attribuzione dell'Aggregate delle relazioni d'uso), applicando lo stesso pattern già adottato dal dominio Appartenenze. Con la sola eccezione residua e indipendente relativa all'assenza di un dominio "Organizzazioni istituzionali" (§28), motivata e documentata secondo lo schema previsto dalla metodologia stessa dell'architettura, il dominio Mercati Internazionali soddisfa integralmente l'obiettivo assegnato: descrivere cos'è un Mercato internazionale — e cosa non è — e cos'è la relazione che un soggetto ha con esso, come concetti di business autonomi e riutilizzabili da qualunque dominio della piattaforma, senza mai diventare un catalogo di Paesi, senza mai conoscere il modello interno di chi lo utilizza, e senza perdere alcuno dei ventidue concetti che questo mapping era chiamato a distinguere con chiarezza.
+Questo documento non introduce alcuna modifica né alcuna eccezione architetturale rispetto a `domain-mapping/imprese.md` o `reconciliation-report.md`: le decisioni qui assunte sono piena conferma di quanto quei documenti già stabiliscono (righe D6-D9, decisione consolidata 2 di `imprese.md`), applicando lo stesso pattern già adottato dal dominio Appartenenze. La Dependency Map è allineata su D9 (Consolidata) e DV1/DV6 (chiuse). Il **§35** chiude i contratti DDL-ready del ciclo 1 Persona–Impresa; il Migration Plan è in `docs/architecture/migrations/mercati-internazionali-migration-plan.md`. Restano esplicitamente aperti: catalogo Territori (riferimento opaco), soggetto Professionista, Organizzazioni istituzionali (§28), history avanzata e policy Identità & Accessi.
