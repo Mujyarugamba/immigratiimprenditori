@@ -2,9 +2,9 @@
 
 ## Nota introduttiva di esclusione
 
-Questo documento rappresenta il passaggio tra il modello logico del dominio Appartenenze e la sua futura rappresentazione fisica. Non crea uno schema di database, non scrive SQL, non crea tabelle, non usa PostgreSQL o Supabase come riferimento progettuale, non indica tipi di dato, non parla di colonne, chiavi, indici, trigger, vincoli tecnici, RLS, API o codice, non descrive meccanismi di autenticazione o autorizzazione, non anticipa decisioni implementative.
+Questo documento rappresenta il passaggio tra il modello logico del dominio Appartenenze e la sua rappresentazione fisica prescrittiva. Le sezioni 1–31 restano al livello concettuale di mapping. Il **§32** chiude i contratti DDL-ready necessari al Migration Plan (nomi, colonne, tipi, nullability, vincoli, RLS difensiva, esclusioni), **senza** SQL eseguibile e senza anticipare policy di Identità & Accessi.
 
-Le eventuali menzioni tecnologiche compaiono esclusivamente in questa nota, in §30 "Questioni aperte e aspetti rinviati" e in §31 "Controllo finale", per confermarne l'assenza altrove nel testo.
+Le menzioni tecnologiche ammesse sono: questa nota, §30, §31 e §32.
 
 Il documento applica integralmente la baseline architetturale (`architecture-baseline.md`), il Reference Model (`02-reference-model.md`), le convenzioni architetturali (`03-convenzioni-architetturali.md`), gli attributi di qualità (`04-quality-attributes.md`), la Dependency Map approvata (`domain-dependency-map.md`) e le decisioni già consolidate nei mapping di Persone (`domain-mapping/persone.md`) e Imprese (`domain-mapping/imprese.md`). Non ridefinisce la metodologia generale: la applica concretamente al dominio Appartenenze.
 
@@ -105,6 +105,7 @@ Essere referente di contatto può coincidere con un ruolo relazionale soltanto q
 29. Decisioni consolidate
 30. Questioni aperte e aspetti rinviati
 31. Controllo finale
+32. Contratti DDL-ready (ciclo 1 Persona–Impresa)
 
 Riepilogo finale
 
@@ -345,8 +346,8 @@ Coerentemente con `appartenenze.md` §6 e con il pattern degli assi indipendenti
 | Asse | Significato | Proprietario | Pattern | Transizioni concettuali | Eventi associati | Distinzione dagli altri assi |
 |---|---|---|---|---|---|---|
 | Stato editoriale della dichiarazione | A che punto è il processo con cui l'Appartenenza nasce | Appartenenze | **S02** | Proposta → Dichiarata (transizione unica, non reversibile, §6 di `appartenenze.md`) | AppartenenzaProposta, AppartenenzaDichiarata | Non si ripete dopo Dichiarata; distinto dallo stato della relazione, che descrive il seguito della storia |
-| Stato della relazione | Se il fatto dichiarato è in corso, sospeso o terminato | Appartenenze | **S01** | (in corso, implicito) → Sospesa → (in corso) / Conclusa / Revocata → Archiviata | AppartenenzaSospesa, AppartenenzaConclusa, AppartenenzaRevocata | Indipendente dallo stato di verifica: una relazione può essere in corso e non verificata, o conclusa e verificata |
-| Stato di verifica | Quanto la piattaforma può confermare la veridicità di quanto dichiarato | Appartenenze | **S03** (sempre multidimensionale, si veda §13) | Non verificata → In verifica → Confermata; Contestata può sovrapporsi in qualsiasi momento agli altri due valori | AppartenenzaConfermata, AppartenenzaContestata, AppartenenzaVerificata | Indipendente dallo stato della relazione: una relazione Contestata non è automaticamente Revocata, fino a risoluzione (§6, §15) |
+| Stato della relazione | Se il fatto dichiarato è in corso, sospeso o terminato | Appartenenze | **S01** | In corso (codifica DDL `active`, §32) ↔ Sospesa ↔ Conclusa / Revocata → Archiviata | AppartenenzaSospesa, AppartenenzaConclusa, AppartenenzaRevocata | Indipendente dallo stato di verifica: una relazione può essere in corso e non verificata, o conclusa e verificata |
+| Stato di verifica | Quanto la piattaforma può confermare la veridicità di quanto dichiarato | Appartenenze | **S03** (sempre multidimensionale, si veda §13) | Non verificata → In verifica → Confermata; la Contestazione è overlay indipendente (`is_contested`, §32) e può coesistere con qualunque esito ordinario | AppartenenzaConfermata, AppartenenzaContestata, AppartenenzaVerificata | Indipendente dallo stato della relazione: una relazione contestata non è automaticamente Revocata, fino a risoluzione (§6, §15); encoding fisico in §32 |
 | Stato di visibilità | Chi può conoscere l'esistenza e i dettagli dell'Appartenenza | Appartenenze | **VIS01-VIS06** (si veda dettaglio §16) | Privata → Interna → Redazionale → Pubblica; Storica e Contestata come stati aggiuntivi non lineari | VisibilitàModificata | Distinto dallo stato della relazione e da quello di verifica: una relazione conclusa può restare visibile come Storica (§11 di `appartenenze.md`) |
 | Stato dell'Autorizzazione gestionale | Se, in un dato momento, la facoltà di gestire la scheda è concessa | Appartenenze | **S01** (applicato alla sola Autorizzazione gestionale come Entity dipendente distinta, §4) | Non concessa → Concessa → Revocata, indipendentemente dal Ruolo e dallo stato della relazione principale | AutorizzazioneGestionaleConcessa, AutorizzazioneGestionaleRevocata | Distinto dallo stato della relazione: l'Autorizzazione può essere concessa o revocata mentre la relazione principale resta in corso, senza alcuna variazione del proprio stato (§2, §12 regola 11 di `appartenenze.md`) |
 | Stato storico | Se una data condizione, su qualunque degli assi precedenti, è quella corrente o appartiene al passato | Appartenenze | **S08** | Corrente → Storico, per ciascun asse indipendentemente | (accompagna ogni evento di transizione, non genera un evento proprio) | Non un'alternativa agli altri assi: li accompagna sempre, coerente con la definizione di S08 in `02-reference-model.md` §7 |
@@ -706,7 +707,7 @@ Nessuna dipendenza rappresentativa/editoriale in entrata è identificata (§23, 
 | DA5 | I sei Ruoli societari/organizzativi (Fondatore, Titolare, Socio, Amministratore, Legale rappresentante, Dirigente) e i cinque Ruoli operativi (Dipendente, Consulente, Collaboratore, Referente, Gestore della scheda) restano un unico catalogo **C03**, senza distinzione strutturale tra le due famiglie | §4 | C03 | RC02, RC08 | Coerenza | — | Il documento logico non distingue due catalghi separati (§4 di `appartenenze.md`) | Nessuno | **Locale** |
 | DA6 | Il ciclo di vita di Appartenenza è scomposto in sei assi indipendenti (stato editoriale, stato della relazione, stato di verifica, stato di visibilità, stato dell'Autorizzazione gestionale, stato storico) | §9 | S01, S02, S03, S08, VIS01-VIS06 | RC14, RC15, RC16, RC17 | Separazione delle responsabilità, coerenza | — | Applicazione diretta di `appartenenze.md` §6, con l'aggiunta esplicita degli assi di visibilità e di Autorizzazione gestionale già distinti al §2 e §11 di quel documento | Nessuno | **Riutilizzabile** (il criterio di scomposizione è applicabile ad altri domini con relazioni analoghe) |
 | DA7 | La verifica multidimensionale a sette assi (§13) non produce mai un giudizio unico "Appartenenza verificata" | §10 | V01-V05 | RC18, RC19, RC20, RC21 | Verificabilità, comprensibilità | — | Applicazione diretta di `appartenenze.md` §10, coerente con l'anti-pattern già escluso in `imprese.md` §8 | Nessuno | **Riutilizzabile** |
-| DA8 | La Contestazione è un valore sovrapposto sull'asse di verifica (**S03**), non un asse a sé stante né uno stato composito con lo stato della relazione | §9 | S03 | RC16, RC21 | Coerenza | — | Coerente con `appartenenze.md` §6: "Contestata... è uno stato che può sovrapporsi in qualsiasi momento agli altri due assi" | Nessuno | **Riutilizzabile** |
+| DA8 | La Contestazione è un overlay indipendente sulla verifica ordinaria (**S03**), non un literal sostitutivo di `verification_status` né uno stato composito con la relazione; encoding fisico ciclo 1: `is_contested boolean` (§32) | §9 | S03 | RC16, RC21 | Coerenza | — | Coerente con `appartenenze.md` §6: "Contestata... è uno stato che può sovrapporsi in qualsiasi momento agli altri due assi"; consente coesistenza con `unverified` / `in_review` / `confirmed` | Nessuno | **Riutilizzabile** |
 | DA9 | La visibilità pubblica dell'Appartenenza è sempre subordinata, come condizione cumulativa, alla visibilità pubblica di entrambi i soggetti collegati | §9 | VIS01-VIS06 | RC15 | Coerenza, separazione delle responsabilità | — | Applicazione diretta di `appartenenze.md` §11, già anticipata come principio generale in `imprese.md` §9 | Nessuno | **Fondazionale** |
 | DA10 | Il titolo di rappresentanza (Autorizzazione gestionale, Rappresentanza legale) è sempre posseduto da Appartenenze; Identità & Accessi lo utilizza senza mai crearlo o duplicarlo | §2 principio 2, §14 | R06 | RC12, RC13 | Separazione delle responsabilità | Conferma D9/D17/D23/D28 (da Provvisoria a Consolidata, per la parte di competenza di questo dominio) | Applicazione diretta di `appartenenze.md` §2, §8, §15 decisione 4, confermata da `identita-accessi.md` §5 | Professionisti, Collaborazioni, Eventi, Opportunità (utilizzatori del titolo) | **Fondazionale** |
 | DA11 | Nessuna Collaborazione, partecipazione a Evento o candidatura a Opportunità genera, modifica o presume un'Appartenenza | §2 principio 2, principio di non-automatismo | R07 | RC30 | Separazione delle responsabilità, basso accoppiamento | Conferma V10 e generalizza V4/V9 | Applicazione diretta di `appartenenze.md` §9 (principio) e dei documenti logici di Collaborazioni ed Eventi (§20 di questo documento) | Collaborazioni, Eventi, Opportunità | **Fondazionale** |
@@ -770,7 +771,7 @@ Nessun punteggio numerico è stato utilizzato in questa valutazione.
 | DA5 | Locale | Appartenenze | §4 | C03 | RC02, RC08 | Coerenza | Consolidata | Nessuno |
 | DA6 | Riutilizzabile | Appartenenze | §9 | S01, S02, S03, S08, VIS01-VIS06 | RC14-RC17 | Separazione delle responsabilità, coerenza | Consolidata | Nessuno |
 | DA7 | Riutilizzabile | Appartenenze | §10 | V01-V05 | RC18-RC21 | Verificabilità, comprensibilità | Consolidata | Nessuno |
-| DA8 | Riutilizzabile | Appartenenze | §9 | S03 | RC16, RC21 | Coerenza | Consolidata | Nessuno |
+| DA8 | Riutilizzabile | Appartenenze | §9 | S03 | RC16, RC21 | Coerenza | Consolidata — encoding `is_contested` (§32) | Nessuno |
 | DA9 | Fondazionale | Appartenenze | §9 | VIS01-VIS06 | RC15 | Coerenza, separazione delle responsabilità | Consolidata | Nessuno |
 | DA10 | Fondazionale | Appartenenze | §2 principio 2, §14 | R06 | RC12, RC13 | Separazione delle responsabilità | Consolidata | Conferma D9/D17/D23/D28 per la parte di competenza (Provvisoria → Consolidata) |
 | DA11 | Fondazionale | Appartenenze | §2 principio 2 | R07 | RC30 | Separazione delle responsabilità, basso accoppiamento | Consolidata | Conferma V10, generalizza V4/V9 |
@@ -809,12 +810,12 @@ Eredità diretta di `appartenenze.md` §15, non risolte né forzate da questo do
 
 ### Aspetti rinviati alla rappresentazione fisica concreta
 
-16. **Meccanismo con cui il Periodo incerto (§7 di `appartenenze.md`, §12 di questo documento) viene rappresentato senza obbligare a inventare una data plausibile.** Decisione del futuro schema.
-17. **Tecnica di storicizzazione (T07/D08, §12, §23) per le sette entità del nucleo persistente.** Se realizzata con tabelle storiche separate, versionamento in linea, log di audit o altra tecnica, resta una decisione del futuro schema.
-18. **Rappresentazione tecnica dei sei assi di stato indipendenti (§11).** Se realizzati come colonne distinte, tabelle distinte o altra struttura, resta una decisione del futuro schema.
+16. **Periodo incerto.** **Chiuso per il ciclo 1 in §32:** `started_at` / `ended_at` nullable; nessuna precisione né flag di approssimazione. L’assenza di data certa è il dato legittimo.
+17. **Tecnica di storicizzazione (T07/D08, §12, §23) oltre la conservazione delle righe.** Tabelle storiche separate / audit log restano fuori ciclo 1; lo storico minimo è la riga Appartenenza non distrutta + successione per chiusura.
+18. **Rappresentazione tecnica dei sei assi di stato indipendenti (§11).** **Chiuso per il ciclo 1 in §32:** colonne sull’AR (`editorial_status`, `relation_status`, `verification_status`, `is_contested`, `visibility_status`) + stato autorizzazione sulla tabella 0..1; nessuno stato composito.
 19. **Meccanismo tecnico di propagazione degli eventi di dominio elencati al §22.** Coerentemente con `01-principi-mapping.md` §12, nessuna tecnologia di comunicazione è anticipata.
 20. **Applicazione tecnica dell'accesso (S05) all'Appartenenza da parte di Identità & Accessi, inclusa la derivazione concreta di un permesso dall'Autorizzazione gestionale.** Rinviata al futuro `domain-mapping/identita-accessi.md`.
-21. **Meccanismo di garanzia dell'unicità o della coerenza tra Ruoli sovrapposti quando la natura dichiarata li rende incompatibili (§7 di questo documento, casi limite).** Il vincolo è logico; la sua applicazione fisica resta rinviata.
+21. **Meccanismo di garanzia dell'unicità o della coerenza tra Ruoli sovrapposti quando la natura dichiarata li rende incompatibili (§7 di questo documento, casi limite).** Il vincolo è logico; **nessuna UNIQUE/exclusion** inventata nel ciclo 1 (§32); controllo applicativo/governance.
 
 ### Aspetti rinviati alla governance
 
@@ -850,10 +851,10 @@ Nessuna soluzione tecnica è proposta per alcuno di questi aspetti.
 | 18 | Visibilità separata dalla verifica | Verificato — §16, con la condizione cumulativa esplicita |
 | 19 | Assenza di cicli non analizzati | Verificato — §25, sette sequenze analizzate, incluso il caso "da verificare" esplicitamente segnalato come tale |
 | 20 | Assenza di nuovi domini | Verificato — §6 dichiara esplicitamente "non determinabile" per le combinazioni che richiederebbero un dominio non ancora formalizzato |
-| 21 | Assenza di tecnologia | Verificato — nessuna tecnologia nominata come scelta di progetto; le uniche menzioni sono nella nota introduttiva e al §30 |
-| 22 | Assenza di SQL | Verificato — nessuna istruzione SQL |
-| 23 | Assenza di schema di database | Verificato — nessuna tabella, colonna, indice, chiave o vincolo tecnico |
-| 24 | Assenza di implementazioni | Verificato — ogni riferimento a una futura struttura fisica concreta è esplicitamente rinviato al §30 |
+| 21 | Assenza di tecnologia fuori sede | Verificato — menzioni tecnologiche confinate a nota introduttiva, §30, §31 e contratti DDL-ready §32 |
+| 22 | Assenza di SQL eseguibile | Verificato — nessuna istruzione SQL eseguibile; §32 è contratto prescrittivo non eseguibile |
+| 23 | Contratti DDL-ready ciclo 1 | Verificato — §32 definisce tabelle, colonne, tipi, vincoli, RLS difensiva ed esclusioni per Persona–Impresa |
+| 24 | Assenza di implementazioni runtime | Verificato — nessun file `.sql` creato da questo mapping; Identità & Accessi e FK Opportunità restano fuori |
 | 25 | Riferimenti incrociati corretti | Verificato — ogni citazione a `appartenenze.md`, `persone.md`, `imprese.md`, `professionisti.md`, `collaborazioni.md`, `eventi.md`, `identita-accessi.md`, `reconciliation-report.md`, `domain-mapping/persone.md`, `domain-mapping/imprese.md`, `domain-dependency-map.md` è stata controllata contro il testo integrale letto in apertura di lavoro |
 | 26 | Pattern realmente esistenti | Verificato — ogni codice citato (A01, E02, E03, E04, VO01, R01, R04, R06, R07, R08, S01-S03, S08, V01-V05, VR02-VR03, EV01-EV04, D01-D09, C03, C06, DOC03, T01-T07, VIS01-VIS06) corrisponde a un pattern effettivamente definito in `02-reference-model.md` |
 | 27 | Sezioni complete | Verificato — tutte le 31 sezioni della struttura obbligatoria sono presenti e complete |
@@ -862,10 +863,138 @@ Nessuna soluzione tecnica è proposta per alcuno di questi aspetti.
 
 ---
 
+## 32. Contratti DDL-ready (ciclo 1 Persona–Impresa)
+
+**Scopo.** Chiudere le ambiguità di schema necessarie al Migration Plan Appartenenze. Non è SQL eseguibile. Perimetro: solo Persona–Impresa. Nessuna FK polimorfica. Nessuna Organizzazione.
+
+**Autorità collegata.** `docs/architecture/migrations/appartenenze-migration-plan.md`.
+
+**Pattern RLS/privilegi (tutte le tabelle §32).** `ENABLE ROW LEVEL SECURITY`; nessuna policy; `REVOKE ALL` da `anon` e `authenticated`; nessun `GRANT`; nessun `auth.uid()`.
+
+**Pattern timestamps.** `created_at` / `updated_at` timestamptz NOT NULL DEFAULT now(); trigger `*_set_updated_at` per tabella.
+
+**Elementi esclusi dal ciclo 1 (tutte le tabelle).** FK a `auth.users`; CASCADE da `profiles`/`businesses` verso la relazione; UNIQUE `(person_id, business_id)`; exclusion constraint; history/audit table; badge “membership verified”; seed demo; policy VIS02; FK Opportunità.
+
+### 32.1 `public.business_membership_roles` (M1.1)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Catalogo C03 ruoli |
+| PK | `code` text |
+| Colonne | `code`; `label_it` text NOT NULL; `typical_natures` text NOT NULL (descrittivo); `sort_order` int NOT NULL; `is_active` boolean NOT NULL DEFAULT true; timestamps |
+| CHECK | code/label non blank; `sort_order >= 0` |
+| Seed normativo | 11 code: `founder`, `owner`, `partner`, `administrator`, `legal_representative`, `executive`, `employee`, `consultant`, `collaborator`, `contact_referent`, `sheet_manager` |
+| ON DELETE | n/a |
+
+### 32.2 `public.business_memberships` (M1.2) — Aggregate Root
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Relazione Persona–Impresa + assi + periodo + ruolo |
+| PK | `id` uuid DEFAULT gen_random_uuid() |
+| Colonne (ordine) | `id`; `person_id`; `business_id`; `role_id`; `editorial_status`; `relation_status`; `verification_status`; `is_contested`; `visibility_status`; `started_at`; `ended_at`; `cessation_reason`; `contextual_notes`; `created_at`; `updated_at` |
+| Tipi / nullability | `person_id`/`business_id` uuid NOT NULL; `role_id` text NOT NULL; status text NOT NULL; `is_contested` boolean NOT NULL DEFAULT false; `started_at`/`ended_at` date NULL; note text NULL |
+| Default status | `editorial_status='proposed'`; `relation_status='active'`; `verification_status='unverified'`; `visibility_status='private'` |
+| FK | `person_id` → `profiles(id)` ON DELETE RESTRICT; `business_id` → `businesses(id)` ON DELETE RESTRICT; `role_id` → `business_membership_roles(code)` ON DELETE RESTRICT |
+| Vocabolari CHECK | editorial: `proposed`\|`declared`; relation: `active`\|`suspended`\|`concluded`\|`revoked`\|`archived`; verification: `unverified`\|`in_review`\|`confirmed` (**senza** `contested`); visibility: `private`\|`internal`\|`editorial`\|`public`\|`historical` |
+| CHECK temporali | `ended_at >= started_at` quando entrambe NOT NULL; `active`/`suspended` ⇒ `ended_at IS NULL`; `concluded`/`revoked`/`archived` ⇒ `ended_at IS NOT NULL` |
+| UNIQUE | nessuna su `(person_id, business_id)` |
+| Indici | `(person_id)`, `(business_id)`, `(role_id)`, `(relation_status)` |
+| Contestazione | `is_contested` overlay (DA8); indipendente da `verification_status` |
+| Relazione in corso | `relation_status = 'active'` (codifica dello “in corso” Logical) |
+| Periodo incerto | solo date nullable |
+
+### 32.3 `public.business_membership_qualifications` (M2.1)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Precisazioni E04 0..N |
+| Colonne | `id`; `membership_id` NOT NULL; `label` text NOT NULL; `sort_order` int NOT NULL DEFAULT 0; timestamps |
+| FK | `membership_id` → `business_memberships(id)` ON DELETE CASCADE |
+| UNIQUE | `(membership_id, label)` |
+| CHECK | label non blank; `sort_order >= 0` |
+
+### 32.4 `public.business_membership_sources` (M3.1)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Fonti V03 1..N (minimo applicativo; DB ammette 0 in proposta) |
+| Colonne | `id`; `membership_id` NOT NULL; `source_kind` text NOT NULL; `reliability_note` text NULL; `reference_label` text NULL; `declared_at` timestamptz NULL; timestamps |
+| FK | CASCADE da AR |
+| CHECK | `source_kind IN ('person_self_declaration','business_declaration','public_register','entitled_third_party','editorial_moderation')` |
+
+### 32.5 `public.business_membership_evidences` (M3.2)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Evidenze 0..N per aspetto |
+| Colonne | `id`; `membership_id` NOT NULL; `source_id` uuid NULL; `supported_aspect` text NOT NULL; `summary` text NOT NULL; `observed_at` timestamptz NULL; timestamps |
+| FK | `membership_id` CASCADE; `source_id` → sources ON DELETE SET NULL |
+| CHECK | `supported_aspect` ∈ sette aspetti §32.8; summary non blank |
+
+### 32.6 `public.business_membership_management_authorizations` (M4.1)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Autorizzazione gestionale di business 0..1 (non tecnica) |
+| Colonne | `id`; `membership_id` NOT NULL; `authorization_status` text NOT NULL DEFAULT `'granted'`; `granted_at` timestamptz NULL; `revoked_at` timestamptz NULL; `source_note` text NULL; timestamps |
+| FK | CASCADE da AR |
+| UNIQUE | `(membership_id)` |
+| CHECK | status `granted`\|`revoked`; revoca richiede `revoked_at`; ordine temporale grant/revoke |
+
+### 32.7 `public.business_membership_responsibility_declarations` (M4.2)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Cinque responsabilità indipendenti dal ruolo |
+| Colonne | `id`; `membership_id` NOT NULL; `responsibility_code` text NOT NULL; `is_declared` boolean NOT NULL DEFAULT true; `note` text NULL; timestamps |
+| FK | CASCADE da AR |
+| UNIQUE | `(membership_id, responsibility_code)` |
+| CHECK | code ∈ `ownership`, `legal_representation`, `operational_representation`, `sheet_management`, `contact_referent` |
+
+### 32.8 `public.business_membership_verifications` (M5.1)
+
+| Campo | Valore |
+|---|---|
+| Responsabilità | Current-state V04 per aspetto (sette assi) |
+| Colonne | `id`; `membership_id` NOT NULL; `aspect` text NOT NULL; `status` text NOT NULL DEFAULT `'unverified'`; `verified_at` timestamptz NULL; `expires_at` timestamptz NULL; `source_note` text NULL; timestamps |
+| FK | CASCADE da AR |
+| UNIQUE | `(membership_id, aspect)` |
+| CHECK aspect | `identity`, `business_existence`, `relation_effectiveness`, `role`, `period`, `representation`, `management_authorization` |
+| CHECK status | `unverified`, `in_review`, `confirmed`, `rejected` |
+| Nota | Nessun trigger obbligatorio di sync con `business_memberships.verification_status` |
+
+### 32.9 Funzioni, indici, commenti, privilegi
+
+| Elemento | Prescrizione |
+|---|---|
+| Funzioni | Solo `set_updated_at` per tabella; nessun gate applicativo in DB |
+| Indici | Come tabelle sopra; nessun indice “full text” prescritto |
+| Commenti SQL | Obbligatori su tabelle e colonne di significato (assi, overlay contestazione, RESTRICT, non-RLS dell’autorizzazione) — parte delle unità M1–M5, non di una M7 separata |
+| Privilegi | REVOKE ALL; nessun GRANT |
+| Dipendenze esterne | Solo `profiles`, `businesses` |
+| Integrazione Opportunità | Fuori ciclo; `membership_id` resta opaco |
+
+### 32.10 Mapping Logical → fisico (decisioni chiuse)
+
+| Punto | Decisione fisica |
+|---|---|
+| Nome radice | `business_memberships` |
+| Contestazione | `is_contested` |
+| In corso | `relation_status = active` |
+| Date incerte | nullable |
+| Verifiche multi-asse | tabella §32.8 |
+| Fonti / evidenze | tabelle distinte §32.4–32.5 |
+| Ruoli / qualifiche | entrambe |
+| Responsabilità | dichiarazioni §32.7 |
+| Autorizzazione gestionale | tabella 0..1 §32.6 |
+
+---
+
 # Riepilogo finale
 
-1. **File creato**: `docs/architecture/physical/domain-mapping/appartenenze.md`
-2. **Numero di sezioni**: 31 sezioni della struttura obbligatoria, precedute da nota introduttiva, documenti letti, regola fondamentale, distinzioni obbligatorie e indice, seguite dal Riepilogo finale
+1. **File**: `docs/architecture/physical/domain-mapping/appartenenze.md`
+2. **Numero di sezioni**: 32 (31 di mapping + §32 contratti DDL-ready ciclo 1), precedute da nota introduttiva, documenti letti, regola fondamentale, distinzioni obbligatorie e indice, seguite dal Riepilogo finale
 3. **Aggregate e concetti persistenti**: 7 (Appartenenza — A01; Ruolo — E02+C03; Qualifica — E04; Periodo — VO01+T03/T04/T05; Fonte — V03; Evidenza di verifica — E02+V02; Autorizzazione gestionale — E02+R06), §4
 4. **Concetti incorporati**: 7 (descrizione del ruolo, note contestuali, intervallo temporale, motivazione della cessazione, livello di responsabilità, provenienza della dichiarazione, preferenze di visibilità), §5
 5. **Combinazioni di soggetti ammesse**: 1 pienamente mappata (Persona-Impresa) più 2 non determinabili in attesa di un futuro dominio "Organizzazioni istituzionali" (Persona-Organizzazione, Impresa-Organizzazione); 2 escluse esplicitamente (Persona-Persona, Impresa-Impresa), §6
@@ -890,6 +1019,6 @@ Nessuna soluzione tecnica è proposta per alcuno di questi aspetti.
 24. **Pattern riutilizzabili confermati**: 11, §27
 25. **Qualità raggiunta**: 15 attributi verificati con esito positivo (1 con riserva esplicitamente motivata: verificabilità, per la relazione non confermata con Contenuti Editoriali), nessuno con esito negativo, nessun punteggio numerico utilizzato, §28
 26. **Questioni aperte**: 11 (8 logiche, 3 metodologiche), §30
-27. **Aspetti rinviati**: 13 (4 ai domini futuri, 6 alla rappresentazione fisica concreta, 3 alla governance), §30
+27. **Aspetti rinviati**: aggiornati — periodo incerto e assi di stato chiusi in §32; storicizzazione avanzata, eventi tecnici, S05 Identità, incompatibilità ruoli restano aperti dove dichiarato
 28. **Eventuali impatti sulla Dependency Map**: D3 ratificata come già Consolidata dal punto di vista del dominio proprietario; D9/D17/D23/D28 confermate per la parte di competenza di Appartenenze, restando Provvisorie fino al completamento dei rispettivi mapping dipendenti (Mercati Internazionali, Opportunità, Collaborazioni, Eventi); V2, V4, V10 confermate come vietate, §24, §26, §29
-29. **Conferma dell'assenza di contenuti tecnici e implementativi**: confermata dal controllo finale (§31, righe 21-24); nessuna istruzione SQL, schema di database, riferimento a PostgreSQL/Supabase o dettaglio implementativo è presente fuori dalla nota introduttiva e dal §30
+29. **Contratti DDL-ready**: §32 chiude naming, colonne, vincoli, RLS difensiva ed esclusioni per il ciclo 1; nessuna SQL eseguibile; Migration Plan in `docs/architecture/migrations/appartenenze-migration-plan.md`
