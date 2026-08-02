@@ -159,6 +159,8 @@ La classificazione è volutamente ampia e non si basa esclusivamente sugli Ordin
 - **Qualifica** — un titolo, un'iscrizione o un'abilitazione formale (§6), distinta da una semplice Competenza dichiarata per il suo grado di formalità.
 - **Servizio offerto** — cosa il Professionista dichiara di offrire concretamente (§7), distinto dalla Categoria che lo classifica.
 
+**Confine di realizzazione del ciclo 1 (senza anticipare l’implementazione).** Nel primo ciclo fisico, le dichiarazioni di ambito e di offerta (Categoria dichiarata sul Profilo, Competenza professionale, Servizio professionale) sono fatti owned del Profilo e restano distinte dalle Qualifiche formali (§6) e dalla copertura territoriale/linguistica/di mercato (§8). La Specializzazione resta un concetto descrittivo: nel ciclo 1 non è un elenco governato autonomo; è un affinamento testuale opzionale della dichiarazione di Categoria. La Competenza professionale riusa la tassonomia condivisa delle competenze già usata dal dominio Persone, senza creare un secondo catalogo locale e senza coincidere con la CompetenzaDichiarata generica della Persona. Il Servizio professionale dichiarato non è OffertaDiServizio né ServizioImpresa; non implica contratti, pagamenti o prenotazioni. Eventuali riferimenti a Opportunità o Collaborazioni restano navigazione/utilizzo da quei domini verso Professionisti, non ownership inversa di questo dominio.
+
 ---
 
 ## 6. Qualifiche, titoli, iscrizioni e abilitazioni

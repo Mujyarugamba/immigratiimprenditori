@@ -1012,8 +1012,10 @@ Identificatori esterni (`external_identifier`) sono attributi, non PK.
 | `professional_profiles` | `context_business_id` | `businesses(id)` | NO | NO ACTION | **SET NULL** | Contesto facoltativo; soft-loss del contesto se Impresa rimossa; **non** implica Appartenenza |
 | `professional_profile_categories` | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned |
 | `professional_profile_categories` | `category_code` | `professional_categories(code)` | SÌ | CASCADE | **RESTRICT** | Catalogo |
-| Credenziali / associazioni / servizi / territori / lingue / mercati / settori / FEV | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned dall'AR |
-| `professional_competencies` | `competency_id` | `competencies(id)` | SÌ | NO ACTION | **RESTRICT** | Catalogo condiviso |
+| Credenziali / associazioni / territori / lingue / mercati / settori / FEV | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned dall'AR |
+| `professional_competencies` | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned dall'AR |
+| `professional_competencies` | `competency_id` | `competencies(id)` | SÌ | NO ACTION | **RESTRICT** | Catalogo condiviso Persone/Tassonomia (`bigint`) |
+| `professional_services` | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned dall'AR |
 | `professional_services` | `service_nature_code` | `professional_service_natures(code)` | SÌ | CASCADE | **RESTRICT** | Catalogo |
 | `professional_operational_languages` | `language_id` | `languages(id)` | SÌ | NO ACTION | **RESTRICT** | Catalogo condiviso |
 | `professional_served_markets` | `market_id` | `international_markets(id)` | SÌ | NO ACTION | **RESTRICT** | Non cancellare Mercato se ancora dichiarato servito |
@@ -1158,7 +1160,9 @@ Distinzioni obbligatorie: `professional_status` (esercizio) ≠ `availability_st
 
 **Escluso.** Prezzo di vendita vincolante, listino commerciale, checkout, pagamento, preventivo strutturato come impegno.
 
-Se `fee_indication_kind='none'` ⇒ `fee_amount_min/max/currency` NULL. Se `on_request`/`free` ⇒ importi NULL. Se `hourly_range`/`fixed_range` ⇒ almeno un estremo NOT NULL.
+**Profilo (AR).** Se `fee_indication_kind='none'` ⇒ `fee_amount_min/max/currency` NULL. Se `on_request`/`free` ⇒ importi NULL. Se `hourly_range`/`fixed_range` ⇒ almeno un estremo NOT NULL.
+
+**Servizio dichiarato (`professional_services`, ciclo 1).** Solo `fee_indication_kind` + `fee_note` (§29.3.10). **Nessuna** colonna `fee_amount_*` / `fee_currency` / `fee_visibility` sul servizio: la matrice importi resta sull’AR. CHECK sul servizio = vocabolario `fee_indication_kind` soltanto.
 
 ---
 
@@ -1247,12 +1251,12 @@ Espressi in forma traducibile in SQL (nomi indicativi):
 6. Profilo — `availability_status='future'` ⇒ `availability_until IS NOT NULL`.
 7. Profilo — `administrative_origin IS NULL OR professional_status IN ('suspended','ceased','revoked','archived')`.
 8. Credenziali — vocabolari status/kind; date §29.20; `denomination` non blank; se `origin_kind='foreign'` allora `equivalence_status IS NOT NULL`; se `national` allora `equivalence_status IS NULL`.
-9. Servizi — vocabolari audience/delivery/status; `title` non blank.
-10. Dichiarazioni leggere — `declaration_status IN ('declared','removed')`.
+9. Servizi — `title` non blank (`length(btrim(title)) > 0`); `audience_kind` ∈ `persons`\|`businesses`\|`both`; `delivery_mode` ∈ `in_person`\|`remote`\|`hybrid`\|`unspecified`; `service_status` ∈ `declared`\|`active`\|`suspended`\|`unavailable`; `visibility_status` ∈ vocabolario VIS §29.19; `availability_status IS NULL OR availability_status` ∈ vocabolario disponibilità profilo §29.16; `fee_indication_kind` ∈ vocabolario §29.17 (senza CHECK importi — colonne assenti); `sort_order >= 0`.
+10. Dichiarazioni leggere — `declaration_status IN ('declared','removed')`; per categorie: `sort_order >= 0`; `specialization_label` nullable senza CHECK anti-blank (blank ammesso solo se NULL; stringa vuota/spazi: **CHECK** `specialization_label IS NULL OR length(btrim(specialization_label)) > 0` per evitare label fantasma).
 11. Lingue — proficiency/usage vocabolari.
 12. Territori — `country_ref` non blank; coverage/presence vocabolari.
 13. Mercati — `relation_kind IN ('known','served','supported')`.
-14. Competenze — level/years.
+14. Competenze — `level_code IS NULL OR level_code` ∈ `basic`\|`intermediate`\|`advanced`\|`expert`; `years_experience IS NULL OR years_experience >= 0`; `declaration_status` ∈ `declared`\|`removed`; `verification_status` ∈ `unverified`\|`verified`\|`contested` (**senza** `in_review`); `sort_order >= 0`.
 15. FEV — aspect ∈ elenco §29.21; status ∈ elenco; date expire.
 16. **Nessun CHECK XOR soggetto Persona/Impresa** (non applicabile).
 17. **Nessun CHECK** che imponga `publication_status='published' ⇔ visibility_status='public'` (assi distinti).
@@ -1401,3 +1405,27 @@ Precondizioni esterne già soddisfatte: `profiles`, `languages`, `competencies`,
 | FEV | 3 tabelle profilo |
 | Verifica d’insieme | Non persistita |
 | RLS | Enable senza policy |
+
+---
+
+### 29.32 Blocco M4 — contratto operativo di implementazione
+
+**Responsabilità del blocco.** Dichiarazioni di **ambito** (categorie + specializzazione testuale) e **offerta descrittiva** (competenze professionali, servizi dichiarati), owned dall’AR, dopo le credenziali M3 e **prima** della copertura operativa M5.
+
+| Unità | Tabella | Dipendenze | Seed | Policy |
+|---|---|---|---|---|
+| M4.1 | `professional_profile_categories` | AR CASCADE; `professional_categories` RESTRICT | **Assente** | **Assenti** |
+| M4.2 | `professional_competencies` | AR CASCADE; `competencies(id)` bigint RESTRICT | **Assente** | **Assenti** |
+| M4.3 | `professional_services` | AR CASCADE; `professional_service_natures` RESTRICT | **Assente** | **Assenti** |
+
+**Pattern obbligatori (ogni unità).** PK uuid + `gen_random_uuid()`; `created_at`/`updated_at`; funzione `set_*_updated_at` INVOKER + `search_path=''` + trigger `BEFORE UPDATE`; RLS ENABLE senza FORCE; REVOKE ALL da `PUBLIC`/`anon`/`authenticated`; nessun GRANT; COMMENT ON tabella + colonne ambigue + funzione; indici owner (+ target FK dove §29.23); nessun JSONB; nessun dato derivato; nessuna anticipazione M5/M6.
+
+**M4.1 — UNIQUE / indici.** Partial UNIQUE declared `(professional_profile_id, category_code)`; partial UNIQUE primary `(professional_profile_id)` WHERE `is_primary AND declared`; btree `(category_code)`; btree owner.
+
+**M4.2 — UNIQUE / indici.** Partial UNIQUE declared `(professional_profile_id, competency_id)`; btree owner; btree `(competency_id)`. Distinto da `profile_competencies` (Persone).
+
+**M4.3 — UNIQUE / indici.** Nessun UNIQUE su `title`; btree owner; btree `(service_status)` (parziale `active` ammesso). Esclusi marketplace/prezzo/FK Opportunità–Collaborazioni.
+
+**Esclusi dal blocco M4.** Territori/lingue/mercati/settori (M5); FEV (M6); catalogo Specializzazioni; seconda copia di `competencies`; `membership_id`; OffertaDiServizio; policy/GRANT.
+
+**Verifica post-apply minima.** Presence 3 tabelle; colonne §29.3.6/9/10; PK/FK/UNIQUE/CHECK; trigger; RLS; zero policy; privilegi revocati; assenza M5.

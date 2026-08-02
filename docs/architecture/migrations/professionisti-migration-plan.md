@@ -54,7 +54,7 @@ Determinare in modo definitivo le unità **M1–M8** del dominio Professionisti 
 * assegnazione esatta di tabelle, vincoli, seed e oggetti tecnici;
 * sequenza di review → dry-run → apply → test → commit → validazione finale.
 
-Al termine di questo documento, il dominio è **strutturalmente determinabile per SQL**. L’autorizzazione a creare M1.1 richiede ancora la micro-review indipendente del Plan (§28).
+Al termine di questo documento, il dominio è **strutturalmente determinabile per SQL**. M1–M3 sono chiuse e versionate; il blocco M4 ha contratto completo per creazione accelerata delle tre migration (§15).
 
 ---
 
@@ -86,7 +86,7 @@ Al termine di questo documento, il dominio è **strutturalmente determinabile pe
 7. **FEV profilo a 3 tabelle;** verifica d’insieme = proiezione non persistita; nessun trigger di aggregazione.  
 8. **Deny-by-default:** RLS ENABLE, no FORCE, no policy, REVOKE ALL, no GRANT (§29.25–§29.26).  
 9. **Seed normativo ≠ seed demo:** solo C03 nei cataloghi M1; M8.1 = SKIP.  
-10. **Una responsabilità primaria per migration;** review unità prima della successiva (salvo revisione congiunta esplicitamente dichiarata nel blocco).  
+10. **Una responsabilità primaria per migration;** per M1–M3 vale la micro-review per unità; per **M4** la progettazione è revisionata a blocco (creazione accelerata delle tre SQL), con review SQL/apply successive.
 11. **Il Plan non modifica §29.**  
 
 ---
@@ -96,12 +96,13 @@ Al termine di questo documento, il dominio è **strutturalmente determinabile pe
 | Elemento | Stato |
 |---|---|
 | Dominio concettuale (Thesis/Logical/Physical §1–§28) | Chiuso |
-| Contratto DDL-ready §29 | Chiuso |
-| Migration SQL Professionisti | **Zero** (verificato: nessun file `*professional*` in `supabase/migrations`) |
-| Timestamp migration più alto esistente | `20260802220000` (`create_international_commercial_relation_verifications`) |
-| Dipendenze fisiche ciclo 1 | Disponibili (§7) |
+| Contratto DDL-ready §29 | Chiuso (+ §29.32 blocco M4 operativo) |
+| Migration SQL Professionisti M1–M3 | **Presenti e applicate** (locale/remoto fino a `20260804140000`; commit `5761217`) |
+| Migration SQL Professionisti M4+ | **Assenti** |
+| Timestamp Professionisti più alto | `20260804140000` (M3.5) |
+| Dipendenze fisiche ciclo 1 per M4 | Disponibili (M1.1, M1.4, M2.1, `competencies`) |
 | Dipendenze future | Rinviate (§6) |
-| SQL autorizzato | **No** — finché questo Plan non supera micro-review e non viene autorizzata M1.1 |
+| SQL M4 | **Autorizzabile** dopo determinazione blocco (§15) — non ancora creato |
 | Working tree alla stesura | `main` allineato a `origin/main`; modifica documentale prevista su `domain-mapping/professionisti.md` (§29); HEAD di riferimento iniziale `436690a` |
 
 ---
@@ -423,40 +424,161 @@ Assegnato a ciascuna unità M1.*:
 
 ## 15. M4 — Ambito dichiarato e servizi
 
+**Titolo blocco.** Ambito dichiarato e servizi.
+**Responsabilità.** Dichiarazioni owned di categoria/specializzazione testuale, competenze professionali e servizi descrittivi — dopo M3 (credenziali) e prima di M5 (copertura).
+**Prerequisiti blocco.** M2.1 applicata; M1.1 e M1.4 applicate; `public.competencies` esistente (Persone).
+**Completamento.** 3 tabelle; UNIQUE/CHECK/indici/trigger/RLS/REVOKE/COMMENT; seed **assente**; policy **assenti**.
+**Stop point.** **Sì** dopo M4.3 (review di blocco prima di M5.1).
+**Timestamp proposti** (dopo `20260804140000`; univoci; da verificare con `migration list` alla creazione SQL):
+
+| Unità | Timestamp proposto | File proposto |
+|---|---|---|
+| M4.1 | `20260804150000` | `20260804150000_create_professional_profile_categories.sql` |
+| M4.2 | `20260804160000` | `20260804160000_create_professional_competencies.sql` |
+| M4.3 | `20260804170000` | `20260804170000_create_professional_services.sql` |
+
+**Regole comuni M4 (ogni unità).** Stile M3: header normativo; una tabella; PK uuid `gen_random_uuid()`; timestamps; `set_*_updated_at` INVOKER + `search_path=''` + trigger `BEFORE UPDATE`; RLS ENABLE; no FORCE; no policy; REVOKE ALL da `PUBLIC`/`anon`/`authenticated`; no GRANT; COMMENT ON tabella/colonne/funzione; seed assente; no JSONB; no dati test; no anticipazione M5/M6.
+
 ### M4.1 — Dichiarazioni categoria
 
 | Campo | Valore |
 |---|---|
 | Codice / slug | M4.1 / `create_professional_profile_categories` |
-| Tabella | `professional_profile_categories` |
-| FK | profile CASCADE; `category_code` → categories RESTRICT |
-| UNIQUE parziali | declared (profile, category_code); primaria declared |
-| Note | `specialization_label` testo; **nessun** catalogo specializzazioni |
-| Esclusi | tabella specializations |
+| Responsabilità | Dichiarazione di Categoria sul Profilo + specializzazione testuale opzionale |
+| Tabella | `public.professional_profile_categories` (§29.3.6) |
+| Classificazione | link/E02 owned |
+| Dipendenze | M2.1; M1.1 |
+| Timestamp | `20260804150000` |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `category_code` | text | NO | — |
+| 4 | `specialization_label` | text | SÌ | NULL |
+| 5 | `is_primary` | boolean | NO | false |
+| 6 | `sort_order` | integer | NO | 0 |
+| 7 | `declaration_status` | text | NO | `'declared'` |
+| 8 | `created_at` | timestamptz | NO | `now()` |
+| 9 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK `professional_profile_id` → `professional_profiles(id)` ON UPDATE NO ACTION ON DELETE CASCADE. FK `category_code` → `professional_categories(code)` ON UPDATE CASCADE ON DELETE RESTRICT.
+
+**UNIQUE.** (1) UNIQUE INDEX `prof_profile_categories_declared_uidx` ON `(professional_profile_id, category_code)` WHERE `declaration_status='declared'`. (2) UNIQUE INDEX `prof_profile_categories_primary_uidx` ON `(professional_profile_id)` WHERE `is_primary=true AND declaration_status='declared'`.
+
+**CHECK.** `declaration_status IN ('declared','removed')`; `sort_order >= 0`; `specialization_label IS NULL OR length(btrim(specialization_label)) > 0`.
+
+**Indici applicativi.** btree `(professional_profile_id)`; btree `(category_code)`; oltre le UNIQUE parziali.
+
+**Trigger.** `set_professional_profile_categories_updated_at` + `professional_profile_categories_set_updated_at`.
+
+**RLS / privilegi / policy.** ENABLE; no FORCE; **policy assenti**; REVOKE ALL da PUBLIC/anon/authenticated.
+
+**Seed.** **Assente.**
+
+**Esclusi.** Tabella/catalogo `professional_specializations`; seed specializzazioni; colonne di copertura M5; FEV; policy/GRANT.
+
+**Validazione locale.** Colonne 9; 2 UNIQUE parziali; 2 FK; CHECK; trigger; RLS; zero policy.
+**Runtime.** Insert declared valido; doppia declared stessa categoria rifiutata; due primary declared rifiutate; `removed` consente ri-dichiarazione; CASCADE delete profilo; anon/authenticated negati.
+**Post-apply.** Cataloghi: presence; UNIQUE; FK target categories; assenza tabella specializations.
 
 ### M4.2 — Competenze professionali
 
 | Campo | Valore |
 |---|---|
 | Codice / slug | M4.2 / `create_professional_competencies` |
-| Tabella | `professional_competencies` |
-| FK | profile CASCADE; `competency_id` → `competencies(id)` RESTRICT |
-| UNIQUE parziale | declared (profile, competency_id) |
-| Distinzione | ≠ `profile_competencies` (Persone); stesso catalogo condiviso |
-| Esclusi | secondo catalogo competenze locale |
+| Responsabilità | Competenza specialistica dichiarata sul Profilo (≠ `profile_competencies`) |
+| Tabella | `public.professional_competencies` (§29.3.9) |
+| Classificazione | E02 owned |
+| Dipendenze | M2.1; `public.competencies` (`id` bigint) |
+| Timestamp | `20260804160000` |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `competency_id` | bigint | NO | — |
+| 4 | `level_code` | text | SÌ | NULL |
+| 5 | `years_experience` | numeric(5,1) | SÌ | NULL |
+| 6 | `declaration_status` | text | NO | `'declared'` |
+| 7 | `verification_status` | text | NO | `'unverified'` |
+| 8 | `sort_order` | integer | NO | 0 |
+| 9 | `notes` | text | SÌ | NULL |
+| 10 | `created_at` | timestamptz | NO | `now()` |
+| 11 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner → profiles CASCADE. FK `competency_id` → `competencies(id)` ON UPDATE NO ACTION ON DELETE RESTRICT.
+
+**UNIQUE.** UNIQUE INDEX `prof_competencies_declared_uidx` ON `(professional_profile_id, competency_id)` WHERE `declaration_status='declared'`.
+
+**CHECK.** `declaration_status IN ('declared','removed')`; `verification_status IN ('unverified','verified','contested')` (**no** `in_review`); `level_code IS NULL OR level_code IN ('basic','intermediate','advanced','expert')`; `years_experience IS NULL OR years_experience >= 0`; `sort_order >= 0`.
+
+**Indici.** btree owner; btree `(competency_id)`; UNIQUE parziale.
+
+**Trigger.** `set_professional_competencies_updated_at` + `professional_competencies_set_updated_at`.
+
+**RLS / privilegi / policy.** Come M4.1. **Non** copiare GRANT/policy legacy di `competencies`.
+
+**Seed.** **Assente.**
+
+**Esclusi.** Secondo catalogo competenze locale; coincidenza con `profile_competencies`; aspetto FEV strutturale (rinvio M6 / colonna `verification_status` riga soltanto).
+
+**Validazione / runtime / post-apply.** Colonne 11; UNIQUE declared; FK bigint; REJECT doppia declared; REJECT `years_experience < 0`; REJECT level invalido; CASCADE; privilegi negati; assenza policy.
 
 ### M4.3 — Servizi professionali dichiarati
 
 | Campo | Valore |
 |---|---|
 | Codice / slug | M4.3 / `create_professional_services` |
-| Tabella | `professional_services` |
-| FK | profile CASCADE; `service_nature_code` → service_natures RESTRICT |
-| Colonne assegnate | title, description, nature, audience_kind, delivery_mode, is_standardized, service_status, visibility_status, availability_status override, fee_indication_kind, fee_note, sort_order, timestamps — §29.3.10 |
-| CHECK | vocabolari servizio + title non blank |
-| Indici | `(professional_profile_id)`; `(service_status)` (anche parziale active se utile) |
-| **Esclusi obbligatori** | checkout; pagamenti; prenotazioni; contratti; SLA; prezzo vincolante; disponibilità transazionale; OffertaDiServizio; FK Opportunità/Collaborazioni |
+| Responsabilità | Dichiarazione descrittiva di servizio offerto (≠ OffertaDiServizio, ≠ ServizioImpresa) |
+| Tabella | `public.professional_services` (§29.3.10) |
+| Classificazione | E02 owned |
+| Dipendenze | M2.1; M1.4 |
+| Timestamp | `20260804170000` |
 | Stop point blocco | **Sì** dopo M4.3 |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `title` | text | NO | — |
+| 4 | `description` | text | SÌ | NULL |
+| 5 | `service_nature_code` | text | NO | — |
+| 6 | `audience_kind` | text | NO | `'both'` |
+| 7 | `delivery_mode` | text | NO | `'unspecified'` |
+| 8 | `is_standardized` | boolean | NO | false |
+| 9 | `service_status` | text | NO | `'declared'` |
+| 10 | `visibility_status` | text | NO | `'private'` |
+| 11 | `availability_status` | text | SÌ | NULL |
+| 12 | `fee_indication_kind` | text | NO | `'none'` |
+| 13 | `fee_note` | text | SÌ | NULL |
+| 14 | `sort_order` | integer | NO | 0 |
+| 15 | `created_at` | timestamptz | NO | `now()` |
+| 16 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner CASCADE. FK `service_nature_code` → `professional_service_natures(code)` ON UPDATE CASCADE ON DELETE RESTRICT.
+
+**UNIQUE.** Nessuno (titoli omonimi ammessi).
+
+**CHECK.** `length(btrim(title)) > 0`; `audience_kind IN ('persons','businesses','both')`; `delivery_mode IN ('in_person','remote','hybrid','unspecified')`; `service_status IN ('declared','active','suspended','unavailable')`; `visibility_status` ∈ VIS §29.19; `availability_status IS NULL OR` ∈ vocabolario disponibilità profilo; `fee_indication_kind IN ('none','hourly_range','fixed_range','on_request','free','discounted')`; `sort_order >= 0`. **Nessun** CHECK importi (colonne assenti).
+
+**Indici.** btree `(professional_profile_id)`; btree `(service_status)` — parziale `WHERE service_status='active'` **ammesso**.
+
+**Trigger.** `set_professional_services_updated_at` + `professional_services_set_updated_at`.
+
+**RLS / privilegi / policy.** Come M4.1.
+
+**Seed.** **Assente.**
+
+**Esclusi obbligatori.** `price`/`fee_amount_*`/`fee_currency`/`fee_visibility`; checkout; pagamenti; prenotazioni; contratti; SLA; disponibilità transazionale; OffertaDiServizio; FK Opportunità/Collaborazioni; link territorio/lingua per-servizio (M5 / rinvio).
+
+**Validazione / runtime / post-apply.** Colonne 16; title blank rifiutato; status/nature invalidi rifiutati; duplicato title ammesso; CASCADE; privilegi negati; assenza oggetti marketplace.
 
 ---
 
@@ -612,7 +734,7 @@ I soli seed autorizzati sono i seed **normativi C03** già inclusi in M1.1–M1.
 | M6.2 | `create_professional_profile_evidences` | evidences |
 | M6.3 | `create_professional_profile_verifications` | verifications |
 
-Timestamp reali: **non assegnati** qui; vedi §21.
+Timestamp reali M1–M3: già in repository. Timestamp M4: proposti in §15; M5+ ancora da assegnare alla creazione (vedi §21).
 
 ---
 
@@ -620,13 +742,14 @@ Timestamp reali: **non assegnati** qui; vedi §21.
 
 | Regola | Prescrizione |
 |---|---|
-| Riferimento | Timestamp più alto esistente: `20260802220000` |
+| Riferimento | Timestamp più alto esistente nel dominio Professionisti: **`20260804140000`** (M3.5 applicata e versionata) |
 | Assegnazione | Un timestamp univoco per unità SQL, strettamente crescente |
 | Ordine | Cronologia file = ordine topologico §11 |
 | Collisione | Vietata; verificare con `supabase migration list` prima di ogni creazione |
 | Riuso / retrodatazione | Vietati |
 | Gap | Lasciare margine ordinato (es. incrementi a step coerenti con lo stile repo) senza sovrapporsi a rami paralleli |
-| Momento | Timestamp scelti **solo** alla creazione concreta di ciascuna migration, dopo approvazione unità precedente |
+| Momento | Timestamp scelti alla creazione concreta della migration; per M4 i valori proposti in §15 (`…150000` / `…160000` / `…170000`) sono **autoritativi per la creazione accelerata del blocco**, salvo collisione rilevata in `migration list` |
+| M1–M3 | Timestamp già assegnati e file presenti (`20260803090000`…`20260804140000`) — non riassegnare |
 
 ---
 
@@ -651,6 +774,8 @@ Timestamp reali: **non assegnati** qui; vedi §21.
 |---|---|
 | `professional_profiles` | `prof_profiles` |
 | `professional_profile_categories` | `prof_profile_categories` |
+| `professional_competencies` | `prof_competencies` |
+| `professional_services` | `prof_services` |
 | `professional_association_memberships` | `prof_assoc_memberships` |
 | `professional_operational_languages` | `prof_op_languages` |
 | `professional_served_territories` | `prof_served_territories` |
@@ -788,14 +913,13 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 
 ## 28. Stop point del Plan
 
-Dopo la creazione di **questo** documento:
+**Stato corrente.** M1–M3 chiuse. Blocco M4 determinato documentalmente (§15); **nessun file SQL M4 ancora creato**.
 
-1. **M1.1 non è automaticamente autorizzata.**  
-2. È obbligatoria una **micro-review indipendente del Migration Plan** (copertura, topologia, avversariale).  
-3. Solo con esito positivo si autorizza la creazione del primo file SQL M1.1.  
-4. Ogni incongruenza Plan↔§29 va risolta **documentalmente** prima dello SQL (aggiornando Plan o, se bloccante e motivato, §29 — quest’ultimo solo per contraddizioni reali).
+1. La creazione accelerata di **M4.1–M4.3** è autorizzabile solo con contratto §15/§29 allineato (questa revisione).
+2. Non aprire **M5** prima dello stop point post-M4.3 (SQL + apply + review blocco).
+3. Ogni incongruenza Plan↔§29 va risolta **documentalmente** prima dello SQL.
 
-**Stop point operativi successivi:** dopo M1.4; M2.1; M3.5; M4.3; M5.4; M6.3; M8.2.
+**Stop point operativi:** dopo M1.4; M2.1; M3.5; **M4.3**; M5.4; M6.3; M8.2.
 
 ---
 
@@ -806,13 +930,14 @@ Dopo la creazione di **questo** documento:
 - [x] AR isolata in M2.1  
 - [x] Credenziali non unificate (M3.1–M3.4) + associazioni M3.5  
 - [x] Servizi descrittivi M4.3 con esclusioni marketplace  
+- [x] Contratto M4.1–M4.3 completo + timestamp proposti
 - [x] Territori opachi M5.1; lingue M5.2; mercati M5.3; settori M5.4  
 - [x] FEV esattamente 3 tabelle M6  
 - [x] Nessuna membership FK; nessun catalogo Ordini; nessuna policy/GRANT  
 - [x] M7 assente motivato; M8.1 SKIP; M8.2 report  
-- [x] Slugs definitivi; timestamp strategia senza valori; abbreviazioni ≤63  
+- [x] Slugs definitivi; abbreviazioni ≤63
 - [x] Review unità/blocco; test; apply; commit prescritti  
-- [ ] Micro-review indipendente del Plan (prossimo passo umano/agente)  
+- [ ] SQL M4.1–M4.3 (prossimo passo operativo)
 - [ ] Autorizzazione M1.1 SQL  
 
 ---
@@ -835,9 +960,9 @@ Dopo la creazione di **questo** documento:
 | M7 artificiale | **Respinta** — assente motivato |
 | Plan che altera §29 | **Respinta** — regola autorità |
 | Unità non revisionabili | **Respinta** — 20 SQL atomiche |
-| Timestamp già assegnati in conflitto | **Respinta** — strategia senza valori; base `20260802220000` |
+| Timestamp già assegnati in conflitto | **Respinta** — M1–M3 versionati; M4 proposti dopo `20260804140000` (§15/§21) |
 
-**Esito confutazione:** nessuna accusa regge. Plan approvabile a livello statico, subordinato a micro-review indipendente prima di M1.1.
+**Esito confutazione:** nessuna accusa regge sul perimetro statico. Blocco M4 contratto aggiornato per creazione accelerata SQL.
 
 ---
 
@@ -845,18 +970,18 @@ Dopo la creazione di **questo** documento:
 
 | Unit | Slug / artefatto | Stato |
 |---|---|---|
-| M1.1–M1.4 | create_professional_* catalogs | **Pianificata** — SQL non creato |
-| M2.1 | create_professional_profiles | **Pianificata** |
-| M3.1–M3.5 | credentials + associations | **Pianificata** |
-| M4.1–M4.3 | scope + services | **Pianificata** |
-| M5.1–M5.4 | coverage | **Pianificata** |
+| M1.1–M1.4 | create_professional_* catalogs | **Applicata e versionata** |
+| M2.1 | create_professional_profiles | **Applicata e versionata** |
+| M3.1–M3.5 | credentials + associations | **Applicata e versionata** (`5761217` / fino a `20260804140000`) |
+| M4.1–M4.3 | scope + services | **Contratto completo — SQL non creato** (creazione accelerata autorizzabile) |
+| M5.1–M5.4 | coverage | **Pianificata** — dopo stop M4.3 |
 | M6.1–M6.3 | profile FEV | **Pianificata** |
 | M7 | — | **Assente** |
 | M8.1 | demo seed | **SKIP** |
-| M8.2 | `professionisti-validation-report.md` | **Da produrre dopo SQL** |
+| M8.2 | `professionisti-validation-report.md` | **Da produrre a fine ciclo 1 SQL** |
 
 ---
 
-**MIGRATION PLAN PROFESSIONISTI COMPLETATO A LIVELLO STATICO.**  
-20 unità SQL determinate; M7 assente; M8.1 SKIP; M8.2 report non SQL; tutte le 20 tabelle assegnate; ordine topologico certificabile.  
-**M1.1 non ancora autorizzata** — richiesta micro-review indipendente del Plan (§28).
+**MIGRATION PLAN PROFESSIONISTI — BLOCCO M4 DETERMINATO.**
+M1–M3 chiuse; M4.1–M4.3 con contratto implementabile e timestamp proposti; M5+ non aperte.
+**Prossimo passo operativo:** creazione accelerata delle tre migration M4 (senza micro-review intermedie di progettazione), poi review SQL/apply secondo §23–§26.
