@@ -1,6 +1,6 @@
 # Mapping fisico — Dominio PROFESSIONISTI
 
-> Livello architetturale. Physical Domain Mapping concettuale del dominio Professionisti: il passaggio tra la Tesi architetturale del dominio, il modello logico e la sua futura rappresentazione fisica. Non contiene schema PostgreSQL, non contiene SQL, non definisce tabelle, colonne, indici, chiavi, RLS, non usa Supabase, non tratta API, migrazioni, trigger o framework. Nessun codice.
+> Livello architetturale. Physical Domain Mapping del dominio Professionisti: il passaggio tra la Tesi architetturale del dominio, il modello logico e la sua futura rappresentazione fisica. I §1–§28 restano concettuali (nessun SQL eseguibile). Il **§29** definisce il contratto DDL-ready del ciclo 1 (nomi tabella/colonne, vincoli, RLS, privilegi) necessario al Migration Plan; non contiene SQL eseguibile, non crea migration e non modifica il database.
 > Fondamenti (non modificati da questo documento): [`docs/costituzione-piattaforma.md`](../../../costituzione-piattaforma.md), [`docs/domain-model.md`](../../../domain-model.md), [`docs/platform-data-specification.md`](../../../platform-data-specification.md), [`docs/architecture/fundamental/domain-patterns.md`](../../fundamental/domain-patterns.md), [`docs/architecture/fundamental/professionisti-domain-thesis.md`](../../fundamental/professionisti-domain-thesis.md), [`docs/architecture/logical/professionisti.md`](../../logical/professionisti.md), [`docs/architecture/logical/persone.md`](../../logical/persone.md), [`docs/architecture/logical/imprese.md`](../../logical/imprese.md), [`docs/architecture/logical/appartenenze.md`](../../logical/appartenenze.md), [`docs/architecture/logical/mercati-internazionali.md`](../../logical/mercati-internazionali.md), [`docs/architecture/physical/domain-dependency-map.md`](../domain-dependency-map.md), [`docs/architecture/physical/domain-mapping/persone.md`](./persone.md), [`docs/architecture/physical/domain-mapping/imprese.md`](./imprese.md), [`docs/architecture/physical/domain-mapping/appartenenze.md`](./appartenenze.md), [`docs/architecture/physical/domain-mapping/mercati-internazionali.md`](./mercati-internazionali.md).
 > Ruolo di questo documento nella catena di ingegnerizzazione: costituzione → domain model → platform data specification → modello logico (`logical/professionisti.md`) → tesi architetturale (`professionisti-domain-thesis.md`) → pattern fondazionali (`domain-patterns.md`) → Dependency Map → **mapping fisico del dominio Professionisti (questo documento)** → piano di migrazione → migrazioni. Il significato del dominio è già stato deciso, in modo indipendente e argomentato, dalla Tesi (`professionisti-domain-thesis.md`, §16): questo documento non lo ridiscute, lo traduce in decisioni concettuali di livello fisico.
 
@@ -36,6 +36,7 @@
 26. [Impatti sulla Dependency Map](#26-impatti-sulla-dependency-map)
 27. [Checklist finale](#27-checklist-finale)
 28. [Riepilogo conclusivo](#28-riepilogo-conclusivo)
+29. [Contratto fisico DDL-ready — ciclo 1](#29-contratto-fisico-ddl-ready--ciclo-1)
 
 ---
 
@@ -636,7 +637,7 @@ Ereditate da Tesi §14 e da `domain-dependency-map.md` §23 (DV7), integrate con
 | 1 | Coerenza con la Tesi (`professionisti-domain-thesis.md`) | Verificato — ogni responsabilità, fatto proprietario/escluso e confine di questo documento cita il paragrafo corrispondente della Tesi (§3-§7); nessuna conclusione della Tesi è stata ridiscussa |
 | 2 | Coerenza con il Modello logico (`logical/professionisti.md`) | Verificato — ogni Entity, Value Object, stato, verifica ed evento di questo documento è riconducibile a un paragrafo esplicito del logico (§2 di questo documento, citazioni puntuali in ogni sezione) |
 | 3 | Nessuna duplicazione di fatti di altri domini | Verificato — §6-§7, §10, §19, §24 |
-| 4 | Nessuna implementazione tecnica introdotta | Verificato — nessun riferimento a database, SQL, PostgreSQL, Supabase, tabelle, colonne, API, migrazioni, trigger, framework in alcuna sezione |
+| 4 | Nessuna implementazione tecnica eseguibile introdotta | Verificato per §1–§28 (mapping concettuale). Il §29 introduce esclusivamente il contratto DDL-ready documentale (come Mercati Internazionali §35): nessuna migration, nessun SQL applicato, nessun database modificato |
 | 5 | Distinzione chiara tra proprietà, riferimenti e dipendenze | Verificato — §6 (proprietà), §13 (riferimenti esterni), §21 (dipendenze), ciascuna con dominio proprietario esplicito |
 | 6 | Stati, verifiche, pubblicazione e visibilità mantenuti separati | Verificato — §14 (stati, multi-asse), §16 (quattordici verifiche indipendenti), §17 (visibilità, VIS01-06), §18 (pubblicazione, condizione cumulativa); nessuna fusione in un unico valore |
 | 7 | Ogni Aggregate e ogni scelta architetturale motivata | Verificato — §8 (procedura in cinque domande per tutti e sette i concetti richiesti), §9-§11 (motivazione per ciascuna Entity/VO), §23-§24 (verifica sistematica dei pattern) |
@@ -671,4 +672,732 @@ Ereditate da Tesi §14 e da `domain-dependency-map.md` §23 (DV7), integrate con
 
 **Impatti sulla Dependency Map.** Conferma di D12 e D13 da "Provvisoria" a "Facoltativa confermata"; verifica positiva di DV7 (classificazione "Fondazionale limitato"); conferma dell'assenza della dipendenza vietata V4; segnalazione di una dipendenza facoltativa in uscita (ServizioProfessionale→Opportunità/Collaborazioni) non ancora censita dalla matrice canonica, riservata ai rispettivi futuri mapping (§26).
 
-**Conferma finale.** Nessun altro documento è stato modificato: `domain-model.md`, `platform-data-specification.md`, `domain-patterns.md`, `professionisti-domain-thesis.md`, `logical/professionisti.md`, `domain-dependency-map.md` e i quattro Physical Domain Mapping già approvati restano inalterati. Questo documento è pronto per essere usato come riferimento per il futuro piano di migrazione del dominio Professionisti.
+**Conferma finale.** Nessun altro documento è stato modificato: `domain-model.md`, `platform-data-specification.md`, `domain-patterns.md`, `professionisti-domain-thesis.md`, `logical/professionisti.md`, `domain-dependency-map.md` e i quattro Physical Domain Mapping già approvati restano inalterati. Il mapping concettuale (§1–§28) resta il riferimento di significato; il **§29** chiude i contratti DDL-ready del ciclo 1 e abilita la redazione del Migration Plan senza inventare schema.
+
+---
+
+## 29. Contratto fisico DDL-ready — ciclo 1
+
+**Scopo.** Chiudere le ambiguità di schema necessarie al futuro Migration Plan Professionisti. Non è SQL eseguibile. Non è il Migration Plan. Non assegna codici M1.x definitivi.
+
+**Autorità collegata.** Thesis (`professionisti-domain-thesis.md`), Logical (`logical/professionisti.md`), mapping concettuale §1–§28, Dependency Map D10–D13, Domain Patterns, modello di profondità Mercati Internazionali §35 (forma del contratto, non soggetto XOR né schema FEV copiato).
+
+**Pattern RLS/privilegi (tutte le tabelle §29).** `ENABLE ROW LEVEL SECURITY`; nessun `FORCE ROW LEVEL SECURITY`; nessuna policy applicativa nelle migration strutturali; deny-by-default; `REVOKE ALL` da `PUBLIC`, `anon`, `authenticated`; nessun `GRANT` a `anon`/`authenticated`; nessun `auth.uid()`; `service_role` non privato dei privilegi di bypass RLS già propri del ruolo Supabase. Eccezione cataloghi: vedi §29.25–§29.26.
+
+**Pattern timestamps.** `created_at` / `updated_at` timestamptz NOT NULL DEFAULT now(); funzione `set_<table>_updated_at` dedicata per tabella (`SECURITY INVOKER`, `SET search_path = ''`); un solo trigger locale `BEFORE UPDATE` `*_set_updated_at`. Nomi identificatori ≤ 63 byte (abbreviazioni `prof_` ammesse se necessario).
+
+**Pattern soggetto.** Sempre Persona. Nessun `subject_kind`. Nessun XOR Persona/Impresa. Nessun soggetto polimorfico. Impresa solo come contesto opzionale (§29.8).
+
+**Dipendenze esterne reali verificate nel repository (ciclo 1).** `public.profiles`, `public.businesses`, `public.business_memberships` (esistente ma **non** referenziato strutturalmente nel ciclo 1), `public.languages`, `public.competencies`, `public.business_sectors`, `public.international_markets`. Assente: tabella Territori / `countries`.
+
+**Elementi esclusi dal ciclo 1 (tutte le tabelle).** FK a `auth.users`; policy VIS02; Storage/file upload; history table generica; badge/score/ranking; seed demo; OffertaDiServizio; catalogo Ordini/Collegi; soggetto Impresa; PresenzaDiMercato / InteresseDiMercato; FK Opportunità/Collaborazioni/Eventi; dominio Organizzazioni istituzionali; dominio Servizi.
+
+---
+
+### 29.1 Perimetro e decisioni del ciclo 1
+
+| Classificazione | Elementi |
+|---|---|
+| **Incluso (tabelle)** | Profilo professionale; categorie (catalogo + dichiarazione); modalità di esercizio (catalogo); natura servizio (catalogo); tipi fonte (catalogo); qualifiche; iscrizioni professionali; abilitazioni (con sotto-tipo autorizzazione); certificazioni; iscrizioni associative; competenze professionali; servizi dichiarati; territori serviti; lingue operative; mercati internazionali serviti; settori serviti; fonti/evidenze/verifiche di profilo |
+| **Colonna / VO sul Profilo** | Titolo professionale (sulle credenziali); esperienza (anni + sintesi); disponibilità; tariffa indicativa; contatti professionali minimi; modalità di esercizio primaria; contesto Impresa opzionale |
+| **Catalogo C03** | Categorie; modalità di esercizio; tipi fonte; nature servizio |
+| **Riferimento opaco** | Territori (`country_ref`); enti emittenti (label testuale); Ordini/Collegi (label, non catalogo) |
+| **Rinviato** | Catalogo Specializzazioni; FK `membership_id`; canali di contatto strutturati multipli; Storage evidenze; history table; policy RLS applicative; seed Specializzazioni; settori come tassonomia diversa da `business_sectors`; tariffe strutturate da marketplace; reputazione; equivalenza Italia come workflow |
+| **Escluso dal dominio** | Anagrafica Persona; ServizioImpresa; OffertaDiServizio; Presenza/Interesse/Attività internazionale; contratti/pagamenti/prenotazioni; Ordini come Aggregate Root |
+
+**Autosufficienza.** Al termine del ciclo 1 è possibile: creare al massimo un Profilo per Persona; dichiarare categorie, credenziali, servizi, territori, lingue, mercati, settori; mantenere stati multi-asse distinti; registrare fonti/evidenze/verifiche per aspetti di profilo; preparare pubblicazione senza policy applicative. Non è ancora un marketplace né un albo digitale ufficiale.
+
+---
+
+### 29.2 Inventario esatto delle tabelle
+
+| # | Nome logico | Nome fisico | Responsabilità | Classificazione | Owner | Dipendenze | Blocco suggerito |
+|---|---|---|---|---|---|---|---|
+| 1 | Categoria professionale | `public.professional_categories` | Catalogo C03 categorie | C03 | — | nessuna | B1 |
+| 2 | Modalità di esercizio | `public.professional_practice_modes` | Catalogo C03 modalità | C03 | — | nessuna | B1 |
+| 3 | Tipo di fonte | `public.professional_source_kinds` | Catalogo C03 tipi fonte | C03 | — | nessuna | B1 |
+| 4 | Natura servizio | `public.professional_service_natures` | Catalogo C03 nature | C03 | — | nessuna | B1 |
+| 5 | Profilo professionale | `public.professional_profiles` | Aggregate Root | A01 | — | `profiles`; opz. `businesses`; `professional_practice_modes` | B2 |
+| 6 | Dichiarazione categoria | `public.professional_profile_categories` | Categorie del profilo + specializzazione testuale | link/E02 | Profilo | profilo; categories | B3 |
+| 7 | Qualifica professionale | `public.professional_qualifications` | Qualifica / titolo di studio / qualifica dichiarata | E02 | Profilo | profilo | B3 |
+| 8 | Iscrizione professionale | `public.professional_registrations` | Iscrizione Ordine/Collegio/registro | E02 | Profilo | profilo | B3 |
+| 9 | Abilitazione | `public.professional_authorizations` | Abilitazione o autorizzazione specifica | E02 | Profilo | profilo | B3 |
+| 10 | Certificazione | `public.professional_certifications` | Certificazione ente terzo | E02 | Profilo | profilo | B3 |
+| 11 | Iscrizione associativa | `public.professional_association_memberships` | Adesione associativa non statutaria | E02 | Profilo | profilo | B3 |
+| 12 | Competenza professionale | `public.professional_competencies` | Competenza specialistica dichiarata | E02 | Profilo | profilo; `competencies` | B3 |
+| 13 | Servizio professionale | `public.professional_services` | Dichiarazione descrittiva di servizio | E02 | Profilo | profilo; service_natures | B3 |
+| 14 | Territorio servito | `public.professional_served_territories` | Dichiarazione territorio | E02 | Profilo | profilo | B3 |
+| 15 | Lingua operativa | `public.professional_operational_languages` | Lingua operativa professionale | E02 | Profilo | profilo; `languages` | B3 |
+| 16 | Mercato servito | `public.professional_served_markets` | Mercato internazionale dichiarato | E02 / link | Profilo | profilo; `international_markets` | B3 |
+| 17 | Settore servito | `public.professional_served_sectors` | Settore economico dichiarato | E02 / link | Profilo | profilo; `business_sectors` | B3 |
+| 18 | Fonte di profilo | `public.professional_profile_sources` | Fonte (FEV) | FEV | Profilo | profilo; source_kinds | B4 |
+| 19 | Evidenza di profilo | `public.professional_profile_evidences` | Evidenza (FEV) | FEV | Profilo | profilo; sources | B4 |
+| 20 | Verifica di profilo | `public.professional_profile_verifications` | Verifica per aspetto (FEV) | FEV | Profilo | profilo | B4 |
+
+**Tabelle / cataloghi esplicitamente non create nel ciclo 1.** `professional_specializations` (catalogo); tabelle FEV per-credenziale; `professional_contacts`; tabelle Ordini; qualsiasi tabella `professional_*_history`.
+
+---
+
+### 29.3 Contratto completo delle colonne
+
+#### 29.3.1 `public.professional_categories`
+
+| Ord. | Colonna | Tipo | Null | Default | Significato | Origine | Mutabilità | Vocabolario / FK |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `code` | text | NO | — | Codice stabile categoria | seed/governance | immutabile dopo seed | PK |
+| 2 | `label_it` | text | NO | — | Etichetta IT | seed/governance | aggiornabile | — |
+| 3 | `group_code` | text | NO | — | Gruppo logico §5 | seed | aggiornabile | vedi CHECK gruppi |
+| 4 | `description` | text | SÌ | NULL | Descrizione | governance | aggiornabile | — |
+| 5 | `sort_order` | int | NO | 100 | Ordinamento | governance | aggiornabile | ≥ 0 |
+| 6 | `is_active` | boolean | NO | true | Attivazione catalogo | governance | aggiornabile | — |
+| 7–8 | `created_at` / `updated_at` | timestamptz | NO | now() | Audit tecnico | sistema | sistema | — |
+
+#### 29.3.2 `public.professional_practice_modes`
+
+| Ord. | Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|---|
+| 1 | `code` | text | NO | — | PK codice modalità |
+| 2 | `label_it` | text | NO | — | Etichetta IT |
+| 3 | `sort_order` | int | NO | 100 | Ordinamento (≥ 0) |
+| 4 | `is_active` | boolean | NO | true | Attivazione |
+| 5–6 | timestamps | timestamptz | NO | now() | Sistema |
+
+#### 29.3.3 `public.professional_source_kinds`
+
+Stessa struttura di `professional_practice_modes` (`code`, `label_it`, `sort_order`, `is_active`, timestamps).
+
+#### 29.3.4 `public.professional_service_natures`
+
+Stessa struttura di `professional_practice_modes`.
+
+#### 29.3.5 `public.professional_profiles` (AR)
+
+| Ord. | Colonna | Tipo | Null | Default | Significato | Origine | Mutabilità | Note |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` | PK surrogata | sistema | immutabile | — |
+| 2 | `person_id` | uuid | NO | — | Persona proprietaria | Persone | immutabile | FK `profiles(id)` UNIQUE |
+| 3 | `headline` | text | SÌ | NULL | Sintesi professionale corta | dichiarazione | aggiornabile | non bio Persona |
+| 4 | `summary` | text | SÌ | NULL | Presentazione professionale | dichiarazione | aggiornabile | ≠ `profiles.bio` |
+| 5 | `practice_mode_code` | text | SÌ | NULL | Modalità primaria | catalogo | aggiornabile | FK practice_modes |
+| 6 | `context_business_id` | uuid | SÌ | NULL | Contesto organizzativo opzionale | dichiarazione | aggiornabile | FK businesses; **non** membership |
+| 7 | `editorial_status` | text | NO | `'draft'` | S02 | dominio | aggiornabile | §29.19 |
+| 8 | `professional_status` | text | NO | `'active'` | S01 sostanziale | dominio | aggiornabile | §29.19 |
+| 9 | `administrative_origin` | text | SÌ | NULL | Qualifica S07 | dominio | aggiornabile | nullable se non sospeso/cessato |
+| 10 | `publication_status` | text | NO | `'unpublished'` | S04 | dominio | aggiornabile | §29.19 |
+| 11 | `visibility_status` | text | NO | `'private'` | VIS | dominio | aggiornabile | §29.19 |
+| 12 | `availability_status` | text | NO | `'available'` | Asse disponibilità | dichiarazione | aggiornabile | §29.16 |
+| 13 | `availability_note` | text | SÌ | NULL | Nota disponibilità | dichiarazione | aggiornabile | — |
+| 14 | `availability_until` | date | SÌ | NULL | Orizzonte se futura | dichiarazione | aggiornabile | §29.20 |
+| 15 | `is_contested` | boolean | NO | false | Overlay contestazione | dominio/moderazione | aggiornabile | non è S03 |
+| 16 | `experience_years` | numeric(5,1) | SÌ | NULL | Anni esperienza (VO) | dichiarazione | aggiornabile | ≥ 0 |
+| 17 | `experience_summary` | text | SÌ | NULL | Sintesi esperienza | dichiarazione | aggiornabile | — |
+| 18 | `fee_indication_kind` | text | NO | `'none'` | Natura indicazione economica | dichiarazione | aggiornabile | §29.17 |
+| 19 | `fee_currency` | text | SÌ | NULL | ISO 4217 | dichiarazione | aggiornabile | len 3 se presente |
+| 20 | `fee_amount_min` | numeric(12,2) | SÌ | NULL | Estremo inferiore indicativo | dichiarazione | aggiornabile | ≥ 0 |
+| 21 | `fee_amount_max` | numeric(12,2) | SÌ | NULL | Estremo superiore | dichiarazione | aggiornabile | ≥ min |
+| 22 | `fee_note` | text | SÌ | NULL | Testo libero indicativo | dichiarazione | aggiornabile | non preventivo |
+| 23 | `fee_visibility` | text | NO | `'private'` | Visibilità tariffa | dichiarazione | aggiornabile | `private`\|`public` |
+| 24 | `professional_email` | text | SÌ | NULL | Contatto professionale | dichiarazione | aggiornabile | ≠ contatti Persona obbligatori |
+| 25 | `professional_phone` | text | SÌ | NULL | Contatto professionale | dichiarazione | aggiornabile | — |
+| 26 | `contacts_visibility` | text | NO | `'private'` | Visibilità contatti | dichiarazione | aggiornabile | `private`\|`public`\|`on_request` |
+| 27–28 | timestamps | timestamptz | NO | now() | Sistema | sistema | sistema | — |
+
+**Divieto esplicito sul Profilo.** Nessuna colonna `first_name`, `last_name`, `bio` anagrafica, `spoken_language` generica, score, badge, `verification_status` complessivo persistito.
+
+#### 29.3.6 `public.professional_profile_categories`
+
+| Ord. | Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` | PK |
+| 2 | `professional_profile_id` | uuid | NO | — | Owner |
+| 3 | `category_code` | text | NO | — | FK categories |
+| 4 | `specialization_label` | text | SÌ | NULL | Specializzazione ciclo 1 (testo; catalogo rinviato) |
+| 5 | `is_primary` | boolean | NO | false | Categoria primaria |
+| 6 | `sort_order` | int | NO | 0 | Ordinamento (≥ 0) |
+| 7 | `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| 8–9 | timestamps | timestamptz | NO | now() | Sistema |
+
+#### 29.3.7 Credenziali — colonne comuni e specifiche
+
+**Comuni a** `professional_qualifications`, `professional_registrations`, `professional_authorizations`, `professional_certifications`:
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | `gen_random_uuid()` | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `denomination` | text | NO | — | Denominazione / titolo dichiarato |
+| `issuer_label` | text | SÌ | NULL | Ente emittente descrittivo (opaco; non catalogo Ordini) |
+| `external_identifier` | text | SÌ | NULL | Numero iscrizione / codice esterno |
+| `issued_on` | date | SÌ | NULL | Data rilascio |
+| `valid_from` | date | SÌ | NULL | Decorrenza effetti |
+| `valid_until` | date | SÌ | NULL | Scadenza; NULL = senza termine noto |
+| `credential_status` | text | NO | (per tabella) | S01 specifico |
+| `verification_status` | text | NO | `'unverified'` | S03 autorevole della riga |
+| `visibility_status` | text | NO | `'private'` | Visibilità dichiarazione |
+| `evidence_visibility` | text | NO | `'private'` | Visibilità evidenze collegate |
+| `origin_kind` | text | NO | `'national'` | `national`\|`foreign` |
+| `equivalence_status` | text | SÌ | NULL | Solo se foreign: `not_required`\|`in_progress`\|`obtained`\|`denied` |
+| `notes` | text | SÌ | NULL | Nota |
+| `sort_order` | int | NO | 0 | Ordinamento |
+| timestamps | timestamptz | NO | now() | Sistema |
+
+**Specifiche:**
+
+| Tabella | Extra | Default `credential_status` | Valori `credential_status` |
+|---|---|---|---|
+| `professional_qualifications` | `qualification_kind` text NOT NULL ∈ `study_title`\|`professional_title`\|`declared_qualification` | `'declared'` | `declared`\|`expired`\|`withdrawn` |
+| `professional_registrations` | `register_body_label` text NOT NULL (Ordine/Collegio/registro) | `'active'` | `active`\|`suspended`\|`inactive` |
+| `professional_authorizations` | `authorization_kind` text NOT NULL ∈ `general`\|`specific` | `'active'` | `active`\|`suspended`\|`revoked`\|`expired` |
+| `professional_certifications` | `certifier_label` text SÌ | `'declared'` | `declared`\|`expired`\|`revoked`\|`withdrawn` |
+
+#### 29.3.8 `public.professional_association_memberships`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `association_label` | text | NO | — | Associazione (opaco) |
+| `role_label` | text | SÌ | NULL | Ruolo eventuale |
+| `joined_on` | date | SÌ | NULL | Decorrenza |
+| `ended_on` | date | SÌ | NULL | Fine |
+| `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| `visibility_status` | text | NO | `'private'` | — |
+| timestamps | — | NO | now() | Sistema |
+
+Nessun asse di verifica dedicato (Logical §11 / Physical §14.4).
+
+#### 29.3.9 `public.professional_competencies`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `competency_id` | bigint | NO | — | FK `competencies(id)` |
+| `level_code` | text | SÌ | NULL | `basic`\|`intermediate`\|`advanced`\|`expert` |
+| `years_experience` | numeric(5,1) | SÌ | NULL | ≥ 0 |
+| `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| `verification_status` | text | NO | `'unverified'` | `unverified`\|`verified`\|`contested` |
+| `sort_order` | int | NO | 0 | — |
+| `notes` | text | SÌ | NULL | — |
+| timestamps | — | NO | now() | — |
+
+#### 29.3.10 `public.professional_services`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `title` | text | NO | — | Titolo dichiarazione |
+| `description` | text | SÌ | NULL | Descrizione |
+| `service_nature_code` | text | NO | — | FK service_natures |
+| `audience_kind` | text | NO | `'both'` | `persons`\|`businesses`\|`both` |
+| `delivery_mode` | text | NO | `'unspecified'` | `in_person`\|`remote`\|`hybrid`\|`unspecified` |
+| `is_standardized` | boolean | NO | false | Standard vs personalizzato |
+| `service_status` | text | NO | `'declared'` | §29.19 |
+| `visibility_status` | text | NO | `'private'` | — |
+| `availability_status` | text | SÌ | NULL | Override locale; NULL = eredita profilo |
+| `fee_indication_kind` | text | NO | `'none'` | Come profilo |
+| `fee_note` | text | SÌ | NULL | Indicativo |
+| `sort_order` | int | NO | 0 | — |
+| timestamps | — | NO | now() | — |
+
+**Esclusi.** `price`, checkout, booking, contract_id, SLA, payment_*.
+
+#### 29.3.11 `public.professional_served_territories`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `country_ref` | text | NO | — | Riferimento paese opaco (convenzione piattaforma; tipicamente ISO 3166-1 alpha-2) |
+| `territory_label` | text | SÌ | NULL | Etichetta descrittiva (regione/area) |
+| `coverage_kind` | text | NO | `'served'` | `exercise`\|`served`\|`both` |
+| `presence_mode` | text | NO | `'unspecified'` | `in_person`\|`remote`\|`hybrid`\|`unspecified` |
+| `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| `verification_status` | text | NO | `'unverified'` | `unverified`\|`verified`\|`contested` |
+| `sort_order` | int | NO | 0 | — |
+| timestamps | — | NO | now() | — |
+
+Nessuna FK a tabella Territori (inesistente).
+
+#### 29.3.12 `public.professional_operational_languages`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `language_id` | bigint | NO | — | FK `languages(id)` |
+| `proficiency_level` | text | NO | `'working'` | `elementary`\|`working`\|`professional`\|`native_equivalent` |
+| `usage_role` | text | NO | `'operational'` | `operational`\|`support` |
+| `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| `verification_status` | text | NO | `'unverified'` | `unverified`\|`verified`\|`contested` |
+| `sort_order` | int | NO | 0 | — |
+| timestamps | — | NO | now() | — |
+
+Distinta da `profile_languages` (LinguaParlata Persone) e da `business_operational_language_declarations`.
+
+#### 29.3.13 `public.professional_served_markets`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `market_id` | uuid | NO | — | FK `international_markets(id)` |
+| `relation_kind` | text | NO | `'served'` | `known`\|`served`\|`supported` |
+| `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| `notes` | text | SÌ | NULL | — |
+| `sort_order` | int | NO | 0 | — |
+| timestamps | — | NO | now() | — |
+
+Non crea PresenzaDiMercato né InteresseDiMercato. Nessuna verifica dedicata nel ciclo 1 (Physical §14.4).
+
+#### 29.3.14 `public.professional_served_sectors`
+
+| Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() | PK |
+| `professional_profile_id` | uuid | NO | — | Owner |
+| `sector_id` | bigint | NO | — | FK `business_sectors(id)` |
+| `declaration_status` | text | NO | `'declared'` | `declared`\|`removed` |
+| `sort_order` | int | NO | 0 | — |
+| timestamps | — | NO | now() | — |
+
+#### 29.3.15 FEV profilo
+
+**`professional_profile_sources`:** `id` uuid PK; `professional_profile_id` uuid NOT NULL; `source_kind_code` text NOT NULL → source_kinds; `reference_label` text NULL; `reliability_note` text NULL; `declared_at` timestamptz NULL; timestamps.
+
+**`professional_profile_evidences`:** `id` uuid PK; `professional_profile_id` uuid NOT NULL; `source_id` uuid NULL → sources; `supported_aspect` text NOT NULL (stesso vocabolario verifiche); `summary` text NOT NULL; `observed_at` timestamptz NULL; timestamps. Nessun `storage_path` nel ciclo 1.
+
+**`professional_profile_verifications`:** `id` uuid PK; `professional_profile_id` uuid NOT NULL; `aspect` text NOT NULL; `status` text NOT NULL DEFAULT `'unverified'`; `verified_at` timestamptz NULL; `verifier_label` text NULL; `outcome_note` text NULL; `expires_at` timestamptz NULL; timestamps. Current-state: UNIQUE `(professional_profile_id, aspect)`.
+
+---
+
+### 29.4 Primary key e identificazione
+
+| Tabella | PK | Generazione | Chiave naturale | Divieti |
+|---|---|---|---|---|
+| Cataloghi C03 | `code` text | seed/governance | `code` | Label non è identità |
+| `professional_profiles` | `id` uuid | `gen_random_uuid()` | `person_id` (UNIQUE) | Label/headline non identità |
+| Tutte le E02/FEV | `id` uuid | `gen_random_uuid()` | nessuna label | `denomination` / `title` non UNIQUE globale |
+| Link lingue/competenze/settori/mercati | `id` uuid | `gen_random_uuid()` | unicità dichiarata (vedi UNIQUE) | — |
+
+Identificatori esterni (`external_identifier`) sono attributi, non PK.
+
+---
+
+### 29.5 Unique constraints
+
+| Tabella | Vincolo | NULL / parziale | Motivo |
+|---|---|---|---|
+| `professional_profiles` | UNIQUE (`person_id`) | `person_id` NOT NULL | **Al massimo un Profilo per Persona** |
+| Cataloghi | UNIQUE implicita su PK `code` | — | Codice stabile |
+| `professional_profile_categories` | UNIQUE parziale (`professional_profile_id`, `category_code`) WHERE `declaration_status='declared'` | parziale | Una dichiarazione attiva per categoria |
+| `professional_profile_categories` | UNIQUE parziale (`professional_profile_id`) WHERE `is_primary=true` AND `declaration_status='declared'` | parziale | Al più una categoria primaria |
+| `professional_competencies` | UNIQUE parziale (`professional_profile_id`, `competency_id`) WHERE `declaration_status='declared'` | parziale | Nessuna doppia dichiarazione attiva |
+| `professional_operational_languages` | UNIQUE parziale (`professional_profile_id`, `language_id`, `usage_role`) WHERE `declaration_status='declared'` | parziale | Come LinguaOperativaImpresa |
+| `professional_served_territories` | UNIQUE parziale (`professional_profile_id`, `country_ref`, `coverage_kind`) WHERE `declaration_status='declared'` | parziale | Evita duplicati attivi |
+| `professional_served_markets` | UNIQUE parziale (`professional_profile_id`, `market_id`) WHERE `declaration_status='declared'` | parziale | Un link attivo per mercato |
+| `professional_served_sectors` | UNIQUE parziale (`professional_profile_id`, `sector_id`) WHERE `declaration_status='declared'` | parziale | Idem |
+| `professional_profile_verifications` | UNIQUE (`professional_profile_id`, `aspect`) | entrambi NOT NULL | Current-state per aspetto |
+| Credenziali / servizi / associazioni | nessun UNIQUE su denomination/title | — | Più voci omonime legittime in tempi diversi |
+
+---
+
+### 29.6 Foreign key
+
+| Sorgente | Colonna | Target | Obbl. | ON UPDATE | ON DELETE | Motivazione |
+|---|---|---|---|---|---|---|
+| `professional_profiles` | `person_id` | `profiles(id)` | SÌ | NO ACTION | **RESTRICT** | D10; niente orfani; cancellazione Persona richiede rimozione esplicita Profilo |
+| `professional_profiles` | `practice_mode_code` | `professional_practice_modes(code)` | NO | CASCADE | **RESTRICT** | Catalogo non eliminabile se in uso |
+| `professional_profiles` | `context_business_id` | `businesses(id)` | NO | NO ACTION | **SET NULL** | Contesto facoltativo; soft-loss del contesto se Impresa rimossa; **non** implica Appartenenza |
+| `professional_profile_categories` | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned |
+| `professional_profile_categories` | `category_code` | `professional_categories(code)` | SÌ | CASCADE | **RESTRICT** | Catalogo |
+| Credenziali / associazioni / servizi / territori / lingue / mercati / settori / FEV | `professional_profile_id` | `professional_profiles(id)` | SÌ | NO ACTION | **CASCADE** | Owned dall'AR |
+| `professional_competencies` | `competency_id` | `competencies(id)` | SÌ | NO ACTION | **RESTRICT** | Catalogo condiviso |
+| `professional_services` | `service_nature_code` | `professional_service_natures(code)` | SÌ | CASCADE | **RESTRICT** | Catalogo |
+| `professional_operational_languages` | `language_id` | `languages(id)` | SÌ | NO ACTION | **RESTRICT** | Catalogo condiviso |
+| `professional_served_markets` | `market_id` | `international_markets(id)` | SÌ | NO ACTION | **RESTRICT** | Non cancellare Mercato se ancora dichiarato servito |
+| `professional_served_sectors` | `sector_id` | `business_sectors(id)` | SÌ | NO ACTION | **RESTRICT** | Catalogo settori |
+| `professional_profile_sources` | `source_kind_code` | `professional_source_kinds(code)` | SÌ | CASCADE | **RESTRICT** | Catalogo |
+| `professional_profile_evidences` | `source_id` | `professional_profile_sources(id)` | NO | NO ACTION | **SET NULL** | Evidenza può restare senza fonte |
+| — | — | `business_memberships` | — | — | — | **Nessuna FK nel ciclo 1** (§29.8) |
+
+Direzione dipendenza: Professionisti → Persone (necessaria); → Imprese (facoltativa contesto); → Tassonomie/lingue/competenze/settori; → Mercati Internazionali (facoltativa). Nessuna dipendenza inversa strutturale.
+
+---
+
+### 29.7 Dipendenza da Persona
+
+1. `person_id` uuid NOT NULL → `public.profiles(id)`.
+2. UNIQUE(`person_id`): uno-a-uno.
+3. ON DELETE RESTRICT: la Persona non può essere eliminata finché esiste il Profilo; elimina prima il Profilo (e in CASCADE le owned).
+4. Divieto profili orfani: soddisfatto da NOT NULL + FK.
+5. Divieto duplicazione anagrafica: nessuna colonna anagrafica sul Profilo (§29.3.5).
+6. `person_id` immutabile dopo insert (vincolo applicativo prescritto; nessun trigger di enforcement obbligatorio nel ciclo 1).
+
+---
+
+### 29.8 Dipendenza da Imprese e Appartenenze
+
+| Decisione ciclo 1 | Esito |
+|---|---|
+| Collegamento a membership | **Escluso** — nessuna colonna `membership_id` |
+| Collegamento facoltativo a Impresa | **Incluso** — `context_business_id` opzionale ON DELETE SET NULL |
+| Natura del collegamento | Contesto organizzativo dichiarato (D11), **non** relazione Persona–Impresa |
+| Derivato da Appartenenze | **No** — non c’è sync né FK verso `business_memberships` |
+| Verifica relazione | **Fuori dominio** — utilizzo applicativo dell’esito Appartenenze (D12), non schema |
+| Motivazione | Evitare FK che duplichi ownership di Appartenenze; coerenza D11/D12 |
+
+---
+
+### 29.9 Territori serviti
+
+**Stato reale.** Nessuna tabella `territories` / `countries` nelle migration attuali.
+
+**Soluzione ciclo 1.** Tabella owned `professional_served_territories` con `country_ref` text NOT NULL (riferimento opaco, convenzione piattaforma allineata a Mercati Internazionali `country_ref`) + `territory_label` facoltativa per sotto-area descrittiva.
+
+**Escluso.** FK verso tabella Territori inesistente.
+
+**Evoluzione non distruttiva.** Quando esisterà un catalogo Territori, si potrà aggiungere colonna nullable `territory_id` (o migrare `country_ref`) senza distruggere le dichiarazioni esistenti.
+
+---
+
+### 29.10 Lingue operative professionali
+
+| Aspetto | Decisione |
+|---|---|
+| Catalogo | `public.languages` già esistente |
+| FK | `language_id` bigint NOT NULL → `languages(id)` ON DELETE RESTRICT |
+| Livello | `proficiency_level` chiuso (§29.3.12) |
+| Ruolo | `usage_role` `operational`\|`support` |
+| Distinzione | ≠ `profile_languages` (Persone); ≠ lingue UI; ≠ `business_operational_language_declarations` |
+
+---
+
+### 29.11 Mercati internazionali serviti
+
+| Aspetto | Decisione |
+|---|---|
+| Target | `public.international_markets(id)` — reale |
+| Significato | Dichiarazione locale «conosciuto / servito / supportato» |
+| FK | obbligatoria su riga; ON DELETE RESTRICT |
+| Unicità | una dichiarazione `declared` per `(profile, market)` |
+| Paese | non duplicato qui; composizione paese resta di Mercati |
+| Distinzione | ≠ PresenzaDiMercato; ≠ InteresseDiMercato; ≠ Attività internazionale; nessuna creazione automatica di relazioni MI |
+
+---
+
+### 29.12 Cataloghi locali C03
+
+| Catalogo | Tabella | Seed ciclo 1 | Estensione applicativa |
+|---|---|---|---|
+| Categorie | `professional_categories` | **Obbligatorio** — elenco §29.27 | Solo governance; utenti non inseriscono code |
+| Modalità esercizio | `professional_practice_modes` | **Obbligatorio** — 11 code | Solo governance |
+| Tipi fonte | `professional_source_kinds` | **Obbligatorio** — 13 code | Solo governance |
+| Nature servizio | `professional_service_natures` | **Obbligatorio** — 7 code | Solo governance |
+| Specializzazioni | — | **Rinviato** (vocabolario non chiuso) | Usa `specialization_label` |
+| Tipi abilitazione | — | Non catalogo: CHECK `authorization_kind` | — |
+| Ordini/Collegi | — | **Escluso** | `issuer_label` / `register_body_label` |
+
+Colonne catalogo: `code` PK, `label_it`, `sort_order`, `is_active`, timestamps; categorie aggiungono `group_code`, `description`.
+
+---
+
+### 29.13 Qualifiche, iscrizioni, abilitazioni e certificazioni
+
+**Modello.** Quattro tabelle separate (non un’unica entità tipizzata), più `professional_association_memberships` leggera.
+
+| Concetto | Tabella | Perché separata |
+|---|---|---|
+| Qualifica / titolo di studio / qualifica dichiarata | `professional_qualifications` | Formalità e stati diversi; `qualification_kind` |
+| Iscrizione albo/registro | `professional_registrations` | Stati active/suspended/inactive; ente registro obbligatorio |
+| Abilitazione / autorizzazione | `professional_authorizations` | `authorization_kind`; stati con `revoked` |
+| Certificazione | `professional_certifications` | Ente certificatore; asse verifica distinto |
+| Iscrizione associativa | `professional_association_memberships` | Ciclo leggero, senza S03 dedicato |
+
+Verifica autorevole: colonna `verification_status` su ciascuna delle quattro tabelle credenziali. Evidenze documentali strutturate multi-file: rinviate (ciclo 1 usa FEV profilo + summary).
+
+---
+
+### 29.14 Competenze professionali
+
+| Aspetto | Decisione |
+|---|---|
+| Tassonomia | Riuso `public.competencies` — **nessuna seconda copia** |
+| Distinzione Persone | Tabella distinta da `profile_competencies`; stesso catalogo, dichiarazione professionale |
+| Livello | `level_code` opzionale chiuso |
+| Anni | `years_experience` opzionale ≥ 0 |
+| Evidenza | via FEV profilo aspetto `competency` + `verification_status` sulla riga |
+| Unicità | parziale declared (profile, competency) |
+
+---
+
+### 29.15 Servizi professionali dichiarati
+
+Struttura in `professional_services` (§29.3.10). Territori/lingue del servizio: **non** duplicati come FK per-servizio nel ciclo 1 (restano a livello profilo; eventuale link per-servizio rinviato). Stato, ordinamento, visibilità, disponibilità override locale definiti. Esclusi prezzo vincolante, checkout, prenotazione, contratto, SLA, pagamento. Nessuna FK a Opportunità/Collaborazioni.
+
+---
+
+### 29.16 Disponibilità
+
+| Livello | Rappresentazione |
+|---|---|
+| Profilo | Colonne `availability_status`, `availability_note`, `availability_until` (VO sull’AR) |
+| Servizio | `availability_status` nullable = override; NULL = eredita profilo |
+| Entità autonoma | **No** nel ciclo 1 |
+
+Vocabolario profilo: `available` \| `limited` \| `unavailable` \| `future` \| `case_by_case` \| `temporarily_unavailable`.
+
+Distinzioni obbligatorie: `professional_status` (esercizio) ≠ `availability_status` (raggiungibilità incarichi) ≠ `publication_status` ≠ `visibility_status` ≠ `editorial_status` ≠ `is_contested`.
+
+---
+
+### 29.17 Tariffe e indicazioni economiche
+
+**Incluso (descrittivo).** `fee_indication_kind` ∈ `none` \| `hourly_range` \| `fixed_range` \| `on_request` \| `free` \| `discounted`; importi min/max opzionali; valuta; nota; visibilità.
+
+**Escluso.** Prezzo di vendita vincolante, listino commerciale, checkout, pagamento, preventivo strutturato come impegno.
+
+Se `fee_indication_kind='none'` ⇒ `fee_amount_min/max/currency` NULL. Se `on_request`/`free` ⇒ importi NULL. Se `hourly_range`/`fixed_range` ⇒ almeno un estremo NOT NULL.
+
+---
+
+### 29.18 Esperienza e titoli
+
+| Concetto | Forma ciclo 1 |
+|---|---|
+| EsperienzaProfessionale | VO sul Profilo: `experience_years`, `experience_summary` — **non** tabella |
+| TitoloProfessionale | Campo `denomination` / `qualification_kind='professional_title'` sulle credenziali — **non** tabella autonoma |
+| TitoloDiStudio | `qualification_kind='study_title'` |
+
+Nessuna Entity autonoma senza ciclo di vita proprio oltre la dichiarazione credenziale.
+
+---
+
+### 29.19 Stati
+
+| Asse | Dove | Valori | Persistito | Autorevole |
+|---|---|---|---|---|
+| Editoriale S02 | Profilo `editorial_status` | `draft` \| `declared` \| `published` | Sì | Domino/redazione |
+| Professionale S01 | Profilo `professional_status` | `active` \| `suspended` \| `ceased` \| `revoked` \| `archived` | Sì | Dominio |
+| Origine amm. S07 | Profilo `administrative_origin` | `voluntary` \| `disciplinary` \| `moderation` \| NULL | Sì | Dominio |
+| Pubblicazione S04 | Profilo `publication_status` | `unpublished` \| `published` | Sì | Dominio |
+| Visibilità | Profilo `visibility_status` | `private` \| `editorial` \| `network` \| `selected` \| `public` \| `partially_anonymous` | Sì | Dominio |
+| Disponibilità | Profilo `availability_status` | vedi §29.16 | Sì | Dichiarazione |
+| Contestazione | Profilo `is_contested` | boolean | Sì | Overlay |
+| Verifica profilo complessiva | — | — | **No** (proiezione applicativa da verifiche per aspetto + credenziali) | Non persistita |
+| Credenziale S01 | `credential_status` | per tabella §29.3.7 | Sì | Dominio |
+| Credenziale S03 | `verification_status` | `unverified` \| `in_review` \| `verified` \| `contested` | Sì | Verifica riga |
+| Servizio S01 | `service_status` | `declared` \| `active` \| `suspended` \| `unavailable` | Sì | Dominio |
+| Dichiarazioni leggere | `declaration_status` | `declared` \| `removed` | Sì | Dichiarazione |
+| FEV | `status` | `unverified` \| `in_review` \| `confirmed` \| `rejected` | Sì | Verificatore |
+
+**Transizioni minime prescritte (applicazione; non trigger SQL).** `archived` solo da `ceased` o `revoked`. `removed` terminale sulla riga dichiarazione. `service_status='unavailable'` terminale. Pubblicazione `published` richiede `editorial_status ∈ {declared, published}` e `professional_status ∉ {archived}` — enforcement applicativo nel ciclo 1 (CHECK opzionale di coerenza debole ammesso solo se non blocca bozze legittime; **nessun CHECK che forzi pubblicazione=visibilità**).
+
+---
+
+### 29.20 Temporalità
+
+| Entità | Campi | CHECK | Scadenza assente | Sovrapposizioni |
+|---|---|---|---|---|
+| Credenziali | `issued_on`, `valid_from`, `valid_until` | `valid_until IS NULL OR valid_from IS NULL OR valid_until >= valid_from`; analogo `issued_on` | NULL = senza termine noto / non applicabile | Ammesse più righe storiche |
+| Associazioni | `joined_on`, `ended_on` | `ended_on IS NULL OR joined_on IS NULL OR ended_on >= joined_on` | NULL = ancora valida | Ammesse |
+| Disponibilità futura | `availability_until` | obbligatorio se `availability_status='future'` | — | — |
+| FEV | `verified_at`, `expires_at` | `expires_at IS NULL OR verified_at IS NULL OR expires_at >= verified_at` | NULL = non scade | Current-state UNIQUE aspect |
+| Profilo | nessun `valid_from/until` di esistenza | — | Ciclo di vita via stati | Un solo corrente per Persona |
+
+Niente `start_date`/`end_date` generici. Nessuna history table: lo storico è retention delle righe con stati terminali (`removed`, `expired`, `revoked`, `archived`).
+
+---
+
+### 29.21 Fonti, evidenze e verifiche
+
+**Modello del ciclo 1.** FEV **locale al dominio**, agganciato al **Profilo** (3 tabelle), più `verification_status` autorevole sulle quattro tabelle credenziali e su competenze/territori/lingue.
+
+| Domanda | Decisione |
+|---|---|
+| Oggetti con fonti | Profilo (tabella sources); credenziali referenziano fonti solo indirettamente via aspetti |
+| Oggetti con evidenze | Profilo |
+| Condivisione cross-domain | **No** — FEV non condiviso con Mercati/Appartenenze |
+| Numero tabelle FEV | **3** |
+| Tipi fonte | Catalogo `professional_source_kinds` |
+| Aspetti verifica profilo | vocabolario chiuso sotto |
+| Stato verifica | `unverified`\|`in_review`\|`confirmed`\|`rejected` |
+| Verificatore | `verifier_label` text (opaco; non FK account) |
+| Record corrente | UNIQUE (profile, aspect); no history table |
+| Storage file | **Rinviato** |
+| Contestazione | `is_contested` sul profilo + `contested` su verification_status credenziali |
+| Verifica complessiva Profilo | **Proiezione / derivazione applicativa**, non colonna persistita |
+
+**Aspetti (`aspect` / `supported_aspect`) chiusi:** `professional_title` \| `registration` \| `authorization` \| `qualification` \| `certification` \| `experience` \| `service_declared` \| `territory` \| `language` \| `availability` \| `contacts` \| `competency`.
+
+**Esclusi dagli aspetti FEV profilo.** `person_identity`, `organization_existence`, `membership_relation` — restano utilizzo di esiti esterni (Physical §16).
+
+---
+
+### 29.22 CHECK constraints
+
+Espressi in forma traducibile in SQL (nomi indicativi):
+
+1. Cataloghi: `length(trim(code)) > 0`; `length(trim(label_it)) > 0`; `sort_order >= 0`.
+2. `professional_categories.group_code IN ('legal_tax_labor','finance_credit','technical_built','digital_communication','trade_international','people_org','real_estate','linguistic_intercultural','ip_innovation','residual')`.
+3. Profilo — editorial/professional/publication/visibility/availability/fee/contacts: vocabolari §29.19 / §29.16 / §29.17.
+4. Profilo — `experience_years IS NULL OR experience_years >= 0`.
+5. Profilo — fee: se `fee_indication_kind='none'` allora amount/currency NULL; se `hourly_range` o `fixed_range` allora `(fee_amount_min IS NOT NULL OR fee_amount_max IS NOT NULL)`; se entrambi presenti `fee_amount_max >= fee_amount_min`; amounts ≥ 0; `fee_currency IS NULL OR fee_currency ~ '^[A-Z]{3}$'`.
+6. Profilo — `availability_status='future'` ⇒ `availability_until IS NOT NULL`.
+7. Profilo — `administrative_origin IS NULL OR professional_status IN ('suspended','ceased','revoked','archived')`.
+8. Credenziali — vocabolari status/kind; date §29.20; `denomination` non blank; se `origin_kind='foreign'` allora `equivalence_status IS NOT NULL`; se `national` allora `equivalence_status IS NULL`.
+9. Servizi — vocabolari audience/delivery/status; `title` non blank.
+10. Dichiarazioni leggere — `declaration_status IN ('declared','removed')`.
+11. Lingue — proficiency/usage vocabolari.
+12. Territori — `country_ref` non blank; coverage/presence vocabolari.
+13. Mercati — `relation_kind IN ('known','served','supported')`.
+14. Competenze — level/years.
+15. FEV — aspect ∈ elenco §29.21; status ∈ elenco; date expire.
+16. **Nessun CHECK XOR soggetto Persona/Impresa** (non applicabile).
+17. **Nessun CHECK** che imponga `publication_status='published' ⇔ visibility_status='public'` (assi distinti).
+
+---
+
+### 29.23 Indici
+
+| Tabella | Indice | Tipo | Unicità | Condizione | Access pattern |
+|---|---|---|---|---|---|
+| `professional_profiles` | `(person_id)` | btree | UNIQUE | — | Lookup Persona |
+| `professional_profiles` | `(publication_status)` | btree | no | — | Profili pubblicati |
+| `professional_profiles` | `(availability_status)` | btree | no | — | Filtro disponibilità |
+| `professional_profiles` | `(professional_status)` | btree | no | — | Filtro stato |
+| `professional_profile_categories` | `(category_code)` | btree | no | — | Lookup categoria |
+| `professional_profile_categories` | parziale UNIQUE | btree | sì | declared | §29.5 |
+| Credenziali (ciascuna) | `(professional_profile_id)` | btree | no | — | Load aggregate |
+| Credenziali (ciascuna) | `(credential_status)` | btree | no | — | Qualifiche valide/filtro |
+| `professional_services` | `(professional_profile_id)` | btree | no | — | Servizi del profilo |
+| `professional_services` | `(service_status)` | btree | no | WHERE `service_status='active'` opz. | Servizi attivi |
+| Lingue/territori/mercati/settori/competenze | owner + FK target | btree | no | — | Filtri ricerca |
+| UNIQUE parziali declared | come §29.5 | btree | sì | declared | Integrità |
+| `professional_profile_verifications` | `(professional_profile_id, aspect)` | btree | UNIQUE | — | Verifica corrente |
+| Cataloghi | PK code | — | sì | — | Join |
+
+Nessun indice speculativo su `notes`/`summary` full-text nel ciclo 1.
+
+---
+
+### 29.24 Funzioni e trigger
+
+| Elemento | Prescrizione |
+|---|---|
+| `updated_at` | Una funzione + un trigger `BEFORE UPDATE` per ogni tabella mutabile §29 |
+| Security | `SECURITY INVOKER`; `SET search_path = ''` |
+| Funzioni nuove di business | **Nessuna** nel ciclo 1 |
+| Manutenzione proiezione verifica profilo | **Vietata** via trigger — non esiste colonna proiezione |
+| Sync Appartenenze/Imprese | **Vietata** |
+| Gate pubblicazione | Applicazione, non trigger |
+
+---
+
+### 29.25 RLS
+
+Per **ogni** tabella §29:
+
+| Regola | Valore |
+|---|---|
+| RLS enabled | **Sì** |
+| FORCE RLS | **No** |
+| Policy nelle migration strutturali | **Nessuna** |
+| Comportamento | Deny-by-default per `anon`/`authenticated` |
+| Owner / backoffice / pubblico | Demandato a future policy Identità & Accessi (fuori ciclo strutturale) |
+| Cataloghi C03 locali | Stessa infrastruttura: RLS enable, **nessuna** policy `SELECT` pubblica nel ciclo 1 (diversi da `languages`/`competencies`, che hanno già policy legacy proprie e non sono tabelle di questo dominio) |
+| FEV | Non pubbliche; nessuna policy SELECT anon |
+| Ciclo 1 | Crea **solo infrastruttura RLS**, non policy applicative owner/pubblico |
+
+---
+
+### 29.26 Privilegi
+
+| Ruolo | Prescrizione |
+|---|---|
+| `PUBLIC` / default | `REVOKE ALL` su tutte le tabelle §29 e sulle relative sequence/identity |
+| `anon` | **Nessun GRANT** nel ciclo 1 (né su cataloghi né su dati) |
+| `authenticated` | **Nessun GRANT** nel ciclo 1 |
+| `service_role` | Nessun REVOKE aggiuntivo oltre la baseline Supabase; non sostituisce una policy di dominio |
+| Cataloghi C03 | Identici alle altre tabelle Professionisti: deny-by-default + REVOKE; lettura applicativa solo via ruolo di servizio finché Identità & Accessi non introdurrà policy dedicate (fuori ciclo 1 strutturale) |
+| Dati pubblicati | Nessun accesso lettura pubblica strutturale nel ciclo 1 |
+
+Divieto di affidarsi ai grant predefiniti di Supabase senza REVOKE esplicito.
+
+---
+
+### 29.27 Seed
+
+| Catalogo | Seed | Codici chiusi |
+|---|---|---|
+| `professional_categories` | **Obbligatorio, idempotente** | `legal_area`, `tax_accounting`, `labor_welfare`, `finance`, `subsidized_finance`, `credit`, `insurance`, `engineering`, `architecture`, `construction`, `energy`, `sustainability`, `safety`, `digital`, `informatics`, `marketing`, `communication`, `commerce`, `export`, `internationalization`, `customs`, `logistics`, `training`, `human_resources`, `business_organization`, `real_estate`, `translation`, `interpreting`, `cultural_mediation`, `intellectual_property`, `innovation`, `startup`, `other_professional` — `label_it` italiane da Logical §5; `is_active=true`; `sort_order` monotono per gruppo |
+| `professional_practice_modes` | **Obbligatorio** | `individual`, `individual_firm`, `associated_firm`, `professional_company`, `consulting_company`, `business_collaboration`, `specialist_employee`, `professional_network`, `external_professional`, `occasional`, `international_cross_border` |
+| `professional_source_kinds` | **Obbligatorio** | `professional_declaration`, `order_college`, `public_register`, `university`, `certifier`, `professional_organization`, `business`, `professional_firm`, `client`, `partner_body`, `editorial`, `public_source`, `official_document` |
+| `professional_service_natures` | **Obbligatorio** | `consulting`, `training`, `assistance`, `representation`, `design`, `verification`, `accompaniment` |
+| Specializzazioni | **Rinviato** | Nessun seed inventato |
+| Demo profili | **Escluso** | — |
+
+Seed aggiornabile solo da governance (UPSERT su `code`); non estendibile dall’applicazione utente.
+
+---
+
+### 29.28 Commenti SQL
+
+Obbligatori nel futuro SQL:
+
+- Commento tabella su ogni relazione §29.2.
+- Colonne ambigue: `context_business_id` («non membership; non verifica Impresa»), `availability_status` vs `professional_status`, `publication_status` vs `visibility_status`, `is_contested`, `fee_*` («indicativo, non preventivo»), `country_ref` («opaco; non FK Territori»), `specialization_label` («catalogo specializzazioni rinviato»).
+- Distinzioni confinanti: ≠ `profile_languages`; ≠ `profile_competencies`; ≠ `business_services`; ≠ Presenza/Interesse MI; ≠ OffertaDiServizio.
+- FEV: assenza di proiezione verifica complessiva persistita.
+- Credenziali: ente come label opaca, non catalogo Ordini.
+
+---
+
+### 29.29 Ordine topologico suggerito
+
+Ordine basato solo su dipendenze fisiche (codici M*.* = responsabilità del Migration Plan):
+
+1. Cataloghi B1: `professional_categories` → `professional_practice_modes` → `professional_source_kinds` → `professional_service_natures` (+ seed).
+2. Aggregate Root B2: `professional_profiles` (dipende da `profiles`, cataloghi practice_modes; FK opzionale `businesses`).
+3. Owned dichiarative B3 (parallellizzabili tra loro dopo B2): categories declarations; qualifications; registrations; authorizations; certifications; association_memberships; competencies; services; territories; operational_languages; served_markets; served_sectors.
+4. FEV B4: sources → evidences → verifications.
+5. Commenti/REVOKE/RLS enable per ogni unità, secondo lo stile delle migration già approvate.
+
+Precondizioni esterne già soddisfatte: `profiles`, `languages`, `competencies`, `business_sectors`, `businesses`, `international_markets`.
+
+---
+
+### 29.30 Questioni rinviate e chiusura
+
+**Decisioni risolte.** AR unica; soggetto Persona 1:1; confini D10–D13; quattro famiglie credenziali separate; FEV profilo a 3 tabelle; nessuna proiezione verifica complessiva persistita; territori opachi; lingue/competenze/settori/mercati su tabelle reali; membership strutturale esclusa; tariffe descrittive; esperienza/titolo come VO/colonne; RLS solo infrastruttura.
+
+**Decisioni rinviate.** Catalogo Specializzazioni + seed; FK `membership_id`; policy RLS applicative; Storage evidenze; FEV per-credenziale dedicato; link territorio/lingua per-servizio; canali contatto multipli; history table; workflow equivalenza titoli; codice famiglia Disponibilità in Reference Model; consolidamento PCa1.
+
+**Dipendenze future.** Dominio Organizzazioni (Ordini come soggetti); dominio Servizi (OffertaDiServizio); catalogo Territori condiviso; Identità & Accessi (policy); eventuale Autonomy futura di singole credenziali come AR (§25.4).
+
+**Il Migration Plan non potrà modificare:** nomi tabella/colonne vincolanti di questo contratto; vocabolari CHECK chiusi; UNIQUE 1:1 Persona; assenza di `membership_id` nel ciclo 1; assenza di proiezione verifica profilo; modello soggetto Persona-only; esclusione marketplace.
+
+**Il Migration Plan dovrà organizzare:** suddivisione in unità M*.*; timestamp file; ordine esatto entro i blocchi B1–B4; abbreviazione nomi funzione ≤63 byte se necessario; idempotenza seed; dry-run/apply. Non potrà introdurre policy/GRANT cataloghi in contraddizione con §29.25–§29.26 senza un aggiornamento esplicito di questo contratto.
+
+---
+
+### 29.31 Mapping decisioni chiuse (sintesi operativa)
+
+| Punto | Decisione fisica |
+|---|---|
+| Aggregate Root | `professional_profiles` |
+| Soggetto | Solo `person_id` → `profiles` |
+| Cardinalità | UNIQUE `person_id` |
+| Impresa | `context_business_id` opzionale SET NULL |
+| Appartenenze | Nessuna FK ciclo 1 |
+| Territori | `country_ref` opaco |
+| Lingue | FK `languages` |
+| Mercati | FK `international_markets` |
+| Competenze | FK `competencies` |
+| Settori | FK `business_sectors` |
+| Credenziali | 4 tabelle + associazioni |
+| Servizi | `professional_services` descrittivi |
+| FEV | 3 tabelle profilo |
+| Verifica d’insieme | Non persistita |
+| RLS | Enable senza policy |
