@@ -27,7 +27,7 @@
 14. [M3 — Credenziali professionali](#14-m3--credenziali-professionali)
 15. [M4 — Ambito dichiarato e servizi](#15-m4--ambito-dichiarato-e-servizi)
 16. [M5 — Copertura operativa](#16-m5--copertura-operativa)
-17. [M6 — Fonti, evidenze, verifiche](#17-m6--fonti-evidenze-verifiche)
+17. [M6 — Fonti, evidenze, verifiche (FEV profilo)](#17-m6--fonti-evidenze-verifiche-fev-profilo)
 18. [M7 — Assente](#18-m7--assente)
 19. [M8 — Seed demo e validazione finale](#19-m8--seed-demo-e-validazione-finale)
 20. [Slugs delle future migration](#20-slugs-delle-future-migration)
@@ -96,14 +96,14 @@ Al termine di questo documento, il dominio è **strutturalmente determinabile pe
 | Elemento | Stato |
 |---|---|
 | Dominio concettuale (Thesis/Logical/Physical §1–§28) | Chiuso |
-| Contratto DDL-ready §29 | Chiuso (+ §29.32 blocco M4 operativo) |
-| Migration SQL Professionisti M1–M3 | **Presenti e applicate** (locale/remoto fino a `20260804140000`; commit `5761217`) |
-| Migration SQL Professionisti M4+ | **Assenti** |
-| Timestamp Professionisti più alto | `20260804140000` (M3.5) |
-| Dipendenze fisiche ciclo 1 per M4 | Disponibili (M1.1, M1.4, M2.1, `competencies`) |
+| Contratto DDL-ready §29 | Chiuso (+ §29.32–§29.34 blocchi M4–M6 operativi) |
+| Migration SQL Professionisti M1–M5 | **Presenti e applicate** (locale/remoto fino a `20260804210000`; commit `f6079e3`) |
+| Migration SQL Professionisti M6+ | **Assenti** |
+| Timestamp Professionisti più alto | `20260804210000` (M5.4) |
+| Dipendenze fisiche ciclo 1 per M6 | Disponibili (M2.1, M1.3 `professional_source_kinds`) |
 | Dipendenze future | Rinviate (§6) |
-| SQL M4 | **Autorizzabile** dopo determinazione blocco (§15) — non ancora creato |
-| Working tree alla stesura | `main` allineato a `origin/main`; modifica documentale prevista su `domain-mapping/professionisti.md` (§29); HEAD di riferimento iniziale `436690a` |
+| SQL M6 | **Autorizzabile** dopo determinazione blocco (§17) — non ancora creato |
+| Working tree alla determinazione M6 | `main` = `origin/main` = `f6079e3`; modifica documentale prevista su Logical/Physical/Plan |
 
 ---
 
@@ -743,52 +743,156 @@ Assegnato a ciascuna unità M1.*:
 
 ---
 
-## 17. M6 — Fonti, evidenze, verifiche
+## 17. M6 — Fonti, evidenze, verifiche (FEV profilo)
 
-**Responsabilità.** Esattamente le **3** tabelle FEV del profilo (§29.21). Ordine: sources → evidences → verifications.
+**Titolo blocco.** FEV profilo.
+**Responsabilità.** Esattamente le **3** tabelle FEV owned dal Profilo (§29.21 / §29.3.15 / §29.34): Fonti → Evidenze → Verifiche per aspetti chiusi. Completa la struttura SQL del ciclo 1 dopo M5.
+**Prerequisiti blocco.** M2.1 applicata; M1.3 (`professional_source_kinds`) applicata. Nessuna dipendenza strutturale obbligatoria da M3–M5 (gli aspetti referenziano semanticamente dichiarazioni/credenziali senza FK polimorfiche).
+**Completamento.** 3 tabelle; UNIQUE current-state su verifiche; CHECK aspetti/status/date; trigger/RLS/REVOKE/COMMENT; seed **assente**; policy **assenti**; Storage **assente**.
+**Stop point.** **Sì** dopo M6.3 (struttura ciclo 1 SQL completa; poi M8 chiusura documentale).
 
-**Ribaditi.**
+| Unità | Timestamp proposto | File |
+|---|---|---|
+| M6.1 | `20260804220000` | `20260804220000_create_professional_profile_sources.sql` |
+| M6.2 | `20260804230000` | `20260804230000_create_professional_profile_evidences.sql` |
+| M6.3 | `20260804240000` | `20260804240000_create_professional_profile_verifications.sql` |
 
-* Verifica complessiva profilo = **proiezione non persistita**.  
-* Nessun trigger di aggregazione.  
-* Nessuna tabella FEV per credenziale.  
-* Nessuno Storage.  
-* Nessuna policy.  
-* Nessun workflow moderazione completo.  
-* Aspetti chiusi: elenco §29.21.  
-* Aspetti esclusi: person_identity, organization_existence, membership_relation.
+**Regole comuni M6 (ogni unità).** Stile M5: header normativo; una tabella; PK uuid; timestamps; `set_*_updated_at` INVOKER + `search_path=''` + trigger `BEFORE UPDATE`; RLS ENABLE; no FORCE; no policy; REVOKE ALL da `PUBLIC`/`anon`/`authenticated`; no GRANT; COMMENT ON; seed assente; no JSONB; no Storage; no anticipazione M8 SQL; no proiezione verifica complessiva; no trigger di aggregazione.
 
-### M6.1 — Fonti
+**Vocabolario aspetti (evidenze `supported_aspect` e verifiche `aspect`).**
+`professional_title` \| `registration` \| `authorization` \| `qualification` \| `certification` \| `experience` \| `service_declared` \| `territory` \| `language` \| `availability` \| `contacts` \| `competency`.
 
-| Campo | Valore |
-|---|---|
-| Slug | `create_professional_profile_sources` |
-| Tabella | `professional_profile_sources` |
-| FK | profile CASCADE; `source_kind_code` → source_kinds RESTRICT |
-| Colonne | §29.3.15 |
-| Seed | nessuno (tipi già in M1.3) |
+**Esclusi dagli aspetti.** `person_identity`, `organization_existence`, `membership_relation`; categoria/settore/mercato/adesione associativa come aspetto FEV dedicato.
 
-### M6.2 — Evidenze
+**Ribaditi.** Verifica complessiva profilo = proiezione non persistita; nessuna tabella FEV per-credenziale; `verification_status` di riga M3/M4/M5 resta distinto da `status` FEV; nessuna FK `entity_type`/`entity_id`.
+
+### M6.1 — Fonti di profilo
 
 | Campo | Valore |
 |---|---|
-| Slug | `create_professional_profile_evidences` |
-| Tabella | `professional_profile_evidences` |
-| FK | profile CASCADE; `source_id` → sources ON DELETE **SET NULL** |
-| CHECK | `supported_aspect` ∈ vocabolario aspetti |
-| Esclusi | `storage_path` |
+| Codice / slug | M6.1 / `create_professional_profile_sources` |
+| Responsabilità | Provenienza informativa dichiarata per il Profilo (Fonte ≠ Evidenza ≠ Verifica) |
+| Tabella | `public.professional_profile_sources` (§29.3.15) |
+| Dipendenze | M2.1; M1.3 |
+| Timestamp | `20260804220000` |
 
-### M6.3 — Verifiche
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `source_kind_code` | text | NO | — |
+| 4 | `reference_label` | text | SÌ | NULL |
+| 5 | `reliability_note` | text | SÌ | NULL |
+| 6 | `declared_at` | timestamptz | SÌ | NULL |
+| 7 | `created_at` | timestamptz | NO | `now()` |
+| 8 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner → profiles ON UPDATE NO ACTION ON DELETE CASCADE. FK `source_kind_code` → `professional_source_kinds(code)` ON UPDATE CASCADE ON DELETE RESTRICT.
+
+**UNIQUE.** Nessuno oltre PK.
+
+**CHECK.** Nessun vocabolario aggiuntivo obbligatorio sulle note (testo libero). Seed tipi già in M1.3.
+
+**Indici.** btree owner; btree `(source_kind_code)`.
+
+**Trigger / RLS / privilegi / seed.** Regole comuni M6. COMMENT: Fonte ≠ Evidenza/Verifica; `reference_label` non è URL strutturato.
+
+### M6.2 — Evidenze di profilo
 
 | Campo | Valore |
 |---|---|
-| Slug | `create_professional_profile_verifications` |
-| Tabella | `professional_profile_verifications` |
-| FK | profile CASCADE |
-| UNIQUE | (`professional_profile_id`, `aspect`) — current-state |
-| Status | `unverified`\|`in_review`\|`confirmed`\|`rejected` |
-| History table | **esclusa** |
-| Stop point | **Sì** — struttura ciclo 1 SQL completa |
+| Codice / slug | M6.2 / `create_professional_profile_evidences` |
+| Responsabilità | Riscontro concreto a supporto di un aspetto (Evidenza ≠ Fonte ≠ Verifica) |
+| Tabella | `public.professional_profile_evidences` (§29.3.15) |
+| Dipendenze | M2.1; M6.1 |
+| Timestamp | `20260804230000` |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `source_id` | uuid | SÌ | NULL |
+| 4 | `supported_aspect` | text | NO | — |
+| 5 | `summary` | text | NO | — |
+| 6 | `observed_at` | timestamptz | SÌ | NULL |
+| 7 | `created_at` | timestamptz | NO | `now()` |
+| 8 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner CASCADE. FK `source_id` → `professional_profile_sources(id)` ON UPDATE NO ACTION ON DELETE **SET NULL**.
+
+**UNIQUE.** Nessuno oltre PK (più evidenze per stesso aspetto ammesse).
+
+**CHECK.** `supported_aspect` ∈ vocabolario aspetti; `length(btrim(summary)) > 0`.
+
+**Indici.** btree owner; btree `(source_id)`; btree `(supported_aspect)` ammesso.
+
+**Esclusi.** `storage_path`, URL, MIME, hash, dimensione, JSONB payload.
+
+### M6.3 — Verifiche di profilo
+
+| Campo | Valore |
+|---|---|
+| Codice / slug | M6.3 / `create_professional_profile_verifications` |
+| Responsabilità | Esito current-state per aspetto del Profilo |
+| Tabella | `public.professional_profile_verifications` (§29.3.15) |
+| Dipendenze | M2.1 |
+| Timestamp | `20260804240000` |
+| Stop point blocco | **Sì** — struttura ciclo 1 SQL completa |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `aspect` | text | NO | — |
+| 4 | `status` | text | NO | `'unverified'` |
+| 5 | `verified_at` | timestamptz | SÌ | NULL |
+| 6 | `verifier_label` | text | SÌ | NULL |
+| 7 | `outcome_note` | text | SÌ | NULL |
+| 8 | `expires_at` | timestamptz | SÌ | NULL |
+| 9 | `created_at` | timestamptz | NO | `now()` |
+| 10 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner CASCADE. Nessuna FK a sources/evidences (collegamento applicativo).
+
+**UNIQUE.** UNIQUE `(professional_profile_id, aspect)` — current-state; history **esclusa**.
+
+**CHECK.** `aspect` ∈ vocabolario aspetti; `status IN ('unverified','in_review','confirmed','rejected')`; `expires_at IS NULL OR verified_at IS NULL OR expires_at >= verified_at`.
+
+**Indici.** UNIQUE (profile, aspect); btree owner.
+
+**Distinzioni.** `status` FEV ≠ `verification_status` riga M3/M4/M5; ≠ `is_contested` AR; ≠ pubblicazione/editoriale. `verifier_label` non è FK account.
+
+**Esclusi blocco M6.** FEV per-credenziale; Storage; badge complessivo; entity_type/entity_id; sync automatico assi AR; seed; policy/GRANT.
+
+### Test statici previsti (blocco M6, pre-SQL e pre-apply)
+
+* Parsing SQL; nomi ≤ 63 byte (`prof_profile_sources` / `_evidences` / `_verifications`).
+* Inventario Plan ↔ SQL ↔ §29.3.15 / §29.34 (3 tabelle, colonne, ordine).
+* Dipendenze: M2.1 + M1.3 presenti prima di M6.1; M6.1 prima di M6.2.
+* Assenza oggetti vietati: `storage_path`, URL strutturato, MIME, hash, JSONB payload, `entity_type`/`entity_id`, policy, GRANT, history table, proiezione verifica complessiva, FK verso tabelle M3–M5 per aspetto.
+* Timestamp `20260804220000`…`20260804240000` strettamente crescenti e successivi a `20260804210000`.
+
+### Test runtime previsti (blocco M6, post-apply, in transazione ROLLBACK)
+
+| # | Caso | Esito atteso |
+|---|---|---|
+| M6-a | Insert source con `source_kind_code` inesistente | rifiutato (FK) |
+| M6-b | Delete profile owner → cascade sources/evidences/verifications | OK |
+| M6-c | Delete source con evidence collegata → `source_id` SET NULL | OK |
+| M6-d | Evidence con `supported_aspect` fuori vocabolario / summary blank | rifiutato (CHECK) |
+| M6-e | Due verification stesso `(profile, aspect)` | rifiutato (UNIQUE) |
+| M6-f | `status` fuori `unverified\|in_review\|confirmed\|rejected` | rifiutato |
+| M6-g | `expires_at < verified_at` (entrambi NOT NULL) | rifiutato |
+| M6-h | SELECT/INSERT come `anon`/`authenticated` | negato (RLS, no policy) |
+| M6-i | Assenza colonne Storage/path/JSONB su evidences | OK (catalogo) |
+
+**Rollback dei test.** Tutti i DML di prova in `BEGIN…ROLLBACK`; nessun commit di seed demo; nessun truncate delle tabelle di produzione.
 
 ---
 
@@ -846,7 +950,7 @@ I soli seed autorizzati sono i seed **normativi C03** già inclusi in M1.1–M1.
 | M6.2 | `create_professional_profile_evidences` | evidences |
 | M6.3 | `create_professional_profile_verifications` | verifications |
 
-Timestamp reali M1–M4: già in repository fino a `20260804170000`. Timestamp M5: proposti in §16 (`…180000`…`…210000`); M6 ancora da assegnare alla creazione.
+Timestamp reali M1–M5: già in repository fino a `20260804210000`. Timestamp M6: proposti in §17 (`…220000`…`…240000`); file SQL non ancora creati.
 
 ---
 
@@ -854,14 +958,14 @@ Timestamp reali M1–M4: già in repository fino a `20260804170000`. Timestamp M
 
 | Regola | Prescrizione |
 |---|---|
-| Riferimento | Timestamp più alto esistente nel dominio Professionisti: **`20260804170000`** (M4.3 applicata e versionata) |
+| Riferimento | Timestamp più alto esistente nel dominio Professionisti: **`20260804210000`** (M5.4 applicata e versionata) |
 | Assegnazione | Un timestamp univoco per unità SQL, strettamente crescente |
 | Ordine | Cronologia file = ordine topologico §11 |
 | Collisione | Vietata; verificare con `supabase migration list` prima di ogni creazione |
 | Riuso / retrodatazione | Vietati |
 | Gap | Lasciare margine ordinato (es. incrementi a step coerenti con lo stile repo) senza sovrapporsi a rami paralleli |
-| Momento | Timestamp scelti alla creazione concreta della migration; per M5 i valori proposti in §16 (`…180000`…`…210000`) sono **autoritativi per la creazione accelerata del blocco**, salvo collisione rilevata in `migration list` |
-| M1–M4 | Timestamp già assegnati e file presenti (`20260803090000`…`20260804170000`) — non riassegnare |
+| Momento | Timestamp scelti alla creazione concreta della migration; per M6 i valori proposti in §17 (`…220000`…`…240000`) sono **autoritativi per la creazione accelerata del blocco**, salvo collisione rilevata in `migration list` |
+| M1–M5 | Timestamp già assegnati e file presenti (`20260803090000`…`20260804210000`) — non riassegnare |
 
 ---
 
@@ -926,7 +1030,9 @@ Checklist minima:
 10. Dipendenze soddisfatte; nessun oggetto anticipato/rinviato  
 11. Nessuna modifica a tabelle di altri domini  
 
-**Eccezione revisione congiunta.** Nessuna: ogni unità M1.1–M6.3 richiede micro-review propria. La review di blocco (§24) è aggiuntiva, non sostitutiva.
+**Eccezione revisione congiunta.** Nessuna in regime ordinario: ogni unità M1.1–M6.3 richiede micro-review propria. La review di blocco (§24) è aggiuntiva, non sostitutiva.
+
+**Eccezione creazione accelerata M6.** Con contratto §17/§29.34 approvato, le tre unità M6.1–M6.3 possono essere create in un unico ciclo SQL senza micro-review di *progettazione* intermedie; restano obbligatori: review SQL del blocco, dry-run, apply, smoke/runtime (§25–§26) prima del commit.
 
 ---
 
@@ -985,6 +1091,10 @@ Presenza tabelle/colonne; PK; UNIQUE; FK; CHECK; indici; trigger; RLS enabled; p
 | 8 | Duplicazione link declared (lingua/mercato/settore/categoria) | rifiutato |
 | 9 | Stato fuori vocabolario | rifiutato |
 | 10 | SELECT/INSERT come anon o authenticated senza policy/grant | negato |
+| 11 | Due verification stesso `(professional_profile_id, aspect)` | rifiutato |
+| 12 | Evidence `supported_aspect` / verification `aspect` fuori elenco §29.21 | rifiutato |
+| 13 | FEV `expires_at < verified_at` (entrambi valorizzati) | rifiutato |
+| 14 | `source_kind_code` assente dal catalogo M1.3 | rifiutato |
 
 ---
 
@@ -1025,13 +1135,13 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 
 ## 28. Stop point del Plan
 
-**Stato corrente.** M1–M4 chiuse (SQL applicate e versionate fino a `20260804170000` / commit `54dfcff`). Blocco M5 determinato documentalmente (§16 / §29.33); SQL M5 da creare in ciclo accelerato.
+**Stato corrente.** M1–M5 chiuse (SQL applicate e versionate fino a `20260804210000` / commit `f6079e3`). Blocco M6 determinato documentalmente (§17 / §29.3.15 / §29.34); SQL M6 da creare in ciclo accelerato.
 
-1. La creazione accelerata di **M5.1–M5.4** è autorizzabile solo con contratto §16/§29.33 allineato (questa revisione).
-2. Non aprire **M6** prima dello stop point post-M5.4 (SQL + apply + review blocco).
+1. La creazione accelerata di **M6.1–M6.3** è autorizzabile solo con contratto §17/§29.34 allineato (questa revisione).
+2. Non aprire **M8** prima dello stop point post-M6.3 (SQL + apply + review blocco). M7 resta **assente**.
 3. Ogni incongruenza Plan↔§29 va risolta **documentalmente** prima dello SQL.
 
-**Stop point operativi:** dopo M1.4; M2.1; M3.5; **M4.3**; M5.4; M6.3; M8.2.
+**Stop point operativi:** dopo M1.4; M2.1; M3.5; M4.3; M5.4; **M6.3**; M8.2.
 
 ---
 
@@ -1043,14 +1153,15 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 - [x] Credenziali non unificate (M3.1–M3.4) + associazioni M3.5  
 - [x] Servizi descrittivi M4.3 con esclusioni marketplace  
 - [x] Contratto M4.1–M4.3 completo + SQL applicato/versionato
-- [x] Contratto M5.1–M5.4 completo + timestamp proposti (§16 / §29.33)
+- [x] Contratto M5.1–M5.4 completo + SQL applicato/versionato (`f6079e3` / fino a `20260804210000`)
 - [x] Territori opachi M5.1; lingue M5.2; mercati M5.3; settori M5.4  
-- [x] FEV esattamente 3 tabelle M6  
+- [x] Contratto M6.1–M6.3 completo + timestamp proposti (§17 / §29.34)
+- [x] FEV esattamente 3 tabelle M6; aspetti chiusi; no Storage; no proiezione complessiva
 - [x] Nessuna membership FK; nessun catalogo Ordini; nessuna policy/GRANT  
 - [x] M7 assente motivato; M8.1 SKIP; M8.2 report  
 - [x] Slugs definitivi; abbreviazioni ≤63
 - [x] Review unità/blocco; test; apply; commit prescritti  
-- [ ] SQL M5.1–M5.4 (prossimo passo operativo)
+- [ ] SQL M6.1–M6.3 (prossimo passo operativo)
 
 ---
 
@@ -1066,15 +1177,16 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 | Soggetto polimorfico / XOR | **Respinta** — solo Persona |
 | Proiezione verifica persistita | **Respinta** — vietata |
 | FEV per credenziale / Storage | **Respinta** — esclusi |
+| Riferimenti polimorfici entity_type/id | **Respinta** — aspetto chiuso, no FK multi-target |
 | Policy o GRANT | **Respinta** — §8/§29 |
 | Seed demo | **Respinta** — M8.1 SKIP |
 | Dipendenze circolari | **Respinta** — grafo §11 |
 | M7 artificiale | **Respinta** — assente motivato |
 | Plan che altera §29 | **Respinta** — regola autorità |
 | Unità non revisionabili | **Respinta** — 20 SQL atomiche |
-| Timestamp già assegnati in conflitto | **Respinta** — M1–M3 versionati; M4 proposti dopo `20260804140000` (§15/§21) |
+| Timestamp già assegnati in conflitto | **Respinta** — M1–M5 versionati; M6 proposti dopo `20260804210000` (§17/§21) |
 
-**Esito confutazione:** nessuna accusa regge sul perimetro statico. Blocco M4 contratto aggiornato per creazione accelerata SQL.
+**Esito confutazione:** nessuna accusa regge sul perimetro statico. Blocco M6 contratto aggiornato per creazione accelerata SQL.
 
 ---
 
@@ -1086,14 +1198,14 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 | M2.1 | create_professional_profiles | **Applicata e versionata** |
 | M3.1–M3.5 | credentials + associations | **Applicata e versionata** (`5761217` / fino a `20260804140000`) |
 | M4.1–M4.3 | scope + services | **Applicata e versionata** (`54dfcff` / fino a `20260804170000`) |
-| M5.1–M5.4 | coverage | **Contratto completo — SQL non creato** (creazione accelerata autorizzabile) |
-| M6.1–M6.3 | profile FEV | **Pianificata** — dopo stop M5.4 |
+| M5.1–M5.4 | coverage | **Applicata e versionata** (`f6079e3` / fino a `20260804210000`) |
+| M6.1–M6.3 | profile FEV | **Contratto completo — SQL non creato** (creazione accelerata autorizzabile) |
 | M7 | — | **Assente** |
 | M8.1 | demo seed | **SKIP** |
 | M8.2 | `professionisti-validation-report.md` | **Da produrre a fine ciclo 1 SQL** |
 
 ---
 
-**MIGRATION PLAN PROFESSIONISTI — BLOCCO M5 DETERMINATO.**
-M1–M4 chiuse; M5.1–M5.4 con contratto implementabile e timestamp proposti; M6+ non aperte.
-**Prossimo passo operativo:** creazione accelerata delle quattro migration M5 (senza micro-review intermedie di progettazione), poi review SQL/apply secondo §23–§26.
+**MIGRATION PLAN PROFESSIONISTI — BLOCCO M6 DETERMINATO.**
+M1–M5 chiuse; M6.1–M6.3 con contratto implementabile e timestamp proposti; M7 assente; M8 non aperto.
+**Prossimo passo operativo:** creazione accelerata delle tre migration M6 (senza micro-review intermedie di progettazione), poi review SQL/apply secondo §23–§26.

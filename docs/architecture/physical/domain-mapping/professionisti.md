@@ -964,11 +964,47 @@ Non crea PresenzaDiMercato né InteresseDiMercato. Nessuna verifica dedicata nel
 
 #### 29.3.15 FEV profilo
 
-**`professional_profile_sources`:** `id` uuid PK; `professional_profile_id` uuid NOT NULL; `source_kind_code` text NOT NULL → source_kinds; `reference_label` text NULL; `reliability_note` text NULL; `declared_at` timestamptz NULL; timestamps.
+##### `public.professional_profile_sources`
 
-**`professional_profile_evidences`:** `id` uuid PK; `professional_profile_id` uuid NOT NULL; `source_id` uuid NULL → sources; `supported_aspect` text NOT NULL (stesso vocabolario verifiche); `summary` text NOT NULL; `observed_at` timestamptz NULL; timestamps. Nessun `storage_path` nel ciclo 1.
+| Ord. | Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` | PK |
+| 2 | `professional_profile_id` | uuid | NO | — | Owner AR |
+| 3 | `source_kind_code` | text | NO | — | FK `professional_source_kinds(code)` |
+| 4 | `reference_label` | text | SÌ | NULL | Citazione descrittiva opaca |
+| 5 | `reliability_note` | text | SÌ | NULL | Nota qualitativa (non score) |
+| 6 | `declared_at` | timestamptz | SÌ | NULL | Quando la fonte è stata dichiarata/indicata |
+| 7–8 | timestamps | timestamptz | NO | now() | Sistema |
 
-**`professional_profile_verifications`:** `id` uuid PK; `professional_profile_id` uuid NOT NULL; `aspect` text NOT NULL; `status` text NOT NULL DEFAULT `'unverified'`; `verified_at` timestamptz NULL; `verifier_label` text NULL; `outcome_note` text NULL; `expires_at` timestamptz NULL; timestamps. Current-state: UNIQUE `(professional_profile_id, aspect)`.
+##### `public.professional_profile_evidences`
+
+| Ord. | Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` | PK |
+| 2 | `professional_profile_id` | uuid | NO | — | Owner AR |
+| 3 | `source_id` | uuid | SÌ | NULL | FK opzionale → sources; ON DELETE SET NULL |
+| 4 | `supported_aspect` | text | NO | — | Aspetto sostenuto (§29.21) |
+| 5 | `summary` | text | NO | — | Riscontro testuale concreto |
+| 6 | `observed_at` | timestamptz | SÌ | NULL | Quando osservato/riferito |
+| 7–8 | timestamps | timestamptz | NO | now() | Sistema |
+
+**Esclusi sulla evidenza.** `storage_path`, URL, MIME, hash, dimensione file, payload JSONB.
+
+##### `public.professional_profile_verifications`
+
+| Ord. | Colonna | Tipo | Null | Default | Significato |
+|---|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` | PK |
+| 2 | `professional_profile_id` | uuid | NO | — | Owner AR |
+| 3 | `aspect` | text | NO | — | Aspetto verificato (§29.21) |
+| 4 | `status` | text | NO | `'unverified'` | Esito current-state |
+| 5 | `verified_at` | timestamptz | SÌ | NULL | Quando registrata la decisione |
+| 6 | `verifier_label` | text | SÌ | NULL | Verificatore opaco (non FK account) |
+| 7 | `outcome_note` | text | SÌ | NULL | Nota di contesto/esito |
+| 8 | `expires_at` | timestamptz | SÌ | NULL | Scadenza; NULL = non scade |
+| 9–10 | timestamps | timestamptz | NO | now() | Sistema |
+
+Current-state: UNIQUE `(professional_profile_id, aspect)`. Nessuna history table.
 
 ---
 
@@ -1279,7 +1315,13 @@ Espressi in forma traducibile in SQL (nomi indicativi):
 | `professional_services` | `(service_status)` | btree | no | WHERE `service_status='active'` opz. | Servizi attivi |
 | Lingue/territori/mercati/settori/competenze | owner + FK target | btree | no | — | Filtri ricerca |
 | UNIQUE parziali declared | come §29.5 | btree | sì | declared | Integrità |
+| `professional_profile_sources` | `(professional_profile_id)` | btree | no | — | Load aggregate |
+| `professional_profile_sources` | `(source_kind_code)` | btree | no | — | Join catalogo |
+| `professional_profile_evidences` | `(professional_profile_id)` | btree | no | — | Load aggregate |
+| `professional_profile_evidences` | `(source_id)` | btree | no | — | Join fonte (nullable) |
+| `professional_profile_evidences` | `(supported_aspect)` | btree | no | — | Filtro aspetto (ammesso) |
 | `professional_profile_verifications` | `(professional_profile_id, aspect)` | btree | UNIQUE | — | Verifica corrente |
+| `professional_profile_verifications` | `(professional_profile_id)` | btree | no | — | Load aggregate (se distinto dalla UNIQUE) |
 | Cataloghi | PK code | — | sì | — | Join |
 
 Nessun indice speculativo su `notes`/`summary` full-text nel ciclo 1.
@@ -1456,3 +1498,31 @@ Precondizioni esterne già soddisfatte: `profiles`, `languages`, `competencies`,
 **Esclusi dal blocco M5.** Disponibilità temporale/di carico sull’AR (§29.16 — già M2); fee/tariffe; FEV (M6); link territorio/lingua per-servizio; sedi operative autonome; tabella `territories`/`countries`; Presenza/Interesse/Attività MI; duplicazione cataloghi `languages`/`business_sectors`/`international_markets`; `membership_id`; OffertaDiServizio; policy/GRANT; seed.
 
 **Verifica post-apply minima.** Presence 4 tabelle; colonne §29.3.11–14; PK/FK/UNIQUE/CHECK; trigger; RLS; zero policy; privilegi revocati; assenza oggetti M6.
+
+---
+
+### 29.34 Blocco M6 — contratto operativo di implementazione (FEV profilo)
+
+**Responsabilità del blocco.** Infrastruttura **Fonti → Evidenze → Verifiche** locale al dominio, owned dall’Aggregate Root `professional_profiles`, per aspetti chiusi del Profilo — dopo copertura M5; completa la struttura SQL del ciclo 1 (prima di M8 chiusura documentale). Non è un audit log, non è document management, non è FEV condiviso cross-domain.
+
+| Unità | Tabella | Colonne | Dipendenze | Seed | Policy |
+|---|---|---|---|---|---|
+| M6.1 | `professional_profile_sources` | 8 | AR CASCADE; `professional_source_kinds` UPDATE CASCADE / DELETE RESTRICT | **Assente** | **Assenti** |
+| M6.2 | `professional_profile_evidences` | 8 | AR CASCADE; sources ON DELETE **SET NULL** | **Assente** | **Assenti** |
+| M6.3 | `professional_profile_verifications` | 10 | AR CASCADE | **Assente** | **Assenti** |
+
+**Pattern obbligatori (ogni unità).** PK uuid + `gen_random_uuid()`; `created_at`/`updated_at`; funzione `set_*_updated_at` INVOKER + `search_path=''` + trigger `BEFORE UPDATE`; RLS ENABLE senza FORCE; REVOKE ALL da `PUBLIC`/`anon`/`authenticated`; nessun GRANT; COMMENT ON tabella + colonne ambigue + funzione; indici owner (+ target FK); nessun JSONB; nessun Storage; nessuna policy; nessuna proiezione verifica complessiva persistita; nessun trigger di aggregazione verso AR.
+
+**M6.1 — Fonti.** Colonne §29.3.15 sources in ordine. FK owner CASCADE. FK `source_kind_code` → `professional_source_kinds(code)` ON UPDATE CASCADE ON DELETE RESTRICT. Nessun UNIQUE dichiarato oltre PK. Indici: btree owner; btree `(source_kind_code)`. `reference_label` / `reliability_note` opachi (non URL, non score).
+
+**M6.2 — Evidenze.** Colonne §29.3.15 evidences. FK owner CASCADE. FK `source_id` → `professional_profile_sources(id)` ON UPDATE NO ACTION ON DELETE **SET NULL** (nullable). CHECK: `supported_aspect` ∈ vocabolario §29.21; `length(btrim(summary)) > 0`. Indici: btree owner; btree `(source_id)`; btree `(supported_aspect)` ammesso. **Nessun** `storage_path`/URL/MIME/hash. Nessun FK polimorfico a tabelle M3–M5: il collegamento semantico è via `supported_aspect`.
+
+**M6.3 — Verifiche.** Colonne §29.3.15 verifications. FK owner CASCADE. UNIQUE `(professional_profile_id, aspect)` current-state. CHECK: `aspect` ∈ stesso vocabolario §29.21; `status ∈ unverified|in_review|confirmed|rejected`; `expires_at IS NULL OR verified_at IS NULL OR expires_at >= verified_at`. Indici: UNIQUE (profile, aspect); btree owner. `verifier_label` opaco (non FK `auth.users`). Nessuna history table. Nessun sync automatico con `verification_status` delle righe M3/M4/M5 né con `is_contested` dell’AR.
+
+**Aspetti ammessi (sources evidence/verification).** `professional_title` \| `registration` \| `authorization` \| `qualification` \| `certification` \| `experience` \| `service_declared` \| `territory` \| `language` \| `availability` \| `contacts` \| `competency`.
+
+**Aspetti esclusi.** `person_identity`, `organization_existence`, `membership_relation`; aspetti non in elenco (categoria, settore, mercato, adesione associativa come aspetto FEV dedicato).
+
+**Esclusi dal blocco M6.** FEV per-credenziale; Storage; policy/GRANT; seed; badge “Professionista verificato”; colonna/proiezione `verification_status` complessivo sul profilo; entity_type/entity_id; JSONB payload; log applicativo; M7 (assente); alterazioni M1–M5.
+
+**Verifica post-apply minima.** Presence 3 tabelle; colonne §29.3.15; PK/FK/UNIQUE/CHECK; trigger; RLS; zero policy; privilegi revocati; assenza Storage/path; assenza oggetti oltre M6.3.
