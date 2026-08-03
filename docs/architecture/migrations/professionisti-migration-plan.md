@@ -29,7 +29,7 @@
 16. [M5 — Copertura operativa](#16-m5--copertura-operativa)
 17. [M6 — Fonti, evidenze, verifiche (FEV profilo)](#17-m6--fonti-evidenze-verifiche-fev-profilo)
 18. [M7 — Assente](#18-m7--assente)
-19. [M8 — Seed demo e validazione finale](#19-m8--seed-demo-e-validazione-finale)
+19. [M8 — Chiusura documentale e validazione finale](#19-m8--chiusura-documentale-e-validazione-finale)
 20. [Slugs delle future migration](#20-slugs-delle-future-migration)
 21. [Strategia timestamp](#21-strategia-timestamp)
 22. [Naming constraint, indici, trigger (≤63 byte)](#22-naming-constraint-indici-trigger-63-byte)
@@ -96,14 +96,14 @@ Al termine di questo documento, il dominio è **strutturalmente determinabile pe
 | Elemento | Stato |
 |---|---|
 | Dominio concettuale (Thesis/Logical/Physical §1–§28) | Chiuso |
-| Contratto DDL-ready §29 | Chiuso (+ §29.32–§29.34 blocchi M4–M6 operativi) |
-| Migration SQL Professionisti M1–M5 | **Presenti e applicate** (locale/remoto fino a `20260804210000`; commit `f6079e3`) |
-| Migration SQL Professionisti M6+ | **Assenti** |
-| Timestamp Professionisti più alto | `20260804210000` (M5.4) |
-| Dipendenze fisiche ciclo 1 per M6 | Disponibili (M2.1, M1.3 `professional_source_kinds`) |
+| Contratto DDL-ready §29 | Chiuso (+ §29.32–§29.35 blocchi M4–M8 operativi) |
+| Migration SQL Professionisti M1–M6 | **Presenti e applicate** (locale/remoto fino a `20260804240000`; commit `6d32dc0`) |
+| Migration SQL Professionisti M7/M8 | **Assenti** (M7 assente; M8 non SQL) |
+| Timestamp Professionisti più alto | `20260804240000` (M6.3) |
+| Dipendenze fisiche ciclo 1 | Soddisfatte (20 tabelle strutturali) |
 | Dipendenze future | Rinviate (§6) |
-| SQL M6 | **Autorizzabile** dopo determinazione blocco (§17) — non ancora creato |
-| Working tree alla determinazione M6 | `main` = `origin/main` = `f6079e3`; modifica documentale prevista su Logical/Physical/Plan |
+| Blocco M8 | **Eseguito**: M8.1 SKIP; M8.2 `ACCETTATA` (`professionisti-validation-report.md`) |
+| Working tree alla chiusura M8 | `main` = `origin/main` = `6d32dc0`; docs + report da commitare |
 
 ---
 
@@ -904,13 +904,24 @@ Nessuna unità M7.
 
 ---
 
-## 19. M8 — Seed demo e validazione finale
+## 19. M8 — Chiusura documentale e validazione finale
+
+**Titolo blocco.** Chiusura ciclo 1 Professionisti.
+**Natura.** Combinazione di: (a) SKIP formale seed demo; (b) report di validazione/accettazione finale non SQL. **Zero migration SQL.** Nessuna migration comment-only.
+**Prerequisiti blocco.** M1–M6 SQL applicate locale e remoto; history allineata fino a `20260804240000`; commit M6 su `origin/main` (`6d32dc0`); M7 assente; working tree coerente all’apertura dell’esecuzione.
+**Completamento.** M8.1 registrata SKIP; M8.2 report approvato; Plan aggiornato a dominio ciclo 1 chiuso.
+**Stop point.** **Sì** dopo M8.2 (chiusura formale del dominio ciclo 1).
+
+| Unità | Natura | Artefatto | SQL | Timestamp |
+|---|---|---|---|---|
+| M8.1 | SKIP formale seed demo | nessuno | **No** | — |
+| M8.2 | Report validazione/accettazione | `docs/architecture/migrations/professionisti-validation-report.md` | **No** | — |
 
 ### M8.1 — Seed / demo istanze
 
 **Decisione definitiva: SKIP.**
 
-I soli seed autorizzati sono i seed **normativi C03** già inclusi in M1.1–M1.4. Nessuna fase SQL separata per profili/credenziali/servizi dimostrativi.
+I soli seed autorizzati sono i seed **normativi C03** già inclusi in M1.1–M1.4 (33+11+13+7). Nessuna fase SQL separata per profili/credenziali/servizi dimostrativi. Nessun `INSERT` demo; nessun backfill; nessuna migration M8.1.
 
 ### M8.2 — Validazione finale (non SQL)
 
@@ -918,10 +929,62 @@ I soli seed autorizzati sono i seed **normativi C03** già inclusi in M1.1–M1.
 |---|---|
 | Codice | **M8.2** |
 | Artefatto | `docs/architecture/migrations/professionisti-validation-report.md` |
-| Natura | Report markdown di riconciliazione — **non** migration SQL |
-| Prerequisiti | Tutte le 20 migration SQL applicate e pubblicate; working tree coerente |
+| Natura | Report markdown di riconciliazione e accettazione — **non** migration SQL |
+| Responsabilità | Chiudere formalmente il ciclo 1: riconciliare Logical → Physical §29 → Plan → 20 SQL M1–M6; certificare inventario; registrare evidenze locale/remoto già ottenute; dichiarare M8.1 SKIP e M7 assente |
+| Prerequisiti | 20 migration SQL Professionisti applicate e versionate; local/remote allineati fino a `20260804240000`; commit/push M6 presenti; assenza SQL successivi Professionisti |
+| Comandi ammessi in esecuzione | Lettura Git; `supabase migration list` (locale/remoto); query catalogo in sola lettura; **non** `db reset`, **non** `migration up`, **non** creazione SQL, **non** apply correttivo |
+| Esplicitamente escluso | Riesecuzione obbligatoria dei test runtime M1–M6 (già superati per blocco); seed demo; policy/GRANT; Storage; oggetti M7; domini successivi |
 
-**Il report dovrà verificare:** migration applicate; local = remote; inventario 20 tabelle; colonne; constraint; FK; indici; trigger; RLS; privilegi; seed C03; assenza policy; assenza grant; assenza oggetti rinviati; coerenza §29; coerenza Plan; working tree; commit; push; chiusura ciclo 1.
+**Sezioni obbligatorie del report M8.2.**
+
+1. Esito (`ACCETTATA` / `NON ACCETTATA`)
+2. Scopo e limiti (statica + riconciliazione; non sostituisce runtime già eseguito)
+3. Documenti analizzati (Logical, Physical §29, Plan, Dependency Map, Patterns, Thesis, 20 SQL, report M1/M2 di blocco se utili)
+4. Inventario unità M1–M8 (con M7 assente, M8.1 SKIP)
+5. Inventario 20 migration SQL (timestamp, file, tabella/oggetti, stato)
+6. Riconciliazione Logical → Physical
+7. Riconciliazione Physical → Migration (matrice 20 oggetti)
+8. Matrice di validazione catalogale (colonne/PK/FK/UNIQUE/CHECK/indici/trigger/RLS/FORCE/policy/privilegi/COMMENT/seed)
+9. History locale e remota; confronto local = remote; drift
+10. Seed C03 (conteggi 33/11/13/7); assenza seed demo
+11. Assenza oggetti vietati (M7, Storage FEV, membership FK, policy, GRANT, proiezione verifica complessiva, entity_type/id, JSONB strutturale vietato)
+12. Git (commit M1–M6 rilevanti; working tree; `origin/main`)
+13. Rilievi / limiti / osservazioni non bloccanti
+14. Criteri di chiusura dominio ciclo 1 e formula di accettazione
+
+**Matrice di validazione M1–M6 (controlli richiesti per ogni tabella owned/catalogo).**
+
+| Blocco | Tabella | Esist. | Colonne | PK | FK | CHECK | UNIQUE | Indici | Trigger | RLS | FORCE | Policy=0 | Priv. | COMMENT | Seed | History L/R |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| M1.1 | `professional_categories` | Sì | Sì | Sì | — | Sì | PK code | ammesso | Sì | Sì | No | Sì | REVOKE | Sì | 33 | Sì |
+| M1.2 | `professional_practice_modes` | Sì | Sì | Sì | — | Sì | PK code | ammesso | Sì | Sì | No | Sì | REVOKE | Sì | 11 | Sì |
+| M1.3 | `professional_source_kinds` | Sì | Sì | Sì | — | Sì | PK code | ammesso | Sì | Sì | No | Sì | REVOKE | Sì | 13 | Sì |
+| M1.4 | `professional_service_natures` | Sì | Sì | Sì | — | Sì | PK code | ammesso | Sì | Sì | No | Sì | REVOKE | Sì | 7 | Sì |
+| M2.1 | `professional_profiles` | Sì | Sì | Sì | person; practice; business? | Sì | person_id | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M3.1–M3.4 | qualifications / registrations / authorizations / certifications | Sì | Sì | Sì | profile CASCADE | Sì | secondo §29 | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M3.5 | `professional_association_memberships` | Sì | Sì | Sì | profile CASCADE | Sì | secondo §29 | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M4.1 | `professional_profile_categories` | Sì | Sì | Sì | profile; category | Sì | parziale declared | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M4.2 | `professional_competencies` | Sì | Sì | Sì | profile; competencies | Sì | parziale declared | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M4.3 | `professional_services` | Sì | Sì | Sì | profile; service_nature? | Sì | secondo §29 | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M5.1 | `professional_served_territories` | Sì | Sì | Sì | profile CASCADE | Sì | parziale declared | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M5.2 | `professional_operational_languages` | Sì | Sì | Sì | profile; languages | Sì | parziale declared | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M5.3 | `professional_served_markets` | Sì | Sì | Sì | profile; markets | Sì | parziale declared | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M5.4 | `professional_served_sectors` | Sì | Sì | Sì | profile; sectors | Sì | parziale declared | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M6.1 | `professional_profile_sources` | Sì | Sì | Sì | profile; source_kinds | —/note | PK | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M6.2 | `professional_profile_evidences` | Sì | Sì | Sì | profile; sources SET NULL | aspect+summary | PK | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+| M6.3 | `professional_profile_verifications` | Sì | Sì | Sì | profile CASCADE | aspect+status+date | (profile, aspect) | Sì | Sì | Sì | No | Sì | REVOKE | No | — | Sì |
+
+**Verifiche locali richieste (esecuzione M8.2).** Presence 20 tabelle; `schema_migrations` head `20260804240000`; conteggi seed C03; RLS/FORCE/policy/privilegi a campione o integrale sulle 20; assenza tabelle Professionisti extra; coerenza file SQL repository ↔ history.
+
+**Verifiche remote richieste.** History remota fino a `20260804240000`; presence delle 20 tabelle; allineamento local=remote (delta 0); nessun drift strutturale noto.
+
+**Migration comment-only.** **Assente** in M8 (e M7). I COMMENT ON obbligatori sono già parte di ciascuna unità M1–M6.
+
+**Criteri di superamento M8.2.** Report completo; matrice senza caselle bloccanti aperte; local=remote; 20/20 tabelle; M8.1 SKIP registrato; M7 assente confermato; Plan aggiornato a chiuso; commit/push del solo report (+ eventuale allineamento documentale minimo).
+
+**Criteri di chiusura dominio ciclo 1.** Formula nel report: dominio Professionisti ciclo 1 **ACCETTATO** a livello strutturale SQL + documentale. Tag Git opzionale (Plan §27). Fuori perimetro post-M8: policy Identità & Accessi; Storage evidenze; catalogo Specializzazioni; FK membership; FEV per-credenziale; marketplace; domini successivi.
+
+**Messaggio commit previsto (esecuzione).** `docs(db): add professionals validation report`
 
 ---
 
@@ -1135,13 +1198,13 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 
 ## 28. Stop point del Plan
 
-**Stato corrente.** M1–M5 chiuse (SQL applicate e versionate fino a `20260804210000` / commit `f6079e3`). Blocco M6 determinato documentalmente (§17 / §29.3.15 / §29.34); SQL M6 da creare in ciclo accelerato.
+**Stato corrente.** Ciclo 1 Professionisti **chiuso**: M1–M6 SQL applicate e versionate fino a `20260804240000` / commit `6d32dc0`; M7 assente; M8.1 SKIP; M8.2 report prodotto (`professionisti-validation-report.md`, esito `ACCETTATA`). **Zero migration SQL** in M8.
 
-1. La creazione accelerata di **M6.1–M6.3** è autorizzabile solo con contratto §17/§29.34 allineato (questa revisione).
-2. Non aprire **M8** prima dello stop point post-M6.3 (SQL + apply + review blocco). M7 resta **assente**.
-3. Ogni incongruenza Plan↔§29 va risolta **documentalmente** prima dello SQL.
+1. M8.2 eseguita: validazione locale/remota e report presenti.
+2. M7 resta **assente**. Nessuna migration comment-only né SQL M8.
+3. Post-M8: solo commit/push del report e dei docs di allineamento; nessun apply aggiuntivo.
 
-**Stop point operativi:** dopo M1.4; M2.1; M3.5; M4.3; M5.4; **M6.3**; M8.2.
+**Stop point operativi:** dopo M1.4; M2.1; M3.5; M4.3; M5.4; M6.3; **M8.2 (raggiunto)**.
 
 ---
 
@@ -1152,16 +1215,15 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 - [x] AR isolata in M2.1  
 - [x] Credenziali non unificate (M3.1–M3.4) + associazioni M3.5  
 - [x] Servizi descrittivi M4.3 con esclusioni marketplace  
-- [x] Contratto M4.1–M4.3 completo + SQL applicato/versionato
-- [x] Contratto M5.1–M5.4 completo + SQL applicato/versionato (`f6079e3` / fino a `20260804210000`)
-- [x] Territori opachi M5.1; lingue M5.2; mercati M5.3; settori M5.4  
-- [x] Contratto M6.1–M6.3 completo + timestamp proposti (§17 / §29.34)
+- [x] Contratto + SQL M4.1–M4.3 applicato/versionato
+- [x] Contratto + SQL M5.1–M5.4 applicato/versionato (`f6079e3` / fino a `20260804210000`)
+- [x] Contratto + SQL M6.1–M6.3 applicato/versionato (`6d32dc0` / fino a `20260804240000`)
 - [x] FEV esattamente 3 tabelle M6; aspetti chiusi; no Storage; no proiezione complessiva
 - [x] Nessuna membership FK; nessun catalogo Ordini; nessuna policy/GRANT  
-- [x] M7 assente motivato; M8.1 SKIP; M8.2 report  
+- [x] M7 assente motivato; M8.1 SKIP; M8.2 report `ACCETTATA`
 - [x] Slugs definitivi; abbreviazioni ≤63
 - [x] Review unità/blocco; test; apply; commit prescritti  
-- [ ] SQL M6.1–M6.3 (prossimo passo operativo)
+- [x] Report M8.2 `professionisti-validation-report.md` prodotto
 
 ---
 
@@ -1180,13 +1242,15 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 | Riferimenti polimorfici entity_type/id | **Respinta** — aspetto chiuso, no FK multi-target |
 | Policy o GRANT | **Respinta** — §8/§29 |
 | Seed demo | **Respinta** — M8.1 SKIP |
+| Migration SQL in M8 | **Respinta** — M8 è solo SKIP + report |
+| Comment-only M7/M8 artificiale | **Respinta** — COMMENT già in M1–M6; M7 assente |
 | Dipendenze circolari | **Respinta** — grafo §11 |
 | M7 artificiale | **Respinta** — assente motivato |
 | Plan che altera §29 | **Respinta** — regola autorità |
 | Unità non revisionabili | **Respinta** — 20 SQL atomiche |
-| Timestamp già assegnati in conflitto | **Respinta** — M1–M5 versionati; M6 proposti dopo `20260804210000` (§17/§21) |
+| Timestamp in conflitto | **Respinta** — M1–M6 versionati fino a `20260804240000` |
 
-**Esito confutazione:** nessuna accusa regge sul perimetro statico. Blocco M6 contratto aggiornato per creazione accelerata SQL.
+**Esito confutazione:** nessuna accusa regge sul perimetro statico. Blocco M8 contratto aggiornato per esecuzione accelerata (solo documentazione/report).
 
 ---
 
@@ -1199,13 +1263,13 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 | M3.1–M3.5 | credentials + associations | **Applicata e versionata** (`5761217` / fino a `20260804140000`) |
 | M4.1–M4.3 | scope + services | **Applicata e versionata** (`54dfcff` / fino a `20260804170000`) |
 | M5.1–M5.4 | coverage | **Applicata e versionata** (`f6079e3` / fino a `20260804210000`) |
-| M6.1–M6.3 | profile FEV | **Contratto completo — SQL non creato** (creazione accelerata autorizzabile) |
+| M6.1–M6.3 | profile FEV | **Applicata e versionata** (`6d32dc0` / fino a `20260804240000`) |
 | M7 | — | **Assente** |
-| M8.1 | demo seed | **SKIP** |
-| M8.2 | `professionisti-validation-report.md` | **Da produrre a fine ciclo 1 SQL** |
+| M8.1 | demo seed | **SKIP** (decisione definitiva) |
+| M8.2 | `professionisti-validation-report.md` | **ACCETTATA** — ciclo 1 chiuso |
 
 ---
 
-**MIGRATION PLAN PROFESSIONISTI — BLOCCO M6 DETERMINATO.**
-M1–M5 chiuse; M6.1–M6.3 con contratto implementabile e timestamp proposti; M7 assente; M8 non aperto.
-**Prossimo passo operativo:** creazione accelerata delle tre migration M6 (senza micro-review intermedie di progettazione), poi review SQL/apply secondo §23–§26.
+**MIGRATION PLAN PROFESSIONISTI — CICLO 1 CHIUSO.**
+M1–M6 chiuse; M7 assente; M8.1 SKIP; M8.2 ACCETTATA (`professionisti-validation-report.md`).
+**Prossimo passo operativo:** commit e push del report M8.2 e degli aggiornamenti documentali di chiusura (nessuna migration SQL).

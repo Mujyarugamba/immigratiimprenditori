@@ -1526,3 +1526,32 @@ Precondizioni esterne già soddisfatte: `profiles`, `languages`, `competencies`,
 **Esclusi dal blocco M6.** FEV per-credenziale; Storage; policy/GRANT; seed; badge “Professionista verificato”; colonna/proiezione `verification_status` complessivo sul profilo; entity_type/entity_id; JSONB payload; log applicativo; M7 (assente); alterazioni M1–M5.
 
 **Verifica post-apply minima.** Presence 3 tabelle; colonne §29.3.15; PK/FK/UNIQUE/CHECK; trigger; RLS; zero policy; privilegi revocati; assenza Storage/path; assenza oggetti oltre M6.3.
+
+---
+
+### 29.35 Blocco M8 — chiusura documentale e validazione finale (ciclo 1)
+
+**Responsabilità del blocco.** Chiudere formalmente il ciclo 1 Professionisti dopo M6: registrare lo SKIP del seed demo e produrre il report di validazione/accettazione che riconcilia Logical → Physical §29 → Migration Plan → 20 migration SQL. **Non** crea schema. **Non** applica migration. **Non** introduce seed. **Non** introduce policy/GRANT.
+
+| Unità | Natura | Artefatto | SQL |
+|---|---|---|---|
+| M8.1 | SKIP seed demo | nessuno | **Assente** |
+| M8.2 | Report validazione/accettazione | `docs/architecture/migrations/professionisti-validation-report.md` | **Assente** |
+
+**Migration comment-only.** **Assente** in M8 (e M7). I COMMENT ON obbligatori restano responsabilità delle unità M1–M6 già applicate.
+
+**Inventario strutturale da certificare (20 tabelle).**
+M1: `professional_categories`, `professional_practice_modes`, `professional_source_kinds`, `professional_service_natures`.
+M2: `professional_profiles`.
+M3: `professional_qualifications`, `professional_registrations`, `professional_authorizations`, `professional_certifications`, `professional_association_memberships`.
+M4: `professional_profile_categories`, `professional_competencies`, `professional_services`.
+M5: `professional_served_territories`, `professional_operational_languages`, `professional_served_markets`, `professional_served_sectors`.
+M6: `professional_profile_sources`, `professional_profile_evidences`, `professional_profile_verifications`.
+
+**Controlli minimi M8.2 per ogni tabella.** Esistenza locale e remota; allineamento history fino a `20260804240000`; colonne/PK/FK/UNIQUE/CHECK/indici/trigger secondo §29; RLS ENABLE; FORCE RLS false; policy = 0; privilegi PUBLIC/anon/authenticated assenti; COMMENT ON tabella presenti; seed solo sui 4 cataloghi M1 (33/11/13/7); assenza oggetti extra Professionisti.
+
+**Esclusi da M8.** Qualsiasi file `.sql` nuovo; `db reset`; apply correttivo; riesecuzione obbligatoria runtime M1–M6; tag Git obbligatorio; anticipazione policy Identità & Accessi; Storage; catalogo Specializzazioni; FK `membership_id`; FEV per-credenziale; marketplace.
+
+**Criterio di chiusura dominio.** Report M8.2 con esito `ACCETTATA`; Plan aggiornato; commit/push del report. Il ciclo 1 strutturale Professionisti è allora chiuso.
+
+**Stato post-M8.2 (esecuzione).** Report `docs/architecture/migrations/professionisti-validation-report.md` prodotto con esito `ACCETTATA` (2026-08-03). History locale/remota allineata a `20260804240000`. Ciclo 1 strutturale **chiuso** a livello di accettazione documentale; commit/push del report restano l’unico passo Git pendente.

@@ -505,3 +505,5 @@ Il percorso di un Profilo professionale è descritto da **cinque assi distinti**
 
 Queste domande restano decisioni progettuali future, coerenti con l'approccio già adottato in `logical/persone.md`, `logical/imprese.md`, `logical/appartenenze.md`, `logical/mercati-internazionali.md`, `logical/opportunita.md` e `logical/collaborazioni.md`.
 
+**Confine di chiusura del ciclo 1 (M8).** La chiusura formale del primo ciclo fisico non introduce nuove entità logiche né seed dimostrativi: lo SKIP del seed demo (M8.1) e il report di validazione/accettazione (M8.2, `professionisti-validation-report.md`, esito `ACCETTATA`) riconciliano il modello logico con il contratto fisico e le migration strutturali già realizzate (cataloghi, Profilo, credenziali, ambito/servizi, copertura, FEV profilo). Non costituisce un nuovo asse di verifica, pubblicazione o reputazione. Il ciclo 1 strutturale è chiuso a livello di accettazione documentale.
+
