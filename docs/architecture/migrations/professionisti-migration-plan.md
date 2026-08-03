@@ -584,50 +584,162 @@ Assegnato a ciascuna unità M1.*:
 
 ## 16. M5 — Copertura operativa
 
+**Titolo blocco.** Copertura operativa.
+**Responsabilità.** Dichiarazioni owned di territori (esercizio/serviti), lingue professionali, mercati internazionali referenziati e settori economici serviti — dopo M4 e prima di M6 (FEV).
+**Prerequisiti blocco.** M2.1 applicata; `public.languages`; `public.international_markets`; `public.business_sectors`. Nessun catalogo Territori/countries.
+**Completamento.** 4 tabelle; UNIQUE parziali/CHECK/indici/trigger/RLS/REVOKE/COMMENT; seed **assente**; policy **assenti**.
+**Stop point.** **Sì** dopo M5.4 (review di blocco prima di M6.1).
+
+| Unità | Timestamp proposto | File |
+|---|---|---|
+| M5.1 | `20260804180000` | `20260804180000_create_professional_served_territories.sql` |
+| M5.2 | `20260804190000` | `20260804190000_create_professional_operational_languages.sql` |
+| M5.3 | `20260804200000` | `20260804200000_create_professional_served_markets.sql` |
+| M5.4 | `20260804210000` | `20260804210000_create_professional_served_sectors.sql` |
+
+**Regole comuni M5 (ogni unità).** Stile M4: header normativo; una tabella; PK uuid `gen_random_uuid()`; timestamps; `set_*_updated_at` INVOKER + `search_path=''` + trigger `BEFORE UPDATE`; RLS ENABLE; no FORCE; no policy; REVOKE ALL da `PUBLIC`/`anon`/`authenticated`; no GRANT; COMMENT ON tabella/colonne/funzione; seed assente; no JSONB; no anticipazione M6.
+
 ### M5.1 — Territori serviti
 
 | Campo | Valore |
 |---|---|
-| Slug | `create_professional_served_territories` |
-| Tabella | `professional_served_territories` |
-| FK esterne | **nessuna** |
-| Chiave geografica | `country_ref` text opaco (+ `territory_label`) |
-| UNIQUE parziale | declared (profile, country_ref, coverage_kind) |
-| Commento SQL | obbligatorio: non FK Territori; evoluzione futura non distruttiva |
-| Esclusi | tabella countries/territories |
+| Codice / slug | M5.1 / `create_professional_served_territories` |
+| Responsabilità | Dichiarazione territorio di esercizio e/o servito + modalità di presenza |
+| Tabella | `public.professional_served_territories` (§29.3.11 / §29.33) |
+| Dipendenze | M2.1 (nessuna FK geografica) |
+| Timestamp | `20260804180000` |
 
-### M5.2 — Lingue operative
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `country_ref` | text | NO | — |
+| 4 | `territory_label` | text | SÌ | NULL |
+| 5 | `coverage_kind` | text | NO | `'served'` |
+| 6 | `presence_mode` | text | NO | `'unspecified'` |
+| 7 | `declaration_status` | text | NO | `'declared'` |
+| 8 | `verification_status` | text | NO | `'unverified'` |
+| 9 | `sort_order` | integer | NO | 0 |
+| 10 | `created_at` | timestamptz | NO | `now()` |
+| 11 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner → `professional_profiles(id)` ON UPDATE NO ACTION ON DELETE CASCADE. **Nessuna** FK a `territories`/`countries`.
+
+**UNIQUE.** UNIQUE INDEX `prof_served_territories_declared_uidx` ON `(professional_profile_id, country_ref, coverage_kind)` WHERE `declaration_status='declared'`.
+
+**CHECK.** `length(btrim(country_ref)) > 0`; `territory_label IS NULL OR length(btrim(territory_label)) > 0`; `coverage_kind IN ('exercise','served','both')`; `presence_mode IN ('in_person','remote','hybrid','unspecified')`; `declaration_status IN ('declared','removed')`; `verification_status IN ('unverified','verified','contested')` (**no** `in_review`); `sort_order >= 0`.
+
+**Indici.** UNIQUE parziale; btree owner; btree `(country_ref)`.
+
+**Trigger / RLS / privilegi / seed.** Come regole comuni M5. COMMENT obbligatorio: `country_ref` opaco, non FK Territori.
+
+**Esclusi.** Catalogo territori; coordinate; sedi; copertura per-servizio; disponibilità temporale AR.
+
+### M5.2 — Lingue operative professionali
 
 | Campo | Valore |
 |---|---|
-| Slug | `create_professional_operational_languages` |
-| Tabella | `professional_operational_languages` |
-| FK | `language_id` → `languages(id)` RESTRICT; profile CASCADE |
-| UNIQUE parziale | declared (profile, language_id, usage_role) |
-| Distinzione | ≠ `profile_languages`; ≠ lingue UI; ≠ `business_operational_language_declarations` |
-| CHECK | proficiency_level; usage_role |
+| Codice / slug | M5.2 / `create_professional_operational_languages` |
+| Responsabilità | Lingue operative/di supporto professionali del Profilo |
+| Tabella | `public.professional_operational_languages` (§29.3.12 / §29.33) |
+| Dipendenze | M2.1; `public.languages` (`id` bigint) |
+| Timestamp | `20260804190000` |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `language_id` | bigint | NO | — |
+| 4 | `proficiency_level` | text | NO | `'working'` |
+| 5 | `usage_role` | text | NO | `'operational'` |
+| 6 | `declaration_status` | text | NO | `'declared'` |
+| 7 | `verification_status` | text | NO | `'unverified'` |
+| 8 | `sort_order` | integer | NO | 0 |
+| 9 | `created_at` | timestamptz | NO | `now()` |
+| 10 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner CASCADE. FK `language_id` → `languages(id)` ON UPDATE NO ACTION ON DELETE RESTRICT.
+
+**UNIQUE.** UNIQUE INDEX `prof_op_languages_declared_uidx` ON `(professional_profile_id, language_id, usage_role)` WHERE `declaration_status='declared'`.
+
+**CHECK.** `proficiency_level IN ('elementary','working','professional','native_equivalent')`; `usage_role IN ('operational','support')`; `declaration_status IN ('declared','removed')`; `verification_status IN ('unverified','verified','contested')` (**no** `in_review`); `sort_order >= 0`.
+
+**Indici.** UNIQUE parziale; btree owner; btree `(language_id)`.
+
+**Distinzione.** ≠ `profile_languages`; ≠ lingue UI; ≠ `business_operational_language_declarations`. Non copiare GRANT/policy di `languages`.
 
 ### M5.3 — Mercati internazionali serviti
 
 | Campo | Valore |
 |---|---|
-| Slug | `create_professional_served_markets` |
-| Tabella | `professional_served_markets` |
-| FK | `market_id` → `international_markets(id)` ON DELETE **RESTRICT**; profile CASCADE |
-| UNIQUE parziale | declared (profile, market_id) |
-| relation_kind | `known`\|`served`\|`supported` |
-| Distinzione | ≠ PresenzaDiMercato; ≠ InteresseDiMercato; nessuna creazione automatica relazioni MI |
-| Verifica dedicata | assente nel ciclo 1 (§29.14.4 / §29.3.13) |
+| Codice / slug | M5.3 / `create_professional_served_markets` |
+| Responsabilità | Dichiarazione known/served/supported verso un Mercato internazionale |
+| Tabella | `public.professional_served_markets` (§29.3.13 / §29.33) |
+| Dipendenze | M2.1; `public.international_markets` (`id` uuid) |
+| Timestamp | `20260804200000` |
 
-### M5.4 — Settori serviti
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `market_id` | uuid | NO | — |
+| 4 | `relation_kind` | text | NO | `'served'` |
+| 5 | `declaration_status` | text | NO | `'declared'` |
+| 6 | `notes` | text | SÌ | NULL |
+| 7 | `sort_order` | integer | NO | 0 |
+| 8 | `created_at` | timestamptz | NO | `now()` |
+| 9 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner CASCADE. FK `market_id` → `international_markets(id)` ON UPDATE NO ACTION ON DELETE RESTRICT.
+
+**UNIQUE.** UNIQUE INDEX `prof_served_markets_declared_uidx` ON `(professional_profile_id, market_id)` WHERE `declaration_status='declared'`.
+
+**CHECK.** `relation_kind IN ('known','served','supported')`; `declaration_status IN ('declared','removed')`; `sort_order >= 0`. **Nessuna** colonna `verification_status`.
+
+**Indici.** UNIQUE parziale; btree owner; btree `(market_id)`.
+
+**Distinzione.** ≠ PresenzaDiMercato; ≠ InteresseDiMercato; ≠ Attività; nessuna creazione automatica relazioni MI.
+
+### M5.4 — Settori economici serviti
 
 | Campo | Valore |
 |---|---|
-| Slug | `create_professional_served_sectors` |
-| Tabella | `professional_served_sectors` |
-| FK | `sector_id` → `business_sectors(id)` RESTRICT; profile CASCADE |
-| UNIQUE parziale | declared (profile, sector_id) |
+| Codice / slug | M5.4 / `create_professional_served_sectors` |
+| Responsabilità | Settori economici dichiarati come ambiti serviti dal Profilo |
+| Tabella | `public.professional_served_sectors` (§29.3.14 / §29.33) |
+| Dipendenze | M2.1; `public.business_sectors` (`id` bigint) |
+| Timestamp | `20260804210000` |
 | Stop point blocco | **Sì** dopo M5.4 |
+
+**Colonne (ordine fisico).**
+
+| Ord. | Colonna | Tipo | Null | Default |
+|---|---|---|---|---|
+| 1 | `id` | uuid | NO | `gen_random_uuid()` |
+| 2 | `professional_profile_id` | uuid | NO | — |
+| 3 | `sector_id` | bigint | NO | — |
+| 4 | `declaration_status` | text | NO | `'declared'` |
+| 5 | `sort_order` | integer | NO | 0 |
+| 6 | `created_at` | timestamptz | NO | `now()` |
+| 7 | `updated_at` | timestamptz | NO | `now()` |
+
+**PK / FK.** PK `id`. FK owner CASCADE. FK `sector_id` → `business_sectors(id)` ON UPDATE NO ACTION ON DELETE RESTRICT.
+
+**UNIQUE.** UNIQUE INDEX `prof_served_sectors_declared_uidx` ON `(professional_profile_id, sector_id)` WHERE `declaration_status='declared'`.
+
+**CHECK.** `declaration_status IN ('declared','removed')`; `sort_order >= 0`.
+
+**Indici.** UNIQUE parziale; btree owner; btree `(sector_id)`.
+
+**Distinzione.** ≠ `business_sector_declarations` (Imprese); ≠ categorie professionali M4.1; nessun `is_primary` nel ciclo 1.
+
+**Esclusi blocco M5.** FEV M6; link territorio/lingua per-servizio; sedi; catalogo Territori; Presenza/Interesse/Attività MI; disponibilità temporale AR; marketplace; seed; policy/GRANT.
 
 ---
 
@@ -734,7 +846,7 @@ I soli seed autorizzati sono i seed **normativi C03** già inclusi in M1.1–M1.
 | M6.2 | `create_professional_profile_evidences` | evidences |
 | M6.3 | `create_professional_profile_verifications` | verifications |
 
-Timestamp reali M1–M3: già in repository. Timestamp M4: proposti in §15; M5+ ancora da assegnare alla creazione (vedi §21).
+Timestamp reali M1–M4: già in repository fino a `20260804170000`. Timestamp M5: proposti in §16 (`…180000`…`…210000`); M6 ancora da assegnare alla creazione.
 
 ---
 
@@ -742,14 +854,14 @@ Timestamp reali M1–M3: già in repository. Timestamp M4: proposti in §15; M5+
 
 | Regola | Prescrizione |
 |---|---|
-| Riferimento | Timestamp più alto esistente nel dominio Professionisti: **`20260804140000`** (M3.5 applicata e versionata) |
+| Riferimento | Timestamp più alto esistente nel dominio Professionisti: **`20260804170000`** (M4.3 applicata e versionata) |
 | Assegnazione | Un timestamp univoco per unità SQL, strettamente crescente |
 | Ordine | Cronologia file = ordine topologico §11 |
 | Collisione | Vietata; verificare con `supabase migration list` prima di ogni creazione |
 | Riuso / retrodatazione | Vietati |
 | Gap | Lasciare margine ordinato (es. incrementi a step coerenti con lo stile repo) senza sovrapporsi a rami paralleli |
-| Momento | Timestamp scelti alla creazione concreta della migration; per M4 i valori proposti in §15 (`…150000` / `…160000` / `…170000`) sono **autoritativi per la creazione accelerata del blocco**, salvo collisione rilevata in `migration list` |
-| M1–M3 | Timestamp già assegnati e file presenti (`20260803090000`…`20260804140000`) — non riassegnare |
+| Momento | Timestamp scelti alla creazione concreta della migration; per M5 i valori proposti in §16 (`…180000`…`…210000`) sono **autoritativi per la creazione accelerata del blocco**, salvo collisione rilevata in `migration list` |
+| M1–M4 | Timestamp già assegnati e file presenti (`20260803090000`…`20260804170000`) — non riassegnare |
 
 ---
 
@@ -913,10 +1025,10 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 
 ## 28. Stop point del Plan
 
-**Stato corrente.** M1–M3 chiuse. Blocco M4 determinato documentalmente (§15); **nessun file SQL M4 ancora creato**.
+**Stato corrente.** M1–M4 chiuse (SQL applicate e versionate fino a `20260804170000` / commit `54dfcff`). Blocco M5 determinato documentalmente (§16 / §29.33); SQL M5 da creare in ciclo accelerato.
 
-1. La creazione accelerata di **M4.1–M4.3** è autorizzabile solo con contratto §15/§29 allineato (questa revisione).
-2. Non aprire **M5** prima dello stop point post-M4.3 (SQL + apply + review blocco).
+1. La creazione accelerata di **M5.1–M5.4** è autorizzabile solo con contratto §16/§29.33 allineato (questa revisione).
+2. Non aprire **M6** prima dello stop point post-M5.4 (SQL + apply + review blocco).
 3. Ogni incongruenza Plan↔§29 va risolta **documentalmente** prima dello SQL.
 
 **Stop point operativi:** dopo M1.4; M2.1; M3.5; **M4.3**; M5.4; M6.3; M8.2.
@@ -930,15 +1042,15 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 - [x] AR isolata in M2.1  
 - [x] Credenziali non unificate (M3.1–M3.4) + associazioni M3.5  
 - [x] Servizi descrittivi M4.3 con esclusioni marketplace  
-- [x] Contratto M4.1–M4.3 completo + timestamp proposti
+- [x] Contratto M4.1–M4.3 completo + SQL applicato/versionato
+- [x] Contratto M5.1–M5.4 completo + timestamp proposti (§16 / §29.33)
 - [x] Territori opachi M5.1; lingue M5.2; mercati M5.3; settori M5.4  
 - [x] FEV esattamente 3 tabelle M6  
 - [x] Nessuna membership FK; nessun catalogo Ordini; nessuna policy/GRANT  
 - [x] M7 assente motivato; M8.1 SKIP; M8.2 report  
 - [x] Slugs definitivi; abbreviazioni ≤63
 - [x] Review unità/blocco; test; apply; commit prescritti  
-- [ ] SQL M4.1–M4.3 (prossimo passo operativo)
-- [ ] Autorizzazione M1.1 SQL  
+- [ ] SQL M5.1–M5.4 (prossimo passo operativo)
 
 ---
 
@@ -973,15 +1085,15 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 | M1.1–M1.4 | create_professional_* catalogs | **Applicata e versionata** |
 | M2.1 | create_professional_profiles | **Applicata e versionata** |
 | M3.1–M3.5 | credentials + associations | **Applicata e versionata** (`5761217` / fino a `20260804140000`) |
-| M4.1–M4.3 | scope + services | **Contratto completo — SQL non creato** (creazione accelerata autorizzabile) |
-| M5.1–M5.4 | coverage | **Pianificata** — dopo stop M4.3 |
-| M6.1–M6.3 | profile FEV | **Pianificata** |
+| M4.1–M4.3 | scope + services | **Applicata e versionata** (`54dfcff` / fino a `20260804170000`) |
+| M5.1–M5.4 | coverage | **Contratto completo — SQL non creato** (creazione accelerata autorizzabile) |
+| M6.1–M6.3 | profile FEV | **Pianificata** — dopo stop M5.4 |
 | M7 | — | **Assente** |
 | M8.1 | demo seed | **SKIP** |
 | M8.2 | `professionisti-validation-report.md` | **Da produrre a fine ciclo 1 SQL** |
 
 ---
 
-**MIGRATION PLAN PROFESSIONISTI — BLOCCO M4 DETERMINATO.**
-M1–M3 chiuse; M4.1–M4.3 con contratto implementabile e timestamp proposti; M5+ non aperte.
-**Prossimo passo operativo:** creazione accelerata delle tre migration M4 (senza micro-review intermedie di progettazione), poi review SQL/apply secondo §23–§26.
+**MIGRATION PLAN PROFESSIONISTI — BLOCCO M5 DETERMINATO.**
+M1–M4 chiuse; M5.1–M5.4 con contratto implementabile e timestamp proposti; M6+ non aperte.
+**Prossimo passo operativo:** creazione accelerata delle quattro migration M5 (senza micro-review intermedie di progettazione), poi review SQL/apply secondo §23–§26.

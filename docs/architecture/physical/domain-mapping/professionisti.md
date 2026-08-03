@@ -1429,3 +1429,30 @@ Precondizioni esterne già soddisfatte: `profiles`, `languages`, `competencies`,
 **Esclusi dal blocco M4.** Territori/lingue/mercati/settori (M5); FEV (M6); catalogo Specializzazioni; seconda copia di `competencies`; `membership_id`; OffertaDiServizio; policy/GRANT.
 
 **Verifica post-apply minima.** Presence 3 tabelle; colonne §29.3.6/9/10; PK/FK/UNIQUE/CHECK; trigger; RLS; zero policy; privilegi revocati; assenza M5.
+
+---
+
+### 29.33 Blocco M5 — contratto operativo di implementazione
+
+**Responsabilità del blocco.** Dichiarazioni owned di **copertura operativa** del Profilo: territori (esercizio/serviti), lingue professionali operative/di supporto, mercati internazionali referenziati, settori economici serviti — dopo ambito/servizi M4 e **prima** del FEV profilo M6.
+
+| Unità | Tabella | Colonne | Dipendenze | Seed | Policy |
+|---|---|---|---|---|---|
+| M5.1 | `professional_served_territories` | 11 | AR CASCADE; nessuna FK geografica | **Assente** | **Assenti** |
+| M5.2 | `professional_operational_languages` | 10 | AR CASCADE; `languages(id)` bigint RESTRICT | **Assente** | **Assenti** |
+| M5.3 | `professional_served_markets` | 9 | AR CASCADE; `international_markets(id)` uuid RESTRICT | **Assente** | **Assenti** |
+| M5.4 | `professional_served_sectors` | 7 | AR CASCADE; `business_sectors(id)` bigint RESTRICT | **Assente** | **Assenti** |
+
+**Pattern obbligatori (ogni unità).** PK uuid + `gen_random_uuid()`; `created_at`/`updated_at`; funzione `set_*_updated_at` INVOKER + `search_path=''` + trigger `BEFORE UPDATE`; RLS ENABLE senza FORCE; REVOKE ALL da `PUBLIC`/`anon`/`authenticated`; nessun GRANT; COMMENT ON tabella + colonne ambigue + funzione; indici owner (+ target FK §29.23); nessun JSONB; nessun dato derivato; nessuna anticipazione M6; nessuna policy.
+
+**M5.1 — Territori.** Colonne §29.3.11 in ordine: `id`, `professional_profile_id`, `country_ref`, `territory_label`, `coverage_kind` default `served`, `presence_mode` default `unspecified`, `declaration_status` default `declared`, `verification_status` default `unverified`, `sort_order` default 0, timestamps. UNIQUE parziale declared `(professional_profile_id, country_ref, coverage_kind)`. CHECK: `length(btrim(country_ref)) > 0`; `territory_label IS NULL OR length(btrim(territory_label)) > 0`; `coverage_kind ∈ exercise|served|both`; `presence_mode ∈ in_person|remote|hybrid|unspecified`; `declaration_status ∈ declared|removed`; `verification_status ∈ unverified|verified|contested` (**senza** `in_review`); `sort_order >= 0`. Indici: UNIQUE parziale; btree owner; btree `(country_ref)`. **Nessuna** FK a `territories`/`countries` (assenti). `country_ref` opaco (convenzione tipicamente ISO 3166-1 alpha-2, non vincolata da regex catalogo).
+
+**M5.2 — Lingue.** Colonne §29.3.12: `id`, `professional_profile_id`, `language_id`, `proficiency_level` default `working`, `usage_role` default `operational`, `declaration_status`, `verification_status`, `sort_order`, timestamps. UNIQUE parziale declared `(professional_profile_id, language_id, usage_role)`. CHECK: `proficiency_level ∈ elementary|working|professional|native_equivalent`; `usage_role ∈ operational|support`; declaration/verification come M5.1; `sort_order >= 0`. Indici: UNIQUE parziale; btree owner; btree `(language_id)`. Distinta da `profile_languages`, lingue UI, `business_operational_language_declarations`. **Non** copiare GRANT/policy legacy di `languages`.
+
+**M5.3 — Mercati.** Colonne §29.3.13: `id`, `professional_profile_id`, `market_id`, `relation_kind` default `served`, `declaration_status`, `notes`, `sort_order`, timestamps. **Nessun** `verification_status` nel ciclo 1. UNIQUE parziale declared `(professional_profile_id, market_id)`. CHECK: `relation_kind ∈ known|served|supported`; declaration; `sort_order >= 0`. Indici: UNIQUE parziale; btree owner; btree `(market_id)`. Distinta da PresenzaDiMercato / InteresseDiMercato / Attività; nessuna creazione automatica relazioni MI.
+
+**M5.4 — Settori.** Colonne §29.3.14: `id`, `professional_profile_id`, `sector_id`, `declaration_status`, `sort_order`, timestamps. UNIQUE parziale declared `(professional_profile_id, sector_id)`. CHECK: declaration; `sort_order >= 0`. Indici: UNIQUE parziale; btree owner; btree `(sector_id)`. Distinta da `business_sector_declarations` (Imprese). Nessun `is_primary` prescritto per i settori professionali nel ciclo 1.
+
+**Esclusi dal blocco M5.** Disponibilità temporale/di carico sull’AR (§29.16 — già M2); fee/tariffe; FEV (M6); link territorio/lingua per-servizio; sedi operative autonome; tabella `territories`/`countries`; Presenza/Interesse/Attività MI; duplicazione cataloghi `languages`/`business_sectors`/`international_markets`; `membership_id`; OffertaDiServizio; policy/GRANT; seed.
+
+**Verifica post-apply minima.** Presence 4 tabelle; colonne §29.3.11–14; PK/FK/UNIQUE/CHECK; trigger; RLS; zero policy; privilegi revocati; assenza oggetti M6.

@@ -235,6 +235,8 @@ La classificazione è volutamente ampia e non si basa esclusivamente sugli Ordin
 
 **Principio sul confine con Mercati Internazionali.** Il Professionista può supportare l'accesso a un Mercato internazionale (es. come Risorsa di supporto al mercato, `logical/mercati-internazionali.md` §2, o come controparte di una Relazione commerciale internazionale) senza diventare parte di quel dominio: il Mercato resta definito e governato esclusivamente da `logical/mercati-internazionali.md`.
 
+**Confine di realizzazione del ciclo 1 (copertura operativa, senza anticipare l’implementazione).** Nel primo ciclo fisico, la copertura del Profilo è modellata come dichiarazioni owned distinte: territori serviti/di esercizio (con modalità presenza/remoto a livello territorio, senza catalogo Territori condiviso), lingue operative/di supporto professionali (catalogo `languages`, distinte da LinguaParlata della Persona e da LinguaOperativaImpresa), mercati internazionali conosciuti/serviti/supportati (riferimento opaco al Mercato, senza Presenza/Interesse/Attività), settori economici serviti (catalogo `business_sectors` condiviso). La disponibilità temporale/di carico (asse §9) resta sull’Aggregate Root e non è una tabella di copertura. Lingue o territori per singolo Servizio professionale, sedi operative autonome, mobilità come entità separata e catalogo Territori/countries sono fuori dal ciclo 1 o rinviate.
+
 ---
 
 ## 9. Disponibilità e condizioni professionali
