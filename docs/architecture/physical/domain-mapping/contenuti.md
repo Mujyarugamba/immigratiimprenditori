@@ -15,9 +15,9 @@
 | Dominio | **Contenuti** (Contenuti editoriali) |
 | Artefatto | Physical Domain Mapping |
 | Logical di riferimento | `docs/architecture/logical/contenuti.md` (chiuso per Physical) |
-| Stato | **Chiuso per Migration Plan** (salvo §43) |
+| Stato | **Ciclo 1 chiuso** — M1–M5 completati; M6 assente; M7 assente; M8.1 SKIP; M8.2 ACCETTATA |
 | Ciclo | Ciclo 1 |
-| Migration Plan / SQL | **Fuori da questo documento** |
+| Migration Plan / SQL / M8.2 | Completati; report `docs/architecture/migrations/contenuti-validation-report.md` |
 
 ---
 
@@ -740,7 +740,10 @@ Physical accettabile se: inventario 12 tabelle chiuso; AR unica; ownership terna
 
 ## 46. Stato finale
 
-**Physical Contenuti chiuso per Migration Plan ciclo 1.**  
+**Physical Contenuti — ciclo 1 chiuso.**
+
 Dodici tabelle (`content_types` … `content_relations`), AR `contents`, ownership Persona|Impresa|Redazione, tipologies e categorie a catalogo, autori e link tipizzati, corpo unico, pattern RLS deny-by-default.
 
-Migration Plan e SQL restano fasi successive.
+Stato operativo: **M1–M5 completati**; **M6 assente**; **M7 assente**; **M8.1 SKIP**; **M8.2 ACCETTATA**.
+
+Report: `docs/architecture/migrations/contenuti-validation-report.md`.

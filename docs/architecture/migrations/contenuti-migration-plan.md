@@ -1,7 +1,7 @@
 # Contenuti — Migration Plan
 
-**Stato del documento:** Pianificazione statica completa — ciclo 1.
-**Natura:** piano di migrazione documentale. Non crea file `.sql`, non applica migration, non contatta database, non esegue Supabase CLI operativa, non modifica Logical né Physical.
+**Stato del documento:** Ciclo 1 chiuso — M1–M5 completati; M6 assente; M7 assente; M8.1 SKIP; M8.2 ACCETTATA.
+**Natura:** piano di migrazione documentale. Le 12 migration SQL sono state create, applicate e pubblicate; M8.2 in `contenuti-validation-report.md`.
 
 **Contratto fisico vincolante:** `docs/architecture/physical/domain-mapping/contenuti.md`.
 **Contratto logico vincolante:** `docs/architecture/logical/contenuti.md`.
@@ -16,10 +16,10 @@
 |---|---|
 | Dominio | **Contenuti** |
 | Artefatto | Migration Plan ciclo 1 |
-| HEAD di riferimento (pre-SQL) | `181b8b6feb761dee41e362ec6c1c29e9c4830a3a` |
-| Ultima migration repository | `20260806170000` (Eventi M5.3) |
-| SQL Contenuti | **Assenti** (da creare dopo approvazione Plan) |
-| Stato | **Chiuso per creazione cumulativa M1–M5 (12 unità)** |
+| HEAD schema pubblicato | `e1c9a3965ef490ef444f9497cb234b247e9c47ef` |
+| Ultima migration Contenuti | `20260807200000` |
+| SQL Contenuti | **12/12** create, applicate locale/remoto, pubblicate |
+| Stato | **Ciclo 1 chiuso** — M1–M5 completati; M6 assente; M7 assente; M8.1 SKIP; M8.2 ACCETTATA |
 
 ---
 
@@ -630,32 +630,38 @@ Come Physical §43: trigger responsabile; multi-categoria; seed tag; versioning/
 
 | Fase | Stato |
 |---|---|
-| Logical | Presente (untracked al Plan) |
-| Physical | Presente (untracked al Plan) |
-| Migration Plan | **Questo documento** |
-| SQL M1–M5 (12 file) | Da creare in ciclo cumulativo |
-| M8.2 | Da produrre a fine ciclo |
+| Logical | Completato; ciclo 1 chiuso |
+| Physical | Completato; ciclo 1 chiuso |
+| Migration Plan | **Questo documento** — ciclo 1 chiuso |
+| SQL M1–M5 (12 file) | **Completati** (`20260807090000`…`20260807200000`) |
+| M6 | **Assente** |
+| M7 | **Assente** |
+| M8.1 | **SKIP** |
+| M8.2 | **ACCETTATA** (`contenuti-validation-report.md`) |
 
 ---
 
 ## 40. Stato finale
 
-**Migration Plan Contenuti completo e approvabile.**  
-12 unità SQL determinate; AR unico `contents`; ownership ternaria; M6/M7 assenti; M8 non SQL.  
-**Prossima azione autorizzabile:** creazione contemporanea delle 12 migration SQL secondo questo Plan.  
-Nessun file `.sql` creato da questo documento.
+**Migration Plan Contenuti — ciclo 1 chiuso.**
+
+M1–M5 completati (12 SQL); M6 assente; M7 assente; M8.1 SKIP; M8.2 ACCETTATA.
+
+AR unico `contents`; ownership ternaria; head locale/remoto `20260807200000`; drift 0.
+
+Report: `docs/architecture/migrations/contenuti-validation-report.md`.
 
 ---
 
 ## Checklist conclusiva
 
-- [x] 12/12 tabelle → 12 unità  
-- [x] Timestamp univoci > `20260806170000`  
-- [x] AR unico (`contents`)  
-- [x] Seed esatti 11+8; tags 0  
-- [x] M6/M7 assenti  
-- [x] M8.1 SKIP; M8.2 path definito  
-- [x] Dipendenze acicliche; link tipizzati  
-- [x] Legacy non assorbite  
-- [x] Modalità accelerata cumulativa  
-- [x] Sufficiente per creare tutte le migration in un unico ciclo  
+- [x] 12/12 tabelle → 12 unità
+- [x] Timestamp univoci > `20260806170000`
+- [x] AR unico (`contents`)
+- [x] Seed esatti 11+8; tags 0
+- [x] M6/M7 assenti
+- [x] M8.1 SKIP; M8.2 ACCETTATA
+- [x] Dipendenze acicliche; link tipizzati
+- [x] Legacy non assorbite
+- [x] Modalità accelerata cumulativa
+- [x] Ciclo 1 chiuso su schema pubblicato

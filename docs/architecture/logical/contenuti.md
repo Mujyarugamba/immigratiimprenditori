@@ -14,9 +14,9 @@
 |---|---|
 | Nome ufficiale del dominio | **Contenuti** (sinonimo normativo: **Contenuti editoriali**) |
 | Artefatto | Logical Data Model |
-| Stato | **Chiuso per il passaggio al Physical** (salvo decisioni rinviate esplicite al §44) |
+| Stato | **Ciclo 1 chiuso** — M1–M5 completati; M6 assente; M7 assente; M8.1 SKIP; M8.2 ACCETTATA |
 | Ciclo di riferimento | Ciclo 1 — perimetro minimo implementabile (§39) |
-| Physical / Migration Plan / SQL | **Fuori da questo documento** |
+| Physical / Migration Plan / SQL / M8.2 | Completati; report `docs/architecture/migrations/contenuti-validation-report.md` |
 | Revisione | Consolidamento autoritativo post-chiusura Eventi; chiude AR, ownership, ciclo 1 e confini adiacenti |
 | Predecessore | `logical/contenuti-editoriali.md` (fondativo; non cancellato; questo file è l’autorità per Physical ciclo 1) |
 
@@ -682,6 +682,10 @@ Logical accettabile se: AR non ambigua; contenuto≠pubblicazione≠documento; o
 
 ## 47. Stato finale
 
-**Logical Contenuti chiuso per il passaggio al Physical del ciclo 1**, con Aggregate Root unico **Contenuto**, tipologie a catalogo, ownership Persona|Impresa|Redazione, lifecycle slim, testo unico, collegamenti narrativi facoltativi ai domini chiusi, e confini espliciti verso StoriaPersonale, MediaImpresa, Osservatorio, Organizzazioni, Identità, CMS e Storage.
+**Logical Contenuti — ciclo 1 chiuso.**
 
-Physical, Migration Plan e SQL restano fasi successive.
+Aggregate Root unico **Contenuto**, tipologie a catalogo, ownership Persona|Impresa|Redazione, lifecycle slim, testo unico, collegamenti narrativi facoltativi ai domini chiusi, e confini espliciti verso StoriaPersonale, MediaImpresa, Osservatorio, Organizzazioni, Identità, CMS e Storage.
+
+Stato operativo: **M1–M5 completati**; **M6 assente**; **M7 assente**; **M8.1 SKIP**; **M8.2 ACCETTATA**.
+
+Report: `docs/architecture/migrations/contenuti-validation-report.md`.
