@@ -1,12 +1,12 @@
 # Logical Data Model — Dominio OSSERVATORIO
 
 > Livello logico e di dominio. Nessun riferimento a database, SQL, PostgreSQL, Supabase, tabelle, colonne, tipi dato tecnici, chiavi primarie o esterne, indici, constraint tecnici, RLS, API, migration, backend, frontend, dashboard, strumenti di business intelligence, componenti dell'interfaccia o dettagli implementativi. Nessun codice.
-> Fondamenti (non modificati da questo documento): [`docs/domain-model.md`](../../domain-model.md), [`docs/architecture/logical/persone.md`](./persone.md), [`docs/architecture/logical/imprese.md`](./imprese.md), [`docs/architecture/logical/appartenenze.md`](./appartenenze.md), [`docs/architecture/logical/mercati-internazionali.md`](./mercati-internazionali.md), [`docs/architecture/logical/opportunita.md`](./opportunita.md), [`docs/architecture/logical/collaborazioni.md`](./collaborazioni.md), [`docs/architecture/logical/professionisti.md`](./professionisti.md), [`docs/architecture/logical/eventi.md`](./eventi.md), [`docs/architecture/logical/contenuti-editoriali.md`](./contenuti-editoriali.md).
-> Scopo del documento: definire il modello logico del dominio Osservatorio, già anticipato in `docs/domain-model.md` §1 come dominio di "Supporto" ("aggregare dati provenienti da altri domini... in report e statistiche leggibili... non è fonte primaria di dati: consuma e sintetizza, non genera fatti economici") e richiamato da ogni documento logico precedente come destinatario di dati aggregabili, mai come loro proprietario (`logical/persone.md` §8, `logical/imprese.md` §1, `logical/mercati-internazionali.md` §1/§11, `logical/opportunita.md`, `logical/collaborazioni.md`, `logical/professionisti.md` §1, `logical/eventi.md` §1/§13, `logical/contenuti-editoriali.md` §1/§7). Questo documento conferma Osservatorio come dominio autonomo e ne definisce la struttura logica completa.
-> Carattere autonomo del dominio. Osservatorio rappresenta la produzione di conoscenza aggregata, documentata e metodologicamente trasparente sull'imprenditoria immigrata in Italia: fenomeni osservati, indicatori, serie storiche, confronti, qualità del dato, incertezza, e i prodotti analitici che ne derivano (rapporti, dossier, schede territoriali e settoriali). Non è un cruscotto tecnico né un semplice contenitore di statistiche: è un dominio con una propria natura metodologica, un proprio ciclo di vita e proprie regole di qualità e riservatezza.
-> Principio della conoscenza derivata. L'Osservatorio **non possiede** i dati operativi dei domini sorgente (Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi, Mercati Internazionali): li referenzia e li trasforma attraverso selezione, classificazione, normalizzazione concettuale, aggregazione, confronto, calcolo, interpretazione e documentazione metodologica, producendo conoscenza **derivata**, mai conoscenza operativa alternativa. Un dato aggregato dell'Osservatorio non sostituisce né modifica automaticamente i fatti presenti nei domini sorgente: i due piani restano sempre distinti e comunicanti in una sola direzione (dai domini sorgente verso l'Osservatorio).
-> Distinzione tra dato operativo, dato esterno, indicatore, analisi e contenuto editoriale. Un **dato operativo** (un'Impresa esiste, un'Opportunità è stata pubblicata) vive nel proprio dominio sorgente. Un **dato esterno** proviene da una Fonte esterna alla piattaforma (un ente pubblico, un istituto statistico). Un **Indicatore** è una definizione metodologica stabile che permette di misurare un Fenomeno nel tempo. Un'**analisi** è l'elaborazione e l'interpretazione di uno o più valori di Indicatore secondo un perimetro dichiarato. Un **Contenuto editoriale** (`logical/contenuti-editoriali.md`) è la narrazione che può raccontare un'analisi, ma non è l'analisi stessa, così come l'analisi non è il dato operativo che la origina. Questo documento distingue rigorosamente questi cinque piani in ogni sezione.
-> Carattere del documento. Esclusivamente logico e di dominio: nessuna decisione tecnica, nessuna implementazione, nessuna anticipazione di database, API, dashboard, strumenti di business intelligence o interfaccia.
+> Fondamenti (non modificati da questo documento): [`docs/domain-model.md`](../../domain-model.md), [`docs/architecture/logical/reconciliation-report.md`](./reconciliation-report.md), [`docs/architecture/physical/domain-dependency-map.md`](../physical/domain-dependency-map.md), [`docs/architecture/logical/persone.md`](./persone.md), [`docs/architecture/logical/imprese.md`](./imprese.md), [`docs/architecture/logical/appartenenze.md`](./appartenenze.md), [`docs/architecture/logical/mercati-internazionali.md`](./mercati-internazionali.md), [`docs/architecture/logical/opportunita.md`](./opportunita.md), [`docs/architecture/logical/collaborazioni.md`](./collaborazioni.md), [`docs/architecture/logical/professionisti.md`](./professionisti.md), [`docs/architecture/logical/eventi.md`](./eventi.md), [`docs/architecture/logical/contenuti.md`](./contenuti.md), [`docs/architecture/logical/contenuti-editoriali.md`](./contenuti-editoriali.md) (predecessore), [`docs/architecture/logical/organizzazioni.md`](./organizzazioni.md), [`docs/architecture/logical/identita-accessi.md`](./identita-accessi.md).
+> Scopo del documento: definire il modello logico del dominio Osservatorio, già anticipato in `docs/domain-model.md` §1 come dominio di "Supporto" ("aggregare dati provenienti da altri domini... in report e statistiche leggibili... non è fonte primaria di dati: consuma e sintetizza, non genera fatti economici") e richiamato dai documenti logici dei domini sorgente come destinatario di dati aggregabili, mai come loro proprietario. Questo documento conferma Osservatorio come dominio autonomo. **Questa revisione chiude il perimetro del ciclo 1** (§15.A–§15.D) sufficiente a un Physical DDL-ready senza nuove decisioni semantiche.
+> Carattere autonomo del dominio. Osservatorio rappresenta la produzione di conoscenza aggregata, documentata e metodologicamente trasparente sull'imprenditoria immigrata in Italia. Nel modello generale ciò include fenomeni, indicatori, serie, confronti, qualità e prodotti analitici. **Nel ciclo 1** il dominio si riduce a un **registro di indicatori statistici e valori aggregati pubblicabili**, non a una piattaforma di business intelligence (§15.A).
+> Principio della conoscenza derivata. L'Osservatorio **non possiede** i dati operativi dei domini sorgente: produce conoscenza **derivata**, mai conoscenza operativa alternativa. Un dato aggregato non sostituisce né modifica i fatti dei domini sorgente (flusso unidirezionale).
+> Distinzione tra dato operativo, dato esterno, indicatore, analisi e contenuto editoriale. Un **dato operativo** vive nel dominio sorgente. Un **dato esterno** proviene da una Fonte esterna. Un **Indicatore** è una definizione metodologica stabile. Un'**analisi** interpreta valori. Un **Contenuto** (`logical/contenuti.md`) è narrazione distinta dal dato statistico. Nel ciclo 1 i prodotti analitici narrativi (Rapporto, Dossier, Scheda) restano di Contenuti, non di Osservatorio (§15.A, §15.C).
+> Carattere del documento. Esclusivamente logico e di dominio. I §§1–14 descrivono il modello generale metodologico; **dove il ciclo 1 restringe, prevale §15**.
 
 ## Indice
 
@@ -24,7 +24,7 @@
 12. [Ciclo di vita, revisione e pubblicazione](#12-ciclo-di-vita-revisione-e-pubblicazione)
 13. [Regole, invarianti e casi limite](#13-regole-invarianti-e-casi-limite)
 14. [Eventi di dominio](#14-eventi-di-dominio)
-15. [Decisioni finali e domande aperte](#15-decisioni-finali-e-domande-aperte)
+15. [Decisioni finali, ciclo 1 e prontezza Physical](#15-decisioni-finali-ciclo-1-e-prontezza-physical)
 
 ---
 
@@ -34,7 +34,7 @@
 
 **Quali problemi risolve.** Rende possibile leggere fenomeni collettivi (nascita e crescita delle imprese, occupazione generata, apertura ai Mercati internazionali, partecipazione a Opportunità ed Eventi) senza intaccare né esporre i dati individuali dei domini sorgente (§8, §11); distingue sempre un dato operativo da un dato derivato, un'osservazione da un indicatore, un valore calcolato da un'interpretazione (§3, §8); gestisce la qualità del dato come insieme di dimensioni indipendenti, evitando un giudizio unico e ingannevole (§10); previene la reidentificazione di soggetti individuali attraverso soglie di aggregazione e anonimizzazione (§11); consente confronti territoriali, settoriali e temporali solo quando metodologicamente validi, evitando di scambiare una correlazione per una causalità (§9); costituisce, insieme a Persone, Imprese, Opportunità e Mercati Internazionali, una delle funzioni strategiche della piattaforma, non un semplice sottoprodotto statistico (introduzione strategica).
 
-**Cosa rientra nel dominio.** Fenomeni osservati e perimetri di analisi (§4, §5); fonti, misure e indicatori (§7, §8); aggregazioni e serie storiche (§9, §11); metodologie (§8); qualità del dato (§10); revisioni (§12); pubblicazione dei risultati (§12); comparabilità (§9); interpretazioni analitiche (§8); i prodotti analitici — rapporti, dossier, schede territoriali e settoriali (§2).
+**Cosa rientra nel dominio.** Nel modello generale: fenomeni e perimetri (§4, §5); fonti, misure e indicatori (§7, §8); aggregazioni e serie (§9, §11); metodologie (§8); qualità (§10); revisioni e pubblicazione (§12); interpretazioni e prodotti analitici (§2). **Nel ciclo 1 prevale §15**: solo Indicatore (AR), FonteStatistica e Valori aggregati pubblicabili, con dimensioni e lifecycle ridotti; rapporti/dossier/schede/interpretazioni non sono owned da Osservatorio.
 
 **Cosa NON rientra nel dominio.**
 - Non rientrano i dati operativi di **Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi** e **Mercati internazionali**: restano posseduti dai rispettivi domini sorgente, che l'Osservatorio referenzia e aggrega senza mai incorporarli né duplicarli (introduzione, principio della conoscenza derivata).
@@ -83,22 +83,24 @@
 
 ## 2. Entità e concetti principali
 
-**Entità autonome** — esistono per proprio conto, hanno un ciclo di vita e sono referenziabili da altri concetti del dominio:
+**Nota su Aggregate Root — decisione definitiva per il ciclo 1.** Esiste **un solo Aggregate Root: Indicatore** (§15.A). La Fonte statistica e il Valore dell’Indicatore appartengono al dominio Osservatorio come oggetti del ciclo 1 (Valore subordinato all’Indicatore; Fonte owned dal dominio e referenziabile). Serie, Osservazione, Interpretazione, Rapporto, Dossier, Scheda e Revisione come Aggregate Root autonomi **non** sono ammessi nel ciclo 1: la serie storica è la sequenza dei Valori dello stesso Indicatore; i prodotti narrativi appartengono a Contenuti; le revisioni sono modellate come sostituzione/storicizzazione dei Valori (§15.A).
 
-| Entità | Descrizione |
-|---|---|
-| **Indicatore** | Definizione metodologica stabile che permette di misurare un Fenomeno osservato nel tempo, con nome, finalità, unità di misura e regola di calcolo dichiarati (§8) |
-| **Metodologia** | Descrizione documentata e versionabile del modo in cui una Fonte, un'Osservazione o un Indicatore vengono trattati per produrre un valore (§8) |
-| **Fonte** (statistica, amministrativa, interna, esterna) | Origine dichiarata di un'Osservazione o di un dato utilizzato dall'Osservatorio, con responsabile, copertura e limiti propri (§7) |
-| **Osservazione** | Dato elementare raccolto per un Fenomeno, riferito a un'unità di osservazione, un periodo e una Fonte (§3, §5) |
-| **Valore dell'Indicatore** | Occorrenza calcolata di un Indicatore per un determinato perimetro e periodo, distinta dalla definizione dell'Indicatore stesso (§8) |
-| **Serie storica** | Sequenza ordinata di Valori di uno stesso Indicatore su periodi successivi e comparabili (§9) |
-| **Rapporto** | Prodotto analitico strutturato che raccoglie una o più Analisi e Valori, con una propria pubblicazione (§12) |
-| **Dossier** | Prodotto analitico di approfondimento su un fenomeno specifico, tipicamente più estenso e monografico di un Rapporto (§12) |
-| **Scheda territoriale** | Prodotto analitico che sintetizza gli Indicatori disponibili per un Territorio di riferimento (§6, §12) |
-| **Scheda settoriale** | Prodotto analitico che sintetizza gli Indicatori disponibili per un Settore di riferimento (§6, §12) |
-| **Interpretazione** | Testo analitico che spiega il significato di uno o più Valori, distinto dalla misura stessa (§8, §13) |
-| **Revisione** | Fatto storicizzato che documenta la modifica di una Metodologia o di un Valore precedentemente pubblicato, senza cancellarlo (§9, §12) |
+**Entità del modello generale** — il catalogo seguente descrive il vocabolario metodologico completo; **nel ciclo 1 prevale §15** (solo Indicatore come AR; Fonte e Valore come oggetti inclusi):
+
+| Entità | Descrizione | Ciclo 1 |
+|---|---|---|
+| **Indicatore** | Definizione metodologica stabile che permette di misurare un Fenomeno osservato nel tempo, con nome, finalità, unità di misura e regola di calcolo dichiarati (§8) | **AR unico** |
+| **Metodologia** | Descrizione documentata e versionabile del modo in cui una Fonte, un'Osservazione o un Indicatore vengono trattati per produrre un valore (§8) | Sintetica sull’Indicatore (incluso); versionamento complesso **rinviato** |
+| **Fonte** (statistica, amministrativa, interna, esterna) | Origine dichiarata di un'Osservazione o di un dato utilizzato dall'Osservatorio, con responsabile, copertura e limiti propri (§7) | **FonteStatistica** owned (§15.A) |
+| **Osservazione** | Dato elementare raccolto per un Fenomeno, riferito a un'unità di osservazione, un periodo e una Fonte (§3, §5) | **Rinviata** / esclusa come persistenza di microdato |
+| **Valore dell'Indicatore** | Occorrenza calcolata di un Indicatore per un determinato perimetro e periodo, distinta dalla definizione dell'Indicatore stesso (§8) | **Subordinato all’AR** |
+| **Serie storica** | Sequenza ordinata di Valori di uno stesso Indicatore su periodi successivi e comparabili (§9) | **Derivata** (non AR / non tabella autonoma) |
+| **Rapporto** | Prodotto analitico strutturato che raccoglie una o più Analisi e Valori, con una propria pubblicazione (§12) | **Escluso** da OSS; narrativo → Contenuti |
+| **Dossier** | Prodotto analitico di approfondimento su un fenomeno specifico, tipicamente più estenso e monografico di un Rapporto (§12) | **Escluso** da OSS; narrativo → Contenuti |
+| **Scheda territoriale** | Prodotto analitico che sintetizza gli Indicatori disponibili per un Territorio di riferimento (§6, §12) | **Esclusa** da OSS; editoriale → Contenuti |
+| **Scheda settoriale** | Prodotto analitico che sintetizza gli Indicatori disponibili per un Settore di riferimento (§6, §12) | **Esclusa** da OSS; editoriale → Contenuti |
+| **Interpretazione** | Testo analitico che spiega il significato di uno o più Valori, distinto dalla misura stessa (§8, §13) | **Esclusa** da OSS; → Contenuti |
+| **Revisione** | Fatto storicizzato che documenta la modifica di una Metodologia o di un Valore precedentemente pubblicato, senza cancellarlo (§9, §12) | Modello semplice di rettifica Valore (§15.A); non AR |
 
 **Concetti descrittivi e classificazioni** — non hanno vita propria indipendente, ma qualificano le entità autonome o i loro valori:
 
@@ -135,7 +137,7 @@
 | Fenomeno → Opportunità/Collaborazione/Evento/Mercato | `logical/opportunita.md`, `logical/collaborazioni.md`, `logical/eventi.md`, `logical/mercati-internazionali.md` | L'ambito applicativo osservato, referenziato per l'aggregazione (§4) |
 | Rapporto/Analisi → Contenuto editoriale | `logical/contenuti-editoriali.md` | Un Contenuto può raccontare un'Analisi, restando un'entità distinta (§1, §13) |
 
-**Prodotti analitici** — Rapporto, Dossier, Scheda territoriale, Scheda settoriale: entità dipendenti che raccolgono e presentano Valori e Interpretazioni secondo un proprio ciclo di pubblicazione (§12), senza mai diventare esse stesse Fonte primaria per altri Indicatori.
+**Prodotti analitici (modello generale)** — Rapporto, Dossier, Scheda territoriale, Scheda settoriale: nel modello generale sono prodotti che raccolgono Valori e Interpretazioni. **Nel ciclo 1** non sono owned da Osservatorio: la narrazione e le schede editoriali appartengono a Contenuti; dashboard e serie restano derivate dai Valori (§15.A, §15.C).
 
 ---
 
@@ -550,110 +552,291 @@ Coerentemente con il meccanismo dei "fatti accaduti" già stabilito in `docs/dom
 
 ---
 
-## 15. Decisioni finali e domande aperte
+## 15. Decisioni finali, ciclo 1 e prontezza Physical
 
-### Decisioni vincolanti
+> **Autorità.** Questa sezione chiude il ciclo 1. In caso di contrasto con §§1–14 (modello generale metodologico), **prevale §15**.
 
-1. Osservatorio è un dominio autonomo (§1).
-2. L'Osservatorio non possiede i dati operativi dei domini sorgente (introduzione, §1).
-3. L'Osservatorio produce conoscenza derivata attraverso aggregazione, calcolo, confronto e interpretazione (introduzione, §8, §9).
-4. Dato operativo, Osservazione, Misura, Indicatore, Valore dell'Indicatore, Analisi e Contenuto editoriale sono concetti distinti (§1, §2, §3).
-5. Definizione dell'Indicatore e Valore dell'Indicatore sono concetti distinti (§8).
-6. Dato osservato, dato stimato, dato provvisorio, dato validato e dato rettificato sono concetti distinti (§3, §12).
-7. Fonte, Metodologia e Regola di calcolo sono concetti distinti (§7, §8).
-8. Fenomeno, Popolazione, Unità di osservazione, Perimetro e Dimensione di analisi sono concetti distinti (§4, §5, §6).
-9. Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi e Mercati internazionali restano domini distinti (§1, §2).
-10. L'Osservatorio può utilizzare dati aggregati provenienti da tali domini senza incorporarli (§1, §2).
-11. L'Osservatorio non modifica automaticamente i fatti dei domini sorgente (§1, §13 regola 5).
-12. Una correlazione non equivale a causalità (§4, §9, §13 regola 6).
-13. Una Fonte ufficiale non è automaticamente completa, aggiornata o comparabile (§7, §13 regola 7).
-14. Un dato mancante non equivale a zero (§10, §13 regola 8).
-15. La qualità del dato deve essere multidimensionale (§10).
-16. Stato di acquisizione, elaborazione, verifica, pubblicazione, validità, visibilità e contestazione sono assi separati (§12).
-17. Le revisioni metodologiche e dei valori devono poter essere storicizzate (§9, §12, §13 regola 10).
-18. I dati stimati devono essere distinguibili dai dati osservati (§3, §8, §13 regola 12).
-19. I valori provvisori devono essere distinguibili dai valori definitivi (§3, §12, §13 regola 9).
-20. Le interpretazioni devono essere distinguibili dalle misure (§2, §8, §13 regola 16).
-21. I risultati devono dichiarare perimetro, periodo, fonti, metodologia, qualità e limiti (§3, §8, §13 regole 1-3, 18).
-22. I dati aggregati non devono consentire la reidentificazione dei soggetti (§11, §13 regola 13).
-23. L'Osservatorio non attribuisce qualifiche, affidabilità, rappresentanza o diritti di accesso (§1, §13 regola 14).
-24. I diritti di accesso restano responsabilità di Identità & Accessi (§1, §12).
-25. Osservatorio e Contenuti editoriali restano domini distinti (§1, §13 regola 15).
-26. L'Osservatorio deve poter produrre serie storiche, confronti territoriali, settoriali e temporali (§9).
-27. Il dominio deve supportare fonti interne ed esterne (§7).
-28. Il dominio deve supportare dati osservati, dichiarati, amministrativi, stimati e derivati (§3).
-29. Il dominio deve preservare la riservatezza definita dai domini sorgente (§11, §13 regola 20).
-30. L'origine, la nazionalità, la lingua e lo status migratorio non devono essere dedotti impropriamente (§6, §13 regola 19).
+### Decisioni vincolanti (modello generale, confermate)
 
-### Domande aperte
-
-Le seguenti questioni restano esplicitamente aperte e non sono risolte da questo documento:
-
-- confine tra Osservatorio e Contenuti editoriali, nei casi di analisi già fortemente narrativa;
-- confine tra Osservatorio e dati operativi, nei casi di indicatori quasi in tempo reale;
-- definizione giuridica e metodologica di "imprenditore di origine immigrata";
-- identificazione precisa delle popolazioni di riferimento per ciascun Fenomeno;
-- criteri di uso dei dati dichiarati nei calcoli statistici;
-- criteri di uso dei dati amministrativi esterni;
-- criteri di uso dei dati interni alla piattaforma come fonte statistica;
-- valutazione della rappresentatività dei dati interni rispetto alla popolazione reale;
-- governance delle classificazioni ufficiali adottate;
-- gestione delle classificazioni storiche superate;
-- periodicità degli aggiornamenti per ciascun Indicatore;
-- politiche di revisione (chi può proporre, validare, approvare una Revisione);
-- versionamento delle Metodologie nel tempo;
-- replicabilità dei calcoli storici;
-- trattamento dei valori provvisori nella pubblicazione;
-- politica di pubblicazione delle stime;
-- soglie minime di aggregazione per ciascun tipo di Fenomeno o Dimensione;
-- valutazione operativa del rischio di reidentificazione;
-- trattamento dei dati sensibili;
-- uso di categorie relative a origine e status migratorio nelle Dimensioni di analisi;
-- trattamento dei dati mancanti nei calcoli compositi;
-- trattamento delle fonti discordanti;
-- responsabilità di valutazione della qualità del dato;
-- responsabilità sulle interpretazioni pubblicate;
-- necessità e modalità di revisione scientifica o metodologica esterna;
-- coinvolgimento di università e centri di ricerca nella validazione;
-- gestione dei rapporti con partner esterni per la fornitura di dati;
-- licenze e condizioni di utilizzo delle fonti esterne;
-- politiche di conservazione delle serie storiche nel lungo periodo;
-- gestione operativa delle rettifiche e della loro comunicazione;
-- collegamento con Persone — quali dati aggregabili, con quale soglia;
-- collegamento con Imprese — quali dati aggregabili, con quale soglia;
-- collegamento con Opportunità — quali indicatori di partecipazione sono sostenibili;
-- collegamento con Collaborazioni — come misurare esiti non sempre dichiarati;
-- collegamento con Professionisti — come trattare titoli non verificati nelle Dimensioni;
-- collegamento con Eventi — come misurare partecipazione ed affluenza in modo comparabile;
-- collegamento con Mercati internazionali — come distinguere Presenza e Interesse negli Indicatori;
-- collegamento con la Formazione — quali fenomeni formativi sono osservabili;
-- quali dati dell'Osservatorio potranno essere utilizzati nei Contenuti editoriali, e con quali limiti;
-- eventuale futura separazione tra rilevazioni, indicatori e prodotti analitici come sotto-domini distinti;
-- futura gestione di sondaggi e questionari come Fonte diretta strutturata.
+1. Osservatorio è un dominio autonomo (§1; `domain-model.md`).
+2. L'Osservatorio non possiede i dati operativi dei domini sorgente (§1).
+3. L'Osservatorio produce conoscenza derivata; non modifica i fatti sorgente (§1).
+4. Dato operativo, Indicatore, Valore e Contenuto restano concetti distinti (§1, §2, §3).
+5. Definizione dell'Indicatore e Valore dell'Indicatore sono distinti (§8).
+6. Fonte ≠ Organizzazione ≠ Documento ≠ Contenuto (§7, §15.C).
+7. Una correlazione non equivale a causalità (§4, §9).
+8. Un dato mancante non equivale a zero (§10).
+9. I dati aggregati non devono consentire la reidentificazione (§11).
+10. L'Osservatorio non attribuisce qualifiche, rappresentanza o diritti di accesso (§1).
+11. I diritti di accesso restano di Identità & Accessi (§1; PF13).
+12. Osservatorio e Contenuti restano domini distinti (§1, §15.C).
+13. L'origine, la nazionalità, la lingua e lo status migratorio non devono essere dedotti impropriamente (§6).
 
 ---
 
-## Controllo finale
+### 15.A Decisioni del ciclo 1 (chiuse)
 
-1. **15 sezioni presenti nello stesso ordine richiesto** — verificato: §1 Responsabilità, §2 Entità, §3 Natura del dato, §4 Fenomeni e ambiti, §5 Perimetri/popolazioni/unità, §6 Dimensioni e classificazioni, §7 Fonti, §8 Indicatori/misure/regole di calcolo, §9 Serie storiche/confronti/comparabilità, §10 Qualità/completezza/incertezza, §11 Aggregazione/anonimizzazione/riservatezza, §12 Ciclo di vita/revisione/pubblicazione, §13 Regole/invarianti/casi limite, §14 Eventi di dominio, §15 Decisioni finali/domande aperte.
-2. **Coerenza con tutti i documenti logici esistenti** — verificata: il documento riprende senza contraddizioni i riferimenti già presenti in `logical/persone.md`, `logical/imprese.md`, `logical/appartenenze.md`, `logical/mercati-internazionali.md` (Osservatorio come destinatario di dati aggregabili, distinzione Presenza/Interesse), `logical/opportunita.md`, `logical/collaborazioni.md`, `logical/professionisti.md`, `logical/eventi.md`, `logical/contenuti-editoriali.md`, e con `docs/domain-model.md` (Osservatorio come dominio di Supporto, "consuma e sintetizza, non genera fatti economici"; ReportOsservatorio).
-3. **Osservatorio modellato come dominio autonomo** — verificato: §1 ne dichiara la responsabilità propria, §2 le entità proprie (Indicatore, Metodologia, Fonte, Valore, Serie storica, Rapporto, Dossier, Scheda territoriale/settoriale), §10-§12 le regole di qualità e ciclo di vita specifiche del dominio.
-4. **Nessun possesso o duplicazione dei dati operativi dei domini sorgente** — verificato: §1, §2 e l'introduzione dichiarano esplicitamente che l'Osservatorio referenzia, non incorpora, i dati di Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi, Mercati internazionali.
-5. **Dato, osservazione, misura, indicatore, valore, analisi e contenuto editoriale distinti** — verificato: tabella di chiusura §1, §2, §3, §8.
-6. **Fonte, Metodologia e Regola di calcolo distinte** — verificato: §2, §7, §8 le trattano come concetti separati con attributi propri.
-7. **Assi di stato dell'acquisizione, elaborazione, verifica, pubblicazione, validità, visibilità e contestazione separati** — verificato: tabella dedicata in §12.
-8. **Qualità, completezza, copertura, affidabilità e comparabilità indipendenti** — verificato: §10 le elenca come 21 dimensioni indipendenti, senza badge generico.
-9. **Dati osservati, stimati, provvisori, definitivi e rettificati distinti** — verificato: §3, §8, §12.
-10. **Aggregazione, anonimizzazione e protezione dalla reidentificazione previste** — verificato: §11 dedicata, richiamata in §5, §10, §13.
-11. **Interpretazione e Misura distinte** — verificato: §2, §8, §13 regola 16, evento InterpretazioneAssociata in §14.
-12. **Ricerca di riferimenti tecnici o di database** — eseguita: il documento non contiene riferimenti a database, SQL, PostgreSQL, Supabase, tabelle, colonne, tipi di dato tecnici, chiavi primarie o esterne, indici, constraint tecnici, RLS, API, migration, backend, frontend, dashboard, strumenti di business intelligence, componenti dell'interfaccia o codice.
+#### Obiettivo minimo
+
+Il ciclo 1 è un **registro di indicatori statistici e valori aggregati pubblicabili**: definire un Indicatore, registrare metodologia essenziale e Fonte, registrare Valori numerici aggregati con periodo, dimensioni minime, stato e qualità, pubblicare o ritirare. Non è una piattaforma di BI, né un data lake, né un CMS analitico.
+
+#### Aggregate Root e oggetti
+
+| Oggetto | Ruolo ciclo 1 |
+|---|---|
+| **Indicatore** | **Unico Aggregate Root** |
+| **FonteStatistica** | Oggetto owned dal dominio Osservatorio; referenziabile; **non** AR |
+| **ValoreIndicatore** | Fatto **subordinato** all’Indicatore; **non** AR |
+| Serie storica | **Derivata** dalla sequenza dei Valori; non AR / non tabella autonoma |
+| Osservazione, Interpretazione, Rapporto, Dossier, Scheda, Revisione-AR | **Non** AR nel ciclo 1 |
+
+#### Contratto Indicatore
+
+| Attributo | Decisione |
+|---|---|
+| Codice stabile | Obbligatorio, univoco, immutabile dopo la prima pubblicazione |
+| Titolo | Obbligatorio |
+| Descrizione | Obbligatoria |
+| Finalità | Obbligatoria (sintetica) |
+| Metodologia sintetica | Obbligatoria (testo breve sull’Indicatore) |
+| Natura del valore | Una sola, insieme chiuso (§ sotto) |
+| Unità di misura | Una sola, insieme chiuso, coerente con la natura; definita sull’Indicatore |
+| Periodicità | Una sola: `annual` \| `quarterly` \| `monthly` \| `point_in_time` |
+| Stato operativo | `draft` \| `active` \| `deprecated` \| `retired` — default `draft` |
+| Pubblicazione | `unpublished` \| `published` \| `withdrawn` — default `unpublished` |
+| Date | `published_at` quando published; `withdrawn_at` quando withdrawn; date di creazione/aggiornamento |
+| Ownership | **Redazionale** (titolarità di piattaforma/redazione); nessuna Persona/Impresa/Account/`auth.users` come owner |
+| Amministrabilità | Indicatori **amministrabili** nel tempo; **nessun seed obbligatorio**; possono essere aggiunti; possono essere dismessi (`deprecated`/`retired`) **senza cancellare** i Valori storici |
+
+#### Natura e formato del valore
+
+Nature ammesse (chiuse): `count` \| `percentage` \| `currency` \| `ratio` \| `index`.
+
+Unità ammesse (chiuse, non catalogo amministrabile): `units` \| `percent` \| `eur` \| `eur_thousands` \| `ratio` \| `index_points`.
+
+Coerenza obbligatoria Indicatore:
+
+| Natura | Unità ammesse |
+|---|---|
+| `count` | `units` |
+| `percentage` | `percent` |
+| `currency` | `eur`, `eur_thousands` |
+| `ratio` | `ratio` |
+| `index` | `index_points` |
+
+Esclusi dal ciclo 1: testi qualitativi; booleani; intervalli; distribuzioni; vettori; JSON; valori multicolonna.
+
+#### Contratto ValoreIndicatore
+
+| Attributo | Decisione |
+|---|---|
+| Appartenenza | Esattamente un Indicatore |
+| Valore numerico | Unico numero decimale ad alta precisione (concettuale); nessuna altra forma |
+| Periodo | Strutturato: `period_start` obbligatoria; `period_end` obbligatoria e ≥ start; anno di riferimento **derivabile**; granularità coerente con la periodicità dell’Indicatore; **nessun periodo testuale libero** |
+| Fonte | Riferimento obbligatorio a una FonteStatistica |
+| Stato dato | `provisional` \| `final` \| `revised` \| `withdrawn` |
+| Qualità | `official` \| `estimated` \| `derived` \| `self_reported` — distinta da stato e da Fonte |
+| Nota metodologica | Opzionale, sintetica |
+| Pubblicazione valore | `published_at` quando reso pubblico; ritiro senza cancellazione silenziosa |
+| Sostituzione | Collegamento opzionale al Valore sostituito; storico conservato |
+| Dimensioni | Zero o più tra le tre ammesse; **al massimo una valorizzazione per asse** |
+
+Esclusi sul Valore: microdati; formule; query salvate; risultati UI; JSON; elenchi di soggetti sottostanti.
+
+#### Stato del Valore
+
+| Stato | Significato |
+|---|---|
+| `provisional` | Valore provvisorio, soggetto a conferma |
+| `final` | Valore considerato definitivo per il periodo/dimensioni |
+| `revised` | Valore che rettifica un precedente; il precedente resta in storico |
+| `withdrawn` | Valore ritirato dalla pubblicazione corrente; non cancellato |
+
+Un solo Valore **corrente non ritirato** per combinazione logica: Indicatore + periodo + dimensioni (territorio, settore, paese). Nessun workflow di approvazione complesso.
+
+#### Qualità del Valore
+
+| Qualità | Significato |
+|---|---|
+| `official` | Proveniente da fonte ufficiale dichiarata |
+| `estimated` | Stima metodologica dichiarata |
+| `derived` | Derivato da calcoli su dati di piattaforma o altre misure |
+| `self_reported` | Basato su dati dichiarati dai soggetti (sempre aggregati) |
+
+Qualità ≠ stato ≠ Fonte ≠ score di accuratezza. Score avanzati, intervalli di confidenza: **rinviati**.
+
+#### Dimensioni ammesse
+
+Un Valore può avere 0..3 dimensioni, al più una per asse:
+
+1. **Territorio** (opzionale): livello chiuso `italy` \| `region` \| `province` \| `municipality` \| `other`; etichetta obbligatoria se presente; codice esterno opzionale. **Nessun** catalogo ISTAT/NUTS nuovo nel ciclo 1.
+2. **Settore economico** (opzionale): riferimento opzionale al catalogo pubblicato `business_sectors`, oppure assente.
+3. **Paese / nazionalità statistica** (opzionale): etichetta obbligatoria se presente; codice esterno opzionale (es. riferimento opaco). **Nessun** catalogo `countries` dedicato risulta pubblicato nel repository; **nessuna** FK inventata. Non usare `international_market_countries` (composizione Mercati, non catalogo paesi).
+
+Escluse: genere, età, forma giuridica, classe dimensionale, mercato, professione, tipologie OPP/COL/Eventi/Servizi, combinazioni multidimensionali avanzate.
+
+#### FonteStatistica
+
+Owned da Osservatorio. Attributi minimi: denominazione; ente produttore **testuale**; titolo pubblicazione/rilevazione; URL opzionale; identificativo esterno opzionale; edizione/versione opzionale; data pubblicazione; licenza/condizioni opzionali; nota metodologica; stato `active` \| `deprecated` \| `unavailable`.
+
+Ciclo 1: **nessuna** FK obbligatoria a Organizzazioni; nessun documento/file/Storage/dataset a righe; nessuna pubblicazione autonoma della Fonte. Fonte = provenienza e tracciabilità, non archivio.
+
+#### Ownership e autore
+
+| Fatto | Ownership ciclo 1 |
+|---|---|
+| Indicatore | Redazionale (piattaforma); non Persona/Impresa/Account/`auth.users` |
+| FonteStatistica | Redazionale (dominio); non Organizzazione come owner |
+| ValoreIndicatore | Owned dall’Indicatore; nessuna ownership autonoma |
+| Autore operativo | Derivato da Identità & Accessi in applicazione; **non** fatto di dominio obbligatorio nel ciclo 1 |
+
+#### Lifecycle Indicatore
+
+| Asse | Valori | Note |
+|---|---|---|
+| Operativo | `draft` → `active` → `deprecated` → `retired` | Default `draft`. Dismissione senza cancellazione dei Valori |
+| Pubblicazione | `unpublished` \| `published` \| `withdrawn` | Default `unpublished`. Gate: `published` richiede metodologia sintetica, natura, unità, periodicità. `published_at` / `withdrawn_at` |
+
+Pubblicazione **non** implica validazione scientifica assoluta.
+
+#### Lifecycle Fonte
+
+`active` \| `deprecated` \| `unavailable`. Nessuna pubblicazione autonoma nel ciclo 1.
+
+#### Privacy e soglia
+
+- Solo valori aggregati; nessun microdato identificabile; nessuna FK a singole Persone o Imprese; nessuna copia anagrafica.
+- Il dominio non pubblica valori che rappresentino direttamente un singolo soggetto identificabile.
+- Per conteggi derivati da soggetti: soglia minima pubblicabile **5 unità**, salvo fonte ufficiale già pubblicata che legittimi un valore inferiore.
+- Valori sotto soglia: soppressi o generalizzati **prima** dell’inserimento come dato pubblicabile.
+- Regola **applicativa/editoriale**: non richiede necessariamente un CHECK numerico universale (alcuni indicatori possono legittimamente valere meno di 5).
+- Nessun flag di anonimizzazione né microdato di soppressione persistito.
+
+#### Deny-by-default
+
+I fatti del ciclo 1 non generano permessi. Visibilità pubblica dei Valori/`published` è governata dalle regole di pubblicazione del dominio e da Identità & Accessi. Struttura ≠ policy applicative.
+
+---
+
+### 15.B Matrice ciclo 1 — incluso / rinviato / escluso
+
+| Elemento | Incluso | Rinviato | Escluso | Motivazione |
+|---|---|---|---|---|
+| Indicatore (AR) | ✓ | | | Nucleo ciclo 1 |
+| Codice, titolo, descrizione, finalità | ✓ | | | Contratto minimo |
+| Metodologia sintetica sull’Indicatore | ✓ | | | Essenziale |
+| Natura + unità chiuse | ✓ | | | Modello valore chiuso |
+| Periodicità chiusa | ✓ | | | Periodo strutturato |
+| FonteStatistica | ✓ | | | Provenienza |
+| ValoreIndicatore numerico | ✓ | | | Fatto subordinato |
+| Periodo strutturato | ✓ | | | Nessun testo libero |
+| Stato valore (`provisional`…`withdrawn`) | ✓ | | | Slim |
+| Qualità (`official`…`self_reported`) | ✓ | | | Distinta da stato |
+| Rettifica / sostituzione con storico | ✓ | | | Un corrente per chiave logica |
+| Territorio (livello + etichetta) | ✓ | | | Dimensione minima |
+| Settore (`business_sectors` opzionale) | ✓ | | | Catalogo già pubblicato |
+| Paese (etichetta + codice opzionale) | ✓ | | | Nessun catalogo countries pubblicato |
+| Serie storica come tabella/AR | | | ✓ | Derivata dai Valori |
+| Dataset / righe sorgente | | ✓ | | Non registro indicatori |
+| Microdati identificabili | | | ✓ | Privacy |
+| Osservazione persistita | | ✓ | | Non necessaria al registro |
+| Rapporti / Dossier / Schede owned OSS | | | ✓ | → Contenuti |
+| Interpretazione owned OSS | | | ✓ | → Contenuti |
+| Dashboard / grafici / mappe persistiti | | | ✓ | Viste derivate |
+| Ranking / trend / confronti persistiti | | | ✓ | Derivati |
+| Metodologia versionata complessa | | ✓ | | Sintetica sufficiente |
+| Workflow approvazione / audit scientifico | | ✓ | | Fuori ciclo 1 |
+| Dimensioni avanzate (genere, età, …) | | ✓ | | Non supportabili |
+| FK Organizzazioni | | ✓ | | Ente testuale in Fonte |
+| FK Contenuti | | ✓ | | Nessuna ownership crociata |
+| Feed automatici / ETL / import | | ✓ | | Manuale/editoriale ciclo 1 |
+| Sondaggi / questionari strutturati | | ✓ | | Fonte futura |
+| Indicatori compositi complessi | | ✓ | | Nature semplici |
+| Intervalli di confidenza / score qualità | | ✓ | | Qualità chiusa basta |
+| Cataloghi ISTAT / NUTS nuovi | | | ✓ | Non inventare |
+| Account / `auth.users` owner | | | ✓ | Identità & Accessi |
+| Documenti / Storage / scraping / data lake / BI / cache / export / CRM | | | ✓ | Fuori dominio |
+| JSON generico | | | ✓ | Nessuna semantica deferita |
+| FK individuali Persone / Imprese | | | ✓ | Solo aggregati |
+
+---
+
+### 15.C Relazioni con altri domini (congelate per ciclo 1)
+
+| Dominio | Relazione ciclo 1 | Natura |
+|---|---|---|
+| **Contenuti** | Articoli, report narrativi, dossier, schede editoriali, interpretazioni, storytelling: **owned da Contenuti**. Nessuna tabella Rapporto/Dossier/Scheda in OSS; nessuna FK obbligatoria | Confine chiuso |
+| **Organizzazioni** | Ente produttore **testuale** in Fonte; nessuna FK strutturale; nessun duplicato anagrafico | Rinviato collegamento |
+| **Persone** | Nessuna FK individuale; nessun microdato; eventuale derivazione aggregata senza ownership | Derivazione senza FK |
+| **Imprese** | Nessuna FK individuale; nessun microdato; eventuale derivazione aggregata senza ownership | Derivazione senza FK |
+| **business_sectors** | Riferimento opzionale sulla dimensione settore del Valore | Strutturale opzionale |
+| **Catalogo paesi** | Non pubblicato come tabella dedicata; paese = etichetta + codice opzionale | Nessuna FK inventata |
+| **Appartenenze / Professionisti / Opportunità / Eventi / Servizi / Collaborazioni / Mercati** | Possono alimentare calcoli esterni; **nessuna** FK ai loro AR individuali nel ciclo 1 | Derivazione / futura |
+| **Identità & Accessi** | Accesso e azioni di scrittura; non possiede fatti statistici; deny-by-default | Supporto |
+| **Ricerca / Notifiche** | Consumatori di pubblicazioni; nessuna ownership inbound | Fuori ownership |
+
+**Assenza cicli di ownership.** Flusso unidirezionale: domini sorgente → (derivazione) → Osservatorio; Contenuti narra senza acquisire ownership dei Valori (coerente con D37–D45, P6, P9).
+
+---
+
+### 15.D Prontezza Physical
+
+Il Logical Osservatorio è **chiuso per il ciclo 1**.
+
+Il Physical del ciclo 1 **deve** limitarsi a tradurre:
+
+* **AR** Indicatore (definizione, natura, unità, periodicità, lifecycle operativo + pubblicazione);
+* **FonteStatistica** owned dal dominio;
+* **ValoreIndicatore** subordinato (numero, periodo strutturato, fonte, stato, qualità, dimensioni 0..3, rettifica);
+* **insiemi chiusi** natura/unità/periodicità/stati/qualità/livelli territoriali;
+* **privacy** aggregata e soglia editoriale 5;
+* **confini** §15.A–§15.C (Contenuti, Organizzazioni, Persone/Imprese, no JSON, deny-by-default).
+
+Il Physical **non** deve:
+
+* inventare un secondo Aggregate Root;
+* persistere Serie/Osservazione/Rapporto/Dossier/Scheda/Interpretazione/dashboard/grafici;
+* introdurre microdati o FK a Persone/Imprese individuali;
+* inventare cataloghi geografici ISTAT/NUTS o un catalogo countries inesistente;
+* introdurre FK obbligatorie a Organizzazioni o Contenuti;
+* lasciare aperte nature/unità/dimensioni/lifecycle;
+* usare JSON generico per dimensioni o valori;
+* attribuire ownership a Account/`auth.users`.
+
+I nomi di tabelle/colonne/CHECK restano decisione del Physical. Il Migration Plan, quando autorizzato, potrà tradurre questo modello in DDL **senza nuove decisioni semantiche**.
+
+**Criterio di completamento.** Con §15.A–§15.D il ciclo 1 è completo e il Physical DDL-ready è **autorizzabile**.
+
+---
+
+### Domande aperte (non bloccanti per il Physical ciclo 1)
+
+- raffinamento post-ciclo-1 di feed automatici e contratti di campo per-dominio;
+- collegamento facoltativo Fonte → Organizzazioni;
+- collegamento facoltativo Valori/Indicatori → Contenuti;
+- dimensioni avanzate e soglie per-fenomeno più granulari;
+- metodologia versionata, audit scientifico, sondaggi strutturati;
+- eventuale catalogo paesi condiviso quando sarà pubblicato;
+- definizione giuridica ampia di “imprenditore di origine immigrata” (non richiesta per registrare indicatori amministrati);
+- futura separazione rilevazioni / indicatori / prodotti come sotto-domini.
+
+---
+
+## Controllo finale (ciclo 1)
+
+1. **§15 autoritativa presente** — verificato: §15.A–§15.D chiudono AR, oggetti, valori, dimensioni, fonti, lifecycle, privacy, confini.
+2. **Un solo AR** — Indicatore; Fonte e Valore non sono AR.
+3. **Nessun microdato** — verificato §15.A / §15.B.
+4. **Nessuna dashboard / rapporto narrativo owned** — verificato §15.A / §15.C.
+5. **Nessuna FK individuale Persone/Imprese** — verificato §15.C.
+6. **Nessuna decisione semantica aperta bloccante** — le domande residue sono esplicitamente non bloccanti.
+7. **Coerenza Domain Model / reconciliation / dependency-map** — conoscenza derivata, P6/P9, confine CE, nessun ciclo ownership.
+8. **Nessun riferimento tecnico/SQL** — il documento resta logico; i riferimenti a `business_sectors` indicano solo cataloghi già pubblicati come dipendenze strutturali opzionali, senza anticipare DDL di Osservatorio.
 
 ### Riepilogo finale
 
-**Principali decisioni prese.** Osservatorio è confermato come dominio autonomo e come una delle funzioni strategiche della piattaforma, accanto a Persone, Imprese, Opportunità e Mercati Internazionali. Il dominio produce conoscenza derivata — non dati operativi — attraverso una catena esplicita di trasformazioni (Osservazione → Misura → Valore → Indicatore → Analisi → prodotto analitico), mantenendo sempre distinti dato operativo, dato statistico, indicatore, valore, analisi e contenuto editoriale. Il ciclo di vita è modellato su otto assi indipendenti (acquisizione, elaborazione, metodologico, verifica, pubblicazione, validità temporale, visibilità, contestazione), evitando qualsiasi stato unico compressivo. La qualità del dato è multidimensionale (21 dimensioni indipendenti), e l'aggregazione/anonimizzazione è disciplinata con soglie variabili per prevenire la reidentificazione di soggetti individuali. Le Serie storiche e i confronti sono ammessi solo a condizioni esplicite di comparabilità, e una correlazione non implica mai causalità.
+**Ciclo 1.** Registro di Indicatori e Valori aggregati pubblicabili, con FonteStatistica, periodo strutturato, tre dimensioni massime, nature/unità chiuse, lifecycle slim, privacy aggregata.
 
-**Eventuali incoerenze trovate.** Nessuna incoerenza rilevata rispetto ai documenti logici esistenti: tutti i riferimenti incrociati (Osservatorio come destinatario di dati aggregabili in `mercati-internazionali.md` §1/§11/§12, in `professionisti.md` §1, in `eventi.md` §1/§13, in `contenuti-editoriali.md` §1/§7/§13) sono stati rispettati e resi coerenti con la struttura interna di questo documento.
+**Physical.** Autorizzato a tradurre §15 senza inventare semantica.
 
-**Relazioni con gli altri domini.** Osservatorio utilizza dati aggregabili da Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi e Mercati Internazionali (come domini sorgente, mai incorporati) e dalla Tassonomia Condivisa (per Dimensioni e Classificazioni); è utilizzato da Contenuti Editoriali (come possibile origine di un'Analisi narrata) e da Ricerca (per rendere trovabili i propri prodotti analitici). Non ha alcuna relazione di governance con Identità & Accessi, a cui restano affidati i diritti di accesso.
-
-**Domande ancora aperte.** Le 38 domande elencate nella sezione precedente restano esplicitamente aperte, in particolare: il confine tra Osservatorio e Contenuti editoriali nei casi di analisi fortemente narrativa; la definizione giuridica di "imprenditore di origine immigrata"; le soglie minime di aggregazione per fenomeno/dimensione; la governance delle revisioni metodologiche e delle rettifiche; il coinvolgimento di soggetti terzi (università, centri di ricerca, partner) nella validazione; e la futura gestione di sondaggi e questionari come fonte diretta strutturata.
+**LOGICAL OSSERVATORIO REVISIONATO E APPROVATO — PHYSICAL AUTORIZZABILE**
