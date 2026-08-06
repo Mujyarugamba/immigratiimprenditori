@@ -1,12 +1,12 @@
 # Logical Data Model — Dominio IDENTITÀ & ACCESSI
 
 > Livello logico e di dominio. Nessun riferimento a database, SQL, PostgreSQL, Supabase, tabelle, colonne, tipi dato tecnici, chiavi primarie o esterne, indici, constraint tecnici, RLS, API, migration, backend, frontend, token tecnici, protocolli di autenticazione, librerie, provider specifici o dettagli implementativi. Nessun codice.
-> Fondamenti (non modificati da questo documento): [`docs/domain-model.md`](../../domain-model.md), [`docs/architecture/logical/persone.md`](./persone.md), [`docs/architecture/logical/imprese.md`](./imprese.md), [`docs/architecture/logical/appartenenze.md`](./appartenenze.md), [`docs/architecture/logical/mercati-internazionali.md`](./mercati-internazionali.md), [`docs/architecture/logical/opportunita.md`](./opportunita.md), [`docs/architecture/logical/collaborazioni.md`](./collaborazioni.md), [`docs/architecture/logical/professionisti.md`](./professionisti.md), [`docs/architecture/logical/eventi.md`](./eventi.md), [`docs/architecture/logical/contenuti-editoriali.md`](./contenuti-editoriali.md), [`docs/architecture/logical/osservatorio.md`](./osservatorio.md).
-> Scopo del documento: definire il modello logico del dominio Identità & Accessi, già anticipato in `docs/domain-model.md` §1 come dominio "Generico" ("Autenticare l'utente e definire cosa può fare... non è un dominio di business: è infrastruttura abilitante") e richiamato da ogni documento logico precedente come responsabile esclusivo di autenticazione, autorizzazione e permessi tecnici, mai come proprietario dei fatti di business (`logical/persone.md`, `logical/imprese.md` §1/§7, `logical/appartenenze.md` §8/§10, `logical/mercati-internazionali.md` §1, `logical/professionisti.md` §1, `logical/eventi.md`, `logical/contenuti-editoriali.md` §1/§12/§13, `logical/osservatorio.md` §1/§12). Questo documento conferma Identità & Accessi come dominio autonomo e ne definisce la struttura logica completa.
+> Fondamenti (non modificati da questo documento): [`docs/domain-model.md`](../../domain-model.md), [`docs/architecture/logical/persone.md`](./persone.md), [`docs/architecture/logical/imprese.md`](./imprese.md), [`docs/architecture/logical/organizzazioni.md`](./organizzazioni.md), [`docs/architecture/logical/appartenenze.md`](./appartenenze.md), [`docs/architecture/logical/mercati-internazionali.md`](./mercati-internazionali.md), [`docs/architecture/logical/opportunita.md`](./opportunita.md), [`docs/architecture/logical/collaborazioni.md`](./collaborazioni.md), [`docs/architecture/logical/professionisti.md`](./professionisti.md), [`docs/architecture/logical/eventi.md`](./eventi.md), [`docs/architecture/logical/contenuti-editoriali.md`](./contenuti-editoriali.md), [`docs/architecture/logical/osservatorio.md`](./osservatorio.md), [`docs/architecture/logical/reconciliation-report.md`](./reconciliation-report.md), [`docs/architecture/physical/domain-dependency-map.md`](../physical/domain-dependency-map.md).
+> Scopo del documento: definire il modello logico del dominio Identità & Accessi, già anticipato in `docs/domain-model.md` §1 come dominio "Generico" ("Autenticare l'utente e definire cosa può fare... non è un dominio di business: è infrastruttura abilitante") e richiamato dai documenti logici come responsabile esclusivo di autenticazione, autorizzazione e permessi tecnici, mai come proprietario dei fatti di business. Questo documento conferma Identità & Accessi come dominio autonomo, ne definisce la struttura logica e chiude il **perimetro del ciclo 1** sufficiente al Physical (§15.A–§15.C).
 > Carattere autonomo del dominio. Identità & Accessi rappresenta chi tenta di accedere alla piattaforma, con quale identità digitale, con quale livello di verifica, per conto di chi, con quale titolo, e a cosa può accedere entro quali limiti e per quale periodo. Non è un semplice meccanismo tecnico invisibile: ha una propria natura concettuale — fatta di identità digitali, account, metodi di autenticazione, ruoli applicativi, permessi, deleghe, consensi — distinta e autonoma rispetto ai soggetti economici e sociali che la piattaforma rappresenta.
-> Distinzione tra Account, Identità digitale, Persona, Impresa e Appartenenza. Un **Account** è il costrutto di accesso che permette di autenticarsi e agire sulla piattaforma. Una **Identità digitale** è l'insieme di credenziali e metodi di autenticazione riconducibili a un Account. Una **Persona** (`logical/persone.md`) è il soggetto sociale e anagrafico, che può esistere senza alcun Account. Un'**Impresa** (`logical/imprese.md`) è un soggetto economico che non possiede mai credenziali proprie: agisce sempre attraverso Persone autorizzate. Un'**Appartenenza** (`logical/appartenenze.md`) è il fatto di business che lega una Persona a un'Impresa; il titolo per agire per l'Impresa deriva da essa (o da una delega compatibile), ma l'Appartenenza stessa non è un costrutto di accesso. Questi cinque concetti restano sempre distinti in questo documento.
-> Principio per cui l'accesso non crea diritti sostanziali. Una decisione di Identità & Accessi (un permesso concesso, un ruolo assegnato, un accesso consentito) è sempre un fatto tecnico-applicativo: non genera, modifica né dimostra automaticamente un fatto sostanziale dei domini economici e sociali — non crea proprietà, non crea rappresentanza legale, non attribuisce una qualifica professionale, non dimostra affidabilità. I fatti sostanziali restano sempre di competenza esclusiva del dominio che li governa (Persone, Imprese, Appartenenze, Professionisti, e gli altri).
-> Carattere del documento. Esclusivamente logico e di dominio: nessuna decisione tecnica, nessuna implementazione, nessuna anticipazione di protocolli di autenticazione, librerie, provider o meccanismi specifici.
+> Distinzione tra Account, Identità digitale, Persona, Impresa, Organizzazione e Appartenenza. Un **Account** è il costrutto di accesso che permette di autenticarsi e agire sulla piattaforma. Una **Identità digitale** è l'insieme di credenziali e metodi di autenticazione riconducibili a un Account. Una **Persona** (`logical/persone.md`) è il soggetto sociale e anagrafico, che può esistere senza alcun Account. Un'**Impresa** (`logical/imprese.md`) è un soggetto economico che non possiede mai credenziali proprie: agisce sempre attraverso Persone autorizzate. Un'**Organizzazione** (`logical/organizzazioni.md`) è un soggetto collettivo istituzionale/associativo **distinto dall'Impresa**; non possiede credenziali proprie e non è assimilabile a Impresa. Un'**Appartenenza** (`logical/appartenenze.md`) è il fatto di business che lega una Persona a un'Impresa nel ciclo 1; le membership Persona–Organizzazione / Impresa–Organizzazione sono **future** e restano di Appartenenze, mai di Identità & Accessi. Questi concetti restano sempre distinti in questo documento.
+> Principio per cui l'accesso non crea diritti sostanziali. Una decisione di Identità & Accessi (un permesso concesso, un ruolo assegnato, un accesso consentito) è sempre un fatto tecnico-applicativo: non genera, modifica né dimostra automaticamente un fatto sostanziale dei domini economici e sociali — non crea proprietà, non crea rappresentanza legale, non attribuisce una qualifica professionale, non dimostra affidabilità, non crea membership. I fatti sostanziali restano sempre di competenza esclusiva del dominio che li governa (Persone, Imprese, Organizzazioni, Appartenenze, Professionisti, e gli altri).
+> Carattere del documento. Esclusivamente logico e di dominio: nessuna decisione tecnica, nessuna implementazione, nessuna anticipazione di protocolli di autenticazione, librerie, provider o meccanismi specifici. È ammesso il solo riconoscimento concettuale che l'autenticazione tecnica di piattaforma esiste fuori ownership di questo dominio (§15.A).
 
 ---
 
@@ -26,7 +26,7 @@
 12. [Sessioni, sicurezza e tracciabilità concettuale](#12-sessioni-sicurezza-e-tracciabilità-concettuale)
 13. [Regole, invarianti e casi limite](#13-regole-invarianti-e-casi-limite)
 14. [Eventi di dominio](#14-eventi-di-dominio)
-15. [Decisioni finali e domande aperte](#15-decisioni-finali-e-domande-aperte)
+15. [Decisioni finali, ciclo 1 e domande aperte](#15-decisioni-finali-ciclo-1-e-domande-aperte)
 
 ---
 
@@ -39,18 +39,22 @@
 **Cosa rientra nel dominio.** Identità digitali; Account; metodi di autenticazione; verifica dell'identità digitale; associazione tra Account e soggetti di dominio; ruoli applicativi; permessi; deleghe; consensi; accesso a funzionalità e informazioni; sospensioni; recupero dell'accesso; sicurezza concettuale dell'Account; tracciabilità delle decisioni di accesso.
 
 **Cosa NON rientra nel dominio.**
-- Non rientrano **Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi, Mercati Internazionali, Contenuti Editoriali, Osservatorio**: i fatti sostanziali di questi domini (chi è una Persona, chi possiede un'Impresa, chi è un Professionista, chi ha una qualifica) restano di loro esclusiva competenza; Identità & Accessi li referenzia per decidere l'accesso, senza mai diventarne proprietario né duplicarli.
+- Non rientrano **Persone, Imprese, Organizzazioni, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi, Servizi, Mercati Internazionali, Contenuti Editoriali, Osservatorio**: i fatti sostanziali di questi domini restano di loro esclusiva competenza; Identità & Accessi li referenzia per decidere l'accesso, senza mai diventarne proprietario né duplicarli.
+- Non rientrano **membership** Persona–Impresa (già in Appartenenze), né membership **Persona–Organizzazione / Impresa–Organizzazione** (future in Appartenenze, Dependency Map DC2): Identità & Accessi non le crea, non le possiede e non le simula.
+- Non rientrano **Organizzazioni** come anagrafiche, sedi, ufficiali o tipologies (`logical/organizzazioni.md`): solo eventuali decisioni di accesso sulle relative risorse logiche.
 - Non rientrano **comunicazioni e notifiche**: il dominio Notifiche (`docs/domain-model.md` §12) reagisce a fatti accaduti; Identità & Accessi può generare fatti (es. un accesso anomalo) ma non gestisce l'invio o la preferenza di canale.
-- Non rientrano le **preferenze generali** non legate all'accesso (es. preferenze editoriali, di visualizzazione): solo le preferenze di accesso e consenso rientrano qui (§9).
+- Non rientrano le **preferenze generali** non legate all'accesso (es. preferenze editoriali, di visualizzazione): solo le preferenze di accesso e consenso rientrano qui (§9); nel ciclo 1 i Consensi come entità owned sono rinviati (§15.A).
+- Non rientrano **CRM, HR, documenti, media, Storage, FEV, workflow business, billing, audit tecnico infrastrutturale, moderazione editoriale come processo**.
 - Non rientra la **reputazione**: nessun giudizio di affidabilità, qualità o merito è di competenza di questo dominio (§10, §13).
 - Non rientrano **contratti e pagamenti**: eventuali accordi commerciali restano fuori dal perimetro.
 - Non rientrano le **verifiche professionali** (`logical/professionisti.md`) né le **verifiche economiche**: Identità & Accessi può considerarne l'esito come condizione di una decisione di accesso (§7), senza gestirne il processo.
+- Non rientra l'**autenticazione tecnica** (protocolli, credenziali infrastrutturali, provider): resta fuori ownership; questo dominio ne riconosce solo l'esistenza concettuale (§15.A).
 
-**Chiarimenti espliciti.** Un ruolo applicativo non equivale a una qualifica professionale; un permesso non equivale a rappresentanza legale; una delega di accesso non sostituisce un'Appartenenza; l'autenticazione non dimostra automaticamente identità civile o affidabilità (introduzione, §3, §6, §8, §10).
+**Chiarimenti espliciti.** Un ruolo applicativo non equivale a una qualifica professionale né a un ruolo in Impresa/Organizzazione; un permesso non equivale a rappresentanza legale; una delega di accesso non sostituisce un'Appartenenza né una membership organizzativa; l'autenticazione non dimostra automaticamente identità civile o affidabilità; **Organizzazione ≠ Impresa** (introduzione, §3, §5, §6, §8, §10, §15.A).
 
-**Quali domini utilizza.** Identità & Accessi legge, senza incorporare: **Persone** (per l'associazione Account–Persona e lo stato dell'identità dichiarata/verificata); **Imprese** (per il contesto di azione); **Appartenenze** (per il titolo che consente di agire per un'Impresa); **Professionisti** (per l'eventuale stato di verifica professionale rilevante a una decisione di accesso); **Contenuti Editoriali** (per i ruoli editoriali — autore, revisore, responsabile editoriale); **Osservatorio** (per l'eventuale accesso a dati aggregati riservati); ogni altro dominio, come fonte di *risorse logiche* (§7) su cui applicare una decisione di accesso.
+**Quali domini utilizza.** Identità & Accessi legge, senza incorporare: **Persone** (associazione Account–Persona); **Imprese** (contesto di azione, mai credenziali Impresa); **Appartenenze** (titolo Persona–Impresa nel ciclo 1); **Organizzazioni** (solo come risorsa logica / soggetto referenziabile; **nessun contesto Organizzazione operativo nel ciclo 1** — §5, §15.A); **Professionisti** (eventuale stato di verifica come condizione); **Contenuti Editoriali** (funzioni editoriali come Ruoli applicativi); **Osservatorio** (eventuale accesso a dati aggregati riservati); ogni altro dominio, come fonte di *risorse logiche* (§7).
 
-**Quali domini utilizzano Identità & Accessi.** Tutti i domini della piattaforma dipendono da Identità & Accessi per stabilire chi può creare, modificare o consultare le proprie entità — ma nessuno di essi ne incorpora la logica: ciascun dominio proprietario definisce la propria visibilità (§7, principio) e Identità & Accessi la applica. In particolare `logical/imprese.md` §7, `logical/appartenenze.md` §8/§10, `logical/professionisti.md` §1, `logical/contenuti-editoriali.md` §12/§13 e `logical/osservatorio.md` §1/§12 rimandano esplicitamente a questo dominio per ogni fatto tecnico di accesso.
+**Quali domini utilizzano Identità & Accessi.** Tutti i domini della piattaforma dipendono da Identità & Accessi per applicare — non definire — le rispettive regole di visibilità e le decisioni di accesso. In particolare rimandano esplicitamente a questo dominio i Logical già chiusi di Imprese, Appartenenze, Professionisti, Contenuti, Osservatorio, Organizzazioni e gli altri domini pubblicati.
 
 **Perché è un dominio autonomo.** Identità & Accessi ha una propria natura — non economica, non sociale, non editoriale — fatta di identità digitali, credenziali, metodi di autenticazione, ruoli applicativi, permessi, deleghe e consensi, con proprie regole di verifica multidimensionale (§10) e un proprio ciclo di vita a più assi (§11). Nessun altro dominio possiede la competenza per decidere, in modo coerente e centralizzato, chi può fare cosa, per conto di chi, entro quali limiti: comprimere questa responsabilità in un altro dominio (es. in Persone o in Imprese) obbligherebbe quel dominio a occuparsi di credenziali, sessioni e sicurezza, snaturandone la responsabilità di modellare fatti di business.
 
@@ -95,7 +99,7 @@
 | **Verifica dell'identità digitale** | L'accertamento che un'Identità digitale è effettivamente controllata dal soggetto che la utilizza (§10) |
 | **Associazione con Persona** | Il collegamento dichiarato e verificabile tra un Account e una Persona (§3, §5) |
 | **Associazione operativa con Impresa** | Il collegamento, derivato da un'Appartenenza o da una Delega compatibile, che permette a una Persona di agire per un'Impresa (§5) |
-| **Contesto di azione** | La modalità (in proprio, per conto di un'Impresa, per conto di un'organizzazione) in cui un'Identità digitale agisce in un dato momento (§5) |
+| **Contesto di azione** | La modalità in cui un'Identità digitale agisce: in proprio (Persona), per conto di un'Impresa, per conto di un'Organizzazione (rinviato), oppure in contesto redazionale/di sistema (§5, §15.A) |
 | **Ruolo applicativo** | L'insieme nominato di permessi assegnabile a un Account in un Contesto di azione, distinto da ruoli e qualifiche di dominio (§6) |
 | **Permesso** | La singola facoltà tecnica di compiere un'azione o accedere a un'informazione (§6, §7) |
 | **Politica di accesso** | La regola dichiarata che, applicata a un insieme di condizioni, determina l'esito di una richiesta di accesso (§7) |
@@ -123,8 +127,9 @@
 | Riferimento | Verso il dominio | Significato |
 |---|---|---|
 | Associazione con Persona | `logical/persone.md` | L'Account referenzia la Persona a cui è associato, senza incorporarne i dati (§5) |
-| Associazione operativa con Impresa | `logical/imprese.md`, `logical/appartenenze.md` | Il Contesto di azione "per conto di un'Impresa" deriva da un'Appartenenza esistente o da una Delega compatibile (§5, §8) |
-| Ruolo editoriale | `logical/contenuti-editoriali.md` | Autore, revisore, responsabile editoriale sono Ruoli applicativi di questo dominio, applicati a Contenuti di quel dominio (§6) |
+| Associazione operativa con Impresa | `logical/imprese.md`, `logical/appartenenze.md` | Il Contesto di azione "per conto di un'Impresa" deriva da un'Appartenenza esistente (ciclo 1) o, in futuro, da una Delega compatibile (§5, §8, §15.A) |
+| Contesto Organizzazione | `logical/organizzazioni.md`, `logical/appartenenze.md` (future) | **Non operativo nel ciclo 1**: richiede membership o altro fatto autorizzante pubblicato; non simulabile in Identità & Accessi (§5, §15.A) |
+| Ruolo editoriale | `logical/contenuti-editoriali.md` | Funzioni editoriali esercitate tramite Ruoli applicativi di questo dominio, senza ownership dei Contenuti (§6, §15.A) |
 | Accesso a dati aggregati | `logical/osservatorio.md` | Un Ruolo applicativo (es. ricercatore) può condizionare l'accesso a prodotti analitici riservati (§7) |
 | Stato di verifica professionale | `logical/professionisti.md` | Una Decisione di accesso può considerare, come condizione, lo stato di verifica dichiarato da quel dominio, senza gestirlo (§7, §10) |
 
@@ -203,24 +208,26 @@
 | **Associazione verificata** | Un'Associazione per cui esiste un riscontro indipendente della corrispondenza (§10) |
 | **Associazione contestata** | Un'Associazione la cui correttezza è stata messa in dubbio |
 | **Associazione revocata** | Un'Associazione precedentemente valida che è stata dichiarata non più corretta o non più in vigore |
-| **Persona che opera per sé** | Il Contesto di azione in cui l'Identità digitale agisce a titolo proprio |
-| **Persona che opera per un'Impresa** | Il Contesto di azione in cui l'Identità digitale agisce per conto di un'Impresa, sulla base di un'Appartenenza o di una Delega compatibile |
-| **Persona che opera per più Imprese** | Una Persona può avere più Associazioni operative attive contemporaneamente, ciascuna riconducibile a un'Appartenenza distinta |
+| **Persona che opera per sé** | Contesto personale: l'Identità digitale agisce a titolo della Persona associata, entro i diritti sostanziali esistenti |
+| **Persona che opera per un'Impresa** | Contesto Impresa: l'Identità digitale agisce per conto di un'Impresa solo se esiste un fatto autorizzante in Appartenenze (ciclo 1) o, in futuro, una Delega compatibile |
+| **Persona che opera per più Imprese** | Una Persona può avere più contesti Impresa attivi, ciascuno riconducibile a un'Appartenenza distinta |
 | **Persona che cambia contesto di azione** | Il passaggio, nel corso di una stessa Sessione o tra Sessioni diverse, da un Contesto di azione a un altro |
-| **Azione in proprio** | Un'azione compiuta nel Contesto "per sé" |
-| **Azione per conto di un'Impresa** | Un'azione compiuta nel Contesto "per un'Impresa", riconducibile a un'Appartenenza o Delega |
-| **Azione per conto di un'organizzazione** | Analoga all'azione per conto di un'Impresa, riferita a un'organizzazione secondo le stesse regole |
-| **Delega operativa** | La Delega (§8) che può fondare, in alternativa o a integrazione di un'Appartenenza, un'Associazione operativa con Impresa |
-| **Titolo di rappresentanza** | Il fondamento dichiarato (Appartenenza, Delega) che giustifica un'azione per conto di un'Impresa; non è mai generato da questo dominio, ma sempre verificato rispetto ai domini sorgente |
+| **Azione in proprio** | Un'azione compiuta nel Contesto personale |
+| **Azione per conto di un'Impresa** | Un'azione compiuta nel Contesto Impresa, riconducibile a un fatto di Appartenenze (ciclo 1) |
+| **Azione per conto di un'Organizzazione** | Contesto Organizzazione: **non operativo nel ciclo 1**. Richiede membership Persona–Organizzazione / Impresa–Organizzazione (future in Appartenenze) o altro fatto autorizzante pubblicato. **Non** è analogo automatico al contesto Impresa; **non** è simulabile in Identità & Accessi; **Organizzazione ≠ Impresa** (`logical/organizzazioni.md`) |
+| **Contesto redazionale / di sistema** | Contesto in cui un Account con Ruolo applicativo di piattaforma (es. redattore, amministratore applicativo) opera su risorse della piattaforma. Non crea Organizzazione, non crea membership, non attribuisce diritti sostanziali sui domini (§15.A) |
+| **Delega operativa** | La Delega (§8) che in futuro può fondare, in alternativa o a integrazione di un'Appartenenza, un contesto Impresa; **rinviata dal ciclo 1** (§15.A) |
+| **Titolo di rappresentanza / autorizzazione gestionale** | Il fondamento dichiarato in Appartenenze (o futuro) che giustifica un'azione per conto di un'Impresa; non è mai generato da questo dominio |
 | **Limite del contesto** | L'insieme di azioni o informazioni non accessibili in un dato Contesto, anche quando l'Identità digitale sarebbe altrimenti autenticata |
 
 **Conferme.**
 - L'**Account è sempre riconducibile a un'Identità digitale**: non esiste un Account privo di alcuna Identità digitale associata.
-- L'**azione per conto di un'Impresa richiede una Persona associata**: coerente con l'introduzione strategica, un'Impresa non possiede mai credenziali proprie.
-- Il **titolo per agire per l'Impresa deriva da Appartenenze** (`logical/appartenenze.md`, in particolare l'Autorizzazione gestionale, §2 di quel documento) **o da una Delega compatibile con esse** (§8): Identità & Accessi verifica l'esistenza del titolo, non lo crea.
-- **Identità & Accessi non crea proprietà, amministrazione o rappresentanza**: questi fatti restano di competenza esclusiva di `logical/imprese.md` e `logical/appartenenze.md`.
-- Il **cambio di contesto non modifica l'identità dell'Account**: la stessa Identità digitale resta la stessa, indipendentemente dal Contesto di azione selezionato in un dato momento.
-- I **permessi disponibili possono cambiare in base al contesto di azione**: un Ruolo applicativo attivo nel Contesto "per sé" può non essere disponibile (o esserlo in forma diversa) nel Contesto "per un'Impresa" (§6).
+- L'**azione per conto di un'Impresa richiede una Persona associata**: un'Impresa non possiede mai credenziali proprie.
+- Il **titolo per agire per l'Impresa nel ciclo 1 deriva da Appartenenze** (`logical/appartenenze.md`, Autorizzazione gestionale / ruolo strutturale): Identità & Accessi **verifica** l'esistenza del titolo, **non lo crea**. Le Deleghe compatibili restano modello generale (§8) ma **non sono oggetto del ciclo 1** (§15.A).
+- **Identità & Accessi non crea proprietà, amministrazione, rappresentanza, Organizzazione o membership**: fatti di `logical/imprese.md`, `logical/organizzazioni.md`, `logical/appartenenze.md`.
+- Il **contesto Organizzazione non è disponibile nel ciclo 1**: nessuna relazione provvisoria in questo dominio può sostituire le membership future di Appartenenze.
+- Il **cambio di contesto non modifica l'identità dell'Account**.
+- I **permessi disponibili possono cambiare in base al contesto di azione**.
 
 ---
 
@@ -230,24 +237,37 @@
 
 | Concetto | Definizione |
 |---|---|
-| **Ruolo applicativo** | Un insieme nominato di permessi assegnabile a un Account in un dato Contesto, definito e governato da questo dominio |
-| **Ruolo di dominio** | Un ruolo definito da un altro dominio (es. Ruolo di un'Appartenenza in `logical/appartenenze.md` §2) che descrive un fatto di business, non un permesso tecnico |
-| **Ruolo organizzativo** | Analogo al Ruolo di dominio, riferito a un'organizzazione istituzionale (`logical/imprese.md`) |
+| **Ruolo applicativo** | Un insieme nominato di permessi assegnabile a un Account in un dato Contesto, definito e governato da questo dominio; ≠ ruolo professionale, ≠ ruolo in Impresa, ≠ ruolo in Organizzazione, ≠ appartenenza, ≠ delega, ≠ policy infrastrutturale |
+| **Ruolo di dominio / relazionale** | Un ruolo definito da un altro dominio (es. Ruolo di un'Appartenenza in `logical/appartenenze.md`) che descrive un fatto di business, non un permesso tecnico |
+| **Ruolo in un'Organizzazione** | Fatto sostanziale o relazionale di `logical/organizzazioni.md` / future Appartenenze Org: **non** è un Ruolo applicativo e **non** appartiene a Imprese |
 | **Qualifica professionale** | Concetto di `logical/professionisti.md`: non equivale né si traduce automaticamente in un Ruolo applicativo |
-| **Funzione editoriale** | Concetto di `logical/contenuti-editoriali.md` (autore, curatore, revisore, responsabile editoriale): può corrispondere a un Ruolo applicativo di questo dominio, che ne consente l'esercizio tecnico |
-| **Permesso** | La singola facoltà tecnica di compiere un'azione o accedere a un'informazione |
+| **Funzione editoriale** | Concetto di `logical/contenuti-editoriali.md`: può essere esercitata tramite Ruolo applicativo, senza ownership dei Contenuti |
+| **Permesso operativo** | La singola facoltà tecnica di compiere un'azione o accedere a un'informazione |
+| **Policy di accesso** | Regola dichiarata (§7) che produce Decisioni; in Physical potrà tradursi in meccanismi di enforcement, senza che questo documento ne specifichi la forma |
 | **Capacità operativa** | L'insieme delle azioni concretamente disponibili per un Account in un Contesto, risultante dalla combinazione di Ruoli e Permessi attivi |
 | **Responsabilità** | Concetto descrittivo, non tecnico: l'aspettativa di correttezza legata a un Ruolo, che resta un fatto di governance, non un permesso |
 | **Autorizzazione temporanea** | Un Permesso concesso per una durata limitata, oltre la quale cessa senza necessità di revoca esplicita |
 | **Eccezione** | Un Permesso concesso in deroga alla Politica di accesso ordinaria, per un caso specifico e motivato |
 | **Restrizione** | Un limite esplicito che riduce la Capacità operativa altrimenti disponibile secondo un Ruolo |
 
-**Possibili Ruoli applicativi (elenco non esaustivo, non gerarchico):** visitatore; Account registrato; Persona associata; referente di Impresa; operatore autorizzato; Professionista associato; autore; revisore; responsabile editoriale; ricercatore; validatore; moderatore; amministratore funzionale; assistenza; soggetto esterno autorizzato. Questo elenco è coerente con gli attori concettuali già individuati in `docs/domain-model.md` §13 (Visitatore anonimo, Persona autenticata, Persona con Appartenenza attiva, Partner, Redazione/Staff di piattaforma), qui declinati in Ruoli applicativi espliciti di questo dominio.
+**Ruoli applicativi minimi del ciclo 1** (chiusi; non gerarchici; non esaustivi del modello generale):
+
+| Ruolo | Significato | Ambito | Abilita | Non prova | Ciclo 1 |
+|---|---|---|---|---|---|
+| *(nessuno — visitatore)* | Assenza di Account autenticato | Consultazione | Solo ciò che i domini proprietari espongono come pubblico | Identità, Persona, diritti | Incluso come assenza di Account |
+| `account_registrato` | Account autenticato ordinario | Piattaforma | Azioni che richiedono autenticazione di base | Persona, Appartenenza, Org | **Incluso** |
+| `redattore` | Funzione redazionale di piattaforma | Contesto redazionale | Operazioni editoriali ammesse dalle Politiche e dai domini Contenuti/altri | Titolarità sostanziale dei fatti narrati; Organizzazione | **Incluso** |
+| `amministratore_applicativo` | Amministrazione funzionale di piattaforma | Contesto di sistema | Configurazione/accesso amministrativo dichiarato dalle Politiche | Sovranità sui fatti di business; elusione delle Politiche | **Incluso** |
+| `moderatore` | Moderazione di piattaforma | Contesto di sistema | Azioni di moderazione se/quando le Politiche le prevedono | Processo editoriale; ownership Contenuti | **Rinviato** |
+| `servizio_tecnico` | Account di servizio non personale | Contesto di sistema | Automazioni dichiarate | Persona; diritti sostanziali | **Rinviato** (tipologia distinta) |
+
+**Catalogo generale (non ciclo 1).** Restano concepibili nel modello ampio, ma **non attivati** nel ciclo 1: referente di Impresa come Ruolo applicativo (il contesto Impresa deriva da Appartenenza, non da un ruolo nominato qui); Professionista associato; ricercatore; validatore; assistenza; soggetto esterno autorizzato; elenco esteso di §6 storico. Non introdurre ruoli business specifici (fondatore, legale rappresentante Org, ecc.) come Ruoli applicativi.
 
 **Principi.**
-- I Ruoli applicativi **non costituiscono una gerarchia obbligatoria**: un Ruolo non è automaticamente "superiore" a un altro; ciascuno definisce un proprio insieme di Permessi.
-- Un **Account può avere più Ruoli applicativi**, anche in Contesti diversi (es. "referente di Impresa" nel Contesto per l'Impresa A, "autore" nel Contesto per sé).
-- Un **Ruolo non deve attribuire automaticamente tutti i permessi collegati ad altri ruoli**: l'assegnazione di un Ruolo non implica l'assegnazione implicita di Permessi appartenenti a Ruoli differenti, anche quando questi appaiono "vicini" o "superiori" nell'elenco.
+- I Ruoli applicativi **non costituiscono una gerarchia obbligatoria**.
+- Un **Account può avere più Ruoli applicativi**, anche in Contesti diversi.
+- Un **Ruolo non attribuisce automaticamente** i Permessi di altri Ruoli.
+- Un Ruolo applicativo **non** equivale a ruolo in Impresa, ruolo in Organizzazione, qualifica professionale, appartenenza o delega.
 
 ---
 
@@ -326,14 +346,14 @@
 | **Delega per specifico contenuto** | Una Delega limitata a una singola Risorsa logica identificata |
 
 **Chiarimenti.**
-- Una **Delega di accesso non crea proprietà**: il Delegato non acquisisce alcun diritto sostanziale sull'Oggetto della Delega.
-- Una **Delega non crea automaticamente rappresentanza legale**: la rappresentanza legale di un'Impresa resta un fatto di `logical/imprese.md` e `logical/appartenenze.md` (Titolo di rappresentanza, §5), non generato da questo dominio.
-- Una **Delega non sostituisce l'Appartenenza quando questa è necessaria**: se un'azione richiede per sua natura un'Appartenenza (es. una modifica che presuppone un ruolo di dominio riconosciuto), una Delega non può da sola fondare quell'azione.
-- Il **Delegante deve avere il potere di attribuire l'accesso delegato**: una Delega concessa da chi non possiede il relativo titolo non è valida (§13, caso limite 14).
-- **Nessuno può delegare più diritti di quelli che possiede**: l'Ambito di una Delega non può eccedere la Capacità operativa del Delegante al momento della concessione.
-- La **revoca deve interrompere l'accesso futuro, senza cancellare lo storico delle azioni già compiute**: le azioni svolte legittimamente durante il periodo di efficacia della Delega restano valide e tracciate (§12, §13).
-- Una **delega scaduta non equivale a delega revocata**: la Scadenza è un esito naturale e previsto, distinto dalla Revoca, che è un atto deliberato.
-- Una **delega contestata può essere sospesa senza essere definitivamente annullata**: la Sospensione permette di congelare l'efficacia della Delega in attesa di chiarimento, senza equivalere a una Revoca.
+- Una **Delega di accesso abilita un'azione applicativa**; **non** crea appartenenza, titolarità, ruolo professionale, ruolo in Organizzazione né membership.
+- Una **Delega non crea automaticamente rappresentanza legale**: resta fatto di `logical/imprese.md` / `logical/appartenenze.md`.
+- Una **Delega non sostituisce l'Appartenenza** quando questa è necessaria.
+- Il **Delegante deve essere legittimato**; **nessuno può delegare più diritti di quelli che possiede**.
+- La Delega ha **ambito e durata**; può essere **revocata**; la revoca interrompe l'accesso futuro senza cancellare lo storico delle azioni già compiute.
+- Una **delega scaduta ≠ delega revocata**; una **delega contestata** può essere sospesa.
+
+**Ciclo 1.** Le **Deleghe come entità owned sono rinviate** (§15.A). Nel ciclo 1 il contesto Impresa poggia su Appartenenze; non si introducono Deleghe come surrogato di membership Organizzazione.
 
 ---
 
@@ -380,8 +400,12 @@
 | **Contestato** | La validità del Consenso espresso è stata messa in dubbio |
 
 **Principi.**
-- La **revoca del Consenso non deve cancellare automaticamente fatti o attività svolti legittimamente in precedenza**: coerente con il principio analogo già stabilito per le Deleghe (§8) e per le Revisioni dell'Osservatorio (`logical/osservatorio.md` §9, §12).
-- Identità & Accessi deve **governare il consenso all'accesso o al trattamento**, **senza sostituire un futuro modello legale completo della privacy**: questo documento non esaurisce le basi giuridiche del trattamento dei dati, che restano materia di un futuro dominio o disciplina dedicata (§15).
+- I Consensi **non** coincidono con preferenze applicative, autorizzazioni operative, appartenenze o diritti sui domini.
+- Ogni Consenso (quando modellato) ha **finalità, versione/provenienza, momento, durata/scadenza e stato**.
+- La **revoca del Consenso non cancella automaticamente** fatti o attività già legittime.
+- Identità & Accessi governa il consenso all'accesso/trattamento **senza sostituire** un futuro modello Privacy dedicato (§15).
+
+**Ciclo 1.** Le **entità Consenso owned sono rinviate** (§15.A). Restano validi i principi; nessuna tabella/concetto operativo di consenso è richiesto al Physical del ciclo 1.
 
 ---
 
@@ -413,7 +437,7 @@ Coerentemente con il principio, già adottato in `logical/appartenenze.md` §10 
 | **Identità digitale verificata** | Il controllo dell'Identità digitale da parte del soggetto è stato confermato (§3) |
 | **Associazione con Persona verificata** | Il collegamento tra l'Account e la Persona dichiarata è stato confermato (§5) |
 | **Identità civile verificata** | L'identità reale del soggetto, nel senso anagrafico o civile, è stata confermata secondo un riscontro indipendente |
-| **Relazione organizzativa verificata** | Il legame con un'Impresa (Appartenenza o Delega) è stato confermato (§5, §8) |
+| **Relazione con Impresa verificata** | Il legame con un'Impresa (Appartenenza; in futuro anche Delega) è stato confermato (§5, §8). Distinto da eventuali future verifiche di membership Organizzazione |
 | **Delega verificata** | Il potere del Delegante e la validità della Delega sono stati confermati (§8) |
 
 **Principio.** Si evita deliberatamente un unico badge generico di "utente verificato": ciascun livello descrive un aspetto specifico e indipendente, coerente con il principio già stabilito nei domini precedenti.
@@ -545,7 +569,19 @@ Questo documento non descrive registri tecnici, strumenti di logging o meccanism
 17. Le sospensioni devono poter essere limitate per ambito (§11, §13 caso limite 37).
 18. La chiusura dell'Account deve conservare lo storico necessario (§11, §12).
 19. Le azioni compiute legittimamente non vengono annullate automaticamente dalla successiva revoca (§8, §9, §12).
-20. Identità & Accessi non attribuisce qualifiche, proprietà, appartenenze o reputazione (§1).
+20. Identità & Accessi non attribuisce qualifiche, proprietà, appartenenze, Organizzazioni o reputazione (§1).
+21. Un Account non crea automaticamente una Persona (§3, §15.A).
+22. Una Persona non acquisisce diritti sostanziali solo perché associata a un Account (§1, §15.A).
+23. Un ruolo applicativo non equivale a un ruolo sostanziale (Impresa, Organizzazione, professione) (§6).
+24. Una delega non crea appartenenza né membership organizzativa (§8).
+25. Un contesto Impresa richiede un fatto autoritativo esterno (Appartenenze nel ciclo 1) (§5).
+26. Un contesto Organizzazione richiede un fatto autoritativo esterno; **non è operativo nel ciclo 1** (§5, §15.A).
+27. Identità & Accessi non modifica i fatti sostanziali degli altri domini (§1, §7).
+28. L'autenticazione non implica autorizzazione; l'autorizzazione applicativa non implica titolarità (§4, §6, §7).
+29. I permessi devono essere negati in assenza di prova positiva (deny-by-default) (§7, §15.A).
+30. Le relazioni organizzative future non possono essere simulate nel ciclo 1 (§5, §15.A).
+31. Account tecnici o redazionali, se ammessi, devono essere esplicitamente distinti dagli Account personali ordinari; nel ciclo 1 la redazione/sistema opera tramite Ruoli applicativi, non tramite tipologie Account distinte (§6, §15.A).
+32. Organizzazione ≠ Impresa; nessun ruolo organizzativo appartiene a Imprese (§1, §5, §6).
 
 **Casi limite.**
 
@@ -661,109 +697,134 @@ Coerentemente con il meccanismo dei "fatti accaduti" già stabilito in `docs/dom
 
 ---
 
-## 15. Decisioni finali e domande aperte
+## 15. Decisioni finali, ciclo 1 e domande aperte
 
-### Decisioni vincolanti
+### Decisioni vincolanti (modello generale)
 
 1. Identità & Accessi è un dominio autonomo (§1).
-2. Account, Identità digitale e Persona sono concetti distinti (§3).
-3. Una Persona può esistere senza Account (§3, §13 regola 3).
-4. Un Account può esistere prima dell'associazione completa con una Persona (§3, §13 caso limite 1).
-5. La chiusura dell'Account non cancella automaticamente la Persona (§3, §11, §13 regola 4).
-6. Un'Impresa non possiede direttamente credenziali personali (introduzione, §5, §13 regola 5).
-7. Ogni azione per conto di un'Impresa deve essere riconducibile a una Persona (§5, §13 regola 6).
-8. Il titolo per agire per un'Impresa deriva da Appartenenze e dalle deleghe compatibili (§5, §8, §13 regola 7).
-9. Identità & Accessi non crea proprietà, amministrazione o rappresentanza legale (§5, §13 regola 9).
-10. Autenticazione, identificazione, associazione, autorizzazione e verifica sono concetti distinti (§4, §5, §6, §10, §13 regole 12-13).
-11. Ruolo applicativo, ruolo di dominio, qualifica professionale e funzione organizzativa sono concetti distinti (§6, §13 regola 10).
-12. Permesso, delega, consenso e preferenza sono concetti distinti (§6, §8, §9, §13 regola 14).
-13. Un permesso non equivale a diritto sostanziale nel dominio interessato (§6, §7, §13 regola 11).
-14. Una delega non può attribuire più diritti di quelli posseduti dal delegante (§8, §13 regola 8).
-15. La revoca non cancella automaticamente lo storico delle azioni precedenti (§8, §9, §12, §13 regola 19).
-16. Stato dell'Account, stato dell'identità, stato dei metodi, stato delle deleghe, stato dei consensi e stato di sicurezza sono assi separati (§11, §12).
-17. La verifica deve essere multidimensionale (§10).
-18. Non deve esistere un unico badge generico di utente verificato (§10).
-19. La visibilità delle informazioni è stabilita dai domini proprietari (§7, §13 regola 15).
-20. Identità & Accessi applica le regole di accesso senza diventare proprietario delle informazioni (§1, §7, §13 regola 16).
-21. Persone, Imprese, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi, Contenuti editoriali, Mercati internazionali e Osservatorio restano domini distinti (§1).
-22. Identità & Accessi non attribuisce qualifiche, affidabilità, reputazione o idoneità (§1, §10, §13 regola 20).
-23. Le decisioni di accesso devono essere contestualizzate e motivabili (§7).
-24. Il dominio deve supportare accessi pubblici, registrati, limitati, delegati, temporanei e riservati (§4, §6, §7, §8).
-25. Il dominio deve supportare sospensioni e limitazioni per ambito (§11, §13 regola 17).
-26. Il recupero dell'accesso non deve alterare impropriamente l'identità o le Appartenenze (§11).
-27. Lo storico delle decisioni e delle deleghe deve poter essere conservato (§8, §12, §13 regola 18).
-28. I consensi devono essere collegati a finalità identificabili (§9).
-29. La revoca del consenso non annulla automaticamente attività precedentemente legittime (§9, §13 regola 19).
-30. Il dominio deve poter evolvere verso una futura separazione più dettagliata tra Identità, Autenticazione, Autorizzazione, Deleghe e Consensi (§15).
+2. Account (Aggregate Root), Identità digitale e Persona sono concetti distinti (§3).
+3. Una Persona può esistere senza Account (§3).
+4. Un Account può esistere prima dell'associazione completa con una Persona (§3); nel ciclo 1 con Capacità operativa limitata (§15.A).
+5. La chiusura dell'Account non cancella automaticamente la Persona (§3, §11).
+6. Un'Impresa non possiede direttamente credenziali (introduzione, §5).
+7. Un'**Organizzazione** è dominio autonomo distinto da Impresa; non possiede credenziali; Identità & Accessi non la possiede (§1, §5).
+8. Ogni azione per conto di un'Impresa deve essere riconducibile a una Persona e a un fatto autorizzante esterno (§5).
+9. Il titolo per agire per un'Impresa nel ciclo 1 deriva da **Appartenenze**; le Deleghe restano modello generale ma rinviate (§5, §8, §15.A).
+10. Identità & Accessi non crea proprietà, amministrazione, rappresentanza, Organizzazione o membership (§5).
+11. Autenticazione, identificazione, associazione, autorizzazione e verifica sono concetti distinti.
+12. Ruolo applicativo ≠ ruolo di dominio ≠ qualifica professionale ≠ ruolo in Organizzazione (§6).
+13. Permesso, delega, consenso e preferenza sono concetti distinti.
+14. Un permesso non equivale a diritto sostanziale.
+15. Una delega non può attribuire più diritti di quelli del delegante; non crea appartenenza.
+16. La revoca non cancella automaticamente lo storico delle azioni precedenti.
+17. Gli assi di stato restano separati (§11).
+18. La verifica è multidimensionale; nessun badge generico "utente verificato" (§10).
+19. La visibilità è stabilita dai domini proprietari; Identità & Accessi la applica (§7).
+20. Deny-by-default: in assenza di prova positiva l'accesso è negato (§13 regola 29, §15.A).
+21. Persone, Imprese, **Organizzazioni**, Appartenenze, Professionisti, Opportunità, Collaborazioni, Eventi, Servizi, Contenuti, Mercati, Osservatorio restano domini distinti.
+22. Identità & Accessi non attribuisce qualifiche, affidabilità, reputazione o idoneità.
+23. Il recupero dell'accesso non altera impropriamente Associazione o Appartenenze (§11).
+24. Il dominio può evolvere verso una futura separazione tra Identità, Autenticazione, Autorizzazione, Deleghe e Consensi.
 
-### Domande aperte
+---
 
-Le seguenti questioni restano esplicitamente aperte e non sono risolte da questo documento:
+### 15.A Decisioni del ciclo 1 (chiuse)
 
-- rapporto massimo tra Account e Persona (uno a uno, o più Account per Persona in casi motivati);
-- gestione operativa di più Account per la stessa Persona;
-- gestione degli Account senza Persona associata a tempo indefinito;
-- criteri concreti di verifica dell'identità per ciascun livello;
-- livelli di verifica richiesti per le diverse azioni sensibili;
-- trattamento dei soggetti esteri;
-- trattamento dei minorenni;
-- uso di pseudonimi pubblici e relativo bilanciamento con l'identità civile verificata;
-- gestione degli Account di Persone decedute;
-- gestione operativa degli Account compromessi;
-- procedure di recupero assistito;
-- criteri e processo di fusione degli Account duplicati;
-- criteri e processo di separazione delle associazioni errate;
-- ruoli applicativi iniziali da attivare al lancio della piattaforma;
-- governance dei permessi (chi può definirli, modificarli, assegnarli);
-- possibilità di permessi personalizzati oltre ai Ruoli applicativi previsti;
-- limiti alle deleghe a catena;
-- durata massima delle deleghe;
-- deleghe conferite da Imprese, e relativo titolo necessario;
-- relazione precisa tra delega e Appartenenza nei casi limite;
-- revoca automatica delle deleghe in caso di cessazione dell'Appartenenza sottostante;
-- criteri di accesso degli operatori di assistenza;
-- criteri di accesso dei collaboratori esterni;
-- criteri di accesso dei ricercatori;
-- criteri di accesso ai dati dell'Osservatorio;
-- criteri di accesso alle fonti riservate dei Contenuti editoriali;
-- criteri di accesso alle evidenze dei Professionisti;
-- visibilità dei partecipanti agli Eventi rispetto a questo dominio;
-- gestione operativa e legale dei consensi;
-- relazione con un futuro dominio Privacy dedicato;
-- relazione con notifiche e comunicazioni;
-- politiche di conservazione dello storico degli accessi;
-- gestione degli incidenti di sicurezza;
-- processo di riesame delle decisioni di accesso contestate;
-- processo di contestazione dei blocchi;
-- responsabilità e limiti degli amministratori funzionali;
-- gestione di Account istituzionali o di servizio, non riferiti a una singola Persona;
-- criteri per gli accessi temporanei;
-- criteri per gli accessi anonimi (es. segnalazioni);
-- azioni effettuabili senza registrazione;
-- eventuale futura separazione tra Identità, Autenticazione, Autorizzazione e Consensi come sotto-domini distinti.
+| Tema | Decisione ciclo 1 | Stato |
+|---|---|---|
+| **Aggregate Root** | **Account** | Incluso |
+| **Account–Persona (cardinalità ordinaria)** | Persona: **0..1** Account ordinario. Account ordinario: **0..1** Associazione a Persona. Associazione **richiesta** per Contesto personale pieno e per Contesto Impresa. Account senza Persona: ammesso solo come stato **transitorio/limitato**. | Chiuso |
+| **Più Account per la stessa Persona** | **Non ammessi** come caso ordinario nel ciclo 1 | Rinviato (gestione eccezionale/fusione) |
+| **Account tecnici / di servizio** | Tipologia distinta **non** introdotta nel ciclo 1 | Rinviato |
+| **Account redazionali** | Nessuna tipologia Account distinta: la redazione opera con Ruolo `redattore` (o `amministratore_applicativo`) su Account ordinario di Persona staff | Incluso (via ruolo) |
+| **Identità digitale** | Concetto obbligatorio; dettaglio metodi/owned **minimale** | Incluso (concettuale) |
+| **Metodi di autenticazione** | Concetto; implementazione tecnica **fuori** ownership | Rinviato come owned dettagliato |
+| **Autenticazione tecnica / auth piattaforma** | Riconosciuta concettualmente come infrastruttura esterna (es. soggetto autenticato di piattaforma); **non** ownership di protocolli, password, token, MFA, provider | Escluso dal dominio / vincolo di confine |
+| **Associazione Account–Persona** | Inclusa; esplicita; verificabile | Incluso |
+| **Contesto personale** | Operativo | Incluso |
+| **Contesto Impresa** | Operativo **solo** se esiste Appartenenza/autorizzazione gestionale valida; IA interpreta, non crea | Incluso |
+| **Contesto Organizzazione** | **Non operativo**; nessuna membership Org in Appartenenze ciclo 1; nessuna simulazione in IA | Escluso dal ciclo 1 / rinviato |
+| **Contesto redazionale / sistema** | Operativo via Ruoli `redattore` / `amministratore_applicativo` | Incluso |
+| **Ruoli applicativi minimi** | `account_registrato`, `redattore`, `amministratore_applicativo`; visitatore = assenza Account | Incluso |
+| **Moderatore / servizio tecnico** | — | Rinviato |
+| **Deleghe** | Entità owned | Rinviate |
+| **Consensi** | Entità owned | Rinviate |
+| **Sessioni concettuali** | Concetto di tracciabilità; persistenza owned dedicata | Rinviata (infra auth può coprire) |
+| **Eventi di sicurezza / dispositivi** | Concetto | Rinviati come owned |
+| **Azioni senza registrazione** | Letture pubbliche secondo visibilità dei domini proprietari: **sì**, senza Account. Scritture anonime che creano Persona: **no**. Candidature/contatti/segnalazioni: appartengono ai domini proprietari; non generano Account/Persona automatici in IA. Sessioni anonime applicative owned da IA: **no** nel ciclo 1 | Chiuso |
+| **Recupero / sospensione / chiusura Account** | Concetti e assi di stato restano validi; Physical può mappare un sottoinsieme operativo (attivo / sospeso / chiuso) | Incluso (minimo) |
+| **Archiviazione Account** | Conservazione storica post-chiusura | Rinviata nei dettagli |
+| **Policy deny-by-default** | Obbligatoria | Incluso |
+
+**Organizzazioni — chiusura esplicita.** Identità & Accessi non possiede Organizzazioni né membership organizzative. Il contesto Organizzazione resta **non operativo** finché Appartenenze (o altro dominio competente) non pubblica un fatto autorizzante. Titolarità di scheda Organizzazione (Persona \| Impresa \| Redazione in `logical/organizzazioni.md`) **non** genera da sola un Contesto Organizzazione in questo dominio.
+
+---
+
+### 15.B Oggetti: inclusi / rinviati (ciclo 1)
+
+| Oggetto | Ownership | Ciclo 1 |
+|---|---|---|
+| Account (AR) | Identità & Accessi | **Incluso** |
+| Identità digitale | Identità & Accessi | **Incluso** (concettuale/minimale) |
+| Associazione Account–Persona | Identità & Accessi (riferimento a Persone) | **Incluso** |
+| Ruolo applicativo / assegnazione | Identità & Accessi | **Incluso** (catalogo minimo §6) |
+| Permesso / Politica / Decisione di accesso | Identità & Accessi | **Incluso** (concettuale; enforcement deny-by-default) |
+| Contesto personale / Impresa / redazione | Decisioni di questo dominio su fatti esterni | **Incluso** |
+| Contesto Organizzazione | — | **Rinviato** |
+| Metodo di autenticazione (owned dettagliato) | Identità & Accessi | **Rinviato** |
+| Delega | Identità & Accessi | **Rinviato** |
+| Consenso | Identità & Accessi | **Rinviato** |
+| Sessione / dispositivo / evento di sicurezza (owned) | Identità & Accessi | **Rinviato** |
+
+---
+
+### 15.C Prontezza Physical
+
+Il Physical del ciclo 1 può essere progettato su:
+
+* **AR:** Account;
+* **inclusi:** Identità digitale minimale, Associazione Account–Persona, Ruoli applicativi minimi, Politiche/decisioni (deny-by-default), Contesto personale e Contesto Impresa (lettura Appartenenze), Contesto redazionale/sistema via ruoli;
+* **rinviati:** Deleghe, Consensi owned, Contesto Organizzazione, metodi/sessioni/dispositivi come owned dettagliati, Account di servizio tipizzati, moderatore;
+* **dipendenze autoritative:** Persone, Appartenenze (Persona–Impresa), Imprese (solo riferimento), autenticazione tecnica di piattaforma (fuori ownership);
+* **confini:** nessuna ownership di Organizzazioni/membership/CRM/HR/Storage/FEV/documenti/media/workflow; Organizzazione ≠ Impresa;
+* **invarianti:** §13 regole 1–32 e tabella §15.A.
+
+Il Physical **non** deve inventare membership Org, assimilare Org a Impresa, né specificare protocolli auth. I nomi di tabelle/colonne restano decisione del Physical.
+
+---
+
+### Domande aperte (non bloccanti per il Physical ciclo 1)
+
+- criteri concreti di verifica per ciascun livello e azioni sensibili;
+- soggetti esteri e minorenni;
+- pseudonimi pubblici vs identità civile;
+- Account di Persone decedute; Account compromessi; recupero assistito;
+- fusione/separazione Account in casi eccezionali;
+- governance estesa dei permessi e permessi personalizzati;
+- Deleghe (catena, durata, revoca automatica su cessazione Appartenenza) — post ciclo 1;
+- Consensi operativi e relazione con Privacy dedicata — post ciclo 1;
+- criteri di accesso ricercatori, assistenza, evidenze Professionisti, Osservatorio riservato;
+- conservazione storica dettagliata e incidenti di sicurezza;
+- futura separazione Identità / Autenticazione / Autorizzazione / Consensi come sotto-domini.
 
 ---
 
 ## Controllo finale
 
-1. **15 sezioni presenti nello stesso ordine richiesto** — verificato: §1 Responsabilità, §2 Entità, §3 Identità reale/digitale/Account, §4 Metodi e livelli di autenticazione, §5 Associazione con Persona/Impresa/Appartenenze, §6 Ruoli applicativi e permessi, §7 Politiche e decisioni di accesso, §8 Deleghe e rappresentanza operativa, §9 Consensi/finalità/preferenze, §10 Verifica dell'identità e affidabilità, §11 Ciclo di vita dell'Account e recupero, §12 Sessioni/sicurezza/tracciabilità, §13 Regole/invarianti/casi limite, §14 Eventi di dominio, §15 Decisioni finali/domande aperte.
-2. **Coerenza con tutti i documenti logici esistenti** — verificata: il documento riprende senza contraddizioni i riferimenti già presenti in `logical/persone.md`, `logical/imprese.md` §7/§18 (nota su Identità e Accessi come "significato di business" distinto dal "meccanismo tecnico"), `logical/appartenenze.md` §2/§8/§10 (Autorizzazione gestionale, assi di verifica), `logical/mercati-internazionali.md` §1, `logical/opportunita.md`, `logical/collaborazioni.md`, `logical/professionisti.md` §1, `logical/eventi.md`, `logical/contenuti-editoriali.md` §1/§12/§13, `logical/osservatorio.md` §1/§12, e con `docs/domain-model.md` §1/§13 (Identità & Accessi come dominio Generico, infrastruttura abilitante; attori concettuali).
-3. **Identità & Accessi modellato come dominio autonomo** — verificato: §1 ne dichiara la responsabilità propria, §2 le entità proprie (Identità digitale, Account, Metodo di autenticazione, Delega, Consenso, Sessione, Evento di sicurezza), §10-§12 le regole di verifica e ciclo di vita specifiche del dominio.
-4. **Nessuna duplicazione di Persona, Impresa, Appartenenza o Professionista** — verificato: §1, §3, §5 dichiarano esplicitamente che Identità & Accessi referenzia, non incorpora, i fatti sostanziali di quei domini.
-5. **Autenticazione, identificazione, associazione, autorizzazione e verifica distinte** — verificato: tabella di apertura §1, sezioni dedicate §4 (autenticazione), §5 (associazione), §6/§7 (autorizzazione), §10 (verifica).
-6. **Ruolo, permesso, delega, consenso e preferenza distinti** — verificato: §6, §8, §9 li trattano come concetti separati con attributi propri.
-7. **Assi di stato dell'Account, dell'identità, dei metodi, delle deleghe, dei consensi e di sicurezza separati** — verificato: tabella dedicata in §11.
-8. **L'azione per conto di un'Impresa dipende da Persona e Appartenenze** — verificato: §5 lo dichiara come conferma esplicita, richiamata in §13 regole 6-7.
-9. **La visibilità resta responsabilità dei domini proprietari** — verificato: §7 principio dedicato.
-10. **Nessuna attribuzione di diritti sostanziali, qualifiche o affidabilità** — verificato: §1, §6, §10, §13 regola 20.
-11. **Ricerca di riferimenti tecnici o di database** — eseguita: il documento non contiene riferimenti a database, SQL, PostgreSQL, Supabase, tabelle, colonne, tipi di dato tecnici, chiavi primarie o esterne, indici, constraint tecnici, RLS, API, migration, backend, frontend, token tecnici, protocolli di autenticazione, librerie, provider specifici o codice.
+1. **15 sezioni presenti** — verificato; §15 estesa con decisioni ciclo 1 (§15.A–§15.C).
+2. **Allineamento Organizzazioni** — verificato: fondamenti, esclusioni, contesto Org non operativo, ruolo organizzativo non più attribuito a Imprese, nessuna membership Org in IA.
+3. **Nessuna duplicazione** di Persona, Impresa, Organizzazione, Appartenenza, Professionista — verificato.
+4. **Account AR; Account ≠ Persona; accesso ≠ diritto sostanziale** — verificato.
+5. **Contesto Impresa da Appartenenze; Contesto Org rinviato** — verificato.
+6. **Ruoli applicativi minimi ciclo 1 chiusi** — verificato (§6, §15.A).
+7. **Deleghe e Consensi owned rinviati; deny-by-default** — verificato.
+8. **Nessun protocollo auth / SQL / FK** — verificato; solo riconoscimento concettuale dell'autenticazione di piattaforma.
+9. **Physical readiness** — dichiarata in §15.C senza lasciare decisioni semantiche aperte bloccanti.
 
 ### Riepilogo finale
 
-**Principali decisioni prese.** Identità & Accessi è confermato come dominio autonomo e infrastrutturale, distinto da ogni dominio economico e sociale della piattaforma. Il documento stabilisce una catena esplicita di concetti (Identità reale → Identità digitale → Account → Metodo di autenticazione → Sessione) sempre distinta dai fatti di dominio (Persona, Impresa, Appartenenza, Professionista), e disciplina in modo autonomo Ruoli applicativi, Permessi, Deleghe e Consensi, evitando che alcuno di questi costituisca automaticamente un fatto sostanziale (proprietà, rappresentanza, qualifica, affidabilità). Il ciclo di vita dell'Account è modellato su otto assi indipendenti, coerentemente con il pattern già adottato in tutti i domini precedenti, e la verifica dell'identità è multidimensionale, senza un badge generico. Le deleghe e i consensi seguono regole esplicite di non-eccedenza, non-automatismo e conservazione dello storico.
+**Principali decisioni prese.** Identità & Accessi resta dominio autonomo infrastrutturale con AR Account. Organizzazione è dominio distinto da Impresa; membership Org future restano in Appartenenze; contesto Org non operativo nel ciclo 1. Cardinalità ordinaria Account–Persona chiusa (0..1 / 0..1). Contesti: personale e Impresa (via Appartenenze) operativi; redazione/sistema via ruoli; Org rinviato. Ruoli minimi: `account_registrato`, `redattore`, `amministratore_applicativo`. Deleghe e Consensi owned rinviati. Deny-by-default. Autenticazione tecnica fuori ownership.
 
-**Eventuali incoerenze trovate.** Nessuna incoerenza rilevata rispetto ai documenti logici esistenti: tutti i riferimenti incrociati (Identità & Accessi come responsabile esclusivo di autenticazione e permessi tecnici in `imprese.md` §7/§18, `appartenenze.md` §8/§10, `mercati-internazionali.md` §1, `professionisti.md` §1, `contenuti-editoriali.md` §12/§13, `osservatorio.md` §1/§12) sono stati rispettati e resi coerenti con la struttura interna di questo documento.
+**Physical.** Autorizzabile sul perimetro §15.A–§15.C.
 
-**Relazioni con gli altri domini.** Identità & Accessi legge, senza incorporare, fatti da Persone (associazione Account–Persona), Imprese e Appartenenze (titolo per agire per un'Impresa), Professionisti (stato di verifica come condizione di accesso), Contenuti Editoriali (ruoli editoriali) e Osservatorio (accesso a dati aggregati riservati). È utilizzato da tutti i domini della piattaforma per applicare — non per definire — le rispettive regole di visibilità e le decisioni di accesso.
-
-**Domande ancora aperte.** Le 38 domande elencate nella sezione precedente restano esplicitamente aperte, in particolare: il rapporto massimo tra Account e Persona; la gestione di Account compromessi, duplicati o di soggetti deceduti; i criteri di verifica per soggetti esteri e minorenni; la governance dei permessi e delle deleghe a catena; la relazione con un futuro dominio Privacy dedicato; e l'eventuale futura separazione tra Identità, Autenticazione, Autorizzazione e Consensi come sotto-domini distinti.
+**Domande aperte residue.** Solo governance/operatività non bloccanti elencate in §15 (verifiche dettagliate, Privacy, Deleghe post-ciclo 1, ecc.).
