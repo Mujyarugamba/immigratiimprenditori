@@ -1,10 +1,10 @@
 # Logical Data Model — Dominio COLLABORAZIONI
 
 > Livello logico e di dominio. Nessun riferimento a database, SQL, PostgreSQL, Supabase, tabelle, colonne, tipi dato tecnici, chiavi primarie o esterne, indici, constraint tecnici, RLS, API, migration, backend, frontend, componenti dell'interfaccia o dettagli implementativi. Nessun codice.
-> Fondamenti (non modificati da questo documento): [`docs/architecture/fundamental/collaborazioni-domain-thesis.md`](../fundamental/collaborazioni-domain-thesis.md) (significato di business, confini, PF4/PF5), [`docs/architecture/fundamental/domain-patterns.md`](../fundamental/domain-patterns.md), [`docs/domain-model.md`](../../domain-model.md), [`docs/architecture/logical/persone.md`](./persone.md), [`docs/architecture/logical/imprese.md`](./imprese.md), [`docs/architecture/logical/appartenenze.md`](./appartenenze.md), [`docs/architecture/logical/mercati-internazionali.md`](./mercati-internazionali.md), [`docs/architecture/logical/professionisti.md`](./professionisti.md), [`docs/architecture/logical/opportunita.md`](./opportunita.md).
-> Scopo del documento: definire il modello logico del dominio Collaborazioni, componente del dominio Core "Opportunità & Collaborazioni" già riconosciuto dal Domain Model, qui trattata come modello a sé per la propria complessità e autonomia concettuale (coerente con `logical/opportunita.md`, che ha già trattato la componente Opportunità separatamente). Il significato di business, i fatti proprietari e i confini sono quelli già stabiliti dalla Domain Thesis; questo documento li traduce in entità, relazioni, stati e regole senza ridefinirli.
-> Distinzione da Opportunità. Un'Opportunità (`logical/opportunita.md` §1, §3) è normalmente promossa da un soggetto e presenta benefici, requisiti, destinatari e un periodo di validità: è una possibilità strutturata che qualcuno offre a chi la incontra. Una Collaborazione nasce invece dall'intenzione di uno o più soggetti di trovare una controparte, avviare una relazione o sviluppare un'attività comune: è una ricerca, un'offerta o una proposta che cerca un incontro, non una possibilità già definita e resa disponibile da un terzo. Una Collaborazione può nascere da un'Opportunità (es. una risposta che si trasforma in relazione diretta), ma può anche esistere senza alcuna Opportunità formale. Questo dominio non possiede il processo formale di Opportunità (annuncio pubblico con requisiti espliciti ed esito binario): possiede invece il proprio percorso, più aperto, dalla dichiarazione all'eventuale relazione attiva (tesi §5, §8, §13).
-> Carattere del documento. Esclusivamente logico e di dominio: nessuna decisione tecnica, nessuna implementazione, nessuna anticipazione di database, API o interfaccia.
+> Fondamenti (non modificati da questo documento): [`docs/architecture/fundamental/collaborazioni-domain-thesis.md`](../fundamental/collaborazioni-domain-thesis.md) (significato di business, confini, PF4/PF5), [`docs/architecture/fundamental/domain-patterns.md`](../fundamental/domain-patterns.md), [`docs/domain-model.md`](../../domain-model.md), [`docs/architecture/logical/persone.md`](./persone.md), [`docs/architecture/logical/imprese.md`](./imprese.md), [`docs/architecture/logical/appartenenze.md`](./appartenenze.md), [`docs/architecture/logical/organizzazioni.md`](./organizzazioni.md), [`docs/architecture/logical/identita-accessi.md`](./identita-accessi.md), [`docs/architecture/logical/mercati-internazionali.md`](./mercati-internazionali.md), [`docs/architecture/logical/professionisti.md`](./professionisti.md), [`docs/architecture/logical/opportunita.md`](./opportunita.md), [`docs/architecture/logical/servizi.md`](./servizi.md), [`docs/architecture/logical/eventi.md`](./eventi.md), [`docs/architecture/logical/contenuti-editoriali.md`](./contenuti-editoriali.md).
+> Scopo del documento: definire il modello logico del dominio Collaborazioni, componente del dominio Core "Opportunità & Collaborazioni" già riconosciuto dal Domain Model, qui trattata come modello a sé per la propria complessità e autonomia concettuale (coerente con `logical/opportunita.md`, che ha già trattato la componente Opportunità separatamente). Il significato di business, i fatti proprietari e i confini sono quelli già stabiliti dalla Domain Thesis; questo documento li traduce in entità, relazioni, stati e regole senza ridefinirli. **Questa revisione chiude il perimetro del ciclo 1** (§15.A–§15.D) sufficiente a un Physical DDL-ready senza nuove decisioni semantiche.
+> Distinzione da Opportunità. Un'Opportunità (`logical/opportunita.md` §1, §3) è normalmente promossa da un soggetto e presenta benefici, requisiti, destinatari e un periodo di validità: è una possibilità strutturata che qualcuno offre a chi la incontra. Una Collaborazione nasce invece dall'intenzione di uno o più soggetti di trovare una controparte, avviare una relazione o sviluppare un'attività comune: è una ricerca, un'offerta o una proposta che cerca un incontro, non una possibilità già definita e resa disponibile da un terzo. Una Collaborazione può nascere da un'Opportunità (es. una risposta che si trasforma in relazione diretta), ma può anche esistere senza alcuna Opportunità formale. Questo dominio non possiede il processo formale di Opportunità (annuncio pubblico con requisiti espliciti ed esito binario): possiede invece il proprio percorso, più aperto, dalla dichiarazione all'eventuale relazione attiva (tesi §5, §8, §13). Nel **ciclo 1** il percorso si ferma alla scheda dichiarativa pubblicabile (§15.A): interesse, candidature, abbinamento e fase relazionale restano nel modello generale ma sono rinviati.
+> Carattere del documento. Esclusivamente logico e di dominio: nessuna decisione tecnica, nessuna implementazione, nessuna anticipazione di database, API o interfaccia. I §§1–14 descrivono il modello generale; dove il ciclo 1 restringe, prevale §15.
 
 ---
 
@@ -30,18 +30,21 @@
 - Non rientrano i **contratti**: il dominio può rappresentare uno stato concettuale di "Accordo preliminare" (§8) come fase della relazione, ma non la stipula, i termini legali o l'esecuzione di un contratto vero e proprio.
 - Non rientrano le **transazioni economiche**: pagamenti, fatturazione e ogni flusso economico effettivo restano fuori dal perimetro.
 - Non rientra la **controversia legale**: il dominio può rappresentare che una Collaborazione è "Contestata" (§8) come fatto di relazione, senza gestire né rappresentare la risoluzione legale della controversia.
-- Non rientra l'**identità digitale né i diritti di accesso**: nessuna informazione di questo dominio genera di per sé un permesso tecnico; resta responsabilità esclusiva del futuro dominio Identità & Accessi.
+- Non rientra l'**identità digitale né i diritti di accesso**: nessuna informazione di questo dominio genera di per sé un permesso tecnico; resta responsabilità esclusiva di Identità & Accessi (`logical/identita-accessi.md`; PF13).
+- Non rientrano le **Organizzazioni** come fatti anagrafici: la scheda Organizzazione appartiene a `logical/organizzazioni.md`. Nel ciclo 1 Organizzazione **non** è partecipante strutturale (§6, §15.A).
+- Non rientrano i **Servizi**: Offerta/RichiestaDiServizio restano di `logical/servizi.md`; l'Offerta di Collaborazione è un fatto distinto (§2, §4).
 - Non rientra l'**Osservatorio**: il dominio lo alimenta con dati aggregabili, senza produrre esso stesso report o statistiche.
 - Non rientrano i **Contenuti Editoriali**: possono descrivere o raggruppare Collaborazioni come soggetto trattato, senza che il contenuto coincida con la Collaborazione.
 
 **Quali domini utilizza.**
-- **Persone** e **Imprese** — per referenziare proponenti, controparti e candidati, per identità stabile, senza duplicarne i dati (D19, D20, Necessarie).
-- **Appartenenze** — utilizzo del titolo di rappresentanza quando una Persona agisce per conto di un'Impresa (§6; D23), senza possedere né verificare autonomamente la relazione.
-- **Professionisti** — riferimento facoltativo al Profilo professionale quando la proposta coinvolge una qualificazione (§6; D21).
-- **Mercati Internazionali** — per referenziare il Mercato di riferimento di una Collaborazione internazionale (§11), senza incorporare Esigenza di internazionalizzazione o Presenza.
-- **Opportunità** — quando una Collaborazione nasce da un'Opportunità, per mantenere il riferimento all'origine storica (§4; D22), senza dipendere da essa per esistere.
-- **Tassonomia Condivisa** — per gli ambiti territoriali e settoriali (§11).
-- **Identità & Accessi** — di supporto per le azioni di scrittura; non decide la visibilità sostanziale (PF13).
+- **Persone** e **Imprese** — per referenziare titolare di scheda, proponenti e eventuali controparti indicate, per identità stabile, senza duplicarne i dati (D19, D20, Necessarie nel ciclo 1).
+- **Appartenenze** — utilizzo del titolo di rappresentanza quando una Persona agisce per conto di un'Impresa (§6; D23), senza possedere né verificare autonomamente la relazione. Nessuna membership Organizzazione in ciclo 1.
+- **Identità & Accessi** — di supporto per le azioni di scrittura; non decide la visibilità sostanziale né possiede i fatti di Collaborazione (PF13).
+- **Professionisti** — riferimento facoltativo al Profilo professionale nel modello generale (D21); **rinviato nel ciclo 1** (§15.A).
+- **Mercati Internazionali** — riferimento facoltativo nel modello generale (§11); **rinviato nel ciclo 1** (§15.A).
+- **Opportunità** — origine storica facoltativa nel modello generale (D22); **rinviata come FK nel ciclo 1** (§15.A).
+- **Organizzazioni** — dominio pubblicato e distinto da Impresa; **nessuna partecipazione strutturale né FK nel ciclo 1** (§6, §15.A).
+- **Tassonomia Condivisa** — ambiti territoriali/settoriali nel modello generale; nel ciclo 1 restano solo campi descrittivi sulla scheda, senza obbligo di catalogo (§15.A).
 
 **Quali domini utilizzano Collaborazioni.**
 - **Osservatorio** — per aggregare dati su tipologie, territori, settori ed esiti delle Collaborazioni (D43).
@@ -96,7 +99,7 @@
 
 **Nota sugli assi non elencati sopra.** Il ciclo di vita completo (§8) prevede sei assi: ai quattro concetti di stato appena elencati si aggiungono lo **Stato della ricerca** (il percorso specifico dell'incontro tra domanda e offerta) e l'**Esito** (già incluso in tabella): entrambi sono trattati in dettaglio al §8, per evitare duplicazioni.
 
-**Nota su Aggregate e PF4.** Questo modello rappresenta oggi Collaborazione come un unico Aggregate Root che attraversa fasi dichiarative e, eventualmente, relazionali. PF4 (proprietà delle relazioni) si applica alla fase relazionale (accordo preliminare, collaborazione attiva), non alla sola fase dichiarativa unilaterale (tesi §14). Se in futuro la fase dichiarativa e quella relazionale richiedessero consistenze indipendenti, PC2 (più Aggregate Root nello stesso dominio) resterebbe applicabile — decisione rinviata al Physical Domain Mapping (tesi §16, punto 2).
+**Nota su Aggregate e PF4 — decisione definitiva.** Esiste **un solo Aggregate Root: Collaborazione**. Attraversa la fase dichiarativa e, nel modello generale, l'eventuale fase relazionale senza cambiare identità (PF5). PF4 (proprietà delle relazioni) si applica alla fase relazionale, non alla sola dichiarazione unilaterale (tesi §14). **PC2 è chiusa**: non si introducono Aggregate Root distinti per dichiarazione, relazione, Manifestazione o Candidatura. Eventuali promozioni future richiederebbero una revisione esplicita di questo Logical, non una decisione del Physical. Nel ciclo 1 l'AR è realizzato come scheda dichiarativa (§15.A); la fase relazionale resta nel modello generale ma è rinviata come operatività owned.
 
 **Principio di non duplicazione.** Nessuno dei concetti sopra duplica Persona, Impresa, Appartenenza, Mercato internazionale, Professionista, Opportunità o un eventuale futuro concetto di Immobile: Soggetto proponente, Soggetto destinatario e Controparte ricercata sono sempre ruoli o criteri che referenziano entità di altri domini o soggetti esterni, mai nuove schede descrittive parallele; un immobile o uno spazio ricercato od offerto è trattato come Oggetto della collaborazione (§7), non come una nuova entità di dominio.
 
@@ -126,22 +129,27 @@ Una Collaborazione si distingue dai concetti affini per la presenza contemporane
 
 ## 4. Domanda, offerta e proposta congiunta
 
-- **Ricerca di una risorsa o controparte** — una Collaborazione direzionale basata su un'Esigenza dichiarata ("cerco X").
-- **Offerta di una risorsa, prodotto, servizio o competenza** — una Collaborazione direzionale basata su un'Offerta dichiarata ("offro X").
-- **Proposta di partnership** — tipicamente reciproca: non una semplice domanda o offerta, ma una proposta di relazione paritaria tra due o più soggetti.
-- **Proposta di progetto comune** — analoga alla partnership, spesso multilaterale, orientata a un obiettivo condiviso piuttosto che a uno scambio domanda/offerta.
-- **Disponibilità a valutare collaborazioni** — una forma più aperta, senza un'Esigenza o un'Offerta specifica già dichiarata: il proponente segnala apertura, non una ricerca precisa.
-- **Incontro tra domanda e offerta** — il momento in cui una Collaborazione di ricerca e una di offerta (o una Manifestazione di interesse/Candidatura, §9) si intersecano, rilevato come Abbinamento (§10).
-- **Collaborazione già avviata** — corrisponde allo stato della relazione "Avviata" o successivo (§8): l'incontro è avvenuto e la relazione concreta è in corso.
-- **Collaborazione conclusa** — corrisponde a uno stato terminale della relazione (§8), con un Esito dichiarato.
+**Forme di dichiarazione — insieme chiuso del ciclo 1** (valori usati dal Physical):
 
-**Principio.** Alcune Collaborazioni sono **direzionali** (una parte cerca, l'altra offre: es. "cerco fornitori"), mentre altre sono **reciproche o multilaterali** (nessuna delle parti è unicamente "chi cerca" o "chi offre": es. una proposta di partnership o di progetto comune tra più soggetti su base paritaria). Il dominio non forza ogni Collaborazione in uno schema direzionale: una proposta congiunta è un caso pienamente legittimo e distinto.
+| Valore | Significato |
+|---|---|
+| `ricerca` | Collaborazione direzionale basata su un bisogno dichiarato ("cerco X") |
+| `offerta` | Collaborazione direzionale basata su una disponibilità dichiarata ("offro X") |
+| `partnership` | Proposta di relazione paritaria |
+| `progetto` | Proposta orientata a un obiettivo condiviso |
+| `disponibilita_aperta` | Apertura a valutare collaborazioni, senza bisogno/offerta specifica |
+
+Nel modello generale restano inoltre concepibili: incontro domanda/offerta (Abbinamento, §10); collaborazione già avviata; collaborazione conclusa — **rinviati come operatività owned nel ciclo 1** (§15.A).
+
+**Principio.** Alcune Collaborazioni sono **direzionali**, altre **reciproche**. Nel ciclo 1 la reciprocalità è espressa dalla forma (`partnership` / `progetto`) con un solo promotore; proponenti congiunti e multilateralità operativa sono rinviati (§15.A).
 
 ---
 
 ## 5. Tipologie di Collaborazione
 
-La classificazione è volutamente ampia e non si limita ai soli rapporti commerciali: una Collaborazione può assumere una o più tipologie contemporaneamente, secondo lo stesso principio di non esclusività già adottato per le tipologie di Attività internazionale (`logical/mercati-internazionali.md` §5) e di Opportunità (`logical/opportunita.md` §4).
+La classificazione del **modello generale** è volutamente ampia e non si limita ai soli rapporti commerciali: una Collaborazione può assumere una o più tipologie contemporaneamente, secondo lo stesso principio di non esclusività già adottato per le tipologie di Attività internazionale (`logical/mercati-internazionali.md` §5) e di Opportunità (`logical/opportunita.md` §4).
+
+**Ciclo 1.** Il catalogo tipologico ampio di questa sezione è **rinviato**. Il ciclo 1 usa esclusivamente la **forma di dichiarazione** chiusa di §4 / §15.A (`ricerca` | `offerta` | `partnership` | `progetto` | `disponibilita_aperta`), più oggetto/finalità descrittivi. Nessun catalogo tipologico seedato è richiesto al Physical del ciclo 1.
 
 | Gruppo | Tipologie |
 |---|---|
@@ -160,26 +168,81 @@ La classificazione è volutamente ampia e non si limita ai soli rapporti commerc
 
 ## 6. Soggetti e ruoli nella Collaborazione
 
-**Partecipanti ammessi oggi.** Solo **Persona** e **Impresa** possiedono un'identità fondazionale referenziabile (D19, D20; tesi §9). Ogni Collaborazione ha almeno un proponente tra questi due tipi.
+### 6.1 Ownership della scheda (ciclo 1 — chiuso)
 
-**Ruoli.** I ruoli appartengono alla Collaborazione, non ai partecipanti (tesi §10; PL4). Catalogo locale di questo dominio — non riutilizza i Ruoli di Appartenenze (Titolare, Socio, Dipendente…). Ruoli previsti: Soggetto proponente; Soggetto destinatario; controparte ricercata (criterio, non soggetto); candidato; soggetto interessato; soggetto invitato; partner; referente; intermediario; facilitatore; osservatore autorizzato. Il catalogo esatto resta raffinabile (tesi §16, punto 3).
+La scheda Collaborazione ha **esattamente un titolare** tra:
 
-**Relazione con gli altri domini.**
+| Titolare | Significato |
+|---|---|
+| **Persona** | La Persona è responsabile della scheda |
+| **Impresa** | L'Impresa è responsabile della scheda; una Persona con titolo adeguato da Appartenenza agisce in scrittura |
+| **Redazione piattaforma** | Scheda curata redazionalmente (come in Organizzazioni/Contenuti); non crea Contesto Organizzazione né permessi applicativi |
 
-| Soggetto / concetto | Dominio di appartenenza | Come si collega a Collaborazioni |
+**Distinzioni obbligatorie.**
+
+| Concetto | Natura | Non è |
 |---|---|---|
-| Persona | Persone (esterno) | Referenziata come proponente, candidato, soggetto interessato o partner, per identità stabile (D19, Necessaria) |
-| Impresa | Imprese (esterno) | Referenziata come proponente o controparte, per identità stabile (D20, Necessaria) |
-| Appartenenza | Appartenenze (esterno) | Utilizzata (non posseduta) per il titolo con cui una Persona agisce per conto di un'Impresa (D23; principio sotto) |
-| Profilo professionale | Professionisti (esterno) | Referenziato in modo **facoltativo** quando la proposta coinvolge una qualificazione (D21). Non è una terza categoria di partecipante: il partecipante resta la Persona sottostante (tesi §9) |
-| Rete, associazione, ente, università | Nessun dominio fondazionale attuale (Organizzazioni istituzionali non ancora riconciliato) | Solo riferimento informativo esterno, senza scheda propria né partecipazione a pieno titolo fino a quel dominio (tesi §9, §13) |
-| Soggetto esterno non ancora presente sulla piattaforma | Nessuno (riferimento informativo) | Trattato come riferimento, senza identità piena sulla piattaforma (§13) |
+| **Titolare della scheda** | Ownership della scheda Collaborazione | Partecipante; Account; `auth.users` |
+| **Partecipante** | Soggetto locale della Collaborazione con ruolo locale (PL4) | Titolare automatico; membro Appartenenza |
+| **Persona operante / autore della registrazione** | Persona che esegue l'azione di scrittura (creazione/aggiornamento) | Owner se distinto; Account |
+| **Ruolo applicativo** | Fatto di Identità & Accessi | Ruolo locale di Collaborazione; ruolo Appartenenza |
 
-**Principio sul titolo di rappresentanza.** Con quale titolo una Persona agisce per conto di un'Impresa in una Collaborazione (proponendola, candidandosi a suo nome, negoziando per essa) deriva sempre da un'**Appartenenza** esistente (`logical/appartenenze.md`), non dalla Collaborazione stessa: la Collaborazione non crea, non modifica e non presume alcuna Appartenenza, e non attribuisce da sola alcuna rappresentanza (§13, regola vincolante; DA10/DA11). Se non esiste un'Appartenenza con il titolo adeguato, la Persona non può agire per l'Impresa in una Collaborazione, indipendentemente da qualsiasi ruolo assunto all'interno della Collaborazione stessa.
+`auth.users` e Account **non** sono titolari della scheda. I permessi tecnici restano di Identità & Accessi; Collaborazioni non attribuisce diritti RLS ai partecipanti per il solo fatto di partecipare.
+
+### 6.2 Partecipanti (ciclo 1 — chiuso)
+
+| Soggetto | Ciclo 1 | Ruolo ammissibile | Note |
+|---|---|---|---|
+| **Persona** | **Incluso** | Promotore obbligatorio *oppure* controparte indicata facoltativa | D19 |
+| **Impresa** | **Incluso** | Promotore obbligatorio *oppure* controparte indicata facoltativa | D20 |
+| **Organizzazione** | **Escluso** come partecipante strutturale | — | Dominio pubblicato (`logical/organizzazioni.md`); nessuna FK di partecipazione nel ciclo 1; ≠ Impresa |
+| **Professionista** | **Escluso** come tipo di partecipante | — | Qualificazione della Persona; profilo D21 rinviato nel ciclo 1 |
+| **Account** | **Escluso** | — | Solo supporto scrittura via Identità & Accessi |
+| **Soggetto esterno non censito** | **Incluso** solo come etichetta descrittiva | Controparte ricercata (testo), non partecipante | Nessuna identità temporanea; nessuna scheda parallela |
+
+**Cardinalità ciclo 1.** Ogni Collaborazione ha **esattamente un promotore** (Persona **oppure** Impresa). Controparti indicate: **0..N** (Persona o Impresa). Controparte ricercata per criteri: testo descrittivo, senza soggetto nominato. Proponenti congiunti / multilateralità paritaria: **rinviati**.
+
+**Ruoli locali ciclo 1 (chiusi).** Catalogo proprio di Collaborazioni (PL4) — **non** riutilizza i Ruoli di Appartenenze:
+
+| Ruolo locale | Ciclo 1 |
+|---|---|
+| `promotore` | **Incluso** (obbligatorio, esattamente uno) |
+| `controparte_indicata` | **Incluso** (0..N) |
+| destinatario, candidato, interessato, invitato, partner, referente, intermediario, facilitatore, osservatore | **Rinviati** (modello generale) |
+
+**Modello generale (oltre ciclo 1).** Restano validi i ruoli più ampi già previsti dalla tesi (destinatario, candidato, interessato, invitato, partner, …) ma non sono oggetto del Physical ciclo 1.
+
+### 6.3 Relazione con gli altri domini
+
+| Soggetto / concetto | Dominio | Collegamento | Ciclo 1 |
+|---|---|---|---|
+| Persona | Persone | Titolare e/o partecipante (D19) | Operativo |
+| Impresa | Imprese | Titolare e/o partecipante (D20) | Operativo |
+| Appartenenza | Appartenenze | Utilizzo titolo quando Persona agisce per Impresa (D23); V10 | Operativo (utilizzo) |
+| Organizzazione | Organizzazioni | Scheda istituzionale distinta | **Nessuna partecipazione strutturale** |
+| Profilo professionale | Professionisti | Qualificazione facoltativa della Persona (D21) | **Rinviato** |
+| Soggetto esterno | — | Etichetta / controparte ricercata | Solo descrittivo |
+| Account | Identità & Accessi | Scrittura; non ownership scheda | Supporto |
+
+### 6.4 Principio Appartenenze / rappresentanza (chiuso)
+
+Con quale titolo una Persona agisce per conto di un'Impresa in una Collaborazione deriva sempre da un'**Appartenenza** esistente (`logical/appartenenze.md`), non dalla Collaborazione stessa.
+
+Collaborazioni:
+- **non** crea, modifica, presume o assorbe Appartenenze (V10);
+- **non** duplica membership, ruoli permanenti, rappresentanza legale/operativa o autorizzazioni gestionali;
+- **può** registrare un utilizzo storico minimo del titolo (riferimento all'Appartenenza + etichetta al tempo t) senza ownership del fatto;
+- **non** simula membership Persona–Organizzazione / Impresa–Organizzazione (future in Appartenenze; coerente con Identità & Accessi §15.A).
+
+Se non esiste un'Appartenenza con titolo adeguato, la Persona non può agire per l'Impresa in una Collaborazione, indipendentemente da qualsiasi ruolo locale.
 
 ---
 
 ## 7. Oggetto, esigenze e condizioni
+
+**Ciclo 1.** Obbligatori: oggetto e finalità (testo). Facoltativi: descrizione, controparte ricercata (testo), disponibilità temporale, note sulle condizioni. Requisiti/Preferenze/Condizioni come entità strutturate: **rinviati** (§15.A).
+
+**Modello generale.**
 
 - **Oggetto della Collaborazione** — cosa è concretamente al centro della relazione ricercata (§2).
 - **Bisogno da soddisfare** — la componente informativa dell'Esigenza (§2), quando presente.
@@ -211,7 +274,28 @@ La classificazione è volutamente ampia e non si limita ai soli rapporti commerc
 
 ## 8. Ciclo di vita della Collaborazione
 
-Il percorso di una Collaborazione è descritto da **sei assi distinti**, che non devono mai essere compressi in un unico stato (PF7) — un'articolazione ancora più ricca di quella già adottata per l'Opportunità (`logical/opportunita.md` §8, cinque assi), giustificata dalla natura di processo (dichiarativo → eventualmente relazionale) di questo dominio (§3; tesi §6, §11).
+### 8.0 Lifecycle ciclo 1 (chiuso — prevale su §8.a–f per il Physical)
+
+Il ciclo 1 riduce il lifecycle al minimo indispensabile per una scheda dichiarativa. Quattro assi separati (PF7):
+
+| Asse | Valori ciclo 1 | Significato |
+|---|---|---|
+| **Editoriale** | `bozza` \| `pubblicata` \| `ritirata` | Completezza e disponibilità della scheda come dichiarazione |
+| **Operativo** | `aperta` \| `chiusa` \| `annullata` | Se la dichiarazione è ancora attiva come ricerca/proposta |
+| **Esito** | `non_comunicato` \| `positivo` \| `negativo` \| `parziale` | Risultato qualitativo dichiarato; significativo quando operativo ≠ `aperta` |
+| **Archiviazione** | `corrente` \| `archiviata` | Conservazione storica (PF8); distinta da ritiro/chiusura |
+
+**Regole ciclo 1.**
+- Esistenza dalla `bozza`: la Collaborazione esiste già come scheda, anche senza controparte.
+- `pubblicata` non implica verifica, né fase relazionale, né diritti di accesso.
+- `aperta` significa dichiarazione attiva/ricercabile; **non** implica Manifestazione/Candidatura (rinviati).
+- `chiusa` / `annullata` / `ritirata` sono terminali distinti; `archiviata` può seguire uno stato terminale.
+- Fase relazionale (`Avviata`/`Attiva`/`Sospesa`), asse ricerca esteso, verifica `Contestata` come processo: **rinviati** (§15.A).
+- Nessuna scadenza di default obbligatoria; disponibilità temporale resta facoltativa descrittiva.
+
+### 8.1 Modello generale (sei assi — oltre ciclo 1)
+
+Il percorso completo del modello generale è descritto da **sei assi distinti**, che non devono mai essere compressi in un unico stato (PF7) — un'articolazione ancora più ricca di quella già adottata per l'Opportunità (`logical/opportunita.md` §8, cinque assi), giustificata dalla natura di processo (dichiarativo → eventualmente relazionale) di questo dominio (§3; tesi §6, §11). Per il Physical ciclo 1 vale esclusivamente §8.0.
 
 **Esistenza dalla dichiarazione.** La Collaborazione esiste già dallo stato editoriale *Bozza* / *Proposta* (fase dichiarativa), indipendentemente dallo stato della relazione. Lo **Stato della relazione** (asse c) diventa applicabile solo quando le parti raggiungono un Accordo preliminare o un impegno concreto; prima di quel momento, il fatto resta dichiarativo e PF4 non descrive ancora una relazione bilaterale piena (tesi §14).
 
@@ -254,7 +338,9 @@ Il percorso di una Collaborazione è descritto da **sei assi distinti**, che non
 
 ## 9. Manifestazioni di interesse e candidature
 
-**Confine con Opportunità.** Manifestazione di interesse, candidatura e abbinamento di questo dominio appartengono al percorso aperto di Collaborazioni (tesi §11; `domain-mapping/appartenenze.md` §20). Non incorporano il processo formale di Opportunità (annuncio con requisiti espliciti, procedura di ammissibilità, esito binario di accesso). Una Collaborazione può esistere e trovare una controparte anche senza alcuna candidatura formale, tramite contatto diretto o invito (§4).
+**Ciclo 1.** Manifestazione di interesse, CandidaturaCollaborazione, Invito, Accettazione del contatto e relativi eventi sono **rinviati**. Il ciclo 1 non richiede al Physical alcuna entità di interesse (§15.A). Il testo di questa sezione resta modello generale.
+
+**Confine con Opportunità.** Manifestazione di interesse, candidatura e abbinamento di questo dominio appartengono al percorso aperto di Collaborazioni (tesi §11). Non incorporano il processo formale di Opportunità (annuncio con requisiti espliciti, procedura di ammissibilità, esito binario di accesso). Una Collaborazione può esistere e trovare una controparte anche senza alcuna candidatura formale, tramite contatto diretto o invito (§4).
 
 - **Manifestazione di interesse** — un segnale, anche informale, che un soggetto è interessato alla Collaborazione, senza ancora una risposta strutturata (§2).
 - **Candidatura** — una risposta più strutturata, con l'intento di essere selezionato come controparte; può essere preceduta da una Manifestazione di interesse o presentata direttamente. Non richiede, di per sé, i requisiti espliciti tipici di un'Opportunità.
@@ -280,7 +366,9 @@ Il percorso di una Collaborazione è descritto da **sei assi distinti**, che non
 
 ## 10. Abbinamento e compatibilità
 
-Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una possibile corrispondenza tra l'Esigenza o l'Offerta del proponente e le caratteristiche di un soggetto potenzialmente compatibile, sulla base di: territorio; settore; Mercato di riferimento; disponibilità; Requisiti; Preferenze.
+**Ciclo 1.** Abbinamento, matching automatico e gradazione di compatibilità sono **rinviati** (§15.A). Nessun motore di matching è richiesto al Physical.
+
+Un **Abbinamento** (§2) è, nel modello generale, il rilevamento, algoritmico o redazionale, di una possibile corrispondenza tra l'Esigenza o l'Offerta del proponente e le caratteristiche di un soggetto potenzialmente compatibile, sulla base di: territorio; settore; Mercato di riferimento; disponibilità; Requisiti; Preferenze.
 
 **Gradazione, dalla meno alla più certa.**
 - **Compatibilità potenziale** — una corrispondenza di base individuata automaticamente o redazionalmente, senza alcuna verifica.
@@ -297,7 +385,9 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 ## 11. Mercati internazionali, territori e settori
 
-**Collegamenti previsti.** Territorio locale; Regione; Italia; Paese estero; Area economica; Mercato internazionale; settore; filiera; canale commerciale; lingua operativa.
+**Ciclo 1.** Nessuna FK a Mercati Internazionali né obbligo di catalogo territoriale/settoriale. Ambiti restano campi descrittivi opzionali sulla scheda (§15.A).
+
+**Collegamenti previsti (modello generale).** Territorio locale; Regione; Italia; Paese estero; Area economica; Mercato internazionale; settore; filiera; canale commerciale; lingua operativa.
 
 **Distinzioni da mantenere sempre separate**, coerenti con l'approccio già adottato in `logical/opportunita.md` §10:
 
@@ -314,7 +404,9 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 ## 12. Verifica, affidabilità e visibilità
 
-**Assi di verifica**, coerenti con l'approccio già adottato in `logical/imprese.md` §8, `logical/appartenenze.md` §10, `logical/mercati-internazionali.md` §10 e `logical/opportunita.md` §11:
+**Ciclo 1.** Visibilità minima: `bozza` riservata al titolare (e a chi agisce per esso); `pubblicata` consultabile; `ritirata` fuori dagli elenchi correnti. Nessun asse di verifica owned, nessun anonimato avanzato (§15.A). Il resto della sezione è modello generale.
+
+**Assi di verifica** (modello generale), coerenti con l'approccio già adottato in `logical/imprese.md` §8, `logical/appartenenze.md` §10, `logical/mercati-internazionali.md` §10 e `logical/opportunita.md` §11:
 
 - **Identità del proponente** — la piattaforma ha potuto confermare chi è realmente il proponente.
 - **Esistenza dell'Impresa** — quando il proponente agisce per un'Impresa, la piattaforma ha potuto confermare che l'Impresa esiste realmente.
@@ -350,7 +442,7 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 **Regole e invarianti.**
 
-1. Ogni Collaborazione deve avere un proponente identificabile, Persona o Impresa (§6; D19/D20).
+1. Ogni Collaborazione deve avere un promotore identificabile, Persona o Impresa (§6; D19/D20). Nel ciclo 1 il promotore è esattamente uno (§15.A).
 2. Ogni Collaborazione deve avere un oggetto e una finalità (§3): l'assenza di questi elementi la riporta al livello di semplice annuncio o informazione.
 3. Una Collaborazione esiste già nella fase dichiarativa (§1, §8): non richiede una controparte già individuata né uno stato della relazione Avviata/Attiva.
 4. L'identità della Collaborazione non deriva dall'identità di alcun partecipante (PF5; §2).
@@ -384,9 +476,9 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 **Collaborazione con più partner.** Corrisponde a una proposta multilaterale (§4): il dominio non limita il numero di soggetti coinvolti in una proposta congiunta.
 
-**Collaborazione multilaterale.** Analoga al caso precedente: più proponenti possono condividere la stessa Collaborazione su base paritaria (§4), distinta da una relazione con un unico proponente e più controparti.
+**Collaborazione multilaterale.** Nel modello generale: più proponenti su base paritaria (§4). **Ciclo 1:** un solo promotore; multilateralità rinviata (§15.A).
 
-**Collaborazione anonima.** Corrisponde alla visibilità "Anonima verso il pubblico" (§12): pienamente prevista, con l'identità che può restare nascosta anche dopo la pubblicazione.
+**Collaborazione anonima.** Nel modello generale: visibilità "Anonima verso il pubblico" (§12). **Ciclo 1:** anonimato avanzato rinviato; vale la visibilità minima di §15.A.
 
 **Identità resa visibile solo dopo accettazione.** Corrisponde alla visibilità "Con identità rivelata dopo accettazione" (§12): distinta dall'anonimato permanente.
 
@@ -394,15 +486,11 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 **Collaborazione internazionale.** Trattata al §11: piena previsione tramite il collegamento a uno o più Mercati Internazionali.
 
-**Ricerca di immobile o spazio.** Trattata come Oggetto della collaborazione (§2, §7): il dominio supporta questo caso senza incorporare un futuro dominio Immobiliare, che resterebbe responsabile di una eventuale scheda descrittiva propria di un immobile, se introdotto in futuro (questione aperta, §15).
+**Ricerca di immobile o spazio.** Trattata come Oggetto della collaborazione (§2, §7): il dominio supporta questo caso senza incorporare un dominio Immobiliare. Ciclo 1: solo descrizione testuale dell'oggetto.
 
-**Ricerca di personale.** Rientra nelle tipologie "ricerca personale" e "lavoro o collaborazione professionale" (§5): trattata come qualunque altra Collaborazione di ricerca, con Requisiti e Preferenze relative al profilo ricercato (§7).
+**Ricerca di personale / investimento / cliente.** Nel ciclo 1 rientrano nella forma `ricerca` (o `offerta` / `partnership` secondo il caso) con oggetto/finalità descrittivi; le etichette tipologiche ampie di §5 sono rinviate.
 
-**Proposta di investimento.** Rientra nella tipologia "investimento" (§5): può essere direzionale (un'Impresa cerca un investitore) o, in alcuni casi, reciproca.
-
-**Ricerca di cliente.** Rientra nella tipologia "ricerca clienti" (§5): una delle configurazioni più comuni del dominio.
-
-**Offerta di servizi.** Rientra nella forma "Offerta" (§2, §4): una Collaborazione basata su una disponibilità dichiarata, distinta da un'OffertaDiServizio del futuro dominio Servizi e dal Servizio professionale dichiarato di Professionisti, con cui può coesistere senza sovrapporsi concettualmente (tesi §8; questione di confine aperta, §15).
+**Offerta di servizi.** Rientra nella forma `offerta` (§2, §4): Collaborazione basata su disponibilità dichiarata, distinta da OffertaDiServizio (`logical/servizi.md`) e da ServizioProfessionale (`logical/professionisti.md`). Nessun collegamento strutturale a Servizi nel ciclo 1 (§15.A).
 
 **Collaborazione senza condizioni economiche definite.** Ammessa: le Condizioni economiche (§7) sono facoltative, non un requisito minimo di esistenza della Collaborazione (§3).
 
@@ -434,6 +522,10 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 ## 14. Eventi di dominio
 
+**Ciclo 1 (minimo).** CollaborazioneCreata; CollaborazionePubblicata; CollaborazioneModificata; CollaborazioneRitirata; CollaborazioneChiusa; CollaborazioneAnnullata; CollaborazioneArchiviata; PartecipanteAggiunto (controparte indicata). Gli altri eventi di questa sezione appartengono al modello generale e sono rinviati con le entità correlate (§15.A).
+
+**Modello generale.**
+
 - **CollaborazioneCreata** — è stata avviata la preparazione di una nuova Collaborazione (stato editoriale "Bozza").
 - **CollaborazioneProposta** — la Collaborazione è stata formalizzata dal proponente.
 - **CollaborazionePubblicata** — la Collaborazione è diventata visibile secondo le regole applicabili (§12).
@@ -463,61 +555,184 @@ Un **Abbinamento** (§2) è il rilevamento, algoritmico o redazionale, di una po
 
 ---
 
-## 15. Decisioni finali e domande aperte
+## 15. Decisioni finali, ciclo 1 e prontezza Physical
 
-**Decisioni consolidate** (allineate alla Domain Thesis).
+### Decisioni vincolanti (modello generale)
 
-1. Collaborazioni è un dominio autonomo, con proprie entità, proprio ciclo di vita e proprie regole (§1; tesi §5, §17).
-2. Collaborazioni e Opportunità sono domini distinti (introduzione, §1; decisione vincolante 7 di `domain-model.md`): una Collaborazione può nascere da un'Opportunità (D22) ma può esistere autonomamente; non incorpora il processo formale di Opportunità (§9, §13).
-3. Collaborazioni e messaggistica sono concetti distinti (§1): il dominio registra il fatto di un contatto autorizzato, non il suo contenuto.
-4. Collaborazioni e contratti sono concetti distinti (§1): l'Accordo preliminare resta un fatto di dominio, non un impegno giuridico.
-5. La Collaborazione è un processo: esiste già nella fase dichiarativa e può evolvere in relazione attiva (§1, §3, §8; tesi §6).
-6. PF4 si applica alla fase relazionale; PF5 all'identità indipendente in entrambe le fasi (§2, §8; tesi §14).
-7. Persona e Impresa sono i partecipanti ammessi oggi; Professionista è qualificazione facoltativa della Persona, non terza categoria (§6; tesi §9).
-8. I ruoli appartengono alla Collaborazione (catalogo locale, PL4), non ai partecipanti (§6; tesi §10).
-9. Una Persona agisce per un'Impresa sulla base di Appartenenze, mai sulla base della sola Collaborazione (§6, §13).
-10. Una Collaborazione non diventa né assorbe un'Appartenenza (V10; §13 regola 9).
-11. Manifestazione di interesse, candidatura, abbinamento, selezione, accordo e Collaborazione attiva sono fasi differenti (§8, §9, §10).
-12. Un abbinamento non garantisce affidabilità o successo (§10; PF10).
-13. Stato editoriale, stato della ricerca, stato della relazione, verifica, visibilità ed esito sono assi separati (§8; PF7).
-14. Le candidature e le manifestazioni di interesse possono avere visibilità più restrittiva rispetto alla Collaborazione (§9, §12).
-15. Lo storico delle Collaborazioni deve poter essere conservato (§8, §13; PF8).
-16. Il dominio supporta Collaborazioni locali, nazionali e internazionali (§5, §11).
-17. Il dominio supporta richieste e offerte di clienti, fornitori, partner, professionisti, personale, investitori, distributori, spazi e immobili (§5, §7, §13), senza modellare l'esecuzione operativa.
-18. La piattaforma non garantisce la conclusione, l'esecuzione o il successo della relazione (§10, §13).
-19. I diritti di accesso restano responsabilità di Identità & Accessi (§1, §13; PF13).
-20. Il dominio può alimentare l'Osservatorio con dati aggregati senza compromettere informazioni personali o commerciali riservate (§1, §13).
+1. Collaborazioni è un dominio autonomo (§1; tesi §5, §17).
+2. Collaborazioni e Opportunità sono domini distinti (decisione vincolante 7 di `domain-model.md`); D22 è unidirezionale e non crea ownership inversa.
+3. Collaborazioni ≠ messaggistica, contratti, pagamenti, esecuzione progettuale, CRM, HR (§1).
+4. Un solo Aggregate Root **Collaborazione**; **PC2 chiusa** (§2).
+5. Identità della Collaborazione indipendente dai partecipanti (PF5).
+6. PF4 si applica alla fase relazionale del modello generale; nel ciclo 1 la fase relazionale è rinviata (§8.0, §15.A).
+7. Persona e Impresa sono i soli partecipanti strutturali ammessi; Professionista non è terzo tipo; Organizzazione ≠ Impresa e non è partecipante nel ciclo 1 (§6).
+8. I ruoli locali appartengono alla Collaborazione (PL4), non ai partecipanti e non ad Appartenenze.
+9. Una Persona agisce per un'Impresa solo tramite Appartenenza (D23); Collaborazioni non crea rappresentanza (V10).
+10. Una Collaborazione non diventa né assorbe un'Appartenenza (V10).
+11. I diritti di accesso restano di Identità & Accessi (PF13); Collaborazioni non attribuisce permessi ai partecipanti.
+12. La piattaforma non garantisce affidabilità, esecuzione o successo (PF10).
+13. Offerta di Collaborazione ≠ OffertaDiServizio ≠ ServizioProfessionale.
+14. Ownership della scheda: Persona XOR Impresa XOR Redazione; mai `auth.users` / Account (§6.1).
 
-**Domande aperte** (incluse quelle rinviate dalla Domain Thesis §16).
+---
 
-- Distinzione operativa esatta tra Esigenza e Proposta oltre a §4 (Dependency Map; tesi §16 punto 1) — da raffinare nel Physical Domain Mapping.
-- Se la fase dichiarativa e quella relazionale richiedano uno o due Aggregate Root (PC2; §2; tesi §16 punto 2).
-- Catalogo esatto dei Ruoli locali oltre a proponente/destinatario (§6; tesi §16 punto 3).
-- Qual è il confine esatto, in termini di responsabilità e di dati condivisi, tra Collaborazione e Opportunità, in particolare quando una risposta a un'Opportunità evolve in una relazione diretta?
-- Qual è il confine esatto tra Collaborazione e annuncio, oltre ai criteri qualitativi già descritti al §3?
-- Qual è il confine esatto tra Collaborazione e messaggistica, in particolare su quanto del contatto autorizzato debba restare visibile come fatto di dominio?
-- Qual è il confine esatto tra Collaborazione e contratto, in particolare su come rappresentare (se rappresentare) l'esistenza di un contratto senza incorporarne i termini?
-- Come devono essere rappresentati i soggetti esterni non ancora presenti sulla piattaforma (§6), in termini di identificazione stabile e di eventuale evoluzione futura verso un profilo proprio?
-- Trattamento futuro di associazioni, enti, università come partecipanti, rinviato a Organizzazioni istituzionali (tesi §16 punto 7).
-- In quali casi, e con quali garanzie, deve essere possibile una pubblicazione anonima (§12)?
-- In quale momento esatto del ciclo di vita devono diventare visibili i contatti tra le parti (§9, §12), oltre al principio generale già stabilito?
-- Quali criteri esatti determinano un grado di compatibilità automatica "sufficientemente rilevante" da essere segnalato (§10), oltre alla gradazione qualitativa già fornita?
-- Come deve essere trattata operativamente una Collaborazione multilaterale (§4, §13) in termini di ruoli e responsabilità tra i proponenti congiunti?
-- Come devono essere gestite le candidature multiple quando la Collaborazione prevede una selezione esclusiva (§9, §13)?
-- Le condizioni economiche (§7) devono essere rappresentate come dato strutturato del dominio, o restare descrittive nella prima versione?
-- Come devono essere trattati budget e compensi riservati (§7, §12, §13) in termini di conservazione e non solo di visibilità?
-- Quale durata o scadenza predefinita, se necessaria, deve avere una Collaborazione priva di una Disponibilità temporale dichiarata (§7, §13)? Grado di strutturazione di Scadenza, Sospensione, Annullamento (tesi §16 punto 5).
-- Come devono essere gestite operativamente le Collaborazioni ricorrenti (§13), oltre al principio di non continuità automatica già stabilito?
-- Con quale processo si verifica concretamente l'Esito dichiarato di una Collaborazione (§8, §12), quando le parti non collaborano attivamente alla sua conferma?
-- Quale responsabilità assume la piattaforma, se alcuna, nei rapporti tra le parti una volta che una Collaborazione è Avviata (§1, §8; `domain-model.md` §14; tesi §16 punto 6)?
-- Un futuro sistema di reputazione (basato su Esiti storicizzati, §8) deve appartenere a questo dominio o a un dominio distinto?
-- Come devono essere trattate le contestazioni (§8, §12) in termini di processo di risoluzione, oltre alla loro rappresentazione come fatto di dominio (PCa1)?
-- Qual è il collegamento esatto con un futuro dominio Immobiliare, oltre al trattamento come Oggetto della collaborazione già stabilito (§13)?
-- Qual è il collegamento esatto con Mercati Internazionali oltre al semplice riferimento descrittivo già stabilito al §11?
-- Qual è il collegamento esatto con un futuro dominio Servizi (tesi §16 punto 8)?
-- Quali informazioni di questo dominio, esattamente, potranno essere utilizzate dall'Osservatorio, e con quale livello di aggregazione o anonimizzazione?
-- In futuro, richieste, offerte e partnership dovranno essere trattate come sotto-domini distinti con regole proprie, o restare un'unica classificazione all'interno di un solo dominio Collaborazioni?
-- Se Manifestazione di interesse o Candidatura richiedano un'identità temporanea (tesi §16 punto 9).
+### 15.A Decisioni del ciclo 1 (chiuse)
 
-Queste domande restano decisioni progettuali future o di Physical Domain Mapping, coerenti con l'approccio già adottato negli altri documenti logici e con la Domain Thesis.
+| Tema | Decisione ciclo 1 | Stato |
+|---|---|---|
+| **Obiettivo minimo** | Scheda dichiarativa pubblicabile di ricerca/offerta/proposta, con titolare, un promotore e lifecycle slim | Chiuso |
+| **Aggregate Root** | Unico: **Collaborazione** | Incluso |
+| **PC2** | **Chiusa**: nessun secondo AR | Chiuso |
+| **Ownership scheda** | Esattamente uno: **Persona** XOR **Impresa** XOR **Redazione piattaforma** | Incluso |
+| **Creazione** | Il titolare crea la scheda; se titolare = Impresa, scrittura da Persona con Appartenenza adeguata; Redazione può creare schede curate | Incluso |
+| **Autore registrazione** | Persona operante (chi scrive); distinta da titolare e da Account | Incluso (concetto) |
+| **Account / `auth.users`** | Vietati come owner | Escluso |
+| **Partecipante Persona** | Sì | Incluso |
+| **Partecipante Impresa** | Sì | Incluso |
+| **Partecipante Organizzazione** | No struttura / no FK | **Escluso** |
+| **Professionista come partecipante** | No | **Escluso** |
+| **Riferimento Profilo professionale (D21)** | — | **Rinviato** |
+| **Soggetto esterno** | Solo etichetta / controparte ricercata testuale | Incluso (descrittivo) |
+| **Promotori** | Esattamente **uno** (Persona \| Impresa) | Incluso |
+| **Controparti indicate** | 0..N (Persona \| Impresa) | Incluso |
+| **Ruoli locali** | Solo `promotore`, `controparte_indicata` | Incluso |
+| **Forma dichiarazione** | Insieme chiuso: `ricerca` \| `offerta` \| `partnership` \| `progetto` \| `disponibilita_aperta` | Incluso |
+| **Catalogo tipologico ampio (§5)** | — | **Rinviato** |
+| **Oggetto + finalità** | Obbligatori, descrittivi | Incluso |
+| **Esigenza / Offerta come entità distinte** | Rappresentate dalla forma + testo; non E02 separate | **Rinviate** come E02 |
+| **Requisiti / Preferenze / Condizioni strutturate** | Solo testo descrittivo opzionale | Strutturati **rinviati** |
+| **Disponibilità temporale** | Facoltativa; nessuna scadenza di default | Incluso (opzionale) |
+| **Manifestazione / Candidatura / Invito** | — | **Rinviati** |
+| **Abbinamento / matching** | — | **Rinviati** |
+| **Accordo preliminare / fase relazionale** | — | **Rinviati** |
+| **Fonte / Evidenza** | — | **Rinviati** |
+| **Lifecycle** | Quattro assi §8.0 | Incluso |
+| **Visibilità avanzata / anonimato** | Ciclo 1: bozza privata al titolare (e chi agisce per esso); pubblicata consultabile; ritirata non in elenco corrente | Incluso (minimo) |
+| **Verifica / Contestata** | Nessun processo owned | **Rinviato** |
+| **FK Opportunità (D22)** | — | **Rinviata** |
+| **FK Eventi** | — | **Esclusa** |
+| **FK Mercati** | — | **Rinviata** |
+| **FK / link Servizi** | — | **Escluso** |
+| **FK Organizzazioni** | — | **Esclusa** |
+| **Contenuti Editoriali** | Nessuna ownership; nessuna FK da Collaborazioni | **Escluso** (ownership) |
+| **Utilizzo Appartenenza (D23)** | Quando Persona agisce per Impresa: riferimento + snapshot etichetta minimo opzionale | Incluso |
+| **Multilateralità / proponenti congiunti** | — | **Rinviata** |
+| **Identità temporanea** | — | **Esclusa** |
+| **Duplicati semantici A↔B** | Non invariante dura; qualità editoriale | Chiuso (non vincolo) |
+| **Responsabilità piattaforma in fase attiva** | Nessuna nel ciclo 1 (fase attiva rinviata) | Chiuso |
+| **Reputazione** | — | **Esclusa** / dominio futuro |
+| **Contratti / documenti / Storage / messaggistica** | — | **Esclusi** |
+
+**Organizzazioni — chiusura esplicita.** Il dominio Organizzazioni è pubblicato e distinto da Impresa. Collaborazioni ciclo 1 **non** introduce Organizzazione come titolare, promotore o controparte strutturale; **non** simula membership organizzative; eventuali enti non censiti restano etichetta descrittiva. Un cutover futuro a partecipazione Org richiederà revisione di questo Logical (e membership Appartenenze), non una decisione del Physical.
+
+**Appartenenze — chiusura esplicita.** Collaborazioni utilizza il titolo (D23) e non possiede membership, ruoli permanenti, rappresentanza o autorizzazioni gestionali (V10).
+
+---
+
+### 15.B Matrice ciclo 1 — incluso / rinviato / escluso
+
+| Elemento | Incluso | Rinviato | Escluso | Motivazione |
+|---|---|---|---|---|
+| AR Collaborazione (scheda dichiarativa) | ✓ | | | Nucleo ciclo 1 |
+| Titolare scheda Persona\|Impresa\|Redazione | ✓ | | | Ownership chiusa |
+| Persona operante (autore registrazione) | ✓ | | | Distinto da Account |
+| Partecipante `promotore` (1) | ✓ | | | Obbligatorio |
+| Partecipante `controparte_indicata` (0..N) | ✓ | | | Opzionale |
+| Forma dichiarazione (5 valori) | ✓ | | | Catalogo chiuso minimo |
+| Oggetto, finalità, descrizione | ✓ | | | Minimo esistenza |
+| Controparte ricercata (testo) | ✓ | | | Senza soggetto nominato |
+| Etichetta soggetto esterno | ✓ | | | Solo descrittiva |
+| Lifecycle 4 assi (§8.0) | ✓ | | | Slim |
+| Utilizzo Appartenenza / snapshot titolo | ✓ | | | D23 quando applicabile |
+| Tipologie ampie §5 | | ✓ | | Non necessarie al primo Physical |
+| Esigenza/Offerta come E02 | | ✓ | | Coperte dalla forma |
+| Requisiti/Preferenze/Condizioni strutturate | | ✓ | | Testo sufficiente |
+| Manifestazione / Candidatura / Invito | | ✓ | | Percorso interesse |
+| Abbinamento / matching | | ✓ | | Motore non richiesto |
+| Accordo preliminare | | ✓ | | Fase relazionale |
+| Fase relazionale (Avviata/Attiva/Sospesa) | | ✓ | | Oltre scheda dichiarativa |
+| Fonte / Evidenza | | ✓ | | Verifica locale |
+| Assi ricerca/verifica estesi (§8.a–f) | | ✓ | | Ridotti a §8.0 |
+| Ruoli locali estesi | | ✓ | | Solo due ruoli ciclo 1 |
+| D21 Profilo professionale | | ✓ | | Qualificazione opzionale |
+| D22 FK Opportunità | | ✓ | | Origine storica non obbligatoria |
+| D52 FK Mercati | | ✓ | | Contesto internazionale |
+| Proponenti congiunti / multilateralità | | ✓ | | Un solo promotore ciclo 1 |
+| Anonimato avanzato / rivelazione post-accettazione | | ✓ | | Visibilità minima |
+| Contestazione / PCa1 processo | | ✓ | | |
+| Collaborazioni ricorrenti strutturate | | ✓ | | Nuova scheda distinta basta |
+| Partecipante Organizzazione | | | ✓ | Org ≠ Impresa; no membership Org |
+| Account / `auth.users` come owner | | | ✓ | Identità & Accessi |
+| Professionista come terzo partecipante | | | ✓ | D21; non tipo soggetto |
+| FK Eventi | | | ✓ | Contesto occasionale non strutturale |
+| Link/ownership Servizi | | | ✓ | Offerta ≠ OffertaDiServizio |
+| Ownership Contenuti | | | ✓ | Narrativa (D35) |
+| Membership / ruoli Appartenenze | | | ✓ | V10 |
+| Messaggistica / contratti / pagamenti / CRM / HR / documenti / Storage | | | ✓ | Fuori dominio |
+| Identità temporanea | | | ✓ | |
+| Motore matching / marketplace | | | ✓ | |
+| Reputazione owned | | | ✓ | |
+
+---
+
+### 15.C Relazioni con altri domini (congelate per ciclo 1)
+
+| Dominio | Relazione ciclo 1 | Natura |
+|---|---|---|
+| **Persone** | FK/riferimento titolare, promotore, controparte, persona operante | Strutturale |
+| **Imprese** | FK/riferimento titolare, promotore, controparte | Strutturale |
+| **Appartenenze** | Utilizzo titolo quando Persona agisce per Impresa | Utilizzo (D23); no ownership |
+| **Organizzazioni** | Nessuna partecipazione / nessuna FK | Escluso operativo |
+| **Identità & Accessi** | Supporto scrittura; deny-by-default; nessun permesso da fatti Collaborazione | Supporto |
+| **Professionisti** | Nessun riferimento Profilo | Rinviato (D21) |
+| **Opportunità** | Nessuna FK origine | Rinviato (D22) |
+| **Servizi** | Nessun link | Escluso |
+| **Eventi** | Nessuna FK | Escluso |
+| **Contenuti** | Nessuna ownership né FK uscente | Escluso ownership |
+| **Mercati Internazionali** | Nessuna FK | Rinviato |
+| **Osservatorio / Notifiche / Ricerca** | Consumatori futuri di eventi; nessuna dipendenza inbound | Fuori ownership |
+
+**Assenza cicli.** Nessuna dipendenza Opportunità → Collaborazioni; nessun ciclo con Appartenenze, Organizzazioni o Identità.
+
+---
+
+### 15.D Prontezza Physical
+
+Il Logical Collaborazioni è **chiuso per il ciclo 1**.
+
+Il Physical del ciclo 1 **deve** limitarsi a tradurre:
+
+* **AR** Collaborazione (scheda dichiarativa);
+* **ownership** Persona XOR Impresa XOR Redazione;
+* **partecipanti** locali con ruoli `promotore` (1) e `controparte_indicata` (0..N);
+* **forma** a cinque valori chiusi;
+* **oggetto / finalità / descrizione** e controparte ricercata testuale;
+* **lifecycle** §8.0 (quattro assi);
+* **utilizzo Appartenenza** quando applicabile;
+* **confini** §15.A–§15.C (V10, PF13, Org esclusa, interesse/relazione rinviati).
+
+Il Physical **non** deve:
+* riaprire PC2;
+* inventare partecipazione Organizzazione;
+* introdurre Manifestazione/Candidatura/Invito/Abbinamento/Accordo;
+* introdurre catalogo tipologico ampio o matching;
+* attribuire ownership a Account/`auth.users`;
+* creare membership, ruoli permanenti o permessi dai fatti di Collaborazione;
+* aggiungere FK a Opportunità, Eventi, Mercati, Servizi, Organizzazioni, Professionisti nel ciclo 1.
+
+Il Migration Plan, quando autorizzato, **potrà limitarsi a tradurre** questo modello in unità DDL senza nuove decisioni semantiche. I nomi di tabelle/colonne restano decisione del Physical.
+
+**Criterio di completamento.** Con §15.A–§15.D il ciclo 1 è completo e il Physical DDL-ready è autorizzabile.
+
+---
+
+### Domande aperte (non bloccanti per il Physical ciclo 1)
+
+- raffinamento operativo post-ciclo-1 di Manifestazione/Candidatura/Invito e fase relazionale;
+- partecipazione strutturale di Organizzazione (dopo membership Appartenenze);
+- D21/D22/D52 come FK facoltative;
+- catalogo tipologico ampio e condizioni economiche strutturate;
+- anonimato avanzato, contestazioni, reputazione, matching;
+- responsabilità piattaforma in fase attiva;
+- eventuale promozione futura di entità (richiede revisione Logical, non decisione Physical).
 
