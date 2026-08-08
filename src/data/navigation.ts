@@ -1,17 +1,25 @@
 import type { NavItem } from "@/types/navigation";
 
+/**
+ * P4.5 primary nav = five ecosystems (not table inventory).
+ * Professionisti reachable under Persone hub + Esplora.
+ */
 export const primaryNav: NavItem[] = [
+  { label: "Persone", href: "/persone" },
   { label: "Imprese", href: "/imprese" },
-  { label: "Collaborazioni", href: "/collaborazioni" },
   { label: "Opportunità", href: "/opportunita" },
-  { label: "Professionisti", href: "/professionisti" },
-  { label: "Lingue e mercati", href: "/lingue-e-mercati" },
-  { label: "Eventi", href: "/eventi" },
-  { label: "Osservatorio", href: "/osservatorio" },
+  { label: "Mercati", href: "/mercati" },
+  { label: "Servizi", href: "/servizi" },
 ];
 
+/** Secondary: collaborations + transversal layers + site pages. */
 export const moreNav: NavItem[] = [
-  { label: "Notizie e guide", href: "/notizie-e-guide" },
+  { label: "Collaborazioni", href: "/collaborazioni" },
+  { label: "Professionisti", href: "/professionisti" },
+  { label: "Eventi", href: "/eventi" },
+  { label: "Notizie e guide", href: "/contenuti" },
+  { label: "Osservatorio", href: "/osservatorio" },
+  { label: "Organizzazioni", href: "/organizzazioni" },
   { label: "Chi siamo", href: "/chi-siamo" },
 ];
 
@@ -31,4 +39,14 @@ export const publishCta: NavItem = {
 export const loginCta: NavItem = {
   label: "Accedi",
   href: "/accedi",
+};
+
+export const signupCta: NavItem = {
+  label: "Registrati",
+  href: "/registrati",
+};
+
+export const appAreaCta: NavItem = {
+  label: "Area riservata",
+  href: "/app",
 };

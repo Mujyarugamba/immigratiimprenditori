@@ -1,20 +1,25 @@
-import { HomeSearch } from "@/components/home/HomeSearch";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import {
+  PLATFORM_IDENTITY,
+  PLATFORM_VALUE_PROPOSITION,
+} from "@/data/ecosystems";
+import { HomeSearch } from "@/components/home/HomeSearch";
 
 export function Hero() {
   return (
     <Section className="border-line bg-surface border-b py-10 sm:py-14">
       <Container>
         <div className="max-w-3xl space-y-5">
+          <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
+            Rete economica digitale
+          </p>
           <h1 className="text-ink text-4xl font-semibold tracking-tight sm:text-5xl">
-            Persone. Imprese. Opportunità.
+            {PLATFORM_IDENTITY}
           </h1>
           <p className="text-ink-muted max-w-2xl text-base leading-7 sm:text-lg">
-            Cerca imprese, opportunità, professionisti e collaborazioni. Filtra
-            per settore, territorio e lingua, oppure pubblica una richiesta in
-            pochi minuti.
+            {PLATFORM_VALUE_PROPOSITION}
           </p>
         </div>
 
@@ -23,12 +28,12 @@ export function Hero() {
         </div>
 
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-          <ButtonLink href="/imprese">Cerca imprese</ButtonLink>
-          <ButtonLink href="/opportunita" variant="accent">
-            Trova opportunità
+          <ButtonLink href="/persone">Esplora le persone</ButtonLink>
+          <ButtonLink href="/imprese" variant="accent">
+            Scopri le imprese
           </ButtonLink>
-          <ButtonLink href="/pubblica" variant="secondary">
-            Pubblica una richiesta
+          <ButtonLink href="/registrati" variant="secondary">
+            Entra nella rete
           </ButtonLink>
         </div>
       </Container>

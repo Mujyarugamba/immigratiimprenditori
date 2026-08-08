@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { loginCta, moreNav, primaryNav, publishCta } from "@/data/navigation";
+import {
+  appAreaCta,
+  loginCta,
+  moreNav,
+  primaryNav,
+  publishCta,
+  signupCta,
+} from "@/data/navigation";
 
 function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -88,6 +95,43 @@ export function Header() {
   }, [open, moreOpen]);
 
   const moreActive = moreNav.some((item) => isActivePath(pathname, item.href));
+  const isAppChrome =
+    pathname.startsWith("/app") ||
+    pathname.startsWith("/accedi") ||
+    pathname.startsWith("/registrati") ||
+    pathname.startsWith("/auth");
+
+  if (isAppChrome) {
+    return (
+      <header className="border-line bg-surface-elevated/95 sticky top-0 z-40 border-b backdrop-blur-sm">
+        <Container className="flex items-center justify-between gap-3 py-2.5">
+          <BrandMark />
+          <div className="flex items-center gap-3">
+            {pathname.startsWith("/app") ? (
+              <Link
+                href="/"
+                className="text-ink-muted hover:text-ink text-[13px] font-medium"
+              >
+                Sito pubblico
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href={loginCta.href}
+                  className="text-ink-muted hover:text-ink text-[13px] font-medium"
+                >
+                  {loginCta.label}
+                </Link>
+                <Button href={signupCta.href} size="sm">
+                  {signupCta.label}
+                </Button>
+              </>
+            )}
+          </div>
+        </Container>
+      </header>
+    );
+  }
 
   return (
     <header className="border-line bg-surface-elevated/95 sticky top-0 z-40 border-b backdrop-blur-sm">
@@ -126,7 +170,7 @@ export function Header() {
               aria-controls={moreId}
               onClick={() => setMoreOpen((value) => !value)}
             >
-              Altro
+              Esplora
             </button>
             {moreOpen ? (
               <div
@@ -160,7 +204,7 @@ export function Header() {
 
           <div className="border-line mt-1 border-t pt-2 lg:hidden">
             <p className="text-ink-subtle px-1 pb-1 text-[11px] font-medium tracking-wide uppercase">
-              Altro
+              Esplora
             </p>
             {moreNav.map((item) => {
               const active = isActivePath(pathname, item.href);
@@ -182,6 +226,12 @@ export function Header() {
             <Button href={loginCta.href} variant="ghost" className="w-full">
               {loginCta.label}
             </Button>
+            <Button href={signupCta.href} variant="secondary" className="w-full">
+              {signupCta.label}
+            </Button>
+            <Button href={appAreaCta.href} variant="ghost" className="w-full">
+              {appAreaCta.label}
+            </Button>
             <Button href={publishCta.href} className="w-full">
               {publishCta.label}
             </Button>
@@ -194,6 +244,12 @@ export function Header() {
             className="text-ink-muted hover:text-ink hidden text-[13px] font-medium transition-colors sm:inline"
           >
             {loginCta.label}
+          </Link>
+          <Link
+            href={signupCta.href}
+            className="text-ink-muted hover:text-ink hidden text-[13px] font-medium transition-colors md:inline"
+          >
+            {signupCta.label}
           </Link>
           <Button
             href={publishCta.href}

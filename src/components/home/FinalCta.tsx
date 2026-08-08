@@ -9,19 +9,23 @@ export function FinalCta() {
         <div className="border-line bg-surface-elevated flex flex-col gap-6 border px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12">
           <div className="max-w-xl space-y-3">
             <h2 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
-              Cerchi qualcosa per la tua impresa?
+              Entra nella rete e attiva i tuoi nodi
             </h2>
             <p className="text-ink-muted text-base leading-7">
-              Pubblica una richiesta, presenta la tua impresa o condividi
-              un’opportunità di collaborazione.
+              Crea il profilo, collega un&apos;impresa, pubblica un&apos;opportunità
+              o indica i mercati in cui operi. Le azioni avvengono nell&apos;area
+              riservata; la rete pubblica resta esplorabile da tutti.
             </p>
           </div>
-          <div className="flex flex-col gap-2.5 sm:flex-row">
-            <ButtonLink href="/pubblica" variant="accent">
-              Pubblica una richiesta
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+            <ButtonLink href="/registrati" variant="accent">
+              Crea il tuo profilo
+            </ButtonLink>
+            <ButtonLink href="/app/imprese" variant="secondary">
+              Collega la tua impresa
             </ButtonLink>
             <ButtonLink href="/pubblica" variant="secondary">
-              Presenta la tua impresa
+              Pubblica
             </ButtonLink>
           </div>
         </div>

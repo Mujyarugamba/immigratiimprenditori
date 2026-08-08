@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { mainNav, publishCta } from "@/data/navigation";
 import { siteConfig } from "@/lib/site";
@@ -10,6 +13,16 @@ const participateLinks = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
+  if (
+    pathname.startsWith("/app") ||
+    pathname.startsWith("/accedi") ||
+    pathname.startsWith("/registrati") ||
+    pathname.startsWith("/auth")
+  ) {
+    return null;
+  }
+
   return (
     <footer className="bg-brand-dark mt-auto text-white">
       <Container className="grid gap-8 py-9 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">

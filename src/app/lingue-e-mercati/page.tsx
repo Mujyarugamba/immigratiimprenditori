@@ -1,14 +1,5 @@
-import type { Metadata } from "next";
-import { SectionPage } from "@/components/sections/SectionPage";
-import { sections } from "@/data/sections";
-
-const section = sections["lingue-e-mercati"];
-
-export const metadata: Metadata = {
-  title: section.title,
-  description: section.description,
-};
+import { redirect } from "next/navigation";
 
 export default function LingueEMercatiPage() {
-  return <SectionPage {...section} />;
+  redirect("/mercati");
 }

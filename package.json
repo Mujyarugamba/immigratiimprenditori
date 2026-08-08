@@ -8,7 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test \"src/**/*.test.ts\"",
+    "test:p3-smoke": "node scripts/p3-local-smoke.mjs",
+    "test:p4-smoke": "node scripts/p4-local-smoke.mjs",
+    "test:p5-smoke": "node scripts/p5-local-smoke.mjs",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:mobile": "playwright test --project=mobile"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
@@ -18,6 +25,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -28,6 +36,7 @@
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "typescript": "^5"
   }
 }
