@@ -76,7 +76,7 @@ describe("Business CTX/ACT", () => {
     });
     assert.equal(caps.isMember, true);
     assert.equal(caps.canManage, false);
-    assert.equal(labelForCapabilities(caps).manageLabel, "Solo contesto");
+    assert.equal(labelForCapabilities(caps).manageLabel, "Sola lettura");
   });
 
   it("8. CTX + ACT", () => {
@@ -127,7 +127,9 @@ describe("Business UI capabilities", () => {
       hasActiveMembership: true,
       canActForBusiness: true,
     });
-    assert.equal(labelForCapabilities(member).memberLabel, "Membro");
+    assert.equal(labelForCapabilities(member).memberLabel, "Collegata");
+    assert.equal(labelForCapabilities(member).manageLabel, "Sola lettura");
+    assert.equal(labelForCapabilities(manager).manageLabel, "Puoi gestire");
     assert.equal(member.canManage, false);
     assert.equal(manager.canManage, true);
   });

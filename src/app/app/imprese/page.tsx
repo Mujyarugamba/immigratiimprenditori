@@ -31,8 +31,10 @@ export default async function ImpresePage() {
     preferred,
     items.filter((i) => i.isMember).map((i) => i.business.id),
   );
-  const ctxCount = items.filter((i) => i.isMember).length;
-  const actCount = items.filter((i) => i.canManage).length;
+  const selectedName = items.find((i) => i.business.id === selected)?.business
+    .public_name;
+  const linkedCount = items.filter((i) => i.isMember).length;
+  const manageableCount = items.filter((i) => i.canManage).length;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -40,19 +42,19 @@ export default async function ImpresePage() {
         Le mie imprese
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        CTX = membership attiva · ACT = membership attiva + grant di gestione.
-        Il ruolo membership è solo descrittivo.
+        Imprese a cui sei collegato e imprese che puoi gestire. Collegamento e
+        gestione restano distinti.
       </p>
       <p className="text-ink-subtle mt-3 text-xs">
-        Contesto: {ctxCount} · Gestibili: {actCount}
-        {selected ? ` · Selezionata (UI): ${selected.slice(0, 8)}…` : ""}
+        Collegate: {linkedCount} · Gestibili: {manageableCount}
+        {selectedName ? ` · Selezionata: ${selectedName}` : ""}
       </p>
 
       {items.length === 0 ? (
         <div className="mt-8">
           <EmptyStatePanel
             title="Nessuna Impresa"
-            description="Non hai membership attive. Puoi creare una scheda Impresa: otterrai CTX, non ACT. Il primo grant richiede un Amministratore applicativo."
+            description="Non sei ancora collegato a un’impresa. Puoi creare una scheda: resterai collegato e, se serve, un amministratore potrà abilitare la gestione."
           />
         </div>
       ) : (
@@ -74,8 +76,7 @@ export default async function ImpresePage() {
                     {item.business.legal_name}
                   </p>
                   <p className="text-ink-subtle mt-2 text-xs">
-                    Ruolo: <code>{item.roleId}</code> · relazione:{" "}
-                    {item.relationStatus}
+                    Ruolo: {item.roleId}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1 text-xs">
@@ -86,7 +87,7 @@ export default async function ImpresePage() {
                         : "bg-surface-muted text-ink-muted rounded-sm px-2 py-0.5"
                     }
                   >
-                    {item.isMember ? "Membro (CTX)" : "Non attiva"}
+                    {item.isMember ? "Collegata" : "Non attiva"}
                   </span>
                   <span
                     className={
@@ -96,10 +97,10 @@ export default async function ImpresePage() {
                     }
                   >
                     {item.canManage
-                      ? "Gestibile (ACT)"
+                      ? "Puoi gestire"
                       : item.grantStatus === "revoked"
-                        ? "Grant revocato"
-                        : "Solo contesto"}
+                        ? "Gestione revocata"
+                        : "Solo collegamento"}
                   </span>
                 </div>
               </div>
@@ -112,8 +113,8 @@ export default async function ImpresePage() {
         <section className="border-line mt-10 border-t pt-8">
           <h2 className="text-ink text-lg font-semibold">Nuova Impresa</h2>
           <p className="text-ink-muted mt-1 text-sm">
-            INSERT scheda ≠ grant. Dopo la creazione resterai membro senza
-            gestione finché Adm non esegue il bootstrap.
+            Dopo la creazione resti collegato all&apos;impresa. I permessi di
+            gestione possono essere abilitati in seguito.
           </p>
           <div className="mt-4 max-w-lg">
             <CreateBusinessForm />

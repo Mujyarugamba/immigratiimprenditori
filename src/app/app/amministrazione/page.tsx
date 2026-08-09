@@ -23,14 +23,12 @@ const sections = [
   {
     href: "/app/amministrazione/ruoli",
     title: "Ruoli",
-    description:
-      "Assegnazioni redattore e amministratore_applicativo via RPC.",
+    description: "Assegnazioni redattore e amministratore applicativo.",
   },
   {
     href: "/app/amministrazione/imprese",
-    title: "Imprese (bootstrap)",
-    description:
-      "Primo grant di gestione su membership (access_bootstrap_business_grant).",
+    title: "Autorizzazioni imprese",
+    description: "Prima abilitazione dei permessi di gestione su un’impresa.",
   },
 ] as const;
 

@@ -43,7 +43,8 @@ export function CreateBusinessForm() {
           <option value="collaborator">Collaboratore</option>
         </select>
         <span className="text-ink-subtle text-xs">
-          Il ruolo non concede ACT. Il primo grant richiede Adm.
+          Il ruolo descrive la relazione: i permessi di gestione arrivano
+          separatamente.
         </span>
       </label>
 

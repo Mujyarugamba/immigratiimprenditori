@@ -31,7 +31,7 @@ export default async function AdminAccountsPage({ searchParams }: PageProps) {
           Account
         </h1>
         <p className="text-ink-muted mt-1 text-sm">
-          SELECT via RLS amministratore. Nessun token o password esposti.
+          Elenco account applicativi. Nessuna password o token esposti.
         </p>
       </div>
 
@@ -47,7 +47,7 @@ export default async function AdminAccountsPage({ searchParams }: PageProps) {
             id="q"
             name="q"
             defaultValue={q}
-            placeholder="UUID account, auth o persona…"
+            placeholder="Cerca per identificativo…"
             className="border-line bg-surface text-ink focus:border-brand focus:ring-brand/30 rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
           />
         </div>

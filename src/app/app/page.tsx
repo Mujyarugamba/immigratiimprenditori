@@ -6,8 +6,16 @@ import {
   getSelectedBusinessId,
   resolveSelectedBusinessId,
 } from "@/lib/business/selected-business";
+import {
+  labelAccountStatus,
+  labelPersonAssociation,
+  labelProfileReady,
+} from "@/lib/app/user-labels";
 import { getApplicationSession } from "@/lib/session/get-application-session";
-import { destinationForAccountState } from "@/lib/session/guards";
+import {
+  destinationForAccountState,
+  needsInitialOnboarding,
+} from "@/lib/session/guards";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -27,17 +35,13 @@ export default async function AppDashboardPage() {
     redirect(destinationForAccountState(session));
   }
 
-  const needsOnboarding =
-    session.personAssociationStatus !== "contested" &&
-    (!session.accountId ||
-      !session.personId ||
-      session.accountStatus === "registered");
+  const needsOnboarding = needsInitialOnboarding(session);
 
   const businesses = session.personId
     ? await listMyBusinesses(session.personId)
     : [];
-  const ctxCount = businesses.filter((b) => b.isMember).length;
-  const actCount = businesses.filter((b) => b.canManage).length;
+  const linkedCount = businesses.filter((b) => b.isMember).length;
+  const manageableCount = businesses.filter((b) => b.canManage).length;
   const preferred = await getSelectedBusinessId();
   const selectedId = resolveSelectedBusinessId(
     preferred,
@@ -51,74 +55,90 @@ export default async function AppDashboardPage() {
         Dashboard
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Panoramica Identity + Business workspace (P3).
+        Panoramica del tuo spazio personale.
       </p>
 
       <dl className="border-line bg-surface-elevated mt-8 grid gap-4 rounded-md border p-5 text-sm shadow-soft sm:grid-cols-2">
         <div>
-          <dt className="text-ink-subtle">Account</dt>
+          <dt className="text-ink-subtle">Stato account</dt>
           <dd className="text-ink mt-1 font-medium">
-            {session.accountStatus ?? "assente"}
+            {labelAccountStatus(session.accountStatus)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-ink-subtle">Profilo</dt>
+          <dd className="text-ink mt-1 font-medium">
+            {labelProfileReady(session.isActiveAccount)}
+            {session.personAssociationStatus === "contested"
+              ? " · da verificare"
+              : ""}
           </dd>
         </div>
         <div>
           <dt className="text-ink-subtle">Persona</dt>
           <dd className="text-ink mt-1 font-medium">
-            {session.personAssociationStatus === "contested"
-              ? "contestata"
-              : session.personId
-                ? "collegata"
-                : "assente"}
+            {labelPersonAssociation(
+              session.personAssociationStatus,
+              Boolean(session.personId),
+            )}
           </dd>
         </div>
         <div>
-          <dt className="text-ink-subtle">Imprese in contesto (CTX)</dt>
-          <dd className="text-ink mt-1 font-medium">{ctxCount}</dd>
+          <dt className="text-ink-subtle">Imprese collegate</dt>
+          <dd className="text-ink mt-1 font-medium">{linkedCount}</dd>
         </div>
         <div>
-          <dt className="text-ink-subtle">Imprese gestibili (ACT)</dt>
-          <dd className="text-ink mt-1 font-medium">{actCount}</dd>
+          <dt className="text-ink-subtle">Imprese che puoi gestire</dt>
+          <dd className="text-ink mt-1 font-medium">{manageableCount}</dd>
         </div>
         <div className="sm:col-span-2">
-          <dt className="text-ink-subtle">Impresa selezionata (UI)</dt>
+          <dt className="text-ink-subtle">Impresa selezionata</dt>
           <dd className="text-ink mt-1 font-medium">
-            {selected ? selected.business.public_name : "nessuna"}
+            {selected ? selected.business.public_name : "Nessuna"}
           </dd>
         </div>
-        <div>
-          <dt className="text-ink-subtle">Redattore</dt>
-          <dd className="text-ink mt-1 font-medium">
-            {session.isEditor ? "sì" : "no"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-ink-subtle">Amministratore</dt>
-          <dd className="text-ink mt-1 font-medium">
-            {session.isApplicationAdmin ? "sì" : "no"}
-          </dd>
-        </div>
+        {session.isEditor || session.isApplicationAdmin ? (
+          <div className="sm:col-span-2">
+            <dt className="text-ink-subtle">Ruoli aggiuntivi</dt>
+            <dd className="text-ink mt-1 font-medium">
+              {[
+                session.isEditor ? "Redazione" : null,
+                session.isApplicationAdmin ? "Amministrazione" : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </dd>
+          </div>
+        ) : null}
       </dl>
 
       {needsOnboarding ? (
         <div className="border-accent/30 bg-accent-soft mt-6 rounded-md border p-4 text-sm">
-          <p className="text-ink font-medium">Prossima azione</p>
+          <p className="text-ink font-medium">Completa il profilo</p>
           <p className="text-ink-muted mt-1">
-            Completa l&apos;onboarding per collegare la Persona.
+            Collega i tuoi dati personali per usare pienamente l&apos;area
+            riservata.
           </p>
           <Link
             href="/app/onboarding"
             className="text-brand mt-3 inline-block font-medium hover:underline"
           >
-            Vai all&apos;onboarding
+            Continua
           </Link>
         </div>
       ) : (
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
-          <Link href="/app/profilo" className="text-brand font-medium hover:underline">
-            Profilo
+          <Link
+            href="/app/profilo"
+            className="text-brand font-medium hover:underline"
+          >
+            Vai al profilo
           </Link>
-          <Link href="/app/imprese" className="text-brand font-medium hover:underline">
-            Imprese
+          <Link
+            href="/app/imprese"
+            className="text-brand font-medium hover:underline"
+          >
+            Le mie imprese
           </Link>
           {selectedId ? (
             <Link

@@ -160,17 +160,34 @@ export function requireApplicationAdmin(
   return { ok: true };
 }
 
+function isTerminalAccountStatus(
+  status: AccountStatus | string | null | undefined,
+): boolean {
+  return (
+    status === "suspended" || status === "disabled" || status === "closed"
+  );
+}
+
+/**
+ * Initial onboarding still required for the reserved area.
+ * Authoritative completion = access_is_active_account() → session.isActiveAccount.
+ * Contested / terminal accounts use other destinations (profilo / stato).
+ */
+export function needsInitialOnboarding(
+  session: ApplicationSession | null,
+): boolean {
+  if (!session) return false;
+  if (session.personAssociationStatus === "contested") return false;
+  if (isTerminalAccountStatus(session.accountStatus)) return false;
+  return !session.isActiveAccount;
+}
+
 /** Navigation visibility — never combine Adm and Red into a single flag. */
 export function navFlags(session: ApplicationSession | null) {
   const contested = session?.personAssociationStatus === "contested";
   return {
     showApp: session != null,
-    showOnboarding:
-      session != null &&
-      !contested &&
-      (!session.accountId ||
-        !session.personId ||
-        session.accountStatus === "registered"),
+    showOnboarding: needsInitialOnboarding(session),
     showBusinesses: Boolean(session?.personId && !contested),
     showEditor: Boolean(session?.isEditor),
     showAdmin: Boolean(session?.isApplicationAdmin),

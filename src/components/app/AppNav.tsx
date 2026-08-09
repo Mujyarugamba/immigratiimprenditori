@@ -7,6 +7,7 @@ import {
   resolveSelectedBusinessId,
 } from "@/lib/business/selected-business";
 import { signOutAction } from "@/lib/auth/actions";
+import { labelAccountStatus } from "@/lib/app/user-labels";
 import { navFlags } from "@/lib/session/guards";
 import type { ApplicationSession } from "@/types/access";
 
@@ -41,7 +42,7 @@ export async function AppNav({ session }: AppNavProps) {
           <p className="text-ink-muted mt-2 text-xs">
             Account:{" "}
             <span className="font-medium">
-              {session.accountStatus ?? "assente"}
+              {labelAccountStatus(session.accountStatus)}
             </span>
           </p>
         </div>
@@ -59,7 +60,7 @@ export async function AppNav({ session }: AppNavProps) {
           </Link>
           {flags.showOnboarding ? (
             <Link href="/app/onboarding" className={linkClass}>
-              Onboarding
+              Completa il profilo
             </Link>
           ) : null}
           <Link href="/app/profilo" className={linkClass}>
@@ -118,7 +119,7 @@ export async function AppNav({ session }: AppNavProps) {
                 href="/app/amministrazione/imprese"
                 className={`${linkClass} pl-4 text-xs`}
               >
-                Bootstrap grant
+                Autorizzazioni imprese
               </Link>
             </div>
           ) : null}

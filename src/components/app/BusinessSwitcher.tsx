@@ -19,7 +19,7 @@ export function BusinessSwitcher({ items, selectedBusinessId }: Props) {
         htmlFor="business-switcher"
         className="text-ink-subtle text-[11px] font-medium tracking-wide uppercase"
       >
-        Impresa attiva (UI)
+        Impresa selezionata
       </label>
       <select
         id="business-switcher"
@@ -38,7 +38,7 @@ export function BusinessSwitcher({ items, selectedBusinessId }: Props) {
         ))}
       </select>
       <p className="text-ink-subtle text-[11px] leading-snug">
-        La selezione non concede permessi: ACT resta sul grant DB.
+        Cambiare impresa qui non modifica i permessi di gestione.
       </p>
     </form>
   );

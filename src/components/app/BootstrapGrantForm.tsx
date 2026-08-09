@@ -16,16 +16,15 @@ export function BootstrapGrantForm() {
   return (
     <form action={action} className="mt-4 flex flex-col gap-4">
       <p className="text-ink-muted text-sm">
-        Solo Adm: crea il <strong>primo</strong> grant di gestione su una
-        membership attiva. Non è un grant ordinario e non è disponibile agli
-        utenti CTX.
+        Solo amministratori: abilita il <strong>primo</strong> permesso di
+        gestione su un collegamento impresa già attivo.
       </p>
       <FormField
-        label="Membership id"
+        label="Identificativo membership"
         name="membership_id"
         required
         disabled={pending}
-        hint="UUID di business_memberships"
+        hint="Identificativo del collegamento persona–impresa"
       />
       {state.message ? (
         <p

@@ -65,7 +65,7 @@ export default async function ImpresaDetailPage({ params }: Props) {
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
         <span className="bg-brand-soft text-brand rounded-sm px-2 py-0.5 font-medium">
-          {caps.isMember ? "CTX sì" : "CTX no"}
+          {caps.isMember ? "Collegata" : "Non collegata"}
         </span>
         <span
           className={
@@ -74,11 +74,11 @@ export default async function ImpresaDetailPage({ params }: Props) {
               : "bg-surface-muted text-ink-muted rounded-sm px-2 py-0.5"
           }
         >
-          {caps.canManage ? "ACT sì — gestibile" : "ACT no — sola lettura"}
+          {caps.canManage ? "Puoi gestire" : "Sola lettura"}
         </span>
         {own ? (
           <span className="text-ink-subtle px-2 py-0.5">
-            Tuo ruolo: <code>{own.role_id}</code>
+            Tuo ruolo: {own.role_id}
           </span>
         ) : null}
       </div>
@@ -112,8 +112,8 @@ export default async function ImpresaDetailPage({ params }: Props) {
           <BusinessEditForm business={business} />
         ) : (
           <p className="text-ink-muted mt-2 text-sm">
-            Sei membro senza grant di gestione: la scheda è in sola lettura. Il
-            ruolo <code>{own?.role_id ?? "—"}</code> non abilita ACT.
+            Sei collegato all&apos;impresa ma non hai i permessi di gestione: la
+            scheda è in sola lettura.
           </p>
         )}
       </section>
@@ -121,8 +121,8 @@ export default async function ImpresaDetailPage({ params }: Props) {
       <section className="mt-10">
         <h2 className="text-ink text-lg font-semibold">Appartenenze</h2>
         <p className="text-ink-muted mt-1 text-sm">
-          Grant/revoke solo via RPC. Self-grant vietato. Nessuna garanzia DB
-          sull&apos;ultimo gestore.
+          Chi ha i permessi di gestione può assegnarli o revocarli ad altri
+          membri. Non puoi assegnarli a te stesso.
         </p>
         <div className="mt-4">
           <MembershipGrantsPanel

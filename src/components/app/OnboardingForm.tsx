@@ -27,7 +27,7 @@ export function OnboardingForm({
         name="display_name"
         defaultValue={defaultDisplayName}
         disabled={pending}
-        hint="Colleghiamo la Persona creata alla registrazione (id = auth user) tramite access_link_person."
+        hint="Come vuoi apparire nella rete. Puoi modificarlo in seguito dal profilo."
       />
       {state.message ? (
         <p className="text-accent-dark text-sm" role="alert">
@@ -35,7 +35,7 @@ export function OnboardingForm({
         </p>
       ) : null}
       <Button type="submit" disabled={pending}>
-        {pending ? "Collegamento…" : "Collega Persona e continua"}
+        {pending ? "Salvataggio…" : "Continua"}
       </Button>
     </form>
   );

@@ -4,6 +4,7 @@ import type { ApplicationSession } from "../../types/access";
 import {
   destinationForAccountState,
   navFlags,
+  needsInitialOnboarding,
   requireActiveAccount,
   requireApplicationAdmin,
   requireAuthenticated,
@@ -201,5 +202,48 @@ describe("14. service-only provisioning boundary (nav/session contract)", () => 
       assert.equal(r.redirectTo, "/app/profilo");
       assert.equal(r.reason, "association_contested");
     }
+  });
+});
+
+describe("P7.1 onboarding navigation", () => {
+  it("incomplete account sees Completa il profilo entry", () => {
+    const s = session({
+      accountStatus: "registered",
+      personId: null,
+      isActiveAccount: false,
+    });
+    assert.equal(needsInitialOnboarding(s), true);
+    assert.equal(navFlags(s).showOnboarding, true);
+  });
+
+  it("active account does not see onboarding in sidebar", () => {
+    const s = session();
+    assert.equal(s.isActiveAccount, true);
+    assert.equal(needsInitialOnboarding(s), false);
+    assert.equal(navFlags(s).showOnboarding, false);
+  });
+
+  it("completed onboarding destination stays /app (no loop)", () => {
+    const s = session();
+    assert.equal(destinationForAccountState(s), "/app");
+    assert.equal(navFlags(s).showOnboarding, false);
+    assert.equal(requireActiveAccount(s).ok, true);
+  });
+
+  it("contested does not show onboarding nav", () => {
+    const s = session({
+      personId: null,
+      personAssociationStatus: "contested",
+      isActiveAccount: false,
+    });
+    assert.equal(needsInitialOnboarding(s), false);
+    assert.equal(navFlags(s).showOnboarding, false);
+  });
+
+  it("dashboard and profilo remain reachable when active", () => {
+    const s = session();
+    assert.equal(navFlags(s).showApp, true);
+    assert.equal(requireOperationalAccount(s).ok, true);
+    assert.equal(requireActiveAccount(s).ok, true);
   });
 });

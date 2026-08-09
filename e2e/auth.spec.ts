@@ -49,6 +49,28 @@ test.describe("auth + onboarding", () => {
     await page.reload();
     await expect(page).toHaveURL(/\/app/);
     await expect(page.getByText("Area riservata")).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "Area riservata" }),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Area riservata" })
+        .getByRole("link", { name: "Completa il profilo" }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await expect(page.getByText(/Panoramica del tuo spazio personale/)).toBeVisible();
+    await expect(page.getByText(/\(CTX\)|\(ACT\)|access_current_person_id/)).toHaveCount(
+      0,
+    );
+
+    await page.goto("/app/onboarding");
+    await expect(page).toHaveURL(/\/app\/?$/, { timeout: 30_000 });
+
+    await page.goto("/app/profilo");
+    await expect(page.getByRole("heading", { name: "Il mio profilo" })).toBeVisible();
+    await expect(page.getByText(/access_current_person_id|Persona id/)).toHaveCount(
+      0,
+    );
 
     await page.getByRole("button", { name: "Esci" }).click();
     await page.goto("/app");
@@ -70,6 +92,19 @@ test.describe("auth + onboarding", () => {
     await page.getByLabel("Password").fill(PASS);
     await page.getByRole("button", { name: "Accedi" }).click();
     await expect(page).toHaveURL(/\/app/, { timeout: 45_000 });
+    await expect(
+      page
+        .getByRole("navigation", { name: "Area riservata" })
+        .getByRole("link", { name: "Completa il profilo" }),
+    ).toBeVisible();
+    await page
+      .getByRole("navigation", { name: "Area riservata" })
+      .getByRole("link", { name: "Completa il profilo" })
+      .click();
+    await expect(page).toHaveURL(/\/app\/onboarding/);
+    await expect(
+      page.getByRole("heading", { name: "Completa il profilo" }),
+    ).toBeVisible();
   });
 });
 

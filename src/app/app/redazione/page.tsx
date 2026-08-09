@@ -36,10 +36,8 @@ export default function RedazioneDashboardPage() {
       </p>
 
       <p className="border-line bg-surface-elevated text-ink mt-4 rounded-md border p-4 text-sm shadow-soft">
-        <strong>Adm ≠ Red:</strong> questa area richiede{" "}
-        <code>access_is_editor()</code>. Un Account con solo{" "}
-        <code>amministratore_applicativo</code> non deve accedervi, anche se
-        può usare l&apos;area Amministrazione separata.
+        Questa area è riservata al ruolo redattore. L&apos;amministrazione
+        applicativa è separata e non sostituisce la redazione.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

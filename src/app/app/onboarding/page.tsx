@@ -4,9 +4,10 @@ import { OnboardingForm } from "@/components/app/OnboardingForm";
 import { ensureAccountProvisioned } from "@/lib/access/ensure-account";
 import { createClient } from "@/lib/supabase/server";
 import { getApplicationSession } from "@/lib/session/get-application-session";
+import { destinationForAccountState } from "@/lib/session/guards";
 
 export const metadata: Metadata = {
-  title: "Onboarding",
+  title: "Completa il profilo",
 };
 
 export default async function OnboardingPage() {
@@ -20,11 +21,16 @@ export default async function OnboardingPage() {
     session.accountStatus === "disabled" ||
     session.accountStatus === "closed"
   ) {
-    redirect(`/app/stato/${session.accountStatus === "suspended" ? "sospeso" : session.accountStatus === "disabled" ? "disabilitato" : "chiuso"}`);
+    redirect(destinationForAccountState(session));
   }
 
-  if (session.isActiveAccount && session.personId) {
+  // Authoritative completion: access_is_active_account() → isActiveAccount.
+  if (session.isActiveAccount) {
     redirect("/app");
+  }
+
+  if (session.personAssociationStatus === "contested") {
+    redirect("/app/profilo");
   }
 
   await ensureAccountProvisioned(session.authUserId);
@@ -39,25 +45,11 @@ export default async function OnboardingPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="text-ink text-2xl font-semibold tracking-tight">
-        Onboarding
+        Completa il profilo
       </h1>
-      <ol className="text-ink-muted mt-4 list-decimal space-y-2 pl-5 text-sm">
-        <li>Auth user creato</li>
-        <li>Account applicativo provisionato (service-role RPC)</li>
-        <li>
-          Persona auto-creata da trigger <code>handle_new_user</code> con id =
-          auth user (bootstrap contratto self-link)
-        </li>
-        <li>
-          Collegamento Account→Persona via <code>access_link_person</code>
-        </li>
-      </ol>
-      <p className="text-ink-muted mt-4 text-sm">
-        Stato attuale Account:{" "}
-        <strong>{session.accountStatus ?? "in provisioning"}</strong>
-        {" · "}
-        Persona collegata:{" "}
-        <strong>{session.personId ? "sì" : "no"}</strong>
+      <p className="text-ink-muted mt-3 text-sm leading-6">
+        Un ultimo passo per collegare i tuoi dati personali all&apos;account e
+        usare l&apos;area riservata.
       </p>
       <div className="mt-8">
         <OnboardingForm

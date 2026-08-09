@@ -23,8 +23,8 @@ export function labelForCapabilities(caps: BusinessCapabilities): {
   manageLabel: string;
 } {
   return {
-    memberLabel: caps.isMember ? "Membro" : "Non membro",
-    manageLabel: caps.canManage ? "Gestibile" : "Solo contesto",
+    memberLabel: caps.isMember ? "Collegata" : "Non collegata",
+    manageLabel: caps.canManage ? "Puoi gestire" : "Sola lettura",
   };
 }
 
