@@ -39,7 +39,8 @@ export function mapPostgresError(error: unknown): AppError {
     details?: string;
   } | null;
 
-  const msg = (err?.message ?? "").toLowerCase();
+  const msg = `${err?.message ?? ""} ${err?.details ?? ""}`.toLowerCase();
+  const sqlstate = err?.code;
   // Prefer semantic message matches over generic SQLSTATE labels.
   if (msg.includes("self-grant")) {
     return appError("forbidden", "Non puoi assegnarti la gestione.", {
@@ -73,6 +74,29 @@ export function mapPostgresError(error: unknown): AppError {
       { cause: err },
     );
   }
+  if (
+    msg.includes("profiles_slug_key") ||
+    msg.includes("profiles_slug") ||
+    (sqlstate === "23505" &&
+      msg.includes("slug") &&
+      msg.includes("profiles"))
+  ) {
+    return appError(
+      "conflict",
+      "Questo indirizzo è già utilizzato. Scegline un altro.",
+      { cause: err },
+    );
+  }
+  if (
+    msg.includes("profiles_slug_check") ||
+    (sqlstate === "23514" && msg.includes("slug") && msg.includes("profiles"))
+  ) {
+    return appError(
+      "validation",
+      "L'indirizzo contiene caratteri non consentiti.",
+      { cause: err },
+    );
+  }
   if (msg.includes("already exists")) {
     return appError("conflict", "Risorsa già esistente.", { cause: err });
   }
@@ -82,7 +106,6 @@ export function mapPostgresError(error: unknown): AppError {
     });
   }
 
-  const sqlstate = err?.code;
   if (sqlstate && SQLSTATE_MAP[sqlstate]) {
     return appError(SQLSTATE_MAP[sqlstate].code, SQLSTATE_MAP[sqlstate].message, {
       cause: err,

@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { updateOwnPersona } from "@/lib/data/authenticated/persona";
 import { pickProfileSelfUpdate } from "@/lib/profile/whitelist";
+import { isValidProfileSlug } from "@/lib/profile/slug";
+import { slugify } from "@/lib/editorial/slug";
 import { toUserMessage, type AppError } from "@/lib/errors/app-error";
 import { getApplicationSession } from "@/lib/session/get-application-session";
 
@@ -46,14 +48,37 @@ export async function updateProfileAction(
   if (!patch.slug?.trim()) {
     return {
       ok: false,
-      message: "Lo slug è obbligatorio.",
+      message: "L'indirizzo del profilo è obbligatorio.",
       fieldErrors: { slug: "Obbligatorio" },
     };
   }
 
+  // Align with existing editorial slugify + DB normalize_profile_slug.
+  const normalizedSlug = slugify(patch.slug);
+  if (!normalizedSlug || !isValidProfileSlug(normalizedSlug)) {
+    return {
+      ok: false,
+      message: "L'indirizzo contiene caratteri non consentiti.",
+      fieldErrors: {
+        slug: "Usa lettere, numeri e trattini.",
+      },
+    };
+  }
+  patch.slug = normalizedSlug;
+
   const result = await updateOwnPersona(session.personId, patch);
   if (!result.ok) {
-    return { ok: false, message: toUserMessage(result.error as AppError) };
+    const err = result.error as AppError;
+    if (err.code === "conflict") {
+      return {
+        ok: false,
+        message: "Questo indirizzo è già utilizzato. Scegline un altro.",
+        fieldErrors: {
+          slug: "Questo indirizzo è già utilizzato.",
+        },
+      };
+    }
+    return { ok: false, message: toUserMessage(err) };
   }
 
   revalidatePath("/app/profilo");

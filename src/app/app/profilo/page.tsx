@@ -89,7 +89,7 @@ export default async function ProfiloPage() {
 
       {incomplete ? (
         <p className="border-accent/30 bg-accent-soft text-ink mt-4 rounded-md border p-3 text-sm">
-          Completa almeno il nome pubblico e lo slug del profilo.
+          Completa almeno il nome pubblico e l&apos;indirizzo del profilo.
         </p>
       ) : null}
 

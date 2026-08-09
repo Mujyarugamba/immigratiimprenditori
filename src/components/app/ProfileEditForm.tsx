@@ -1,12 +1,16 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { FormField } from "@/components/forms/FormField";
 import { Button } from "@/components/ui/Button";
 import {
   updateProfileAction,
   type FormActionState,
 } from "@/lib/profile/actions";
+import {
+  PERSON_PUBLIC_PATH_PREFIX,
+  suggestProfileSlugFromDisplayName,
+} from "@/lib/profile/slug";
 import type { PersonaProfile } from "@/lib/data/authenticated/persona";
 
 const initial: FormActionState = { ok: false };
@@ -17,6 +21,17 @@ type Props = {
 
 export function ProfileEditForm({ profile }: Props) {
   const [state, action, pending] = useActionState(updateProfileAction, initial);
+  const existingSlug = profile.slug?.trim() ?? "";
+  const [slug, setSlug] = useState(existingSlug);
+  const [slugEditedManually, setSlugEditedManually] = useState(
+    Boolean(existingSlug),
+  );
+
+  function onDisplayNameChange(value: string) {
+    if (existingSlug || slugEditedManually) return;
+    const suggested = suggestProfileSlugFromDisplayName(value, null);
+    if (suggested) setSlug(suggested);
+  }
 
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
@@ -27,16 +42,40 @@ export function ProfileEditForm({ profile }: Props) {
         defaultValue={profile.display_name ?? ""}
         disabled={pending}
         error={state.fieldErrors?.display_name}
+        onChange={(event) => onDisplayNameChange(event.currentTarget.value)}
       />
       <FormField
-        label="Slug"
+        label="Indirizzo del profilo"
         name="slug"
         required
-        defaultValue={profile.slug ?? ""}
-        disabled={pending}
         error={state.fieldErrors?.slug}
-        hint="Identificativo pubblico univoco"
-      />
+        hint="È l'indirizzo della tua pagina pubblica nella rete. Usa lettere, numeri e trattini."
+      >
+        <div className="border-line bg-surface-elevated focus-within:border-brand focus-within:ring-brand/30 flex overflow-hidden rounded-md border focus-within:ring-2">
+          <span className="border-line bg-surface-muted text-ink-subtle flex shrink-0 items-center border-r px-3 text-sm select-none">
+            {PERSON_PUBLIC_PATH_PREFIX.replace(/\/$/, "")}/
+          </span>
+          <input
+            id="slug"
+            name="slug"
+            type="text"
+            required
+            value={slug}
+            disabled={pending}
+            aria-invalid={Boolean(state.fieldErrors?.slug)}
+            aria-describedby={
+              state.fieldErrors?.slug ? "slug-error" : "slug-hint"
+            }
+            autoComplete="off"
+            spellCheck={false}
+            className="text-ink min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-60"
+            onChange={(event) => {
+              setSlugEditedManually(true);
+              setSlug(event.currentTarget.value);
+            }}
+          />
+        </div>
+      </FormField>
       <FormField
         label="Bio"
         name="bio"

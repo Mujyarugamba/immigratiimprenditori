@@ -18,4 +18,13 @@ describe("mapPostgresError", () => {
     assert.equal(err.code, "unexpected");
     assert.doesNotMatch(toUserMessage(err), /secret/);
   });
+
+  it("maps profiles slug unique violation to UX address message", () => {
+    const err = mapPostgresError({
+      code: "23505",
+      message: 'duplicate key value violates unique constraint "profiles_slug_key"',
+    });
+    assert.equal(err.code, "conflict");
+    assert.match(toUserMessage(err), /indirizzo è già utilizzato/i);
+  });
 });
