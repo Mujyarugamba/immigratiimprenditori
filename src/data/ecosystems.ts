@@ -1,5 +1,5 @@
 /**
- * P4.5 — Product / UX information architecture.
+ * Product / UX information architecture.
  * Does not alter DB bounded contexts; maps public routes into five ecosystems.
  */
 
@@ -16,7 +16,7 @@ export type EcosystemDef = {
   href: string;
   tagline: string;
   description: string;
-  /** Primary P4 routes belonging to this ecosystem */
+  /** Primary public routes belonging to this ecosystem */
   routes: string[];
   ctas: { label: string; href: string }[];
 };
@@ -25,16 +25,16 @@ export const PLATFORM_IDENTITY =
   "Persone. Imprese. Opportunità. Mercati internazionali.";
 
 export const PLATFORM_VALUE_PROPOSITION =
-  "Una rete economica digitale dove persone, imprese, opportunità, collaborazioni, servizi e mercati internazionali si collegano — senza duplicare i fatti.";
+  "Una rete dove persone, imprese, opportunità, collaborazioni, servizi e mercati internazionali si incontrano.";
 
 export const ecosystems: EcosystemDef[] = [
   {
     id: "persone",
     label: "Persone",
     href: "/persone",
-    tagline: "Identità, competenze, professionisti",
+    tagline: "Profili, competenze, professionisti",
     description:
-      "Le persone sono il primo nodo della rete. In v1 i profili professionali pubblici sono il punto di ingresso esplorabile; il profilo personale si attiva nell’area riservata.",
+      "Le persone sono al centro della rete. Qui esplori i profili pubblici e i professionisti; il tuo profilo si completa nell’area riservata.",
     routes: ["/persone", "/professionisti"],
     ctas: [
       { label: "Esplora i professionisti", href: "/professionisti" },
@@ -47,7 +47,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/imprese",
     tagline: "Schede impresa e relazioni pubbliche",
     description:
-      "Le imprese sono nodi centrali: settori, territori, servizi, mercati e collaborazioni emergono dalla stessa scheda quando sono pubblici.",
+      "Le imprese collegano settori, territori, servizi, mercati e collaborazioni quando sono pubblici.",
     routes: ["/imprese"],
     ctas: [
       { label: "Scopri le imprese", href: "/imprese" },
@@ -60,7 +60,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/opportunita",
     tagline: "Trovare, proporre, collaborare",
     description:
-      "Opportunità e collaborazioni restano modelli distinti, ma formano un unico ecosistema di necessità e proposte compatibili.",
+      "Le opportunità sono occasioni da cogliere. Le collaborazioni sono proposte di lavoro insieme. Percorsi distinti, nella stessa area di scoperta.",
     routes: ["/opportunita", "/collaborazioni"],
     ctas: [
       { label: "Trova opportunità", href: "/opportunita" },
@@ -71,9 +71,9 @@ export const ecosystems: EcosystemDef[] = [
     id: "mercati",
     label: "Mercati internazionali",
     href: "/mercati",
-    tagline: "Presenze, interessi, relazioni estere",
+    tagline: "Paesi, interessi, relazioni estere",
     description:
-      "Un mercato è un ingresso, non solo un elenco paesi: imprese, attività e contenuti collegati emergono dalle relazioni reali.",
+      "Un mercato è un ingresso: imprese presenti, attività e contenuti emergono dalle relazioni reali.",
     routes: ["/mercati"],
     ctas: [
       { label: "Esplora i mercati", href: "/mercati" },
@@ -84,9 +84,9 @@ export const ecosystems: EcosystemDef[] = [
     id: "servizi",
     label: "Servizi per lavorare e crescere",
     href: "/servizi",
-    tagline: "Offerte e richieste, distinte",
+    tagline: "Offerte e richieste",
     description:
-      "Offerte e richieste di servizio convivono nello stesso ecosistema, senza fondere i due aggregate root.",
+      "Chi offre un servizio e chi lo cerca restano in elenchi distinti, nella stessa sezione.",
     routes: ["/servizi"],
     ctas: [
       { label: "Offerte di servizio", href: "/servizi?tipo=offerta" },
@@ -101,36 +101,36 @@ export const transversalLayers = [
     id: "eventi",
     label: "Eventi",
     href: "/eventi",
-    description: "Incontri, edizioni e contesti della rete.",
+    description: "Incontri e appuntamenti della rete.",
   },
   {
     id: "cultura",
     label: "Cultura",
     href: "/cultura",
     description:
-      "Incontri culturali e connessioni pubbliche nella rete — non un sesto ecosistema.",
+      "Incontri culturali, persone e opportunità creative nella rete.",
   },
   {
     id: "contenuti",
     label: "Notizie e guide",
     href: "/contenuti",
-    description: "Narrazioni e guide collegate ai fatti pubblici.",
+    description: "Storie, notizie e guide utili.",
   },
   {
     id: "osservatorio",
     label: "Osservatorio",
     href: "/osservatorio",
-    description: "Indicatori e serie pubblicate — livello dati, non brand.",
+    description: "Indicatori e dati pubblicati per leggere la rete.",
   },
   {
     id: "organizzazioni",
     label: "Organizzazioni",
     href: "/organizzazioni",
-    description: "Attori istituzionali e associativi pubblici.",
+    description: "Associazioni, enti e organizzazioni pubbliche.",
   },
 ] as const;
 
-/** DB domain → UX ecosystem mapping (authoritative for P4.5). */
+/** DB domain → UX ecosystem mapping (authoritative for IA). */
 export const dbDomainToEcosystem: Record<string, EcosystemId | "trasversale"> = {
   profiles: "persone",
   professional_profiles: "persone",

@@ -236,6 +236,37 @@ export const BUSINESS_STATUSES: Record<string, string> = {
   ceased: "Cessata",
 };
 
+export const ACTIVITY_SCOPE_LABELS: Record<string, string> = {
+  culture: "Cultura",
+  heritage: "Patrimonio",
+  creative_industries: "Industrie creative",
+};
+
+export const MEMBERSHIP_RELATION_LABELS: Record<string, string> = {
+  active: "Attivo",
+  ended: "Concluso",
+  suspended: "Sospeso",
+};
+
+export const GRANT_STATUS_LABELS: Record<string, string> = {
+  granted: "Gestione attiva",
+  revoked: "Gestione revocata",
+  none: "Solo collegamento",
+};
+
+export const PUBLICATION_STATUS_LABELS: Record<string, string> = {
+  public: "Pubblica",
+  unpublished: "Non pubblicata",
+  withdrawn: "Ritirata",
+};
+
+export const EDITORIAL_STATUS_LABELS: Record<string, string> = {
+  draft: "Bozza",
+  ready: "Pronto",
+  published: "Pubblicato",
+  withdrawn: "Ritirato",
+};
+
 export function textFilter(name: string, label: string, placeholder?: string): FilterField {
   return { kind: "text", name, label, placeholder };
 }

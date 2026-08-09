@@ -29,7 +29,7 @@ export function CreateBusinessForm() {
       />
       <FormField label="Sommario" name="summary" disabled={pending} />
       <label className="text-ink flex flex-col gap-1 text-sm">
-        <span className="font-medium">Ruolo membership (descrittivo)</span>
+        <span className="font-medium">Ruolo nell&apos;impresa</span>
         <select
           name="role_id"
           defaultValue="founder"

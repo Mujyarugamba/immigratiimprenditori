@@ -8,11 +8,12 @@ import { Section } from "@/components/ui/Section";
 import { ecosystems } from "@/data/ecosystems";
 import { listHomeProfessionals } from "@/lib/data/public";
 import { listHomePublicPeople } from "@/lib/data/public/people";
+import { PRACTICE_MODES, label } from "@/lib/public/labels";
 
 export const metadata: Metadata = {
   title: "Persone",
   description:
-    "Ecosistema Persone della rete: profili pubblici, professionisti e ingresso all’area riservata.",
+    "Persone nella rete: profili pubblici, professionisti e ingresso all’area riservata.",
 };
 
 const eco = ecosystems.find((e) => e.id === "persone")!;
@@ -28,7 +29,7 @@ export default async function PersoneHubPage() {
       <Section>
         <Container className="max-w-3xl space-y-6">
           <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-            Ecosistema
+            Nella rete
           </p>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             {eco.label}
@@ -40,19 +41,15 @@ export default async function PersoneHubPage() {
               Profili pubblici e professioni
             </h2>
             <p className="text-ink-muted text-sm leading-6">
-              Qui trovi le persone che hanno reso pubblico il proprio profilo e,
-              come ingresso specializzato, i{" "}
-              <strong className="text-ink font-medium">
-                profili professionali pubblici
-              </strong>
-              . Account e autorizzazioni restano privati nell&apos;area
-              riservata.
+              Qui trovi le persone che hanno reso pubblico il proprio profilo e
+              i professionisti disponibili. Le impostazioni del tuo account
+              restano private nell&apos;area riservata.
             </p>
           </div>
 
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="/professionisti">
-              Esplora i professionisti
+              Trova un professionista
             </ButtonLink>
             <ButtonLink href="/registrati" variant="accent">
               Crea il tuo profilo
@@ -110,14 +107,16 @@ export default async function PersoneHubPage() {
           className="py-14 sm:py-16 lg:py-20"
           eyebrow="Professionisti"
           title="Profili professionali pubblici"
-          description="Ruolo specializzato nella rete — non sostituto dell’ecosistema Persone."
+          description="Competenze e servizi professionali nella rete."
           actionHref="/professionisti"
-          actionLabel="Vedi tutti"
+          actionLabel="Vedi tutti i professionisti"
           items={professionals.map((p) => ({
             href: `/professionisti/${p.id}`,
             title: p.headline || "Professionista",
             description: p.summary,
-            meta: [p.practice_mode_code].filter(Boolean) as string[],
+            meta: [label(PRACTICE_MODES, p.practice_mode_code)].filter(
+              Boolean,
+            ) as string[],
           }))}
         />
       )}

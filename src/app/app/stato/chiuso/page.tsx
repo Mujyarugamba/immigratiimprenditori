@@ -7,7 +7,7 @@ export default function AccountChiusoPage() {
   return (
     <ErrorState
       title="Account chiuso"
-      description="L'Account è in stato closed. La sessione applicativa non è operativa."
+      description="Il tuo account è chiuso. L'accesso all'area riservata non è più disponibile."
       actionHref="/"
       actionLabel="Torna al sito pubblico"
     />

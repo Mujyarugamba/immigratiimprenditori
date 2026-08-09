@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <ErrorState
       title="Pagina non trovata"
-      description="La risorsa richiesta non esiste o non è disponibile."
+      description="La pagina richiesta non esiste o non è più disponibile."
       actionHref="/"
       actionLabel="Torna alla home"
     />

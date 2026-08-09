@@ -12,6 +12,7 @@ import {
 } from "@/lib/editorial/actions";
 import type { EditorialContent } from "@/lib/data/editorial/contents";
 import type { CatalogOption } from "@/lib/data/editorial/catalogs";
+import { EDITORIAL_STATUS_LABELS, label } from "@/lib/public/labels";
 
 const initial: FormActionState = { ok: false };
 
@@ -138,8 +139,8 @@ export function EditorialContentEditForm({
             className={selectClass}
             defaultValue={content.editorial_status}
           >
-            <option value="draft">draft</option>
-            <option value="ready">ready</option>
+            <option value="draft">{label(EDITORIAL_STATUS_LABELS, "draft")}</option>
+            <option value="ready">{label(EDITORIAL_STATUS_LABELS, "ready")}</option>
           </select>
         </label>
 

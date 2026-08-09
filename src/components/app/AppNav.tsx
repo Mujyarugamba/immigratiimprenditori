@@ -40,7 +40,7 @@ export async function AppNav({ session }: AppNavProps) {
             {session.email ?? session.authUserId}
           </p>
           <p className="text-ink-muted mt-2 text-xs">
-            Account:{" "}
+            Stato account:{" "}
             <span className="font-medium">
               {labelAccountStatus(session.accountStatus)}
             </span>
@@ -107,7 +107,7 @@ export async function AppNav({ session }: AppNavProps) {
                 href="/app/amministrazione/account"
                 className={`${linkClass} pl-4 text-xs`}
               >
-                Account
+                Account utenti
               </Link>
               <Link
                 href="/app/amministrazione/ruoli"

@@ -83,7 +83,7 @@ export default async function AdminAccountsPage({ searchParams }: PageProps) {
             <tr>
               <th className="border-line border px-3 py-2 font-medium">Account</th>
               <th className="border-line border px-3 py-2 font-medium">Stato</th>
-              <th className="border-line border px-3 py-2 font-medium">Persona</th>
+              <th className="border-line border px-3 py-2 font-medium">Profilo</th>
               <th className="border-line border px-3 py-2 font-medium">Creato</th>
               <th className="border-line border px-3 py-2 font-medium" />
             </tr>
@@ -95,7 +95,7 @@ export default async function AdminAccountsPage({ searchParams }: PageProps) {
                   colSpan={5}
                   className="text-ink-muted border-line border px-3 py-6 text-center"
                 >
-                  Nessun Account trovato.
+                  Nessun account trovato.
                 </td>
               </tr>
             ) : (

@@ -18,7 +18,7 @@ const sections = [
     href: "/app/amministrazione/account",
     title: "Account",
     description:
-      "Elenco Account applicativi, stato lifecycle e associazione Persona.",
+      "Elenco account applicativi, stato e collegamento del profilo.",
   },
   {
     href: "/app/amministrazione/ruoli",
@@ -50,17 +50,18 @@ export default async function AmministrazioneDashboardPage() {
         Dashboard Amministrazione
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Area <strong>amministratore_applicativo</strong>. Gestisci Account,
-        ruoli elevati e bootstrap grant Impresa.
+        Area riservata agli amministratori applicativi. Gestisci account utenti,
+        ruoli elevati e la prima abilitazione dei permessi di gestione sulle
+        imprese.
         {session?.isEditor
-          ? " Il tuo Account ha anche Red: la voce Redazione resta separata."
+          ? " Il tuo account ha anche accesso alla redazione: le due aree restano separate."
           : " Non risulti redattore."}
       </p>
 
       <p className="border-line bg-surface-elevated text-ink mt-4 rounded-md border p-4 text-sm shadow-soft">
-        <strong>Adm ≠ Red:</strong> questa area non espone strumenti editoriali.
-        I ruoli <code>redattore</code> e <code>amministratore_applicativo</code>{" "}
-        sono distinti e si assegnano solo via RPC whitelisted.
+        <strong>Amministrazione ≠ Redazione:</strong> questa area non espone
+        strumenti editoriali. I ruoli di redattore e amministratore applicativo
+        sono distinti e si assegnano solo da qui.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">

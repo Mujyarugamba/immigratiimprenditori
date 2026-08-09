@@ -8,6 +8,18 @@ import {
   type FormActionState,
 } from "@/lib/business/actions";
 import type { BusinessRow } from "@/types/business";
+import {
+  BUSINESS_STATUSES,
+  EDITORIAL_STATUS_LABELS,
+  label,
+  PUBLICATION_STATUS_LABELS,
+} from "@/lib/public/labels";
+
+const BUSINESS_EDITORIAL_LABELS: Record<string, string> = {
+  ...EDITORIAL_STATUS_LABELS,
+  incomplete: "Incompleta",
+  complete: "Completa",
+};
 
 const initial: FormActionState = { ok: false };
 
@@ -64,8 +76,8 @@ export function BusinessEditForm({ business }: Props) {
             disabled={pending}
             className="border-line rounded-md border px-3 py-2"
           >
-            <option value="active">active</option>
-            <option value="ceased">ceased</option>
+            <option value="active">{label(BUSINESS_STATUSES, "active")}</option>
+            <option value="ceased">{label(BUSINESS_STATUSES, "ceased")}</option>
           </select>
         </label>
         <label className="text-ink flex flex-col gap-1 text-sm">
@@ -76,9 +88,15 @@ export function BusinessEditForm({ business }: Props) {
             disabled={pending}
             className="border-line rounded-md border px-3 py-2"
           >
-            <option value="draft">draft</option>
-            <option value="incomplete">incomplete</option>
-            <option value="complete">complete</option>
+            <option value="draft">
+              {label(BUSINESS_EDITORIAL_LABELS, "draft")}
+            </option>
+            <option value="incomplete">
+              {label(BUSINESS_EDITORIAL_LABELS, "incomplete")}
+            </option>
+            <option value="complete">
+              {label(BUSINESS_EDITORIAL_LABELS, "complete")}
+            </option>
           </select>
         </label>
         <label className="text-ink flex flex-col gap-1 text-sm">
@@ -89,8 +107,12 @@ export function BusinessEditForm({ business }: Props) {
             disabled={pending}
             className="border-line rounded-md border px-3 py-2"
           >
-            <option value="unpublished">unpublished</option>
-            <option value="public">public</option>
+            <option value="unpublished">
+              {label(PUBLICATION_STATUS_LABELS, "unpublished")}
+            </option>
+            <option value="public">
+              {label(PUBLICATION_STATUS_LABELS, "public")}
+            </option>
           </select>
         </label>
       </div>

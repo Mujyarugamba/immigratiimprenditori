@@ -65,7 +65,7 @@ export function ForbiddenState() {
   return (
     <StatePanel
       title="Accesso negato"
-      description="Non hai i permessi necessari per questa area. La sicurezza è applicata anche a livello database."
+      description="Non hai i permessi necessari per questa area. Se pensi sia un errore, contatta l'amministratore."
       actionHref="/app"
       actionLabel="Torna alla dashboard"
     />
@@ -87,7 +87,7 @@ export function NotFoundState() {
   return (
     <StatePanel
       title="Pagina non trovata"
-      description="La risorsa richiesta non esiste o non è disponibile."
+      description="La pagina richiesta non esiste o non è più disponibile."
       actionHref="/"
       actionLabel="Torna alla home"
     />

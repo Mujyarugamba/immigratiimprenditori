@@ -49,7 +49,7 @@ export default async function MercatiPage({ searchParams }: PageProps) {
       description={section.description}
       basePath="/mercati"
       filters={[
-        textFilter("q", "Cerca", "Nome, codice o sintesi…"),
+        textFilter("q", "Cerca", "Nome o sintesi…"),
         selectFilter("tipo", "Tipo", MARKET_KINDS),
       ]}
       filterValues={filterValues}
@@ -59,7 +59,6 @@ export default async function MercatiPage({ searchParams }: PageProps) {
         title: item.name,
         description: item.summary,
         badges: [label(MARKET_KINDS, item.market_kind)],
-        meta: [item.code],
       })}
       emptyTitle="Nessun mercato trovato"
       emptyDescription="Non ci sono mercati pubblicati che corrispondono ai filtri selezionati."

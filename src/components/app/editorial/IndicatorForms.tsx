@@ -12,6 +12,14 @@ import {
   type FormActionState,
 } from "@/lib/editorial/actions";
 import type { ObservatoryIndicator } from "@/lib/data/editorial/observatory";
+import { label } from "@/lib/public/labels";
+
+const INDICATOR_OPERATIONAL_LABELS: Record<string, string> = {
+  draft: "Bozza",
+  active: "Attivo",
+  deprecated: "Obsoleto",
+  retired: "Ritirato",
+};
 
 const initial: FormActionState = { ok: false };
 const selectClass =
@@ -112,10 +120,18 @@ export function IndicatorEditForm({ indicator }: { indicator: ObservatoryIndicat
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Stato operativo</span>
           <select name="operational_status" className={selectClass} defaultValue={indicator.operational_status} disabled={pending}>
-            <option value="draft">draft</option>
-            <option value="active">active</option>
-            <option value="deprecated">deprecated</option>
-            <option value="retired">retired</option>
+            <option value="draft">
+              {label(INDICATOR_OPERATIONAL_LABELS, "draft")}
+            </option>
+            <option value="active">
+              {label(INDICATOR_OPERATIONAL_LABELS, "active")}
+            </option>
+            <option value="deprecated">
+              {label(INDICATOR_OPERATIONAL_LABELS, "deprecated")}
+            </option>
+            <option value="retired">
+              {label(INDICATOR_OPERATIONAL_LABELS, "retired")}
+            </option>
           </select>
         </label>
         {state.message ? (

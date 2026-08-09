@@ -14,6 +14,20 @@ import type {
   ObservatorySource,
 } from "@/lib/data/editorial/observatory";
 
+const VALUE_QUALITY_LABELS: Record<string, string> = {
+  official: "Ufficiale",
+  estimated: "Stimato",
+  derived: "Derivato",
+  self_reported: "Autodichiarato",
+};
+
+const VALUE_STATUS_LABELS: Record<string, string> = {
+  provisional: "Provvisorio",
+  final: "Definitivo",
+  revised: "Revisionato",
+  withdrawn: "Ritirato",
+};
+
 const initial: FormActionState = { ok: false };
 const selectClass =
   "border-line bg-surface-elevated text-ink w-full rounded-md border px-3 py-2 text-sm";
@@ -57,10 +71,10 @@ export function ValueCreateForm({
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Qualità</span>
           <select name="quality_code" className={selectClass} defaultValue="official" disabled={pending}>
-            <option value="official">official</option>
-            <option value="estimated">estimated</option>
-            <option value="derived">derived</option>
-            <option value="self_reported">self_reported</option>
+            <option value="official">{VALUE_QUALITY_LABELS.official}</option>
+            <option value="estimated">{VALUE_QUALITY_LABELS.estimated}</option>
+            <option value="derived">{VALUE_QUALITY_LABELS.derived}</option>
+            <option value="self_reported">{VALUE_QUALITY_LABELS.self_reported}</option>
           </select>
         </label>
         <FormField label="Periodo inizio" name="period_start" type="date" required disabled={pending} />
@@ -68,8 +82,8 @@ export function ValueCreateForm({
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Stato</span>
           <select name="status" className={selectClass} defaultValue="provisional" disabled={pending}>
-            <option value="provisional">provisional</option>
-            <option value="final">final</option>
+            <option value="provisional">{VALUE_STATUS_LABELS.provisional}</option>
+            <option value="final">{VALUE_STATUS_LABELS.final}</option>
           </select>
         </label>
       </div>
@@ -116,8 +130,8 @@ export function ValueReviseForm({
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Stato nuovo</span>
           <select name="status" className={selectClass} defaultValue="revised" disabled={pending}>
-            <option value="revised">revised</option>
-            <option value="final">final</option>
+            <option value="revised">{VALUE_STATUS_LABELS.revised}</option>
+            <option value="final">{VALUE_STATUS_LABELS.final}</option>
           </select>
         </label>
         <Button type="submit" size="sm" variant="secondary" disabled={pending}>

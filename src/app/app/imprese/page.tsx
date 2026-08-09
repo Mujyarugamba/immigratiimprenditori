@@ -10,6 +10,10 @@ import {
 import { getApplicationSession } from "@/lib/session/get-application-session";
 import { requireOperationalAccount } from "@/lib/session/guards";
 import { EmptyStatePanel } from "@/components/ui/states";
+import {
+  label,
+  MEMBERSHIP_ROLE_LABELS,
+} from "@/lib/public/labels";
 
 export const metadata: Metadata = {
   title: "Le mie imprese",
@@ -76,7 +80,7 @@ export default async function ImpresePage() {
                     {item.business.legal_name}
                   </p>
                   <p className="text-ink-subtle mt-2 text-xs">
-                    Ruolo: {item.roleId}
+                    Ruolo: {label(MEMBERSHIP_ROLE_LABELS, item.roleId)}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1 text-xs">

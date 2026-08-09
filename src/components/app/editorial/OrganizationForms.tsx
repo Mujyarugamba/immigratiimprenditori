@@ -14,6 +14,18 @@ import {
 } from "@/lib/editorial/actions";
 import type { EditorialOrganization, OrganizationOfficial } from "@/lib/data/editorial/organizations";
 import type { CatalogOption } from "@/lib/data/editorial/catalogs";
+import {
+  EDITORIAL_STATUS_LABELS,
+  label,
+  OFFICIAL_ROLES,
+} from "@/lib/public/labels";
+
+const ORGANIZATION_OPERATIONAL_LABELS: Record<string, string> = {
+  active: "Attiva",
+  inactive: "Inattiva",
+  suspended: "Sospesa",
+  dissolved: "Sciolta",
+};
 
 const initial: FormActionState = { ok: false };
 const selectClass =
@@ -99,17 +111,25 @@ export function OrganizationEditForm({
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Stato editoriale</span>
           <select name="editorial_status" className={selectClass} defaultValue={org.editorial_status} disabled={pending}>
-            <option value="draft">draft</option>
-            <option value="ready">ready</option>
+            <option value="draft">{label(EDITORIAL_STATUS_LABELS, "draft")}</option>
+            <option value="ready">{label(EDITORIAL_STATUS_LABELS, "ready")}</option>
           </select>
         </label>
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Stato operativo</span>
           <select name="operational_status" className={selectClass} defaultValue={org.operational_status} disabled={pending}>
-            <option value="active">active</option>
-            <option value="inactive">inactive</option>
-            <option value="suspended">suspended</option>
-            <option value="dissolved">dissolved</option>
+            <option value="active">
+              {label(ORGANIZATION_OPERATIONAL_LABELS, "active")}
+            </option>
+            <option value="inactive">
+              {label(ORGANIZATION_OPERATIONAL_LABELS, "inactive")}
+            </option>
+            <option value="suspended">
+              {label(ORGANIZATION_OPERATIONAL_LABELS, "suspended")}
+            </option>
+            <option value="dissolved">
+              {label(ORGANIZATION_OPERATIONAL_LABELS, "dissolved")}
+            </option>
           </select>
         </label>
         {state.message ? (
@@ -138,7 +158,7 @@ export function OrganizationEditForm({
           <ul className="text-ink-muted mt-2 space-y-1 text-sm">
             {officials.map((o) => (
               <li key={o.id}>
-                <code>{o.role_kind}</code> — {o.display_label ?? o.person_id ?? "—"}
+                {label(OFFICIAL_ROLES, o.role_kind)} — {o.display_label ?? o.person_id ?? "—"}
               </li>
             ))}
           </ul>
@@ -149,15 +169,26 @@ export function OrganizationEditForm({
           <label className="text-ink flex flex-col gap-1 text-sm">
             <span className="font-medium">Ruolo</span>
             <select name="role_kind" className={selectClass} defaultValue="public_contact" disabled={offPending}>
-              <option value="legal_representative">legal_representative</option>
-              <option value="president">president</option>
-              <option value="director">director</option>
-              <option value="public_contact">public_contact</option>
-              <option value="operational_contact">operational_contact</option>
-              <option value="other">other</option>
+              <option value="legal_representative">
+                {label(OFFICIAL_ROLES, "legal_representative")}
+              </option>
+              <option value="president">{label(OFFICIAL_ROLES, "president")}</option>
+              <option value="director">{label(OFFICIAL_ROLES, "director")}</option>
+              <option value="public_contact">
+                {label(OFFICIAL_ROLES, "public_contact")}
+              </option>
+              <option value="operational_contact">
+                {label(OFFICIAL_ROLES, "operational_contact")}
+              </option>
+              <option value="other">{label(OFFICIAL_ROLES, "other")}</option>
             </select>
           </label>
-          <FormField label="Person ID (UUID)" name="person_id" disabled={offPending} hint="Oppure label esterna" />
+          <FormField
+            label="Identificativo profilo (opzionale)"
+            name="person_id"
+            disabled={offPending}
+            hint="Oppure usa un'etichetta esterna"
+          />
           <FormField label="Label esterna" name="display_label" disabled={offPending} />
           <FormField label="Email" name="email" disabled={offPending} />
           {offState.message ? (

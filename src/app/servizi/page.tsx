@@ -109,11 +109,11 @@ export default async function ServiziPage({ searchParams }: PageProps) {
       <Container>
         <PublicPageHeader title={title} description={description} />
         <EcosystemBanner
-          title="Offerta e richiesta di servizio"
-          description="Offerta e Richiesta sono modelli distinti: qui li consulti in elenco separato. Per scoprire chi offre competenze o chi cerca supporto, esplora anche professionisti e imprese."
+          title="Offro o cerco un servizio"
+          description="Le offerte e le richieste restano in elenchi separati. Per competenze e imprese, esplora anche professionisti e imprese."
           links={[
-            { href: "/professionisti", label: "Vai ai professionisti" },
-            { href: "/imprese", label: "Vai alle imprese" },
+            { href: "/professionisti", label: "Trova un professionista" },
+            { href: "/imprese", label: "Scopri le imprese" },
           ]}
         />
         <ServiceTabs active={tipo} />

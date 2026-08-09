@@ -10,6 +10,12 @@ import {
 } from "@/lib/editorial/actions";
 import type { ObservatorySource } from "@/lib/data/editorial/observatory";
 
+const SOURCE_LIFECYCLE_LABELS: Record<string, string> = {
+  active: "Attiva",
+  deprecated: "Obsoleta",
+  unavailable: "Non disponibile",
+};
+
 const initial: FormActionState = { ok: false };
 const selectClass =
   "border-line bg-surface-elevated text-ink w-full rounded-md border px-3 py-2 text-sm";
@@ -46,11 +52,11 @@ export function SourceRowForm({ source }: { source: ObservatorySource }) {
         <FormField label="Titolo pubblicazione" name="publication_title" defaultValue={source.publication_title} disabled={pending} />
         <FormField label="URL" name="url" defaultValue={source.url ?? ""} disabled={pending} />
         <label className="text-ink flex flex-col gap-1 text-sm sm:col-span-2">
-          <span className="font-medium">Lifecycle</span>
+          <span className="font-medium">Stato fonte</span>
           <select name="lifecycle_status" className={selectClass} defaultValue={source.lifecycle_status} disabled={pending}>
-            <option value="active">active</option>
-            <option value="deprecated">deprecated</option>
-            <option value="unavailable">unavailable</option>
+            <option value="active">{SOURCE_LIFECYCLE_LABELS.active}</option>
+            <option value="deprecated">{SOURCE_LIFECYCLE_LABELS.deprecated}</option>
+            <option value="unavailable">{SOURCE_LIFECYCLE_LABELS.unavailable}</option>
           </select>
         </label>
       </div>

@@ -75,7 +75,7 @@ export default async function AppDashboardPage() {
           </dd>
         </div>
         <div>
-          <dt className="text-ink-subtle">Persona</dt>
+          <dt className="text-ink-subtle">Collegamento profilo</dt>
           <dd className="text-ink mt-1 font-medium">
             {labelPersonAssociation(
               session.personAssociationStatus,

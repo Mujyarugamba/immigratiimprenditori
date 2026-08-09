@@ -7,7 +7,7 @@ export default function AccountDisabilitatoPage() {
   return (
     <ErrorState
       title="Account disabilitato"
-      description="L'Account è in stato disabled. L'accesso applicativo non è operativo."
+      description="Il tuo account è disabilitato. L'accesso all'area riservata non è disponibile."
       actionHref="/"
       actionLabel="Torna al sito pubblico"
     />

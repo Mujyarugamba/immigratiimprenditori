@@ -13,9 +13,9 @@ export default function AdminImpresePage() {
         Autorizzazioni imprese
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Abilita il <strong>primo</strong> permesso di gestione su una membership
-        attiva. Operazione riservata agli amministratori applicativi; non
-        sostituisce le assegnazioni ordinarie successive.
+        Abilita il <strong>primo</strong> permesso di gestione su un collegamento
+        attivo persona–impresa. Operazione riservata agli amministratori
+        applicativi; non sostituisce le assegnazioni ordinarie successive.
       </p>
 
       <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">

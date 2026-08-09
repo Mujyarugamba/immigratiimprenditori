@@ -70,11 +70,13 @@ test.describe("public IA", () => {
       page.getByRole("heading", { name: /Servizi culturali/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: /Contenuti culturali/i }),
+      page.getByRole("heading", { name: /Storie culturali/i }),
     ).toBeVisible();
 
     // Empty-state copy must not use deferred “Presto: classificati” language
     await expect(page.getByText(/Presto:\s*attori culturali classificati/i)).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("classificazione strutturata");
+    await expect(page.locator("body")).not.toContainText("aggregate root");
     await expect(page.locator("body")).not.toContainText("runtime error");
   });
 

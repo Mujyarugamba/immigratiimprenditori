@@ -45,7 +45,7 @@ async function requireEditorSession() {
     return { ok: false as const, message: "Accesso riservato ai redattori." };
   }
   if (!session.isActiveAccount || !session.personId) {
-    return { ok: false as const, message: "Account non operativo." };
+    return { ok: false as const, message: "Completa il profilo per usare la redazione." };
   }
   return { ok: true as const, session, personId: session.personId };
 }

@@ -7,7 +7,7 @@ const links = [
   { href: "/app/amministrazione", label: "Dashboard", exact: true },
   { href: "/app/amministrazione/account", label: "Account" },
   { href: "/app/amministrazione/ruoli", label: "Ruoli" },
-  { href: "/app/amministrazione/imprese", label: "Imprese (bootstrap)" },
+  { href: "/app/amministrazione/imprese", label: "Autorizzazioni imprese" },
 ] as const;
 
 const linkClass =

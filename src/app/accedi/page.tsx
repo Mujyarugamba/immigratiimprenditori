@@ -32,11 +32,11 @@ export default async function AccediPage({ searchParams }: PageProps) {
           Accedi
         </h1>
         <p className="text-ink-muted mt-2 text-sm">
-          Usa le tue credenziali. Auth, Account e Persona restano distinti.
+          Usa le tue credenziali per entrare nell&apos;area riservata.
         </p>
         {params.error === "callback" ? (
           <p className="text-accent-dark mt-4 text-sm" role="alert">
-            Conferma sessione non riuscita. Riprova ad accedere.
+            Conferma accesso non riuscita. Riprova ad accedere o registrati di nuovo.
           </p>
         ) : null}
         <div className="mt-6">

@@ -8,7 +8,21 @@ import { Section } from "@/components/ui/Section";
 import { PLATFORM_IDENTITY } from "@/data/ecosystems";
 import { loadCultureHub } from "@/lib/data/public/culture";
 import {
+  ACTIVITY_SCOPE_LABELS,
+  AVAILABILITY_STATUSES,
+  BUSINESS_STATUSES,
+  COLLABORATION_FORMS,
+  COLLABORATION_STATUSES,
   EVENT_DELIVERY_MODES,
+  MARKET_KINDS,
+  MARKET_STATUSES,
+  OPPORTUNITY_ORIGINS,
+  OPPORTUNITY_STATUSES,
+  ORGANIZATION_FORMS,
+  PRACTICE_MODES,
+  SERVICE_DELIVERY_MODES,
+  SERVICE_OFFER_AVAILABILITY,
+  SERVICE_REQUEST_STATUS,
   formatItalianDateTime,
   label,
 } from "@/lib/public/labels";
@@ -16,7 +30,7 @@ import {
 export const metadata: Metadata = {
   title: "Cultura",
   description:
-    "Cultura come rete di incontri, persone, organizzazioni, imprese, opportunità, collaborazioni, servizi e storie — classificazioni strutturali dei domini, senza duplicare i fatti.",
+    "Incontri, persone, organizzazioni, opportunità e storie legate alla cultura e alle industrie creative.",
 };
 
 export default async function CulturaHubPage() {
@@ -38,7 +52,7 @@ export default async function CulturaHubPage() {
       <Section>
         <Container className="max-w-3xl space-y-6">
           <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-            Livello trasversale
+            Percorso trasversale
           </p>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             Cultura, incontri, relazioni.
@@ -51,8 +65,9 @@ export default async function CulturaHubPage() {
           <p className="text-ink-muted text-sm leading-6">
             Immigrati Imprenditori resta{" "}
             <span className="text-ink font-medium">{PLATFORM_IDENTITY}</span>{" "}
-            Cultura non è un catalogo separato: aggrega fatti pubblici già
-            pubblicati nei domini della rete, con classificazione strutturata.
+            Qui trovi incontri, persone, organizzazioni, imprese, opportunità e
+            storie legate alla cultura e alle industrie creative — già presenti
+            nella rete.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="#incontri">Scopri gli incontri</ButtonLink>
@@ -71,11 +86,10 @@ export default async function CulturaHubPage() {
                 Prossimi incontri
               </p>
               <h2 className="text-ink text-2xl font-semibold tracking-tight">
-                Eventi culturali pubblici
+                Eventi culturali
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Solo eventi classificati strutturalmente come culturali, con
-                edizione imminente o in corso.
+                Appuntamenti culturali pubblici con date imminenti o in corso.
               </p>
             </div>
             <Link
@@ -88,7 +102,7 @@ export default async function CulturaHubPage() {
           {events.length === 0 ? (
             <PublicEmpty
               title="Nessun incontro culturale in programma."
-              description="Quando verranno pubblicati eventi di tipo culturale con edizioni future, compariranno qui."
+              description="Quando verranno pubblicati eventi culturali con date future, compariranno qui."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -126,9 +140,8 @@ export default async function CulturaHubPage() {
                   Occasioni culturali nella rete
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Opportunità con ambito culturale strutturato, oppure collegate
-                  a un evento culturale. Collaborazioni con ambito culturale —
-                  indipendentemente dalla forma.
+                  Occasioni legate alla cultura, al patrimonio o alle industrie
+                  creative — oppure collegate a un evento culturale.
                 </p>
               </div>
               <Link
@@ -141,7 +154,7 @@ export default async function CulturaHubPage() {
             {opportunities.length === 0 ? (
               <PublicEmpty
                 title="Nessuna opportunità culturale pubblicata."
-                description="Compariranno qui opportunità con ambito culturale, patrimonio o industrie creative, oppure collegate a eventi culturali pubblici."
+                description="Compariranno qui occasioni legate a cultura, patrimonio o industrie creative, oppure a eventi culturali pubblici."
               />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -151,9 +164,10 @@ export default async function CulturaHubPage() {
                     href={`/opportunita/${o.id}`}
                     title={o.title}
                     description={o.summary}
-                    meta={[o.origin, o.substantial_status].filter(
-                      Boolean,
-                    ) as string[]}
+                    meta={[
+                      label(OPPORTUNITY_ORIGINS, o.origin),
+                      label(OPPORTUNITY_STATUSES, o.substantial_status),
+                    ].filter(Boolean)}
                   />
                 ))}
               </div>
@@ -167,9 +181,8 @@ export default async function CulturaHubPage() {
                   Collaborazioni culturali
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Schede pubbliche con ambito culturale strutturato. La forma
-                  (ricerca, partnership, progetto…) non determina da sola
-                  l&apos;inclusione.
+                  Proposte di collaborazione con ambito culturale, patrimoniale
+                  o creativo.
                 </p>
               </div>
               <Link
@@ -182,7 +195,7 @@ export default async function CulturaHubPage() {
             {collaborations.length === 0 ? (
               <PublicEmpty
                 title="Nessuna collaborazione culturale pubblicata."
-                description="Compariranno qui collaborazioni con ambito cultura, patrimonio o industrie creative."
+                description="Compariranno qui collaborazioni legate a cultura, patrimonio o industrie creative."
               />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -192,9 +205,10 @@ export default async function CulturaHubPage() {
                     href={`/collaborazioni/${c.slug}`}
                     title={c.title}
                     description={c.object_text}
-                    meta={[c.form_code, c.operational_status].filter(
-                      Boolean,
-                    ) as string[]}
+                    meta={[
+                      label(COLLABORATION_FORMS, c.form_code),
+                      label(COLLABORATION_STATUSES, c.operational_status),
+                    ].filter(Boolean)}
                   />
                 ))}
               </div>
@@ -217,22 +231,21 @@ export default async function CulturaHubPage() {
                 Professionisti culturali e creativi
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Profili pubblici con categorie professionali culturali/creative
-                strutturate, inclusa la mediazione culturale. Non è una
-                directory di artisti.
+                Profili pubblici con competenze culturali, creative o di
+                mediazione culturale.
               </p>
             </div>
             <Link
               href="/professionisti?categoria=cultural_mediation"
               className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
             >
-              Vai ai professionisti
+              Trova un professionista
             </Link>
           </div>
           {professionals.length === 0 ? (
             <PublicEmpty
               title="Nessun professionista culturale o creativo pubblicato."
-              description="Compariranno qui profili con categorie culturali/creative o mediazione culturale."
+              description="Compariranno qui profili con competenze culturali, creative o di mediazione."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -242,9 +255,10 @@ export default async function CulturaHubPage() {
                   href={`/professionisti/${p.id}`}
                   title={p.headline || "Professionista"}
                   description={p.summary}
-                  meta={[p.practice_mode_code, p.availability_status].filter(
-                    Boolean,
-                  ) as string[]}
+                  meta={[
+                    label(PRACTICE_MODES, p.practice_mode_code),
+                    label(AVAILABILITY_STATUSES, p.availability_status),
+                  ].filter(Boolean)}
                 />
               ))}
             </div>
@@ -264,22 +278,21 @@ export default async function CulturaHubPage() {
                   Organizzazioni culturali
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Organizzazioni pubbliche con ambito di attività culturale,
-                  patrimonio o industrie creative. Il tipo giuridico da solo non
-                  basta.
+                  Associazioni, fondazioni ed enti con attività culturale,
+                  patrimoniale o creativa.
                 </p>
               </div>
               <Link
                 href="/organizzazioni?ambito=culture"
                 className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
               >
-                Organizzazioni
+                Scopri le organizzazioni
               </Link>
             </div>
             {organizations.length === 0 ? (
               <PublicEmpty
                 title="Nessuna organizzazione culturale pubblicata."
-                description="Compariranno qui organizzazioni con ambito cultura, patrimonio o industrie creative."
+                description="Compariranno qui organizzazioni con attività in cultura, patrimonio o industrie creative."
               />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -289,9 +302,10 @@ export default async function CulturaHubPage() {
                     href={`/organizzazioni/${o.slug}`}
                     title={o.name}
                     description={o.summary}
-                    meta={[o.primary_scope_code, o.seat_city_label].filter(
-                      Boolean,
-                    ) as string[]}
+                    meta={[
+                      label(ACTIVITY_SCOPE_LABELS, o.primary_scope_code),
+                      o.seat_city_label,
+                    ].filter(Boolean) as string[]}
                   />
                 ))}
               </div>
@@ -305,21 +319,20 @@ export default async function CulturaHubPage() {
                   Imprese culturali e creative
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Imprese pubbliche con dichiarazione di settore nelle industrie
-                  culturali e creative.
+                  Imprese pubbliche attive nelle industrie culturali e creative.
                 </p>
               </div>
               <Link
                 href="/imprese"
                 className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
               >
-                Imprese
+                Scopri le imprese
               </Link>
             </div>
             {businesses.length === 0 ? (
               <PublicEmpty
                 title="Nessuna impresa culturale o creativa pubblicata."
-                description="Compariranno qui imprese con settori CCI dichiarati (audiovisivo, editoria, musica, spettacolo, design, moda, artigianato, patrimonio)."
+                description="Compariranno qui imprese con settori culturali e creativi (audiovisivo, editoria, musica, spettacolo, design, moda, artigianato, patrimonio)."
               />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -329,9 +342,10 @@ export default async function CulturaHubPage() {
                     href={`/imprese/${b.id}`}
                     title={b.public_name}
                     description={b.summary}
-                    meta={[b.organization_form, b.substantial_status].filter(
-                      Boolean,
-                    ) as string[]}
+                    meta={[
+                      label(ORGANIZATION_FORMS, b.organization_form),
+                      label(BUSINESS_STATUSES, b.substantial_status),
+                    ].filter(Boolean)}
                   />
                 ))}
               </div>
@@ -351,8 +365,8 @@ export default async function CulturaHubPage() {
                 Servizi culturali e creativi
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Offerte e richieste pubbliche nella categoria strutturata
-                culturale/creativa. I servizi linguistici restano distinti.
+                Offerte e richieste pubbliche in ambito culturale e creativo. I
+                servizi linguistici restano in un elenco dedicato.
               </p>
             </div>
             <Link
@@ -365,14 +379,14 @@ export default async function CulturaHubPage() {
           {serviceOffers.length === 0 && serviceRequests.length === 0 ? (
             <PublicEmpty
               title="Nessun servizio culturale o creativo pubblicato."
-              description="Compariranno qui offerte e richieste con categoria cultural_creative."
+              description="Compariranno qui offerte e richieste di servizi culturali e creativi."
             />
           ) : (
             <div className="space-y-10">
               {serviceOffers.length > 0 ? (
                 <div>
                   <h3 className="text-ink mb-4 text-lg font-semibold">
-                    Offerte
+                    Offro un servizio
                   </h3>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {serviceOffers.map((s) => (
@@ -381,9 +395,10 @@ export default async function CulturaHubPage() {
                         href={`/servizi/offerte/${s.id}`}
                         title={s.title}
                         description={s.summary}
-                        meta={[s.delivery_mode, s.availability_status].filter(
-                          Boolean,
-                        ) as string[]}
+                        meta={[
+                          label(SERVICE_DELIVERY_MODES, s.delivery_mode),
+                          label(SERVICE_OFFER_AVAILABILITY, s.availability_status),
+                        ].filter(Boolean)}
                       />
                     ))}
                   </div>
@@ -392,7 +407,7 @@ export default async function CulturaHubPage() {
               {serviceRequests.length > 0 ? (
                 <div>
                   <h3 className="text-ink mb-4 text-lg font-semibold">
-                    Richieste
+                    Cerco un servizio
                   </h3>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {serviceRequests.map((s) => (
@@ -401,9 +416,10 @@ export default async function CulturaHubPage() {
                         href={`/servizi/richieste/${s.id}`}
                         title={s.title}
                         description={s.summary}
-                        meta={[s.delivery_mode, s.process_status].filter(
-                          Boolean,
-                        ) as string[]}
+                        meta={[
+                          label(SERVICE_DELIVERY_MODES, s.delivery_mode),
+                          label(SERVICE_REQUEST_STATUS, s.process_status),
+                        ].filter(Boolean)}
                       />
                     ))}
                   </div>
@@ -419,15 +435,14 @@ export default async function CulturaHubPage() {
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl space-y-2">
               <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-                Storie e contenuti
+                Storie e approfondimenti
               </p>
               <h2 className="text-ink text-2xl font-semibold tracking-tight">
-                Contenuti culturali
+                Storie culturali
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Contenuti con categoria cultura, oppure collegati a un evento
-                culturale. La sola categoria &quot;Eventi e comunità&quot; non
-                basta.
+                Notizie, guide e racconti legati alla cultura, oppure collegati
+                a un evento culturale.
               </p>
             </div>
             <Link
@@ -439,8 +454,8 @@ export default async function CulturaHubPage() {
           </div>
           {contents.length === 0 ? (
             <PublicEmpty
-              title="Nessun contenuto culturale pubblicato."
-              description="Compariranno qui contenuti con categoria cultura, oppure collegati a eventi culturali pubblici."
+              title="Nessuna storia culturale pubblicata."
+              description="Compariranno qui notizie e guide culturali, oppure collegate a eventi culturali pubblici."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -474,7 +489,8 @@ export default async function CulturaHubPage() {
                   Mercati collegati agli incontri culturali
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Solo mercati collegati strutturalmente a eventi culturali.
+                  Paesi e aree internazionali collegati agli eventi culturali
+                  della rete.
                 </p>
               </div>
               <Link
@@ -491,9 +507,10 @@ export default async function CulturaHubPage() {
                   href={`/mercati/${m.code}`}
                   title={m.name}
                   description={m.summary}
-                  meta={[m.market_kind, m.substantial_status].filter(
-                    Boolean,
-                  ) as string[]}
+                  meta={[
+                    label(MARKET_KINDS, m.market_kind),
+                    label(MARKET_STATUSES, m.substantial_status),
+                  ].filter(Boolean)}
                 />
               ))}
             </div>
@@ -507,8 +524,8 @@ export default async function CulturaHubPage() {
             Continua nella rete
           </h2>
           <p className="text-ink-muted text-sm leading-6">
-            Cultura resta un livello trasversale: i fatti vivono nei loro
-            ecosistemi. Entra nella rete per pubblicare e collegare.
+            Cultura collega ciò che già esiste nella rete. Entra per
+            presentarti, collaborare e pubblicare.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="/registrati" variant="accent">
@@ -522,7 +539,7 @@ export default async function CulturaHubPage() {
               Esplora opportunità
             </ButtonLink>
             <ButtonLink href="/collaborazioni?ambito=culture" variant="secondary">
-              Collaborazioni
+              Cerca collaborazioni
             </ButtonLink>
             <ButtonLink href="/servizi?categoria=cultural_creative" variant="ghost">
               Servizi culturali

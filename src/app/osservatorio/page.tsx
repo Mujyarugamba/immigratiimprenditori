@@ -42,14 +42,17 @@ export default async function OsservatorioPage({ searchParams }: PageProps) {
       title={section.title}
       description={section.description}
       basePath="/osservatorio"
-      filters={[textFilter("q", "Cerca", "Titolo, codice o descrizione…")]}
+      filters={[textFilter("q", "Cerca", "Titolo o descrizione…")]}
       filterValues={filterValues}
       result={result}
       mapItem={(item) => ({
         href: `/osservatorio/${item.slug}`,
         title: item.title,
         description: item.description,
-        meta: [item.code, item.unit_code, item.periodicity].filter(Boolean),
+        meta: [
+          item.periodicity ? `Periodo: ${item.periodicity.replaceAll("_", " ")}` : "",
+          item.unit_code ? `Unità: ${item.unit_code.replaceAll("_", " ")}` : "",
+        ].filter(Boolean),
       })}
       emptyTitle="Nessun indicatore trovato"
       emptyDescription="Non ci sono indicatori pubblicati che corrispondono ai filtri selezionati."

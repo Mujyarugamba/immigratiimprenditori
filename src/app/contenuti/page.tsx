@@ -15,7 +15,7 @@ import {
 const section = sections["notizie-e-guide"];
 
 export const metadata: Metadata = {
-  title: "Contenuti",
+  title: "Notizie e guide",
   description: section.description,
 };
 
@@ -47,11 +47,11 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
 
   return (
     <PublicListLayout
-      title="Contenuti"
+      title="Notizie e guide"
       description={section.description}
       basePath="/contenuti"
       filters={[
-        textFilter("q", "Cerca", "Titolo o abstract…"),
+        textFilter("q", "Cerca", "Titolo o sintesi…"),
         selectFilter("tipo", "Tipologia", CONTENT_TYPES),
         {
           kind: "select",
@@ -76,8 +76,8 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
           ? [formatItalianDate(item.published_at)]
           : undefined,
       })}
-      emptyTitle="Nessun contenuto trovato"
-      emptyDescription="Non ci sono contenuti pubblicati che corrispondono ai filtri selezionati."
+      emptyTitle="Nessuna notizia o guida trovata"
+      emptyDescription="Non ci sono storie pubblicate che corrispondono ai filtri selezionati."
     />
   );
 }

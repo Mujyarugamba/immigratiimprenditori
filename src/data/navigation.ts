@@ -1,7 +1,7 @@
 import type { NavItem } from "@/types/navigation";
 
 /**
- * P4.5 primary nav = five ecosystems (not table inventory).
+ * Primary nav = five ecosystems.
  * Professionisti reachable under Persone hub + Esplora.
  */
 export const primaryNav: NavItem[] = [

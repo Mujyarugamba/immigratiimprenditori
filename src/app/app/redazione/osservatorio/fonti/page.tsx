@@ -19,7 +19,7 @@ export default async function FontiRedazionePage() {
         Fonti statistiche
       </h1>
       <p className="text-ink-muted mt-1 text-sm">
-        Solo <code>lifecycle_status</code> (active / deprecated / unavailable).
+        Modifica lo stato operativo delle fonti (attiva, obsoleta, non disponibile).
       </p>
 
       <SourceCreateForm />

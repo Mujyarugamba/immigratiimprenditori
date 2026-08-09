@@ -54,8 +54,8 @@ export default async function CollaborazioniPage({ searchParams }: PageProps) {
       banner={
         <EcosystemBanner
           title="Collaborazioni e opportunità"
-          description="Qui trovi le collaborazioni. Per occasioni e proposte pubbliche usa Opportunità — stesso ecosistema, aggregate root distinti."
-          links={[{ href: "/opportunita", label: "Vai alle opportunità" }]}
+          description="Qui trovi chi cerca o offre una collaborazione. Per occasioni e proposte pubbliche usa Opportunità."
+          links={[{ href: "/opportunita", label: "Trova un’opportunità" }]}
         />
       }
       filters={[

@@ -12,8 +12,8 @@ export default function RootError({
   void _error;
   return (
     <ErrorState
-      title="Errore inatteso"
-      description="Si è verificato un errore. Riprova più tardi."
+      title="Si è verificato un problema"
+      description="Riprova tra poco. Se il problema continua, torna alla home."
       actionHref="/"
       actionLabel="Torna alla home"
       onRetry={reset}

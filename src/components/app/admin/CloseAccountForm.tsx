@@ -24,8 +24,8 @@ export function CloseAccountForm({
     <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="account_id" value={accountId} />
       <p className="text-ink-muted text-sm">
-        Chiude definitivamente l&apos;Account via{" "}
-        <code>access_close_account</code>. Operazione idempotente se già chiuso.
+        Chiude definitivamente l&apos;account. Se già chiuso, l&apos;operazione
+        non ha effetti aggiuntivi.
       </p>
       {state.message ? (
         <p
@@ -44,7 +44,7 @@ export function CloseAccountForm({
         disabled={pending || disabled}
         className="self-start"
       >
-        {pending ? "Chiusura…" : "Chiudi Account"}
+        {pending ? "Chiusura…" : "Chiudi account"}
       </Button>
     </form>
   );

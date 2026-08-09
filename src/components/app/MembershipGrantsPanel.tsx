@@ -8,6 +8,12 @@ import {
   revokeManagementAction,
   type FormActionState,
 } from "@/lib/business/actions";
+import {
+  GRANT_STATUS_LABELS,
+  label,
+  MEMBERSHIP_RELATION_LABELS,
+  MEMBERSHIP_ROLE_LABELS,
+} from "@/lib/public/labels";
 import type { MembershipListItem } from "@/types/business";
 
 const initial: FormActionState = { ok: false };
@@ -94,7 +100,7 @@ function ConcludeButton({
       <input type="hidden" name="membership_id" value={membershipId} />
       <input type="hidden" name="business_id" value={businessId} />
       <Button type="submit" size="sm" variant="ghost" disabled={pending}>
-        {pending ? "…" : "Concludi membership"}
+        {pending ? "…" : "Concludi collegamento"}
       </Button>
       {state.message ? (
         <p className="text-ink-muted mt-1 text-xs">{state.message}</p>
@@ -124,9 +130,11 @@ export function MembershipGrantsPanel({
               {m.isSelf ? " (tu)" : ""}
             </p>
             <p className="text-ink-muted text-xs">
-              Ruolo descrittivo: <code>{m.roleId}</code> · relazione:{" "}
-              {m.relationStatus} · grant: {m.grantStatus}
-              {m.isContested ? " · contestata" : ""}
+              Ruolo nell&apos;impresa:{" "}
+              {label(MEMBERSHIP_ROLE_LABELS, m.roleId)} · collegamento:{" "}
+              {label(MEMBERSHIP_RELATION_LABELS, m.relationStatus)} · gestione:{" "}
+              {label(GRANT_STATUS_LABELS, m.grantStatus)}
+              {m.isContested ? " · da verificare" : ""}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

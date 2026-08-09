@@ -18,7 +18,10 @@ export async function bootstrapBusinessGrant(
   if (!data || typeof data !== "string") {
     return {
       ok: false,
-      error: { code: "unexpected", message: "Bootstrap grant non riuscito." },
+      error: {
+        code: "unexpected",
+        message: "Abilitazione della prima autorizzazione non riuscita.",
+      },
     };
   }
   return { ok: true, authorizationId: data };
@@ -38,7 +41,7 @@ export async function grantBusinessManagement(
   if (!data || typeof data !== "string") {
     return {
       ok: false,
-      error: { code: "unexpected", message: "Grant non riuscito." },
+      error: { code: "unexpected", message: "Assegnazione della gestione non riuscita." },
     };
   }
   return { ok: true, authorizationId: data };

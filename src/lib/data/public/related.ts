@@ -279,7 +279,7 @@ export async function relatedForOpportunity(
         {
           href: "/collaborazioni",
           title: "Esplora anche le collaborazioni",
-          meta: "stesso ecosistema",
+          meta: "stessa area",
         },
       ],
     },

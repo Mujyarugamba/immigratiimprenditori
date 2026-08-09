@@ -40,9 +40,8 @@ export default async function AdminRuoliPage({ searchParams }: PageProps) {
           Ruoli applicativi
         </h1>
         <p className="text-ink-muted mt-1 text-sm">
-          Solo <code>redattore</code> e{" "}
-          <code>amministratore_applicativo</code>. Nessun DML diretto su{" "}
-          <code>account_role_assignments</code>.
+          Ruoli di redattore e amministratore applicativo. Le assegnazioni passano
+          solo da questa area amministrativa.
         </p>
       </div>
 
@@ -153,8 +152,8 @@ export default async function AdminRuoliPage({ searchParams }: PageProps) {
       <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">
         <h2 className="text-ink text-base font-semibold">Assegna ruolo</h2>
         <p className="text-ink-muted mt-1 text-sm">
-          Inserisci l&apos;Account target. Non puoi assegnare ruoli al tuo
-          Account (auto-promozione bloccata anche lato RPC).
+          Inserisci l&apos;identificativo dell&apos;account target. Non puoi
+          assegnare ruoli al tuo account (auto-promozione bloccata).
         </p>
         <div className="mt-4 max-w-md">
           <AssignRoleForm />

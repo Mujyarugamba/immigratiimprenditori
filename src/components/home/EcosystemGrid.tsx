@@ -9,11 +9,11 @@ export function EcosystemGrid() {
       <Container>
         <div className="mb-8 max-w-2xl space-y-3">
           <h2 className="text-ink text-2xl font-semibold tracking-tight sm:text-3xl">
-            Cinque ecosistemi, una rete
+            Cinque porte d&apos;ingresso, una rete
           </h2>
           <p className="text-ink-muted text-base leading-7">
-            Ogni fatto esiste una sola volta. Lo esplori da Persona, Impresa,
-            Opportunità, Mercato o Servizi — senza cataloghi isolati.
+            Ogni scheda esiste una sola volta. La trovi da persone, imprese,
+            opportunità, mercati o servizi — senza elenchi isolati.
           </p>
         </div>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">

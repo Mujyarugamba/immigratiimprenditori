@@ -33,7 +33,7 @@ export function BusinessSwitcher({ items, selectedBusinessId }: Props) {
         {items.map((item) => (
           <option key={item.business.id} value={item.business.id}>
             {item.business.public_name}
-            {item.canManage ? " · gestibile" : " · membro"}
+            {item.canManage ? " · gestibile" : " · collegata"}
           </option>
         ))}
       </select>

@@ -6,6 +6,14 @@ import {
   listObservatoryIndicators,
   listObservatorySources,
 } from "@/lib/data/editorial/observatory";
+import { label } from "@/lib/public/labels";
+
+const VALUE_STATUS_LABELS: Record<string, string> = {
+  provisional: "Provvisorio",
+  final: "Definitivo",
+  revised: "Revisionato",
+  withdrawn: "Ritirato",
+};
 
 export const metadata: Metadata = {
   title: "Valori — Redazione",
@@ -77,7 +85,8 @@ export default async function ValoriRedazionePage({ searchParams }: Props) {
                       {ind?.code ?? v.indicator_id}: {v.numeric_value}
                     </span>
                     <span className="text-ink-muted">
-                      {v.period_start} → {v.period_end} · {v.status}
+                      {v.period_start} → {v.period_end} ·{" "}
+                      {label(VALUE_STATUS_LABELS, v.status)}
                     </span>
                   </div>
                   <ValueReviseForm value={v} indicators={indicators} sources={sources} />

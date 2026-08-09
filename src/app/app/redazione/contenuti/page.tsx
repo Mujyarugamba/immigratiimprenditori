@@ -3,6 +3,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { listActiveContentTypes } from "@/lib/data/editorial/catalogs";
 import { listEditorialContents } from "@/lib/data/editorial/contents";
+import {
+  EDITORIAL_STATUS_LABELS,
+  label,
+  PUBLICATION_STATUS_LABELS,
+} from "@/lib/public/labels";
+
+const EDITORIAL_PUBLICATION_LABELS: Record<string, string> = {
+  ...PUBLICATION_STATUS_LABELS,
+  published: "Pubblicato",
+};
 
 export const metadata: Metadata = {
   title: "Contenuti — Redazione",
@@ -38,7 +48,7 @@ export default async function ContenutiRedazionePage({ searchParams }: Props) {
             Contenuti editoriali
           </h1>
           <p className="text-ink-muted mt-1 text-sm">
-            Solo schede con <code>owned_by_editorial=true</code>.
+            Contenuti editoriali di piattaforma.
           </p>
         </div>
         <Button href="/app/redazione/contenuti/nuovo" size="sm">
@@ -66,9 +76,15 @@ export default async function ContenutiRedazionePage({ searchParams }: Props) {
             className="border-line rounded-md border px-3 py-2 text-sm"
           >
             <option value="">Tutti</option>
-            <option value="unpublished">unpublished</option>
-            <option value="published">published</option>
-            <option value="withdrawn">withdrawn</option>
+            <option value="unpublished">
+              {label(PUBLICATION_STATUS_LABELS, "unpublished")}
+            </option>
+            <option value="published">
+              {label(EDITORIAL_PUBLICATION_LABELS, "published")}
+            </option>
+            <option value="withdrawn">
+              {label(PUBLICATION_STATUS_LABELS, "withdrawn")}
+            </option>
           </select>
         </label>
         <label className="text-ink flex flex-col gap-1 text-sm">
@@ -121,8 +137,12 @@ export default async function ContenutiRedazionePage({ searchParams }: Props) {
                     <span className="text-ink-subtle text-xs">{c.slug}</span>
                   </td>
                   <td className="border-line border px-3 py-2">{c.type_code}</td>
-                  <td className="border-line border px-3 py-2">{c.editorial_status}</td>
-                  <td className="border-line border px-3 py-2">{c.publication_status}</td>
+                  <td className="border-line border px-3 py-2">
+                    {label(EDITORIAL_STATUS_LABELS, c.editorial_status)}
+                  </td>
+                  <td className="border-line border px-3 py-2">
+                    {label(EDITORIAL_PUBLICATION_LABELS, c.publication_status)}
+                  </td>
                   <td className="border-line border px-3 py-2">
                     <Link
                       href={`/app/redazione/contenuti/${c.id}`}

@@ -48,7 +48,7 @@ export async function assignRoleAction(
   const roleCode = String(formData.get("role_code") ?? "").trim();
 
   if (!targetAccountId) {
-    return { ok: false, message: "Account target obbligatorio." };
+    return { ok: false, message: "Identificativo account obbligatorio." };
   }
   if (!isWhitelistedRole(roleCode)) {
     return { ok: false, message: "Ruolo non consentito." };
@@ -107,7 +107,7 @@ export async function closeAccountAction(
 
   const accountId = String(formData.get("account_id") ?? "").trim();
   if (!accountId) {
-    return { ok: false, message: "Account assente." };
+    return { ok: false, message: "Identificativo account assente." };
   }
 
   const result = await closeAccount(accountId);
@@ -134,7 +134,7 @@ export async function linkPersonAction(
   if (!accountId || !personId) {
     return {
       ok: false,
-      message: "Account e Persona (profiles.id) sono obbligatori.",
+      message: "Account e identificativo profilo sono obbligatori.",
     };
   }
 
@@ -145,5 +145,5 @@ export async function linkPersonAction(
 
   revalidatePath(`/app/amministrazione/account/${accountId}`);
   revalidatePath("/app/amministrazione/account");
-  return { ok: true, message: "Persona collegata (associazione verificata)." };
+  return { ok: true, message: "Profilo collegato con associazione verificata." };
 }

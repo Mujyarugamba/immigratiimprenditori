@@ -25,8 +25,8 @@ export default async function RegistratiPage() {
           Registrati
         </h1>
         <p className="text-ink-muted mt-2 text-sm">
-          Dopo la registrazione viene creato un Account applicativo. La Persona
-          si collega nel passaggio successivo.
+          Crea il tuo account. Nel passaggio successivo potrai completare il
+          profilo.
         </p>
         <div className="mt-6">
           <AuthForm mode="signup" action={signUpAction} />

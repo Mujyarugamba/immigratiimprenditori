@@ -2,7 +2,13 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/Button";
+import { label, PUBLICATION_STATUS_LABELS } from "@/lib/public/labels";
 import type { FormActionState } from "@/lib/editorial/actions";
+
+const EDITORIAL_PUBLICATION_LABELS: Record<string, string> = {
+  ...PUBLICATION_STATUS_LABELS,
+  published: "Pubblicato",
+};
 
 const initial: FormActionState = { ok: false };
 
@@ -44,7 +50,9 @@ export function EditorialLifecycleButtons({
       <h2 className="text-ink text-base font-semibold">Pubblicazione</h2>
       <p className="text-ink-muted mt-1 text-sm">
         Stato attuale:{" "}
-        <code className="text-ink">{publicationStatus}</code>
+        <span className="text-ink font-medium">
+          {label(EDITORIAL_PUBLICATION_LABELS, publicationStatus)}
+        </span>
       </p>
 
       {publicHref && publicationStatus === "published" ? (

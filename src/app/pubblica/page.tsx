@@ -12,33 +12,45 @@ export const metadata: Metadata = {
 const actions = [
   {
     title: "Crea il tuo profilo",
-    description: "Registrati e completa la Persona nell’area riservata.",
+    description:
+      "Registrati e completa il tuo profilo nell’area riservata.",
     href: "/registrati",
+    cta: "Crea il tuo profilo",
   },
   {
     title: "Collega la tua impresa",
-    description: "Crea o gestisci un’impresa nel workspace (CTX ≠ ACT).",
+    description:
+      "Crea o collega un’impresa dall’area riservata. Collegarla e poterla gestire sono passaggi distinti.",
     href: "/app/imprese",
+    cta: "Vai alle mie imprese",
   },
   {
     title: "Esplora opportunità",
-    description: "Scopri opportunità pubbliche; la pubblicazione avviene dal workspace.",
+    description:
+      "Scopri le occasioni pubbliche. Per pubblicarne una, usa l’area riservata quando disponibile.",
     href: "/opportunita",
+    cta: "Trova un’opportunità",
   },
   {
     title: "Cerca una collaborazione",
-    description: "Collaborazioni pubblicate nello stesso ecosistema delle opportunità.",
+    description:
+      "Persone e organizzazioni che cercano o offrono una collaborazione.",
     href: "/collaborazioni",
+    cta: "Cerca una collaborazione",
   },
   {
     title: "Offri o cerca un servizio",
-    description: "Offerte e richieste restano distinte nel modello dati.",
+    description:
+      "Consulta offerte e richieste in elenchi separati: chi offre e chi cerca restano distinti.",
     href: "/servizi",
+    cta: "Vedi i servizi",
   },
   {
     title: "Esplora i mercati",
-    description: "Indicazione mercati e presenze: area riservata + schede pubbliche.",
+    description:
+      "Scopri paesi e aree internazionali; indica i tuoi mercati dall’area riservata.",
     href: "/mercati",
+    cta: "Esplora i mercati",
   },
 ] as const;
 
@@ -48,12 +60,11 @@ export default function PubblicaPage() {
       <Container className="max-w-3xl space-y-8">
         <header className="space-y-3">
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
-            Pubblica e attiva i tuoi nodi
+            Pubblica la tua presenza nella rete
           </h1>
           <p className="text-ink-muted text-lg leading-7">
-            Le azioni di scrittura avvengono nell&apos;area riservata. Da qui
-            raggiungi i percorsi reali già disponibili — senza funzionalità
-            inventate.
+            Da qui raggiungi i percorsi già disponibili. Le azioni di
+            pubblicazione avvengono nell&apos;area riservata.
           </p>
         </header>
 
@@ -68,7 +79,7 @@ export default function PubblicaPage() {
                 {action.description}
               </p>
               <div className="mt-3">
-                <ButtonLink href={action.href}>Continua</ButtonLink>
+                <ButtonLink href={action.href}>{action.cta}</ButtonLink>
               </div>
             </li>
           ))}

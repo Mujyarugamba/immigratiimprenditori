@@ -48,15 +48,15 @@ export default async function OpportunitaPage({ searchParams }: PageProps) {
   return (
     <PublicListLayout
       title="Opportunità"
-      description="Trova occasioni pubbliche. Le collaborazioni restano un modello distinto nello stesso ecosistema."
+      description="Occasioni pubbliche da cogliere: bandi, progetti e proposte utili. Le collaborazioni sono un percorso separato."
       basePath="/opportunita"
       banner={
         <EcosystemBanner
           title="Opportunità e collaborazioni"
-          description="Qui trovi le opportunità. Per ricerche, offerte e partnership usa Collaborazioni — stesso ecosistema, aggregate root distinti."
+          description="Qui trovi le opportunità — occasioni da cogliere. Se cerchi o offri una collaborazione, vai alle Collaborazioni."
           links={[
-            { href: "/collaborazioni", label: "Vai alle collaborazioni" },
-            { href: "/pubblica", label: "Pubblica / attiva" },
+            { href: "/collaborazioni", label: "Cerca una collaborazione" },
+            { href: "/pubblica", label: "Pubblica nella rete" },
           ]}
         />
       }

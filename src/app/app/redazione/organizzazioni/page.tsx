@@ -2,6 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { listEditorialOrganizations } from "@/lib/data/editorial/organizations";
+import {
+  EDITORIAL_STATUS_LABELS,
+  label,
+  PUBLICATION_STATUS_LABELS,
+} from "@/lib/public/labels";
+
+const EDITORIAL_PUBLICATION_LABELS: Record<string, string> = {
+  ...PUBLICATION_STATUS_LABELS,
+  published: "Pubblicato",
+};
 
 export const metadata: Metadata = {
   title: "Organizzazioni — Redazione",
@@ -18,7 +28,7 @@ export default async function OrganizzazioniRedazionePage() {
             Organizzazioni editoriali
           </h1>
           <p className="text-ink-muted mt-1 text-sm">
-            Schede con <code>owned_by_editorial=true</code>.
+            Schede istituzionali curate dalla redazione.
           </p>
         </div>
         <Button href="/app/redazione/organizzazioni/nuovo" size="sm">
@@ -53,8 +63,12 @@ export default async function OrganizzazioniRedazionePage() {
                     <span className="text-ink-subtle text-xs">{o.slug}</span>
                   </td>
                   <td className="border-line border px-3 py-2">{o.type_code}</td>
-                  <td className="border-line border px-3 py-2">{o.editorial_status}</td>
-                  <td className="border-line border px-3 py-2">{o.publication_status}</td>
+                  <td className="border-line border px-3 py-2">
+                    {label(EDITORIAL_STATUS_LABELS, o.editorial_status)}
+                  </td>
+                  <td className="border-line border px-3 py-2">
+                    {label(EDITORIAL_PUBLICATION_LABELS, o.publication_status)}
+                  </td>
                   <td className="border-line border px-3 py-2">
                     <Link href={`/app/redazione/organizzazioni/${o.id}`} className="text-brand hover:underline">
                       Modifica

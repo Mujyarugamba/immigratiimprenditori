@@ -22,15 +22,15 @@ export function LinkPersonForm({ accountId, disabled = false }: LinkPersonFormPr
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="account_id" value={accountId} />
       <p className="text-ink-muted text-sm">
-        Collega una Persona esistente (<code>profiles.id</code>) con associazione{" "}
-        <strong>verified</strong>. Non sostituisce una Persona già associata.
+        Collega un profilo esistente con associazione verificata. Non sostituisce
+        un profilo già associato a questo account.
       </p>
       <FormField
-        label="Persona id (profiles.id)"
+        label="Identificativo profilo"
         name="person_id"
         required
         disabled={pending || disabled}
-        hint="UUID della riga profiles"
+        hint="Identificativo tecnico del profilo (UUID)"
       />
       {state.message ? (
         <p
@@ -43,7 +43,7 @@ export function LinkPersonForm({ accountId, disabled = false }: LinkPersonFormPr
         </p>
       ) : null}
       <Button type="submit" disabled={pending || disabled} size="sm">
-        {pending ? "Collegamento…" : "Collega Persona"}
+        {pending ? "Collegamento…" : "Collega profilo"}
       </Button>
     </form>
   );

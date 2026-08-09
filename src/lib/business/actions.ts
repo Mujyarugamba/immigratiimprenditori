@@ -33,7 +33,7 @@ async function requireActivePersona() {
   if (!session.personId || !session.isActiveAccount) {
     return {
       ok: false as const,
-      message: "Account non operativo.",
+      message: "Completa il profilo per usare l'area riservata.",
     };
   }
   return {
@@ -111,7 +111,7 @@ export async function updateBusinessAction(
   if (!caps.canManage) {
     return {
       ok: false,
-      message: "Serve autorizzazione di gestione (ACT) per modificare la scheda.",
+      message: "Serve l'autorizzazione di gestione per modificare la scheda.",
     };
   }
 
@@ -141,7 +141,7 @@ export async function grantManagementAction(
   const membershipId = String(formData.get("membership_id") ?? "").trim();
   const businessId = String(formData.get("business_id") ?? "").trim();
   if (!membershipId) {
-    return { ok: false, message: "Membership target assente." };
+    return { ok: false, message: "Collegamento non indicato." };
   }
 
   const result = await grantBusinessManagement(membershipId);
@@ -179,7 +179,7 @@ export async function revokeManagementAction(
   return {
     ok: true,
     message:
-      "Gestione revocata. Nota: il database non impedisce la revoca dell'ultimo gestore.",
+      "Gestione revocata. Attenzione: l'impresa può restare senza gestori attivi.",
   };
 }
 
@@ -191,13 +191,14 @@ export async function bootstrapGrantAction(
   if (!session?.isApplicationAdmin) {
     return {
       ok: false,
-      message: "Solo Amministratore applicativo può eseguire il bootstrap grant.",
+      message:
+        "Solo un amministratore applicativo può abilitare la prima autorizzazione di gestione.",
     };
   }
 
   const membershipId = String(formData.get("membership_id") ?? "").trim();
   if (!membershipId) {
-    return { ok: false, message: "Membership id obbligatorio." };
+    return { ok: false, message: "Identificativo del collegamento obbligatorio." };
   }
 
   const result = await bootstrapBusinessGrant(membershipId);
@@ -207,7 +208,7 @@ export async function bootstrapGrantAction(
 
   revalidatePath("/app/amministrazione");
   revalidatePath("/app/imprese");
-  return { ok: true, message: "Primo grant di gestione creato." };
+  return { ok: true, message: "Prima autorizzazione di gestione abilitata." };
 }
 
 export async function concludeMembershipAction(
@@ -220,7 +221,7 @@ export async function concludeMembershipAction(
   const membershipId = String(formData.get("membership_id") ?? "").trim();
   const businessId = String(formData.get("business_id") ?? "").trim();
   if (!membershipId) {
-    return { ok: false, message: "Membership assente." };
+    return { ok: false, message: "Collegamento non indicato." };
   }
 
   const result = await concludeOwnMembership(membershipId, gate.personId);
@@ -232,5 +233,5 @@ export async function concludeMembershipAction(
     revalidatePath(`/app/imprese/${businessId}`);
   }
   revalidatePath("/app/imprese");
-  return { ok: true, message: "Membership conclusa." };
+  return { ok: true, message: "Collegamento all'impresa concluso." };
 }

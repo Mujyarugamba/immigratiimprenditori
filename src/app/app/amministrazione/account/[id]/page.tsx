@@ -63,11 +63,11 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
         <div>
           <p className="text-ink-muted text-sm">
             <Link href="/app/amministrazione/account" className="text-brand hover:underline">
-              ← Account
+              ← Account utenti
             </Link>
           </p>
           <h1 className="text-ink mt-2 text-2xl font-semibold tracking-tight">
-            Dettaglio Account
+            Dettaglio account
           </h1>
           <p className="text-ink-subtle mt-1 font-mono text-xs">{account.id}</p>
         </div>
@@ -77,10 +77,10 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
         <Field label="Stato">
           {ACCOUNT_STATUS_LABELS[account.account_status]}
         </Field>
-        <Field label="Auth user id">
+        <Field label="Identificativo accesso">
           <span className="font-mono text-xs">{account.auth_user_id}</span>
         </Field>
-        <Field label="Persona">
+        <Field label="Profilo collegato">
           {account.person?.display_name ? (
             <>
               {account.person.display_name}
@@ -96,13 +96,13 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
             "Non associata"
           )}
         </Field>
-        <Field label="Associazione Persona">
+        <Field label="Stato associazione profilo">
           {account.person_association_status
             ? PERSON_ASSOCIATION_LABELS[account.person_association_status] ??
               account.person_association_status
             : "—"}
         </Field>
-        <Field label="Persona collegata il">
+        <Field label="Profilo collegato il">
           {account.person_linked_at
             ? formatItalianDateTime(account.person_linked_at)
             : "—"}
@@ -141,7 +141,7 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
       <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">
         <h2 className="text-ink text-base font-semibold">Ruoli elevati</h2>
         <p className="text-ink-muted mt-1 text-sm">
-          Assegnazione solo via RPC. Auto-promozione bloccata.
+          Assegnazione controllata dal sistema. Auto-promozione bloccata.
         </p>
 
         <div className="mt-4 overflow-x-auto">
@@ -208,7 +208,7 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
       {canLinkPerson ? (
         <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">
           <h2 className="text-ink text-base font-semibold">
-            Collega Persona (Adm)
+            Collega profilo
           </h2>
           <div className="mt-3 max-w-md">
             <LinkPersonForm accountId={account.id} />
@@ -217,7 +217,7 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
       ) : null}
 
       <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">
-        <h2 className="text-ink text-base font-semibold">Chiudi Account</h2>
+        <h2 className="text-ink text-base font-semibold">Chiudi account</h2>
         <div className="mt-3 max-w-lg">
           <CloseAccountForm accountId={account.id} disabled={isClosed} />
         </div>

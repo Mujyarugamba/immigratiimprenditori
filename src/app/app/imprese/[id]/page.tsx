@@ -13,6 +13,19 @@ import {
 } from "@/lib/data/authenticated/memberships";
 import { getApplicationSession } from "@/lib/session/get-application-session";
 import { requireOperationalAccount } from "@/lib/session/guards";
+import {
+  BUSINESS_STATUSES,
+  EDITORIAL_STATUS_LABELS,
+  label,
+  MEMBERSHIP_ROLE_LABELS,
+  PUBLICATION_STATUS_LABELS,
+} from "@/lib/public/labels";
+
+const BUSINESS_EDITORIAL_LABELS: Record<string, string> = {
+  ...EDITORIAL_STATUS_LABELS,
+  incomplete: "Incompleta",
+  complete: "Completa",
+};
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -78,7 +91,7 @@ export default async function ImpresaDetailPage({ params }: Props) {
         </span>
         {own ? (
           <span className="text-ink-subtle px-2 py-0.5">
-            Tuo ruolo: {own.role_id}
+            Tuo ruolo: {label(MEMBERSHIP_ROLE_LABELS, own.role_id)}
           </span>
         ) : null}
       </div>
@@ -86,15 +99,21 @@ export default async function ImpresaDetailPage({ params }: Props) {
       <dl className="border-line bg-surface-elevated mt-6 grid gap-3 rounded-md border p-5 text-sm shadow-soft sm:grid-cols-2">
         <div>
           <dt className="text-ink-subtle">Pubblicazione</dt>
-          <dd className="text-ink mt-1">{business.publication_status}</dd>
+          <dd className="text-ink mt-1">
+            {label(PUBLICATION_STATUS_LABELS, business.publication_status)}
+          </dd>
         </div>
         <div>
           <dt className="text-ink-subtle">Editoriale</dt>
-          <dd className="text-ink mt-1">{business.editorial_status}</dd>
+          <dd className="text-ink mt-1">
+            {label(BUSINESS_EDITORIAL_LABELS, business.editorial_status)}
+          </dd>
         </div>
         <div>
-          <dt className="text-ink-subtle">Sostanziale</dt>
-          <dd className="text-ink mt-1">{business.substantial_status}</dd>
+          <dt className="text-ink-subtle">Stato dell&apos;impresa</dt>
+          <dd className="text-ink mt-1">
+            {label(BUSINESS_STATUSES, business.substantial_status)}
+          </dd>
         </div>
         <div>
           <dt className="text-ink-subtle">Anno</dt>
@@ -119,10 +138,12 @@ export default async function ImpresaDetailPage({ params }: Props) {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-ink text-lg font-semibold">Appartenenze</h2>
+        <h2 className="text-ink text-lg font-semibold">
+          Persone collegate e autorizzazioni
+        </h2>
         <p className="text-ink-muted mt-1 text-sm">
-          Chi ha i permessi di gestione può assegnarli o revocarli ad altri
-          membri. Non puoi assegnarli a te stesso.
+          Chi ha i permessi di gestione può assegnarli o revocarli ad altre
+          persone collegate. Non puoi assegnarli a te stesso.
         </p>
         <div className="mt-4">
           <MembershipGrantsPanel

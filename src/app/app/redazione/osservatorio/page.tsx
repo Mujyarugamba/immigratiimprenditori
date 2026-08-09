@@ -14,12 +14,12 @@ const links = [
   {
     href: "/app/redazione/osservatorio/fonti",
     title: "Fonti statistiche",
-    description: "Provenienza dati (lifecycle_status).",
+    description: "Provenienza e stato delle fonti statistiche.",
   },
   {
     href: "/app/redazione/osservatorio/valori",
     title: "Valori",
-    description: "Valori aggregati per indicatore; revisione con supersedes.",
+    description: "Valori per indicatore e revisioni nel tempo.",
   },
 ] as const;
 
@@ -30,11 +30,11 @@ export default function OsservatorioHubPage() {
         Osservatorio
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Dominio a ownership redazionale implicita: nessuna colonna{" "}
-        <code>owned_by_editorial</code> sulle tabelle OSS.
+        Sezione curata dalla redazione: indicatori, fonti e valori
+        dell&apos;osservatorio.
       </p>
       <p className="border-line bg-surface-elevated text-ink-muted mt-4 rounded-md border p-3 text-xs">
-        Limite editoriale (privacy): pubblicare solo aggregati; per conteggi
+        Limite editoriale (privacy): pubblicare solo dati aggregati; per conteggi
         derivati da soggetti usare soglia minima 5 salvo fonte ufficiale. Non
         caricare microdati.
       </p>

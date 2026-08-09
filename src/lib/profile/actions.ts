@@ -31,7 +31,7 @@ export async function updateProfileAction(
   if (!session.personId || !session.isActiveAccount) {
     return {
       ok: false,
-      message: "Account non operativo per modificare il profilo.",
+      message: "Completa il profilo per modificare il profilo.",
     };
   }
 

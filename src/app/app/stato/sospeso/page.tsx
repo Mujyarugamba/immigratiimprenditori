@@ -7,7 +7,7 @@ export default function AccountSospesoPage() {
   return (
     <ErrorState
       title="Account sospeso"
-      description="L'Account è in stato suspended. Le operazioni riservate non sono disponibili."
+      description="Il tuo account è sospeso. Le operazioni riservate non sono disponibili finché non viene riattivato."
       actionHref="/"
       actionLabel="Torna al sito pubblico"
     />
