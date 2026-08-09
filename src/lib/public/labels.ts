@@ -46,6 +46,13 @@ export const ORGANIZATION_FORMS: Record<string, string> = {
   commercial_or_craft_activity: "Attività commerciale o artigianale",
 };
 
+export const MEMBERSHIP_ROLE_LABELS: Record<string, string> = {
+  owner: "Titolare",
+  partner: "Socio",
+  administrator: "Amministratore",
+  collaborator: "Collaboratore",
+};
+
 export const PRACTICE_MODES: Record<string, string> = {
   individual: "Esercizio individuale",
   individual_firm: "Studio individuale",

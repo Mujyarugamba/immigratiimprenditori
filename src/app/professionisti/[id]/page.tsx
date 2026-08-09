@@ -79,7 +79,18 @@ export default async function ProfessionistaDetailPage({ params }: PageProps) {
             {profile.headline ?? profile.person?.display_name ?? "Profilo professionale"}
           </h1>
           {profile.person?.display_name && profile.headline ? (
-            <p className="text-ink-muted text-sm">{profile.person.display_name}</p>
+            <p className="text-ink-muted text-sm">
+              {profile.person.slug ? (
+                <Link
+                  href={`/persone/${profile.person.slug}`}
+                  className="text-brand hover:underline"
+                >
+                  {profile.person.display_name}
+                </Link>
+              ) : (
+                profile.person.display_name
+              )}
+            </p>
           ) : null}
           {profile.summary ? (
             <p className="text-ink-muted text-lg leading-7">{profile.summary}</p>

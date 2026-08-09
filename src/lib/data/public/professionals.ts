@@ -22,6 +22,7 @@ export type PublicProfessionalListItem = {
 export type PublicProfessionalPerson = {
   id: string;
   display_name: string;
+  slug: string | null;
 };
 
 export type PublicProfessionalCategory = {
@@ -100,7 +101,7 @@ export async function getPublicProfessionalById(
       id, headline, summary, practice_mode_code, availability_status,
       person_id, context_business_id, editorial_status, publication_status,
       visibility_status,
-      profiles!professional_profiles_person_id_fkey ( id, display_name ),
+      profiles!professional_profiles_person_id_fkey ( id, display_name, slug ),
       professional_profile_categories (
         category_code, is_primary, declaration_status,
         professional_categories ( label_it )
@@ -114,8 +115,8 @@ export async function getPublicProfessionalById(
   if (!data) return null;
 
   const personRow = data.profiles as
-    | { id: string; display_name: string }
-    | { id: string; display_name: string }[]
+    | { id: string; display_name: string; slug: string | null }
+    | { id: string; display_name: string; slug: string | null }[]
     | null;
   const person = Array.isArray(personRow) ? personRow[0] : personRow;
 
@@ -152,7 +153,11 @@ export async function getPublicProfessionalById(
     publication_status: data.publication_status,
     visibility_status: data.visibility_status,
     person: person
-      ? { id: person.id, display_name: person.display_name }
+      ? {
+          id: person.id,
+          display_name: person.display_name,
+          slug: person.slug ?? null,
+        }
       : null,
     categories,
   };

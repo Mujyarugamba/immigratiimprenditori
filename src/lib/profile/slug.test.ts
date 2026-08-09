@@ -70,9 +70,9 @@ describe("P7.2 profile public address", () => {
     assert.doesNotMatch(message, /profiles_slug_key|23505|SQLSTATE/i);
   });
 
-  it("public /persone/[slug] route is not introduced by this cleanup", () => {
+  it("public /persone/[slug] route exists for P7.2 address preview", () => {
     const route = join(here, "../../app/persone/[slug]/page.tsx");
-    assert.equal(existsSync(route), false);
+    assert.equal(existsSync(route), true);
     assert.equal(existsSync(join(here, "../../app/persone/page.tsx")), true);
   });
 });

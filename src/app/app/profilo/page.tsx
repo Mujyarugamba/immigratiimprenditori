@@ -93,6 +93,22 @@ export default async function ProfiloPage() {
         </p>
       ) : null}
 
+      {profile?.is_public && profile.slug?.trim() ? (
+        <p className="mt-4 text-sm">
+          <Link
+            href={`/persone/${profile.slug}`}
+            className="text-brand font-medium hover:underline"
+          >
+            Visualizza il mio profilo pubblico
+          </Link>
+        </p>
+      ) : profile && session.isActiveAccount ? (
+        <p className="text-ink-muted mt-4 text-sm">
+          Il profilo pubblico non è attivo. Attiva &quot;Profilo pubblico&quot;
+          nel modulo qui sotto per renderlo visibile in rete.
+        </p>
+      ) : null}
+
       {!session.isActiveAccount ? (
         <p className="text-ink-muted mt-4 text-sm">
           Per modificare il profilo completa prima il percorso iniziale.{" "}

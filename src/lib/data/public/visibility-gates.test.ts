@@ -49,6 +49,11 @@ export const PUBLIC_VISIBILITY_GATES = {
     publication_status: "published",
     visibility_status: "public",
   },
+  profiles: {
+    is_public: true,
+    is_active: true,
+    deleted_at: null,
+  },
 } as const;
 
 describe("public visibility gates (RLS documentation)", () => {
@@ -117,6 +122,14 @@ describe("public visibility gates (RLS documentation)", () => {
     assert.deepEqual(PUBLIC_VISIBILITY_GATES.contents, {
       publication_status: "published",
       visibility_status: "public",
+    });
+  });
+
+  it("profiles gate matches Persone public policy", () => {
+    assert.deepEqual(PUBLIC_VISIBILITY_GATES.profiles, {
+      is_public: true,
+      is_active: true,
+      deleted_at: null,
     });
   });
 });

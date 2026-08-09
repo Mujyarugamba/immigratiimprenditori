@@ -17,6 +17,20 @@ export {
 } from "@/lib/data/public/professionals";
 
 export {
+  getPublicPersonBySlug,
+  listHomePublicPeople,
+  getPublicProfessionalForPerson,
+  listPublicBusinessesForPerson,
+  formatPersonTerritory,
+  personMetadataDescription,
+  PUBLIC_PERSON_VISIBILITY_GATE,
+  PUBLIC_PERSON_EXCLUDED_FIELDS,
+  type PublicPerson,
+  type PublicPersonBusinessLink,
+  type PublicPersonProfessionalSummary,
+} from "@/lib/data/public/people";
+
+export {
   listPublicOpportunities,
   getPublicOpportunityById,
   listHomeOpportunities,

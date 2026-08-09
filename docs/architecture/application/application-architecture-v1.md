@@ -1,9 +1,16 @@
 # Application Architecture v1
 
-**Status:** P1–P6 application blocks implemented — **v1 release-ready**; C2 Cultura hub → **C4 Cultura V2** (app-only, multi-domain data-driven) — see `c4-cultura-v2-validation-report.md`
+**Status:** P1–P6 application blocks implemented — **v1 release-ready**; C2→C4 Cultura; **P7.3 public Persona** `/persone/[slug]` — see `p7.3-public-person-profile-validation-report.md`
 **Baseline Git:** `4bf213b7f9391142cf30533ed261243a2b709250` (`v0.3.0-db-access-rls-v1`)
-**DB head:** `20260813150000` (local = remote, pending `0`) — C3 taxonomy enrichment; C4 is app-only (no further migrations)
+**DB head:** `20260813150000` (local = remote, pending `0`) — C3 taxonomy enrichment; C4/P7 app-only (no further migrations)
 **Authority:** Access/RLS v1 (A1/A2) remains the security authority. This document does not redefine DB contracts.
+
+### P7.3 delta (public Persona profile — app-only)
+
+- Public route `/persone/[slug]` resolves published Persona rows (`is_public ∧ is_active ∧ deleted_at IS NULL`)
+- Data module `src/lib/data/public/people.ts`; no phone/email; related public professional + public memberships→businesses only
+- Hub `/persone` lists public people when present; private profilo links to public page when `is_public`
+- Report: `p7.3-public-person-profile-validation-report.md`
 
 ### C4 delta (Cultura V2 — multi-domain, app-only)
 
@@ -202,7 +209,8 @@ Authenticated RPCs usable from session: `access_link_person`, `access_close_acco
 |---|---|---|
 | Home | `/` | Demo home |
 | Imprese | `/imprese`, `/imprese/[id]` | List placeholder |
-| Professionisti | `/professionisti`, `/professionisti/[id]` | Placeholder |
+| Persone | `/persone`, `/persone/[slug]` | Hub + public Persona detail (P7.3) |
+| Professionisti | `/professionisti`, `/professionisti/[id]` | List + detail |
 | Opportunità | `/opportunita`, … | Placeholder |
 | Servizi | `/servizi` (new) | Absent (home may mention) |
 | Eventi | `/eventi`, … | Placeholder |

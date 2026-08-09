@@ -7,17 +7,21 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { ecosystems } from "@/data/ecosystems";
 import { listHomeProfessionals } from "@/lib/data/public";
+import { listHomePublicPeople } from "@/lib/data/public/people";
 
 export const metadata: Metadata = {
   title: "Persone",
   description:
-    "Ecosistema Persone della rete: professionisti pubblici, competenze e ingresso all’area riservata.",
+    "Ecosistema Persone della rete: profili pubblici, professionisti e ingresso all’area riservata.",
 };
 
 const eco = ecosystems.find((e) => e.id === "persone")!;
 
 export default async function PersoneHubPage() {
-  const professionals = await listHomeProfessionals(6).catch(() => []);
+  const [professionals, people] = await Promise.all([
+    listHomeProfessionals(6).catch(() => []),
+    listHomePublicPeople(6).catch(() => []),
+  ]);
 
   return (
     <>
@@ -33,15 +37,15 @@ export default async function PersoneHubPage() {
 
           <div className="border-line bg-surface-elevated space-y-3 rounded-md border p-5">
             <h2 className="text-ink text-base font-semibold">
-              Limite v1 (onesto)
+              Profili pubblici e professioni
             </h2>
             <p className="text-ink-muted text-sm leading-6">
-              Non esiste ancora una directory pubblica completa di tutte le
-              Persone. In v1 puoi esplorare i{" "}
+              Qui trovi le persone che hanno reso pubblico il proprio profilo e,
+              come ingresso specializzato, i{" "}
               <strong className="text-ink font-medium">
                 profili professionali pubblici
               </strong>
-              . Account, ruoli e autorizzazioni restano privati nell&apos;area
+              . Account e autorizzazioni restano privati nell&apos;area
               riservata.
             </p>
           </div>
@@ -63,35 +67,47 @@ export default async function PersoneHubPage() {
               <Link href="/imprese" className="text-brand font-medium">
                 Imprese collegate
               </Link>{" "}
-              — quando pubbliche, emergono dalle schede professionali e dalle
-              relazioni.
+              — quando pubbliche, emergono dalle schede e dalle relazioni.
             </li>
             <li>
               <Link href="/servizi" className="text-brand font-medium">
                 Servizi
               </Link>{" "}
-              — offerte e richieste collegate a persone/professionisti.
-            </li>
-            <li>
-              Competenze, lingue, territori e settori: filtri e schede dove già
-              disponibili nei profili pubblici.
+              — offerte e richieste collegate a persone e professionisti.
             </li>
           </ul>
         </Container>
       </Section>
 
-      {professionals.length === 0 ? (
+      {people.length === 0 ? (
         <Section className="bg-surface-elevated">
           <Container>
             <PublicEmpty
-              title="Nessun professionista pubblico al momento"
-              description="Quando i profili professionali saranno pubblicati, compariranno qui."
+              title="Nessun profilo pubblico al momento"
+              description="Quando le persone pubblicheranno il proprio profilo, compariranno qui."
             />
           </Container>
         </Section>
       ) : (
         <HomeDomainSection
           className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
+          eyebrow="Profili"
+          title="Persone nella rete"
+          description="Profili resi pubblici dai loro titolari."
+          actionHref="/registrati"
+          actionLabel="Entra nella rete"
+          items={people.map((p) => ({
+            href: `/persone/${p.slug}`,
+            title: p.display_name,
+            description: p.bio,
+            meta: [p.city, p.country].filter(Boolean) as string[],
+          }))}
+        />
+      )}
+
+      {professionals.length === 0 ? null : (
+        <HomeDomainSection
+          className="py-14 sm:py-16 lg:py-20"
           eyebrow="Professionisti"
           title="Profili professionali pubblici"
           description="Ruolo specializzato nella rete — non sostituto dell’ecosistema Persone."
