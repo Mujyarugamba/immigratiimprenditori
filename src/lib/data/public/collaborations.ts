@@ -7,7 +7,7 @@ import {
 } from "@/lib/data/public/paging";
 
 const LIST_SELECT =
-  "id, slug, title, form_code, operational_status, object_text, purpose_text";
+  "id, slug, title, form_code, operational_status, object_text, purpose_text, activity_scope_code";
 
 export type PublicCollaborationListItem = {
   id: string;
@@ -17,6 +17,7 @@ export type PublicCollaborationListItem = {
   operational_status: string;
   object_text: string;
   purpose_text: string;
+  activity_scope_code: string | null;
 };
 
 export type PublicCollaborationParticipant = {
@@ -56,6 +57,7 @@ function mapCollaborationDetail(
     operational_status: data.operational_status as string,
     object_text: data.object_text as string,
     purpose_text: data.purpose_text as string,
+    activity_scope_code: (data.activity_scope_code as string | null) ?? null,
     description: data.description as string | null,
     editorial_status: data.editorial_status as string,
     participants,
@@ -64,7 +66,7 @@ function mapCollaborationDetail(
 
 const DETAIL_SELECT = `
   id, slug, title, form_code, operational_status, object_text, purpose_text,
-  description, editorial_status,
+  activity_scope_code, description, editorial_status,
   collaboration_participants (
     id,
     profiles ( display_name ),
@@ -79,6 +81,7 @@ export async function listPublicCollaborations(
   const q = param(searchParams, "q");
   const forma = param(searchParams, "forma");
   const stato = param(searchParams, "stato");
+  const ambito = param(searchParams, "ambito");
   const supabase = await createClient();
 
   let query = supabase
@@ -97,6 +100,9 @@ export async function listPublicCollaborations(
   }
   if (stato) {
     query = query.eq("operational_status", stato);
+  }
+  if (ambito) {
+    query = query.eq("activity_scope_code", ambito);
   }
 
   const { data, count, error } = await query;

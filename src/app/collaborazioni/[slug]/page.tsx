@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getPublicCollaborationBySlug } from "@/lib/data/public/collaborations";
+import { isCultureClassifiedCollaboration } from "@/lib/data/public/culture";
 import {
   COLLABORATION_FORMS,
   COLLABORATION_STATUSES,
@@ -38,12 +39,25 @@ export default async function CollaborazioneDetailPage({ params }: PageProps) {
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/collaborazioni"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco collaborazioni
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/collaborazioni"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco collaborazioni
+          </Link>
+          {isCultureClassifiedCollaboration({
+            activityScopeCode: collaboration.activity_scope_code,
+            formCode: collaboration.form_code,
+          }) ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">

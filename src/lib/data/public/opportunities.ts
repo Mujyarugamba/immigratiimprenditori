@@ -33,13 +33,29 @@ export async function listPublicOpportunities(
   const q = param(searchParams, "q");
   const origine = param(searchParams, "origine");
   const stato = param(searchParams, "stato");
+  const ambito = param(searchParams, "ambito");
   const supabase = await createClient();
 
-  let query = supabase
-    .from("opportunities")
-    .select(LIST_SELECT, { count: "exact" })
-    .order("platform_published_at", { ascending: false, nullsFirst: false })
-    .range(from, to);
+  let query = ambito
+    ? supabase
+        .from("opportunities")
+        .select(
+          `${LIST_SELECT}, opportunity_activity_scope_assignments!inner (
+            activity_scope_code
+          )`,
+          { count: "exact" },
+        )
+        .eq(
+          "opportunity_activity_scope_assignments.activity_scope_code",
+          ambito,
+        )
+        .order("platform_published_at", { ascending: false, nullsFirst: false })
+        .range(from, to)
+    : supabase
+        .from("opportunities")
+        .select(LIST_SELECT, { count: "exact" })
+        .order("platform_published_at", { ascending: false, nullsFirst: false })
+        .range(from, to);
 
   if (q) {
     query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%`);
@@ -53,12 +69,20 @@ export async function listPublicOpportunities(
 
   const { data, count, error } = await query;
   if (error) throw new Error(error.message);
-  return paginated(
-    (data ?? []) as PublicOpportunityListItem[],
-    count ?? 0,
-    page,
-    pageSize,
-  );
+
+  const items = (data ?? []).map((row) => {
+    const r = row as PublicOpportunityListItem;
+    return {
+      id: r.id,
+      title: r.title,
+      summary: r.summary,
+      origin: r.origin,
+      substantial_status: r.substantial_status,
+      platform_published_at: r.platform_published_at,
+    };
+  });
+
+  return paginated(items, count ?? 0, page, pageSize);
 }
 
 export async function getPublicOpportunityById(

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import { isCultureClassifiedService } from "@/lib/data/public/culture";
 import { getPublicServiceRequestById } from "@/lib/data/public/services";
 import {
   label,
@@ -39,12 +40,24 @@ export default async function ServizioRichiestaDetailPage({ params }: PageProps)
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/servizi?tipo=richiesta"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco servizi
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/servizi?tipo=richiesta"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco servizi
+          </Link>
+          {isCultureClassifiedService({
+            categoryCode: request.category_code,
+          }) ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">

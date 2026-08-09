@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
+import { contentQualifiesForCultureHub } from "@/lib/data/public/culture";
 import { relatedForContent } from "@/lib/data/public/related";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
 
@@ -34,21 +35,37 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
   }
 
   const isPlainText = content.body_format === "plain_text";
-  const related = await relatedForContent({
-    subject_links: content.subject_links,
-    event_links: content.event_links,
-    opportunity_links: content.opportunity_links,
-  }).catch(() => []);
+  const [related, showCulture] = await Promise.all([
+    relatedForContent({
+      subject_links: content.subject_links,
+      event_links: content.event_links,
+      opportunity_links: content.opportunity_links,
+    }).catch(() => []),
+    contentQualifiesForCultureHub({
+      primaryCategoryCode: content.primary_category_code,
+      eventIds: content.event_links.map((l) => l.event_id),
+    }).catch(() => false),
+  ]);
 
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/contenuti"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco contenuti
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/contenuti"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco contenuti
+          </Link>
+          {showCulture ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">

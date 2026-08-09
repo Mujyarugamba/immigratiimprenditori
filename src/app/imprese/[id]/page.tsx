@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getPublicBusinessById } from "@/lib/data/public/businesses";
+import { isCultureClassifiedBusiness } from "@/lib/data/public/culture";
 import { relatedForBusiness } from "@/lib/data/public/related";
 import { label, ORGANIZATION_FORMS } from "@/lib/public/labels";
 
@@ -36,16 +37,29 @@ export default async function ImpresaDetailPage({ params }: PageProps) {
   const primarySectors = business.sectors.filter((s) => s.is_primary);
   const otherSectors = business.sectors.filter((s) => !s.is_primary);
   const related = await relatedForBusiness(business.id).catch(() => []);
+  const showCulture = isCultureClassifiedBusiness({
+    sectorSlugs: business.sectors.map((s) => s.slug),
+  });
 
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/imprese"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco imprese
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/imprese"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco imprese
+          </Link>
+          {showCulture ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           {business.organization_form ? (

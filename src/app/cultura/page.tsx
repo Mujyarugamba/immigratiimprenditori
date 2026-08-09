@@ -16,12 +16,22 @@ import {
 export const metadata: Metadata = {
   title: "Cultura",
   description:
-    "Cultura come spazio di incontri e relazioni nella rete Immigrati Imprenditori: eventi culturali pubblici e connessioni strutturali a opportunità, storie e mercati — senza duplicare i fatti.",
+    "Cultura come rete di incontri, persone, organizzazioni, imprese, opportunità, collaborazioni, servizi e storie — classificazioni strutturali dei domini, senza duplicare i fatti.",
 };
 
 export default async function CulturaHubPage() {
-  const { events, opportunities, professionals, contents, markets } =
-    await loadCultureHub();
+  const {
+    events,
+    opportunities,
+    collaborations,
+    professionals,
+    organizations,
+    businesses,
+    serviceOffers,
+    serviceRequests,
+    contents,
+    markets,
+  } = await loadCultureHub();
 
   return (
     <>
@@ -42,7 +52,7 @@ export default async function CulturaHubPage() {
             Immigrati Imprenditori resta{" "}
             <span className="text-ink font-medium">{PLATFORM_IDENTITY}</span>{" "}
             Cultura non è un catalogo separato: aggrega fatti pubblici già
-            pubblicati altrove, a partire dagli eventi culturali.
+            pubblicati nei domini della rete, con classificazione strutturata.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="#incontri">Scopri gli incontri</ButtonLink>
@@ -78,7 +88,7 @@ export default async function CulturaHubPage() {
           {events.length === 0 ? (
             <PublicEmpty
               title="Nessun incontro culturale in programma."
-              description="Quando verranno pubblicati eventi di tipo culturale con edizioni future, compariranno qui. Nessun dato dimostrativo."
+              description="Quando verranno pubblicati eventi di tipo culturale con edizioni future, compariranno qui."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -104,69 +114,125 @@ export default async function CulturaHubPage() {
         </Container>
       </Section>
 
-      <Section className="py-14 sm:py-16 lg:py-20">
+      <Section id="opportunita-collaborazioni" className="py-14 sm:py-16 lg:py-20">
+        <Container className="space-y-14">
+          <div>
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl space-y-2">
+                <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
+                  Opportunità e collaborazioni
+                </p>
+                <h2 className="text-ink text-2xl font-semibold tracking-tight">
+                  Occasioni culturali nella rete
+                </h2>
+                <p className="text-ink-muted text-sm leading-6">
+                  Opportunità con ambito culturale strutturato, oppure collegate
+                  a un evento culturale. Collaborazioni con ambito culturale —
+                  indipendentemente dalla forma.
+                </p>
+              </div>
+              <Link
+                href="/opportunita?ambito=culture"
+                className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
+              >
+                Esplora le opportunità
+              </Link>
+            </div>
+            {opportunities.length === 0 ? (
+              <PublicEmpty
+                title="Nessuna opportunità culturale pubblicata."
+                description="Compariranno qui opportunità con ambito culturale, patrimonio o industrie creative, oppure collegate a eventi culturali pubblici."
+              />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {opportunities.map((o) => (
+                  <PublicResultCard
+                    key={o.id}
+                    href={`/opportunita/${o.id}`}
+                    title={o.title}
+                    description={o.summary}
+                    meta={[o.origin, o.substantial_status].filter(
+                      Boolean,
+                    ) as string[]}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl space-y-2">
+                <h2 className="text-ink text-2xl font-semibold tracking-tight">
+                  Collaborazioni culturali
+                </h2>
+                <p className="text-ink-muted text-sm leading-6">
+                  Schede pubbliche con ambito culturale strutturato. La forma
+                  (ricerca, partnership, progetto…) non determina da sola
+                  l&apos;inclusione.
+                </p>
+              </div>
+              <Link
+                href="/collaborazioni?ambito=culture"
+                className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
+              >
+                Esplora le collaborazioni
+              </Link>
+            </div>
+            {collaborations.length === 0 ? (
+              <PublicEmpty
+                title="Nessuna collaborazione culturale pubblicata."
+                description="Compariranno qui collaborazioni con ambito cultura, patrimonio o industrie creative."
+              />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {collaborations.map((c) => (
+                  <PublicResultCard
+                    key={c.id}
+                    href={`/collaborazioni/${c.slug}`}
+                    title={c.title}
+                    description={c.object_text}
+                    meta={[c.form_code, c.operational_status].filter(
+                      Boolean,
+                    ) as string[]}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </Container>
+      </Section>
+
+      <Section
+        id="persone"
+        className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
+      >
         <Container>
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl space-y-2">
               <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-                Opportunità collegate
+                Persone e competenze
               </p>
               <h2 className="text-ink text-2xl font-semibold tracking-tight">
-                Occasioni legate agli incontri culturali
+                Professionisti culturali e creativi
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Solo opportunità pubbliche collegate strutturalmente a un evento
-                culturale. Nessuna classificazione da titolo o descrizione.
+                Profili pubblici con categorie professionali culturali/creative
+                strutturate, inclusa la mediazione culturale. Non è una
+                directory di artisti.
               </p>
             </div>
             <Link
-              href="/opportunita"
+              href="/professionisti?categoria=cultural_mediation"
               className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
             >
-              Esplora le opportunità
+              Vai ai professionisti
             </Link>
-          </div>
-          {opportunities.length === 0 ? (
-            <PublicEmpty
-              title="Nessuna opportunità collegata agli incontri culturali pubblicati."
-              description="Compariranno qui solo opportunità referenziate da eventi culturali pubblici."
-            />
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {opportunities.map((o) => (
-                <PublicResultCard
-                  key={o.id}
-                  href={`/opportunita/${o.id}`}
-                  title={o.title}
-                  description={o.summary}
-                  meta={[o.origin, o.substantial_status].filter(
-                    Boolean,
-                  ) as string[]}
-                />
-              ))}
-            </div>
-          )}
-        </Container>
-      </Section>
-
-      <Section className="bg-surface-elevated py-14 sm:py-16 lg:py-20">
-        <Container>
-          <div className="mb-8 max-w-2xl space-y-2">
-            <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-              Persone e competenze
-            </p>
-            <h2 className="text-ink text-2xl font-semibold tracking-tight">
-              Professionisti nella rete
-            </h2>
-            <p className="text-ink-muted text-sm leading-6">
-              Profili pubblici con la categoria professionale strutturata
-              &quot;Mediazione culturale&quot;. Non è una directory di artisti.
-            </p>
           </div>
           {professionals.length === 0 ? (
             <PublicEmpty
-              title="Nessun profilo con mediazione culturale pubblicato."
-              description="La classificazione disponibile oggi riguarda solo la categoria professionale cultural_mediation."
+              title="Nessun professionista culturale o creativo pubblicato."
+              description="Compariranno qui profili con categorie culturali/creative o mediazione culturale."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -183,59 +249,189 @@ export default async function CulturaHubPage() {
               ))}
             </div>
           )}
-          <div className="mt-6">
-            <Link
-              href="/professionisti"
-              className="text-brand hover:text-brand-dark text-sm font-semibold"
-            >
-              Vai ai professionisti
-            </Link>
+        </Container>
+      </Section>
+
+      <Section id="attori" className="py-14 sm:py-16 lg:py-20">
+        <Container className="space-y-14">
+          <div>
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl space-y-2">
+                <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
+                  Organizzazioni e imprese
+                </p>
+                <h2 className="text-ink text-2xl font-semibold tracking-tight">
+                  Organizzazioni culturali
+                </h2>
+                <p className="text-ink-muted text-sm leading-6">
+                  Organizzazioni pubbliche con ambito di attività culturale,
+                  patrimonio o industrie creative. Il tipo giuridico da solo non
+                  basta.
+                </p>
+              </div>
+              <Link
+                href="/organizzazioni?ambito=culture"
+                className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
+              >
+                Organizzazioni
+              </Link>
+            </div>
+            {organizations.length === 0 ? (
+              <PublicEmpty
+                title="Nessuna organizzazione culturale pubblicata."
+                description="Compariranno qui organizzazioni con ambito cultura, patrimonio o industrie creative."
+              />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {organizations.map((o) => (
+                  <PublicResultCard
+                    key={o.id}
+                    href={`/organizzazioni/${o.slug}`}
+                    title={o.name}
+                    description={o.summary}
+                    meta={[o.primary_scope_code, o.seat_city_label].filter(
+                      Boolean,
+                    ) as string[]}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl space-y-2">
+                <h2 className="text-ink text-2xl font-semibold tracking-tight">
+                  Imprese culturali e creative
+                </h2>
+                <p className="text-ink-muted text-sm leading-6">
+                  Imprese pubbliche con dichiarazione di settore nelle industrie
+                  culturali e creative.
+                </p>
+              </div>
+              <Link
+                href="/imprese"
+                className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
+              >
+                Imprese
+              </Link>
+            </div>
+            {businesses.length === 0 ? (
+              <PublicEmpty
+                title="Nessuna impresa culturale o creativa pubblicata."
+                description="Compariranno qui imprese con settori CCI dichiarati (audiovisivo, editoria, musica, spettacolo, design, moda, artigianato, patrimonio)."
+              />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {businesses.map((b) => (
+                  <PublicResultCard
+                    key={b.id}
+                    href={`/imprese/${b.id}`}
+                    title={b.public_name}
+                    description={b.summary}
+                    meta={[b.organization_form, b.substantial_status].filter(
+                      Boolean,
+                    ) as string[]}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </Container>
       </Section>
 
-      <Section className="py-14 sm:py-16 lg:py-20">
-        <Container className="max-w-3xl space-y-4">
-          <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-            Organizzazioni e imprese
-          </p>
-          <h2 className="text-ink text-2xl font-semibold tracking-tight">
-            Attori della rete
-          </h2>
-          <p className="text-ink-muted text-sm leading-6">
-            Non classifichiamo ancora organizzazioni o imprese come
-            &quot;culturali&quot; senza un ambito strutturato dedicato. Finché
-            quel dato non esiste, questa sezione non inventa elenchi.
-          </p>
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-            <ButtonLink href="/organizzazioni" variant="secondary">
-              Organizzazioni
-            </ButtonLink>
-            <ButtonLink href="/imprese" variant="secondary">
-              Imprese
-            </ButtonLink>
-          </div>
-        </Container>
-      </Section>
-
-      <Section className="bg-surface-elevated py-14 sm:py-16 lg:py-20">
+      <Section id="servizi" className="bg-surface-elevated py-14 sm:py-16 lg:py-20">
         <Container>
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl space-y-2">
               <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-                Storie dalla rete
+                Servizi
               </p>
               <h2 className="text-ink text-2xl font-semibold tracking-tight">
-                Contenuti collegati agli incontri culturali
+                Servizi culturali e creativi
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Solo contenuti pubblici con link strutturato a un evento
-                culturale. La categoria &quot;Eventi e comunità&quot; da sola non
+                Offerte e richieste pubbliche nella categoria strutturata
+                culturale/creativa. I servizi linguistici restano distinti.
+              </p>
+            </div>
+            <Link
+              href="/servizi?categoria=cultural_creative"
+              className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
+            >
+              Esplora i servizi
+            </Link>
+          </div>
+          {serviceOffers.length === 0 && serviceRequests.length === 0 ? (
+            <PublicEmpty
+              title="Nessun servizio culturale o creativo pubblicato."
+              description="Compariranno qui offerte e richieste con categoria cultural_creative."
+            />
+          ) : (
+            <div className="space-y-10">
+              {serviceOffers.length > 0 ? (
+                <div>
+                  <h3 className="text-ink mb-4 text-lg font-semibold">
+                    Offerte
+                  </h3>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {serviceOffers.map((s) => (
+                      <PublicResultCard
+                        key={s.id}
+                        href={`/servizi/offerte/${s.id}`}
+                        title={s.title}
+                        description={s.summary}
+                        meta={[s.delivery_mode, s.availability_status].filter(
+                          Boolean,
+                        ) as string[]}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {serviceRequests.length > 0 ? (
+                <div>
+                  <h3 className="text-ink mb-4 text-lg font-semibold">
+                    Richieste
+                  </h3>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {serviceRequests.map((s) => (
+                      <PublicResultCard
+                        key={s.id}
+                        href={`/servizi/richieste/${s.id}`}
+                        title={s.title}
+                        description={s.summary}
+                        meta={[s.delivery_mode, s.process_status].filter(
+                          Boolean,
+                        ) as string[]}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </Container>
+      </Section>
+
+      <Section id="storie" className="py-14 sm:py-16 lg:py-20">
+        <Container>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl space-y-2">
+              <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
+                Storie e contenuti
+              </p>
+              <h2 className="text-ink text-2xl font-semibold tracking-tight">
+                Contenuti culturali
+              </h2>
+              <p className="text-ink-muted text-sm leading-6">
+                Contenuti con categoria cultura, oppure collegati a un evento
+                culturale. La sola categoria &quot;Eventi e comunità&quot; non
                 basta.
               </p>
             </div>
             <Link
-              href="/contenuti"
+              href="/contenuti?categoria=culture"
               className="text-brand hover:text-brand-dark text-sm font-semibold whitespace-nowrap"
             >
               Notizie e guide
@@ -243,8 +439,8 @@ export default async function CulturaHubPage() {
           </div>
           {contents.length === 0 ? (
             <PublicEmpty
-              title="Nessuna storia collegata agli incontri culturali pubblicati."
-              description="I contenuti compariranno qui quando saranno collegati a eventi culturali pubblici."
+              title="Nessun contenuto culturale pubblicato."
+              description="Compariranno qui contenuti con categoria cultura, oppure collegati a eventi culturali pubblici."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -267,7 +463,7 @@ export default async function CulturaHubPage() {
       </Section>
 
       {markets.length > 0 ? (
-        <Section className="py-14 sm:py-16 lg:py-20">
+        <Section id="mercati" className="bg-surface-elevated py-14 sm:py-16 lg:py-20">
           <Container>
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="max-w-2xl space-y-2">
@@ -311,25 +507,25 @@ export default async function CulturaHubPage() {
             Continua nella rete
           </h2>
           <p className="text-ink-muted text-sm leading-6">
-            Collaborazioni e servizi restano nei loro ecosistemi: qui non li
-            etichettiamo come culturali senza una classificazione strutturata.
+            Cultura resta un livello trasversale: i fatti vivono nei loro
+            ecosistemi. Entra nella rete per pubblicare e collegare.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="/registrati" variant="accent">
               Registrati
             </ButtonLink>
             <ButtonLink href="/pubblica">Pubblica</ButtonLink>
-            <ButtonLink href="/collaborazioni" variant="secondary">
-              Cerca una collaborazione
-            </ButtonLink>
             <ButtonLink href="/eventi?tipo=cultural" variant="secondary">
               Scopri gli eventi
             </ButtonLink>
             <ButtonLink href="/opportunita" variant="secondary">
               Esplora opportunità
             </ButtonLink>
-            <ButtonLink href="/servizi" variant="ghost">
-              Esplora i servizi
+            <ButtonLink href="/collaborazioni?ambito=culture" variant="secondary">
+              Collaborazioni
+            </ButtonLink>
+            <ButtonLink href="/servizi?categoria=cultural_creative" variant="ghost">
+              Servizi culturali
             </ButtonLink>
           </div>
         </Container>

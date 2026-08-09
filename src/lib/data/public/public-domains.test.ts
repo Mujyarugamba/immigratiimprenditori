@@ -19,17 +19,17 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 /** Filter query keys used by public list pages — must stay aligned with data modules. */
 export const PUBLIC_LIST_FILTER_PARAMS = {
-  businesses: ["q", "forma"],
-  professionals: ["q", "pratica"],
-  opportunities: ["q", "origine", "stato"],
+  businesses: ["q", "forma", "settore"],
+  professionals: ["q", "pratica", "categoria"],
+  opportunities: ["q", "origine", "stato", "ambito"],
   service_offers: ["q", "categoria", "erogazione"],
   service_requests: ["q", "categoria", "erogazione"],
   events: ["q", "tipo", "modalita"],
-  collaborations: ["q", "forma", "stato"],
+  collaborations: ["q", "forma", "stato", "ambito"],
   markets: ["q", "tipo"],
-  organizations: ["q", "tipo"],
+  organizations: ["q", "tipo", "ambito"],
   indicators: ["q"],
-  contents: ["q", "tipo", "in_evidenza"],
+  contents: ["q", "tipo", "categoria", "in_evidenza"],
 } as const;
 
 const EXPECTED_FILTER_KEYS = [
@@ -43,6 +43,8 @@ const EXPECTED_FILTER_KEYS = [
   "erogazione",
   "modalita",
   "in_evidenza",
+  "ambito",
+  "settore",
 ] as const;
 
 function readModuleSource(name: string): string {
@@ -119,18 +121,18 @@ describe("public list filter param contracts", () => {
     assert.deepEqual([...used].sort(), [...EXPECTED_FILTER_KEYS].sort());
   });
 
-  it("businesses module uses q and forma", () => {
+  it("businesses module uses q, forma, and settore", () => {
     assertUsesParamKeys(readModuleSource("businesses"), PUBLIC_LIST_FILTER_PARAMS.businesses);
   });
 
-  it("professionals module uses q and pratica", () => {
+  it("professionals module uses q, pratica, and categoria", () => {
     assertUsesParamKeys(
       readModuleSource("professionals"),
       PUBLIC_LIST_FILTER_PARAMS.professionals,
     );
   });
 
-  it("opportunities module uses q, origine, and stato", () => {
+  it("opportunities module uses q, origine, stato, and ambito", () => {
     assertUsesParamKeys(
       readModuleSource("opportunities"),
       PUBLIC_LIST_FILTER_PARAMS.opportunities,
@@ -151,7 +153,7 @@ describe("public list filter param contracts", () => {
     assertUsesParamKeys(readModuleSource("events"), PUBLIC_LIST_FILTER_PARAMS.events);
   });
 
-  it("collaborations module uses q, forma, and stato", () => {
+  it("collaborations module uses q, forma, stato, and ambito", () => {
     assertUsesParamKeys(
       readModuleSource("collaborations"),
       PUBLIC_LIST_FILTER_PARAMS.collaborations,
@@ -162,7 +164,7 @@ describe("public list filter param contracts", () => {
     assertUsesParamKeys(readModuleSource("markets"), PUBLIC_LIST_FILTER_PARAMS.markets);
   });
 
-  it("organizations module uses q and tipo", () => {
+  it("organizations module uses q, tipo, and ambito", () => {
     assertUsesParamKeys(
       readModuleSource("organizations"),
       PUBLIC_LIST_FILTER_PARAMS.organizations,
@@ -173,7 +175,7 @@ describe("public list filter param contracts", () => {
     assertUsesParamKeys(readModuleSource("observatory"), PUBLIC_LIST_FILTER_PARAMS.indicators);
   });
 
-  it("contents module uses q, tipo, and in_evidenza", () => {
+  it("contents module uses q, tipo, categoria, and in_evidenza", () => {
     assertUsesParamKeys(readModuleSource("contents"), PUBLIC_LIST_FILTER_PARAMS.contents);
   });
 });

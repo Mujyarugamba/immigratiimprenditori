@@ -5,6 +5,7 @@ import { RelatedLinks } from "@/components/public/RelatedLinks";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import { opportunityQualifiesForCultureHub } from "@/lib/data/public/culture";
 import { getPublicOpportunityById } from "@/lib/data/public/opportunities";
 import { relatedForOpportunity } from "@/lib/data/public/related";
 import {
@@ -38,17 +39,30 @@ export default async function OpportunitaDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const related = await relatedForOpportunity(opportunity.id).catch(() => []);
+  const [related, showCulture] = await Promise.all([
+    relatedForOpportunity(opportunity.id).catch(() => []),
+    opportunityQualifiesForCultureHub(opportunity.id).catch(() => false),
+  ]);
 
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/opportunita"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco opportunità
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/opportunita"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco opportunità
+          </Link>
+          {showCulture ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">

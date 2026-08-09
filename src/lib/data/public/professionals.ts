@@ -44,13 +44,24 @@ export async function listPublicProfessionals(
   const { page, pageSize, from, to } = parsePageParams(searchParams);
   const q = param(searchParams, "q");
   const pratica = param(searchParams, "pratica");
+  const categoria = param(searchParams, "categoria");
   const supabase = await createClient();
 
-  let query = supabase
-    .from("professional_profiles")
-    .select(LIST_SELECT, { count: "exact" })
-    .order("headline", { ascending: true, nullsFirst: false })
-    .range(from, to);
+  let query = categoria
+    ? supabase
+        .from("professional_profiles")
+        .select(
+          `${LIST_SELECT}, professional_profile_categories!inner ( category_code )`,
+          { count: "exact" },
+        )
+        .eq("professional_profile_categories.category_code", categoria)
+        .order("headline", { ascending: true, nullsFirst: false })
+        .range(from, to)
+    : supabase
+        .from("professional_profiles")
+        .select(LIST_SELECT, { count: "exact" })
+        .order("headline", { ascending: true, nullsFirst: false })
+        .range(from, to);
 
   if (q) {
     query = query.or(`headline.ilike.%${q}%,summary.ilike.%${q}%`);
@@ -61,12 +72,21 @@ export async function listPublicProfessionals(
 
   const { data, count, error } = await query;
   if (error) throw new Error(error.message);
-  return paginated(
-    (data ?? []) as PublicProfessionalListItem[],
-    count ?? 0,
-    page,
-    pageSize,
-  );
+
+  const items = (data ?? []).map((row) => {
+    const r = row as PublicProfessionalListItem;
+    return {
+      id: r.id,
+      headline: r.headline,
+      summary: r.summary,
+      practice_mode_code: r.practice_mode_code,
+      availability_status: r.availability_status,
+      person_id: r.person_id,
+      context_business_id: r.context_business_id,
+    };
+  });
+
+  return paginated(items, count ?? 0, page, pageSize);
 }
 
 export async function getPublicProfessionalById(

@@ -87,6 +87,7 @@ export async function listPublicOrganizations(
   const { page, pageSize, from, to } = parsePageParams(searchParams);
   const q = param(searchParams, "q");
   const tipo = param(searchParams, "tipo");
+  const ambito = param(searchParams, "ambito");
   const supabase = await createClient();
 
   let query = supabase
@@ -100,6 +101,9 @@ export async function listPublicOrganizations(
   }
   if (tipo) {
     query = query.eq("type_code", tipo);
+  }
+  if (ambito) {
+    query = query.eq("primary_scope_code", ambito);
   }
 
   const { data, count, error } = await query;

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import { isCultureClassifiedOrganization } from "@/lib/data/public/culture";
 import { getPublicOrganizationBySlug } from "@/lib/data/public/organizations";
 import { label, OFFICIAL_ROLES, ORGANIZATION_TYPES } from "@/lib/public/labels";
 
@@ -42,12 +43,25 @@ export default async function OrganizzazioneDetailPage({ params }: PageProps) {
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/organizzazioni"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco organizzazioni
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/organizzazioni"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco organizzazioni
+          </Link>
+          {isCultureClassifiedOrganization({
+            typeCode: organization.type_code,
+            primaryScopeCode: organization.primary_scope_code,
+          }) ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           <Badge tone="brand">

@@ -30,7 +30,7 @@ export type PublicBusinessDetail = PublicBusinessListItem & {
   editorial_status: string;
   publication_status: string;
   locations: { territory_reference: string }[];
-  sectors: { id: string; name: string; is_primary: boolean }[];
+  sectors: { id: string; slug: string; name: string; is_primary: boolean }[];
 };
 
 export async function listPublicBusinesses(
@@ -39,13 +39,28 @@ export async function listPublicBusinesses(
   const { page, pageSize, from, to } = parsePageParams(searchParams);
   const q = param(searchParams, "q");
   const forma = param(searchParams, "forma");
+  const settore = param(searchParams, "settore");
   const supabase = await createClient();
 
-  let query = supabase
-    .from("businesses")
-    .select(LIST_SELECT, { count: "exact" })
-    .order("public_name", { ascending: true })
-    .range(from, to);
+  let query = settore
+    ? supabase
+        .from("businesses")
+        .select(
+          `${LIST_SELECT}, business_sector_declarations!inner (
+            declaration_status,
+            business_sectors!inner ( slug )
+          )`,
+          { count: "exact" },
+        )
+        .eq("business_sector_declarations.declaration_status", "declared")
+        .eq("business_sector_declarations.business_sectors.slug", settore)
+        .order("public_name", { ascending: true })
+        .range(from, to)
+    : supabase
+        .from("businesses")
+        .select(LIST_SELECT, { count: "exact" })
+        .order("public_name", { ascending: true })
+        .range(from, to);
 
   if (q) {
     query = query.or(
@@ -60,12 +75,21 @@ export async function listPublicBusinesses(
   if (error) {
     throw new Error(error.message);
   }
-  return paginated(
-    (data ?? []) as PublicBusinessListItem[],
-    count ?? 0,
-    page,
-    pageSize,
-  );
+
+  const items = (data ?? []).map((row) => {
+    const r = row as PublicBusinessListItem;
+    return {
+      id: r.id,
+      public_name: r.public_name,
+      legal_name: r.legal_name,
+      summary: r.summary,
+      organization_form: r.organization_form,
+      substantial_status: r.substantial_status,
+      founding_year: r.founding_year,
+    };
+  });
+
+  return paginated(items, count ?? 0, page, pageSize);
 }
 
 export async function getPublicBusinessById(
@@ -81,7 +105,7 @@ export async function getPublicBusinessById(
       business_locations ( territory_reference, visibility_status, location_status ),
       business_sector_declarations (
         is_primary, declaration_status,
-        business_sectors ( id, name )
+        business_sectors ( id, slug, name )
       )
     `,
     )
@@ -114,8 +138,8 @@ export async function getPublicBusinessById(
           is_primary: boolean;
           declaration_status: string;
           business_sectors:
-            | { id: string; name: string }
-            | { id: string; name: string }[]
+            | { id: string; slug: string; name: string }
+            | { id: string; slug: string; name: string }[]
             | null;
         }[]
       | null) ?? []
@@ -129,7 +153,8 @@ export async function getPublicBusinessById(
       (d) => d.declaration_status === "declared" && d.sector != null,
     )
     .map((d) => ({
-      id: d.sector!.id,
+      id: String(d.sector!.id),
+      slug: d.sector!.slug,
       name: d.sector!.name,
       is_primary: d.is_primary,
     }));

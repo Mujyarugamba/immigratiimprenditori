@@ -112,6 +112,7 @@ export async function listPublicContents(
   const { page, pageSize, from, to } = parsePageParams(searchParams);
   const q = param(searchParams, "q");
   const tipo = param(searchParams, "tipo");
+  const categoria = param(searchParams, "categoria");
   const inEvidenza = param(searchParams, "in_evidenza");
   const supabase = await createClient();
 
@@ -127,6 +128,9 @@ export async function listPublicContents(
   }
   if (tipo) {
     query = query.eq("type_code", tipo);
+  }
+  if (categoria) {
+    query = query.eq("primary_category_code", categoria);
   }
   if (inEvidenza === "1") {
     query = query.eq("is_featured", true);

@@ -93,6 +93,7 @@ export const SERVICE_CATEGORIES: Record<string, string> = {
   professional_generic: "Servizi professionali generici",
   financial: "Servizi finanziari",
   real_estate: "Servizi immobiliari",
+  cultural_creative: "Servizi culturali e creativi",
   support_other: "Supporto / altro",
 };
 
