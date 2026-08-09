@@ -385,3 +385,15 @@ Nessun file `.sql` creato da questo documento.
 - [x] Nessuna membership / Org–Org / FEV / Storage
 - [x] Modalità accelerata cumulativa
 - [x] Sufficiente per creare tutte le migration in un unico ciclo
+
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. Tipology ≠ scope.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.1** | `20260813100000_seed_cultural_organization_activity_scopes.sql` | Seed `organization_activity_scopes`: `culture`, `heritage`, `creative_industries` |
+
+Nessun backfill AR. C3.7 discipline deferred.

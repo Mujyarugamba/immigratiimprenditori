@@ -665,3 +665,15 @@ Report: `docs/architecture/migrations/contenuti-validation-report.md`.
 - [x] Legacy non assorbite
 - [x] Modalità accelerata cumulativa
 - [x] Ciclo 1 chiuso su schema pubblicato
+
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.4** (parte contenuti) | `20260813130000_seed_cultural_content_service_categories.sql` | Seed `content_categories.culture` |
+
+Categorie ciclo 1 restano; `culture` additivo. C3.7 deferred.

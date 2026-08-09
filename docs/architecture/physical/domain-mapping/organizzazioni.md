@@ -447,7 +447,7 @@ Testi devono dichiarare: ≠ Impresa; ≠ Appartenenza/membership; ≠ Evento/Se
 | Oggetto | Seed ciclo 1 |
 |---|---|
 | `organization_types` | **11** |
-| `organization_activity_scopes` | **0** |
+| `organization_activity_scopes` | **0** (ciclo 1) → **3** culturali in C3.1 (`culture`, `heritage`, `creative_industries`) |
 | AR / ufficiali | **0** demo |
 
 ---
@@ -583,3 +583,11 @@ Physical accettabile se: inventario 4 tabelle chiuso; AR unica; ownership ternar
 Quattro tabelle (`organization_types`, `organization_activity_scopes`, `organizations`, `organization_officials`), AR `organizations`, ownership Persona|Impresa|Redazione, tipologies a catalogo (seed 11), sede descrittiva su AR, ufficiali owned, link Impresa facoltativo, pattern RLS deny-by-default.
 
 Migration Plan e SQL restano fasi successive.
+
+---
+
+## 32. C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura non è BC e non è Aggregate Root. Tipology organizzativa (`organization_types`) ≠ ambito culturale.
+
+**C3.1** (`20260813100000_seed_cultural_organization_activity_scopes.sql`): seed normativo di `organization_activity_scopes` con `culture`, `heritage`, `creative_industries`. Nessun backfill di `primary_scope_code`. Scope ≠ disciplina (C3.7 deferred).

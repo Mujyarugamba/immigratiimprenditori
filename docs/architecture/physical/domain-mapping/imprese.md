@@ -1103,3 +1103,11 @@ Il presente documento (`docs/architecture/physical/domain-mapping/imprese.md`) a
 **Conferma dell'assenza di contenuti tecnici e implementativi.** Nessuna istruzione SQL, nessuno schema di database, nessun riferimento a PostgreSQL o Supabase come scelta di progetto, nessun tipo di dato tecnico, nessuna API, nessun codice: ogni menzione di tecnologia è confinata alla nota introduttiva e alla sezione delle decisioni rinviate (§24), coerentemente con i vincoli inderogabili di questo mapping e con l'esito positivo della checklist di controllo (sopra).
 
 Il documento è pronto per essere utilizzato come riferimento per il futuro piano di migrazione del dominio Imprese e come secondo caso di applicazione, dopo Persone, della metodologia consolidata in `architecture-baseline.md`.
+
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. I settori CCI sono seed additivi sul catalogo condiviso `business_sectors` (VO03), non ownership Imprese e non discipline artistiche.
+
+**C3.3** (`20260813120000`): `audiovisual`, `publishing`, `music_industry`, `live_performance`, `design_creative`, `fashion`, `artistic_crafts`, `cultural_heritage_services`. Nessun backfill dichiarazioni. C3.7 deferred.

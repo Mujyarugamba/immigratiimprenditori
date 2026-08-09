@@ -611,4 +611,15 @@ Plan accettabile se: 2 tabelle = 2 migration; timestamp unici e ordinati; contra
 * `supabase/migrations/20260810100000_create_collaboration_participants.sql`
 
 senza nuove decisioni semantiche.
-`)
+
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. `form_code` ≠ ambito culturale.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.6** | `20260813150000_add_collaboration_activity_scope.sql` | Catalogo `collaboration_activity_scopes` + colonna nullable `activity_scope_code` |
+
+Seed: `culture`, `heritage`, `creative_industries`. Nessun backfill. C3.7 deferred.

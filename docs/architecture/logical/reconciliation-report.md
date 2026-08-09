@@ -312,6 +312,20 @@ Sintesi dalla Dependency Map consolidata (non duplicata integralmente).
 | R15 | Policy RLS applicative | Identità + tutti | Sicurezza | rinviato post-v1 |
 | R16 | Integrazioni retroattive extra | Vari | FK / link | rinviato post-v1 |
 | R17 | Consolidamento legacy Auth/Profile | Persone / Identità / infra | Debito tecnico | rinviato post-v1 |
+| R18 | Discipline culturali condivise (C3.7) | Trasversale / cataloghi | Tassonomia | rinviato (Hybrid C; scope già in C3.1–C3.6) |
+
+---
+
+## 15bis. Cultura trasversale (Hybrid C — nota C3)
+
+Cultura **non** è un 14º dominio né un Aggregate Root. È un hub applicativo trasversale (C0-B / C2) che consuma classificazioni di scope dei domini esistenti.
+
+| Principio | Dichiarazione |
+|---|---|
+| Scope ≠ disciplina | Inclusione hub = scope/classificazione di dominio; discipline condivise = C3.7 deferred |
+| Un fatto una volta | Nessun CulturalPerson/Org/Business/Event/… |
+| C3.1–C3.6 | Seed/wiring scope (Org, Professionisti, Imprese/CCI, Contenuti, Servizi, Opp, Collab) |
+| C3.7 | Rinviata |
 
 ---
 

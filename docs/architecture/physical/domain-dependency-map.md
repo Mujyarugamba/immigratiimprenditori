@@ -262,6 +262,9 @@ Relazioni significative (non ogni FK tecnica). Direzione: **sorgente → dipende
 | Policy RLS applicative | Identità + tutti | Rinviata | Fuori chiusura schema v1 |
 | FK strutturali Eventi/Servizi/Contenuti → Organizzazioni | Domini consumatori | Rinviata | Etichette nel ciclo 1 |
 | FK retroattive Opportunità raffinate | Opportunità | Rinviata / evolutiva | Secondo Physical Opp |
+| Discipline culturali condivise (C3.7) | Trasversale | Rinviata | Hybrid C: scope già in C3.1–C3.6; Cultura ≠ BC |
+
+**Nota C3 (Hybrid C):** Cultura non è dominio né AR. C3.1–C3.6 arricchiscono cataloghi/scope di Org, Professionisti, Imprese (`business_sectors` CCI), Contenuti, Servizi, Opportunità, Collaborazioni. Nessuna nuova dipendenza di ownership verso un BC Cultura.
 
 I rinvii sono **scelte deliberate**, non incomplezze accidentali della v1.
 

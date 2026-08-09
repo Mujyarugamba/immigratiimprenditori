@@ -655,3 +655,15 @@ Nessun file `.sql` creato da questo documento.
 - [x] Confini DV4/Professionisti/Imprese/Opportunità
 - [x] Modalità accelerata
 - [x] Sufficiente per iniziare M1 senza nuove decisioni
+
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. `linguistic` ≠ cultura.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.4** (parte servizi) | `20260813130000_seed_cultural_content_service_categories.sql` | Seed `service_categories.cultural_creative` |
+
+C3.7 deferred.

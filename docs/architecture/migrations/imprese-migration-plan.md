@@ -750,4 +750,14 @@ Il Migration Plan di Imprese è **completato a livello statico**: sequenza green
 
 ---
 
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. I settori CCI estendono il catalogo condiviso `business_sectors` (VO03), **non** ownership Imprese.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.3** | `20260813120000_seed_creative_cultural_business_sectors.sql` | Seed CCI: `audiovisual`, `publishing`, `music_industry`, `live_performance`, `design_creative`, `fashion`, `artistic_crafts`, `cultural_heritage_services` |
+
+Nessun backfill dichiarazioni. C3.7 deferred.
+
 *Fine del Migration Plan di Imprese.*

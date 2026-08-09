@@ -259,9 +259,12 @@ CHECK: `length(btrim(code)) > 0`; `length(btrim(name_it)) > 0`; `sort_order >= 0
 | `professional_generic` | Servizi professionali generici | 30 |
 | `financial` | Servizi finanziari | 40 |
 | `real_estate` | Servizi immobiliari | 50 |
+| `cultural_creative` | Servizi culturali e creativi | 60 |
 | `support_other` | Supporto / altro | 90 |
 
 ≠ `professional_categories`; ≠ DV4 `language_service_types`.
+
+**C3.4:** seed additivo `cultural_creative`. `linguistic` resta semanticamente distinto e non è proxy Cultura (Hybrid C; C3.7 deferred).
 
 ### 9.2 `service_economic_bands`
 
@@ -523,7 +526,7 @@ Testi devono dichiarare: ≠ ServizioProfessionale; ≠ ServizioImpresa; ≠ Opp
 
 | Oggetto | Seed ciclo 1 |
 |---|---|
-| `service_categories` | 6 righe §9.1 |
+| `service_categories` | 6 righe §9.1 ciclo 1 → **7** con C3.4 (`cultural_creative`) |
 | `service_economic_bands` | 4 righe §9.2 |
 | AR / owned | **Nessun** seed demo |
 

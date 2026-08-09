@@ -244,9 +244,12 @@ Catalogo piatto (no gerarchia). Stessa forma C03 di `content_types`.
 | `services_guidance` | Orientamento ai servizi | 50 |
 | `events_community` | Eventi e comunità | 60 |
 | `stories` | Storie e testimonianze | 70 |
+| `culture` | Cultura | 75 |
 | `other` | Altro | 90 |
 
 Categoria primaria: colonna nullable su `contents`. Nessuna tabella multi-categoria ciclo 1 (Logical: al più una primaria).
+
+**C3.4:** seed additivo `culture` (Hybrid C; scope di contenuto culturale indipendente da Evento; ≠ `events_community`; discipline C3.7 deferred).
 
 ---
 
@@ -547,7 +550,7 @@ Testi devono dichiarare: ≠ Evento; ≠ OffertaDiServizio; ≠ Opportunità; �
 | Oggetto | Seed ciclo 1 |
 |---|---|
 | `content_types` | **11** righe §9 |
-| `content_categories` | **8** righe §10 |
+| `content_categories` | **8** righe §10 ciclo 1 → **9** con C3.4 (`culture`) |
 | `content_tags` | **0** (struttura pronta) |
 | AR / authors / links | **Nessun** seed demo |
 

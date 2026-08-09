@@ -1273,3 +1273,15 @@ Modalità operativa consolidata del progetto (da rispettare per ogni blocco): ar
 **MIGRATION PLAN PROFESSIONISTI — CICLO 1 CHIUSO.**
 M1–M6 chiuse; M7 assente; M8.1 SKIP; M8.2 ACCETTATA (`professionisti-validation-report.md`).
 **Prossimo passo operativo:** commit e push del report M8.2 e degli aggiornamenti documentali di chiusura (nessuna migration SQL).
+
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. `cultural_mediation` resta in `linguistic_intercultural`.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.2** | `20260813110000_extend_professional_cultural_creative_categories.sql` | CHECK `group_code` + `cultural_creative`; seed 7 categorie culturali/creative |
+
+C3.7 discipline deferred.

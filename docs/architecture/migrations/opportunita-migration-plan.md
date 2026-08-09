@@ -774,4 +774,16 @@ Candidatura, valutazione, graduatoria e assegnazione restano **rinviate**; PC2 e
 
 ---
 
+---
+
+## C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura ≠ BC. `opportunity_types` = natura; activity scopes = ambito.
+
+| Unit | File | Responsabilità |
+|---|---|---|
+| **C3.5** | `20260813140000_create_opportunity_activity_scopes.sql` | Catalogo + assignments + RLS mirror type assignments |
+
+Seed scopes: `culture`, `heritage`, `creative_industries`. C3.7 deferred.
+
 *Fine del Migration Plan di Opportunità.*

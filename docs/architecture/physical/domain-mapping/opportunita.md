@@ -2733,4 +2733,18 @@ Il Physical Domain Mapping di Opportunità adotta **un solo Aggregate Root `Oppo
 
 ---
 
+---
+
+## 45. C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura non è BC e non è Aggregate Root. `opportunity_types` classifica la **natura** (call/incentive/…); non l’ambito culturale.
+
+**C3.5** (`20260813140000_create_opportunity_activity_scopes.sql`):
+- catalogo `opportunity_activity_scopes` (C03; seed `culture`, `heritage`, `creative_industries`);
+- bridge `opportunity_activity_scope_assignments` (PK `(opportunity_id, scope_code)`; CASCADE da Opportunity; RESTRICT su catalogo);
+- RLS mirror di `opportunity_type_assignments` (SELECT pubblico su Opp published+public; INSERT/UPDATE party roles);
+- nessun backfill da Evento/titolo; discipline C3.7 deferred.
+
+Un’Opportunità culturale può esistere **senza** Evento tramite assignment di scope.
+
 *Fine del Physical Domain Mapping di Opportunità.*

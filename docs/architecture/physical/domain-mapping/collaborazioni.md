@@ -163,6 +163,7 @@ Interesse/candidatura/invito/abbinamento; relazione attiva; matching; membership
 | 15 | `sought_counterpart_text` | `text` | SÌ | — | Controparte ricercata (criteri); non blank se valorizzata |
 | 16 | `external_context_label` | `text` | SÌ | — | Etichetta contesto/ente esterno non censito; **non** FK Org |
 | 17 | `context_area_text` | `text` | SÌ | — | Area/contesto territoriale-settoriale descrittivo |
+| 17b | `activity_scope_code` | `text` | SÌ | — | FK opzionale `collaboration_activity_scopes` (C3.6); ≠ `form_code` |
 | 18 | `slug` | `text` | NO | — | Unique; pattern slug |
 | 19 | `availability_starts_on` | `date` | SÌ | — | Disponibilità temporale opzionale |
 | 20 | `availability_ends_on` | `date` | SÌ | — | Opzionale; ≥ start se entrambi |
@@ -721,4 +722,16 @@ Physical accettabile se: inventario **2** tabelle chiuso; AR unica; ownership te
 **Physical Collaborazioni ciclo 1 chiuso per Migration Plan.**
 
 Totale: **2 tabelle** (`collaborations`, `collaboration_participants`). Unità SQL indicative: **M1.1**, **M2.1**; **M8.1 SKIP**; **M8.2** documentale.
-`)
+
+---
+
+## 33. C3 Cultural Taxonomy Enrichment (addendum)
+
+**Hybrid C.** Cultura non è BC. `form_code` descrive la forma della collaborazione, non l’ambito culturale.
+
+**C3.6** (`20260813150000_add_collaboration_activity_scope.sql`):
+- catalogo `collaboration_activity_scopes` (seed: `culture`, `heritage`, `creative_industries`);
+- colonna nullable `collaborations.activity_scope_code` FK RESTRICT/CASCADE update;
+- nessun backfill da `form_code`/titolo/descrizione;
+- nessuna nuova policy AR (colonna eredita RLS Collaborazioni);
+- C3.7 discipline deferred.
