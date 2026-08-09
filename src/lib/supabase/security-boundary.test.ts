@@ -71,6 +71,7 @@ describe("service-role boundary", () => {
     const files = [
       "businesses.ts",
       "contents.ts",
+      "culture.ts",
       "observatory.ts",
       "organizations.ts",
     ];

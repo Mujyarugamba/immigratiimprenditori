@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/mercati",
   "/servizi",
   "/eventi",
+  "/cultura",
   "/contenuti",
   "/osservatorio",
   "/organizzazioni",

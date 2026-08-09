@@ -1,9 +1,16 @@
 # Application Architecture v1
 
-**Status:** P1–P6 application blocks implemented — **v1 release-ready** (latest: `p6-e2e-hardening-release-validation-report.md`)
+**Status:** P1–P6 application blocks implemented — **v1 release-ready**; C2 Cultura hub (app-only transversal) — see `c2-cultura-hub-validation-report.md`
 **Baseline Git:** `4bf213b7f9391142cf30533ed261243a2b709250` (`v0.3.0-db-access-rls-v1`)
-**DB head:** `20260812300000` (local = remote, pending `0`) — unchanged by P2–P6
+**DB head:** `20260812300000` (local = remote, pending `0`) — unchanged by P2–P6 and C2
 **Authority:** Access/RLS v1 (A1/A2) remains the security authority. This document does not redefine DB contracts.
+
+### C2 delta (Cultura hub — transversal, app-only)
+
+- Public hub `/cultura` aggregates existing public facts (event-anchored: `events.type_code = cultural`)
+- Esplora + home transversal strip; **not** a sixth ecosystem / not primary nav
+- No DB/RLS/migration/seed changes; no Culture AR
+- Report: `c2-cultura-hub-validation-report.md`
 
 ### P6 delta (E2E / hardening / release)
 

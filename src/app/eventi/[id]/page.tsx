@@ -51,12 +51,22 @@ export default async function EventoDetailPage({ params }: PageProps) {
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
-        <Link
-          href="/eventi"
-          className="text-brand hover:text-brand-dark text-sm font-medium"
-        >
-          ← Torna all&apos;elenco eventi
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link
+            href="/eventi"
+            className="text-brand hover:text-brand-dark text-sm font-medium"
+          >
+            ← Torna all&apos;elenco eventi
+          </Link>
+          {event.type_code === "cultural" ? (
+            <Link
+              href="/cultura"
+              className="text-brand hover:text-brand-dark text-sm font-medium"
+            >
+              Esplora Cultura
+            </Link>
+          ) : null}
+        </div>
 
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">

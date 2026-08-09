@@ -29,6 +29,7 @@ test.describe("public IA", () => {
     await page.goto("/");
     for (const href of [
       "/eventi",
+      "/cultura",
       "/contenuti",
       "/osservatorio",
       "/organizzazioni",
@@ -37,5 +38,19 @@ test.describe("public IA", () => {
       await page.goto(href);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     }
+  });
+
+  test("Cultura hub is transversal and not a sixth ecosystem", async ({
+    page,
+  }) => {
+    await page.goto("/cultura");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      /Cultura,\s*incontri,\s*relazioni/i,
+    );
+    await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
+      "Persone. Imprese. Opportunità. Mercati internazionali.",
+    );
+    await expect(page.locator('a[href="/eventi?tipo=cultural"]').first()).toBeAttached();
+    await expect(page.locator('a[href="/registrati"]').first()).toBeAttached();
   });
 });

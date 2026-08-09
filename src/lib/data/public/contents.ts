@@ -145,16 +145,22 @@ export async function listPublicContents(
 export async function getPublicContentBySlug(
   slug: string,
 ): Promise<PublicContentDetail | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("contents")
-    .select(DETAIL_SELECT)
-    .eq("slug", slug)
-    .maybeSingle();
+  // Public detail contract (P6 / C2.1): missing, private, or temporarily
+  // unavailable lookups resolve to null → route `notFound()`, never a thrown
+  // error that surfaces the generic "Errore inatteso" boundary for a slug miss.
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("contents")
+      .select(DETAIL_SELECT)
+      .eq("slug", slug)
+      .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  if (!data) return null;
-  return mapContentDetail(data);
+    if (error || !data) return null;
+    return mapContentDetail(data);
+  } catch {
+    return null;
+  }
 }
 
 export async function listHomeContents(limit = 3) {

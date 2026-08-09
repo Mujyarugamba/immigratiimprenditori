@@ -17,6 +17,7 @@ export const moreNav: NavItem[] = [
   { label: "Collaborazioni", href: "/collaborazioni" },
   { label: "Professionisti", href: "/professionisti" },
   { label: "Eventi", href: "/eventi" },
+  { label: "Cultura", href: "/cultura" },
   { label: "Notizie e guide", href: "/contenuti" },
   { label: "Osservatorio", href: "/osservatorio" },
   { label: "Organizzazioni", href: "/organizzazioni" },

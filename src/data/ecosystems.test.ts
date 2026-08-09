@@ -42,6 +42,7 @@ describe("P4.5 ecosystem IA", () => {
       "/collaborazioni",
       "/servizi",
       "/eventi",
+      "/cultura",
       "/mercati",
       "/organizzazioni",
       "/osservatorio",
@@ -49,6 +50,13 @@ describe("P4.5 ecosystem IA", () => {
     ]) {
       assert.ok(hrefs.has(href), `missing nav href ${href}`);
     }
+  });
+
+  it("keeps Cultura transversal, not a sixth ecosystem", () => {
+    assert.ok(moreNav.some((n) => n.href === "/cultura"));
+    assert.ok(!primaryNav.some((n) => n.href === "/cultura"));
+    assert.ok(transversalLayers.some((l) => l.id === "cultura"));
+    assert.ok(!ecosystems.some((e) => (e.id as string) === "culture"));
   });
 
   it("maps DB domains to ecosystems without inventing new ARs", () => {

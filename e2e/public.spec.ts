@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   "/mercati",
   "/servizi",
   "/eventi",
+  "/cultura",
   "/collaborazioni",
   "/osservatorio",
   "/contenuti",

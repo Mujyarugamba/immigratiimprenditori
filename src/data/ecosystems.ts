@@ -104,6 +104,13 @@ export const transversalLayers = [
     description: "Incontri, edizioni e contesti della rete.",
   },
   {
+    id: "cultura",
+    label: "Cultura",
+    href: "/cultura",
+    description:
+      "Incontri culturali e connessioni pubbliche nella rete — non un sesto ecosistema.",
+  },
+  {
     id: "contenuti",
     label: "Notizie e guide",
     href: "/contenuti",

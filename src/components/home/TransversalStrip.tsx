@@ -12,11 +12,11 @@ export function TransversalStrip() {
             Livelli che arricchiscono la rete
           </h2>
           <p className="text-ink-muted text-sm leading-6">
-            Eventi, contenuti e Osservatorio non sono l&apos;identità della
-            piattaforma: aiutano a leggere e attivare gli ecosistemi.
+            Eventi, Cultura, contenuti e Osservatorio non sono l&apos;identità
+            della piattaforma: aiutano a leggere e attivare gli ecosistemi.
           </p>
         </div>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {transversalLayers.map((layer) => (
             <li key={layer.id}>
               <Link
