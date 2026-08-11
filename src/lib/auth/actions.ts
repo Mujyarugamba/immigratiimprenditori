@@ -5,6 +5,13 @@ import { ensureAccountProvisioned } from "@/lib/access/ensure-account";
 import { linkOwnPerson } from "@/lib/access/link-person";
 import { safeRedirectPath } from "@/lib/auth/safe-redirect";
 import { toUserMessage, type AppError } from "@/lib/errors/app-error";
+import {
+  ensureSignupTermsAcceptanceIfIntended,
+  parseTermsAcceptedFromForm,
+  recordSignupTermsAcceptance,
+  signupTermsMetadata,
+  TERMS_ACCEPTANCE_REQUIRED_MESSAGE,
+} from "@/lib/legal/record-terms-acceptance";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionState = {
@@ -47,6 +54,18 @@ export async function signInAction(
     return fail(provision.errorMessage);
   }
 
+  if (provision.accountId) {
+    const terms = await ensureSignupTermsAcceptanceIfIntended(
+      supabase,
+      data.user,
+      provision.accountId,
+    );
+    if (!terms.ok) {
+      await supabase.auth.signOut();
+      return fail(terms.message);
+    }
+  }
+
   redirect(next);
 }
 
@@ -57,6 +76,12 @@ export async function signUpAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
+
+  if (!parseTermsAcceptedFromForm(formData)) {
+    return fail(TERMS_ACCEPTANCE_REQUIRED_MESSAGE, {
+      accept_terms: TERMS_ACCEPTANCE_REQUIRED_MESSAGE,
+    });
+  }
 
   if (!email || !password) {
     return fail("Inserisci email e password.");
@@ -69,12 +94,16 @@ export async function signUpAction(
 
   const supabase = await createClient();
   const origin = process.env.NEXT_PUBLIC_SITE_URL;
+  const termsMeta = signupTermsMetadata();
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: fullName ? { full_name: fullName } : undefined,
+      data: {
+        ...(fullName ? { full_name: fullName } : {}),
+        ...termsMeta,
+      },
       emailRedirectTo: origin
         ? `${origin}/auth/callback?next=/app/onboarding`
         : undefined,
@@ -87,9 +116,25 @@ export async function signUpAction(
 
   if (data.user && data.session) {
     const provision = await ensureAccountProvisioned(data.user.id);
-    if (!provision.accountId && provision.errorMessage) {
-      return fail(provision.errorMessage);
+    if (!provision.accountId) {
+      await supabase.auth.signOut();
+      return fail(
+        provision.errorMessage ??
+          "Account non disponibile. Contatta l'assistenza.",
+      );
     }
+
+    const recorded = await recordSignupTermsAcceptance(
+      supabase,
+      provision.accountId,
+    );
+    if (!recorded.ok) {
+      // Fail-safe: do not leave a fully active session without Terms evidence.
+      // Auth+Account may already exist; metadata retains intent for login retry.
+      await supabase.auth.signOut();
+      return fail(recorded.message);
+    }
+
     redirect("/app/onboarding");
   }
 
@@ -127,6 +172,15 @@ export async function completeOnboardingAction(
       provision.errorMessage ??
         "Account non disponibile. Contatta l'assistenza.",
     );
+  }
+
+  const terms = await ensureSignupTermsAcceptanceIfIntended(
+    supabase,
+    user,
+    provision.accountId,
+  );
+  if (!terms.ok) {
+    return fail(terms.message);
   }
 
   const linked = await linkOwnPerson({

@@ -208,6 +208,7 @@ export function cleanupUsers(userIds: string[]) {
     [
       `DELETE FROM public.business_membership_management_authorizations WHERE membership_id IN (SELECT id FROM public.business_memberships WHERE person_id IN (${u}));`,
       `DELETE FROM public.business_memberships WHERE person_id IN (${u});`,
+      `DELETE FROM public.terms_acceptances WHERE account_id IN (SELECT id FROM public.accounts WHERE auth_user_id IN (${u}));`,
       `DELETE FROM public.account_role_assignments WHERE account_id IN (SELECT id FROM public.accounts WHERE auth_user_id IN (${u}));`,
       `DELETE FROM public.accounts WHERE auth_user_id IN (${u});`,
       `DELETE FROM public.profiles WHERE id IN (${u});`,

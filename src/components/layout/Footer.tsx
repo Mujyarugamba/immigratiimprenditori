@@ -95,10 +95,24 @@ export function Footer() {
       </Container>
 
       <div className="border-t border-white/10">
-        <Container className="py-4 text-xs text-white/50">
+        <Container className="flex flex-col gap-3 py-4 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {siteConfig.domain}
           </p>
+          <nav aria-label="Documenti legali" className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link href="/privacy" className="hover:text-white">
+              Privacy
+            </Link>
+            <Link href="/cookie" className="hover:text-white">
+              Cookie
+            </Link>
+            <Link href="/termini" className="hover:text-white">
+              Termini
+            </Link>
+            <Link href="/dati-e-fonti" className="hover:text-white">
+              Dati e fonti
+            </Link>
+          </nav>
         </Container>
       </div>
     </footer>

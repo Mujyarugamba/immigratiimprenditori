@@ -7,7 +7,7 @@ export async function loginViaUi(page: Page, email: string, password: string) {
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Accedi" }).click();
   await expect(page).toHaveURL(/\/app/, { timeout: 45_000 });
-  await expect(page.getByText("Area riservata")).toBeVisible({
+  await expect(page.getByText("Area riservata", { exact: true })).toBeVisible({
     timeout: 30_000,
   });
 }
