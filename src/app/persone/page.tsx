@@ -13,7 +13,7 @@ import { PRACTICE_MODES, label } from "@/lib/public/labels";
 export const metadata: Metadata = {
   title: "Persone",
   description:
-    "Persone nella rete: profili pubblici, professionisti e ingresso all’area riservata.",
+    "Persone e professionisti nella rete Immigrati Imprenditori.",
 };
 
 const eco = ecosystems.find((e) => e.id === "persone")!;
@@ -38,12 +38,11 @@ export default async function PersoneHubPage() {
 
           <div className="border-line bg-surface-elevated space-y-3 rounded-md border p-5">
             <h2 className="text-ink text-base font-semibold">
-              Profili pubblici e professioni
+              Profili e professioni
             </h2>
             <p className="text-ink-muted text-sm leading-6">
-              Qui trovi le persone che hanno reso pubblico il proprio profilo e
-              i professionisti disponibili. Le impostazioni del tuo account
-              restano private nell&apos;area riservata.
+              Qui trovi le persone che hanno scelto di presentarsi e i
+              professionisti disponibili. I dati di accesso restano privati.
             </p>
           </div>
 
@@ -64,7 +63,7 @@ export default async function PersoneHubPage() {
               <Link href="/imprese" className="text-brand font-medium">
                 Imprese collegate
               </Link>{" "}
-              — quando pubbliche, emergono dalle schede e dalle relazioni.
+              — quando disponibili, emergono dalle schede e dalle relazioni.
             </li>
             <li>
               <Link href="/servizi" className="text-brand font-medium">
@@ -80,7 +79,7 @@ export default async function PersoneHubPage() {
         <Section className="bg-surface-elevated">
           <Container>
             <PublicEmpty
-              title="Nessun profilo pubblico al momento"
+              title="Non ci sono ancora profili da mostrare"
               description="Quando le persone pubblicheranno il proprio profilo, compariranno qui."
             />
           </Container>
@@ -90,9 +89,11 @@ export default async function PersoneHubPage() {
           className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
           eyebrow="Profili"
           title="Persone nella rete"
-          description="Profili resi pubblici dai loro titolari."
+          description="Persone che hanno scelto di presentarsi."
           actionHref="/registrati"
           actionLabel="Entra nella rete"
+          emptyTitle="Non ci sono ancora profili da mostrare"
+          emptyDescription="Quando le persone pubblicheranno il proprio profilo, compariranno qui."
           items={people.map((p) => ({
             href: `/persone/${p.slug}`,
             title: p.display_name,
@@ -106,10 +107,12 @@ export default async function PersoneHubPage() {
         <HomeDomainSection
           className="py-14 sm:py-16 lg:py-20"
           eyebrow="Professionisti"
-          title="Profili professionali pubblici"
-          description="Competenze e servizi professionali nella rete."
+          title="Professionisti nella rete"
+          description="Competenze e servizi professionali."
           actionHref="/professionisti"
           actionLabel="Vedi tutti i professionisti"
+          emptyTitle="Non ci sono ancora professionisti da mostrare"
+          emptyDescription="Quando i professionisti si presenteranno, li troverai qui."
           items={professionals.map((p) => ({
             href: `/professionisti/${p.id}`,
             title: p.headline || "Professionista",

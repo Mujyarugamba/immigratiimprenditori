@@ -12,9 +12,9 @@ export function FinalCta() {
               Entra nella rete e pubblica la tua presenza
             </h2>
             <p className="text-ink-muted text-base leading-7">
-              Crea il profilo, collega un&apos;impresa, pubblica un&apos;opportunità
-              o indica i mercati in cui operi. Pubblichi dall&apos;area riservata;
-              la rete resta esplorabile da tutti.
+              Crea il profilo, presenta l&apos;impresa, pubblica un&apos;opportunità
+              o indica i tuoi mercati. Pubblichi dopo l&apos;accesso; la rete resta
+              aperta a tutti.
             </p>
           </div>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">

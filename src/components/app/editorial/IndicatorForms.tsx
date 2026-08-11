@@ -12,7 +12,12 @@ import {
   type FormActionState,
 } from "@/lib/editorial/actions";
 import type { ObservatoryIndicator } from "@/lib/data/editorial/observatory";
-import { label } from "@/lib/public/labels";
+import {
+  OBSERVATORY_PERIODICITY_LABELS,
+  OBSERVATORY_UNIT_LABELS,
+  OBSERVATORY_VALUE_NATURE_LABELS,
+  label,
+} from "@/lib/public/labels";
 
 const INDICATOR_OPERATIONAL_LABELS: Record<string, string> = {
   draft: "Bozza",
@@ -48,28 +53,30 @@ export function IndicatorCreateForm() {
         <span className="font-medium">Natura valore</span>
         <select name="value_nature" className={selectClass} defaultValue="count" disabled={pending}>
           {NATURE_OPTIONS.map((n) => (
-            <option key={n.value} value={n.value}>{n.value}</option>
+            <option key={n.value} value={n.value}>
+              {label(OBSERVATORY_VALUE_NATURE_LABELS, n.value)}
+            </option>
           ))}
         </select>
       </label>
       <label className="text-ink flex flex-col gap-1 text-sm">
         <span className="font-medium">Unità</span>
         <select name="unit_code" className={selectClass} defaultValue="units" disabled={pending}>
-          <option value="units">units</option>
-          <option value="percent">percent</option>
-          <option value="eur">eur</option>
-          <option value="eur_thousands">eur_thousands</option>
-          <option value="ratio">ratio</option>
-          <option value="index_points">index_points</option>
+          {Object.keys(OBSERVATORY_UNIT_LABELS).map((code) => (
+            <option key={code} value={code}>
+              {label(OBSERVATORY_UNIT_LABELS, code)}
+            </option>
+          ))}
         </select>
       </label>
       <label className="text-ink flex flex-col gap-1 text-sm">
         <span className="font-medium">Periodicità</span>
         <select name="periodicity" className={selectClass} defaultValue="annual" disabled={pending}>
-          <option value="annual">annual</option>
-          <option value="quarterly">quarterly</option>
-          <option value="monthly">monthly</option>
-          <option value="point_in_time">point_in_time</option>
+          {Object.keys(OBSERVATORY_PERIODICITY_LABELS).map((code) => (
+            <option key={code} value={code}>
+              {label(OBSERVATORY_PERIODICITY_LABELS, code)}
+            </option>
+          ))}
         </select>
       </label>
       {state.message && !state.ok ? (
@@ -98,22 +105,24 @@ export function IndicatorEditForm({ indicator }: { indicator: ObservatoryIndicat
           <div className="grid gap-2 sm:grid-cols-3">
             <select name="value_nature" className={selectClass} defaultValue={indicator.value_nature} disabled={pending}>
               {NATURE_OPTIONS.map((n) => (
-                <option key={n.value} value={n.value}>{n.value}</option>
+                <option key={n.value} value={n.value}>
+                  {label(OBSERVATORY_VALUE_NATURE_LABELS, n.value)}
+                </option>
               ))}
             </select>
             <select name="unit_code" className={selectClass} defaultValue={indicator.unit_code} disabled={pending}>
-              <option value="units">units</option>
-              <option value="percent">percent</option>
-              <option value="eur">eur</option>
-              <option value="eur_thousands">eur_thousands</option>
-              <option value="ratio">ratio</option>
-              <option value="index_points">index_points</option>
+              {Object.keys(OBSERVATORY_UNIT_LABELS).map((code) => (
+                <option key={code} value={code}>
+                  {label(OBSERVATORY_UNIT_LABELS, code)}
+                </option>
+              ))}
             </select>
             <select name="periodicity" className={selectClass} defaultValue={indicator.periodicity} disabled={pending}>
-              <option value="annual">annual</option>
-              <option value="quarterly">quarterly</option>
-              <option value="monthly">monthly</option>
-              <option value="point_in_time">point_in_time</option>
+              {Object.keys(OBSERVATORY_PERIODICITY_LABELS).map((code) => (
+                <option key={code} value={code}>
+                  {label(OBSERVATORY_PERIODICITY_LABELS, code)}
+                </option>
+              ))}
             </select>
           </div>
         </label>

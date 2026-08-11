@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Container } from "@/components/ui/Container";
-import { mainNav, publishCta } from "@/data/navigation";
+import { mainNav } from "@/data/navigation";
 import { siteConfig } from "@/lib/site";
 
 const participateLinks = [
-  { label: "Pubblica una richiesta", href: "/pubblica" },
-  { label: "Presenta la tua impresa", href: "/pubblica" },
-  { label: "Partecipa come ente", href: "/pubblica" },
+  { label: "Crea il tuo profilo", href: "/registrati" },
+  { label: "Presenta la tua impresa", href: "/app/imprese" },
+  { label: "Pubblica nella rete", href: "/pubblica" },
 ];
 
 export function Footer() {
@@ -69,14 +69,6 @@ export function Footer() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href={publishCta.href}
-                className="text-accent-soft text-sm font-semibold transition-colors hover:text-white"
-              >
-                {publishCta.label}
-              </Link>
-            </li>
           </ul>
         </div>
 
@@ -86,17 +78,17 @@ export function Footer() {
           </p>
           <ul className="space-y-1.5 text-sm text-white/75">
             <li>
-              <Link href="/contatti" className="hover:text-white">
-                Contatti
-              </Link>
-            </li>
-            <li>
               <a
                 href={`mailto:info@${siteConfig.domain}`}
                 className="hover:text-white"
               >
                 info@{siteConfig.domain}
               </a>
+            </li>
+            <li>
+              <Link href="/contatti" className="hover:text-white">
+                Scrivici
+              </Link>
             </li>
           </ul>
         </div>
@@ -108,8 +100,14 @@ export function Footer() {
             © {new Date().getFullYear()} {siteConfig.domain}
           </p>
           <p>
-            Contenuto provvisorio in fase di sviluppo. Nessun dato statistico
-            ufficiale pubblicato in questa versione.
+            <Link
+              href="/osservatorio"
+              className="transition-colors hover:text-white/80"
+            >
+              Osservatorio
+            </Link>
+            {" · "}
+            indicatori pubblicati man mano che diventano disponibili
           </p>
         </Container>
       </div>

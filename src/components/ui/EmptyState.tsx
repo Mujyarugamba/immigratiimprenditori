@@ -4,8 +4,8 @@ type EmptyStateProps = {
 };
 
 export function EmptyState({
-  title = "Contenuti in arrivo",
-  description = "Questa sezione è in fase di allestimento. I contenuti verranno pubblicati progressivamente, senza dati provvisori inventati.",
+  title = "Ancora niente da mostrare",
+  description = "Quando ci saranno contenuti in questa sezione, li troverai qui.",
 }: EmptyStateProps) {
   return (
     <div className="border-line bg-surface mt-8 rounded-md border border-dashed px-5 py-8">

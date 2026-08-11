@@ -25,7 +25,7 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
 
       {mode === "signup" ? (
         <FormField
-          label="Nome visualizzato"
+          label="Come vuoi apparire"
           name="full_name"
           autoComplete="name"
           disabled={pending}

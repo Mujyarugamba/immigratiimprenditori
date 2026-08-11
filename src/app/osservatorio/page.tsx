@@ -4,7 +4,12 @@ import { ErrorState } from "@/components/ui/states";
 import { sections } from "@/data/sections";
 import { listPublicIndicators } from "@/lib/data/public/observatory";
 import { param } from "@/lib/data/public/paging";
-import { textFilter } from "@/lib/public/labels";
+import {
+  OBSERVATORY_PERIODICITY_LABELS,
+  OBSERVATORY_UNIT_LABELS,
+  label,
+  textFilter,
+} from "@/lib/public/labels";
 
 const section = sections.osservatorio;
 
@@ -50,12 +55,16 @@ export default async function OsservatorioPage({ searchParams }: PageProps) {
         title: item.title,
         description: item.description,
         meta: [
-          item.periodicity ? `Periodo: ${item.periodicity.replaceAll("_", " ")}` : "",
-          item.unit_code ? `Unità: ${item.unit_code.replaceAll("_", " ")}` : "",
+          item.periodicity
+            ? label(OBSERVATORY_PERIODICITY_LABELS, item.periodicity)
+            : "",
+          item.unit_code
+            ? label(OBSERVATORY_UNIT_LABELS, item.unit_code)
+            : "",
         ].filter(Boolean),
       })}
-      emptyTitle="Nessun indicatore trovato"
-      emptyDescription="Non ci sono indicatori pubblicati che corrispondono ai filtri selezionati."
+      emptyTitle="Non ci sono ancora indicatori da mostrare"
+      emptyDescription="Gli indicatori dell’Osservatorio compariranno qui quando saranno disponibili."
     />
   );
 }

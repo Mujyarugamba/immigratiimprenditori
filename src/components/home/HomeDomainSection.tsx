@@ -20,6 +20,8 @@ type HomeDomainSectionProps = {
   actionLabel: string;
   items: HomeCard[];
   className?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
 };
 
 export function HomeDomainSection({
@@ -30,6 +32,8 @@ export function HomeDomainSection({
   actionLabel,
   items,
   className = "bg-surface py-14 sm:py-16 lg:py-20",
+  emptyTitle = "Ancora niente da mostrare",
+  emptyDescription = "Quando ci saranno contenuti in questa sezione, li troverai qui.",
 }: HomeDomainSectionProps) {
   return (
     <Section className={className}>
@@ -42,10 +46,7 @@ export function HomeDomainSection({
           actionLabel={actionLabel}
         />
         {items.length === 0 ? (
-          <PublicEmpty
-            title="Ancora nessun contenuto pubblico"
-            description="Quando saranno pubblicati record reali, compariranno qui. Nessun dato dimostrativo."
-          />
+          <PublicEmpty title={emptyTitle} description={emptyDescription} />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (

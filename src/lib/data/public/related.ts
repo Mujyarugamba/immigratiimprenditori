@@ -213,7 +213,7 @@ export async function relatedForMarket(marketId: string): Promise<RelatedLinkGro
     }));
 
   return [
-    { title: "Imprese con presenza pubblica", links: businessLinks },
+    { title: "Imprese presenti", links: businessLinks },
     { title: "Eventi collegati", links: eventLinks },
   ];
 }
@@ -272,14 +272,13 @@ export async function relatedForOpportunity(
         title: o.title,
       })),
     },
-    { title: "Contenuti", links: contentLinks },
+    { title: "Notizie e guide", links: contentLinks },
     {
-      title: "Ecosistema",
+      title: "Scopri anche",
       links: [
         {
           href: "/collaborazioni",
           title: "Esplora anche le collaborazioni",
-          meta: "stessa area",
         },
       ],
     },

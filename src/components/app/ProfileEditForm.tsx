@@ -36,7 +36,7 @@ export function ProfileEditForm({ profile }: Props) {
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
       <FormField
-        label="Nome visualizzato"
+        label="Nome"
         name="display_name"
         required
         defaultValue={profile.display_name ?? ""}

@@ -52,7 +52,7 @@ export default async function CulturaHubPage() {
       <Section>
         <Container className="max-w-3xl space-y-6">
           <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-            Percorso trasversale
+            Nella rete
           </p>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             Cultura, incontri, relazioni.
@@ -154,7 +154,7 @@ export default async function CulturaHubPage() {
             {opportunities.length === 0 ? (
               <PublicEmpty
                 title="Nessuna opportunità culturale pubblicata."
-                description="Compariranno qui occasioni legate a cultura, patrimonio o industrie creative, oppure a eventi culturali pubblici."
+                description="Compariranno qui occasioni legate a cultura, patrimonio o industrie creative, oppure a eventi culturali."
               />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -455,7 +455,7 @@ export default async function CulturaHubPage() {
           {contents.length === 0 ? (
             <PublicEmpty
               title="Nessuna storia culturale pubblicata."
-              description="Compariranno qui notizie e guide culturali, oppure collegate a eventi culturali pubblici."
+              description="Compariranno qui notizie e guide culturali, oppure collegate a eventi culturali."
             />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

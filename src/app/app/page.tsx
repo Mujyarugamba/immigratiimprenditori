@@ -60,7 +60,7 @@ export default async function AppDashboardPage() {
 
       <dl className="border-line bg-surface-elevated mt-8 grid gap-4 rounded-md border p-5 text-sm shadow-soft sm:grid-cols-2">
         <div>
-          <dt className="text-ink-subtle">Stato account</dt>
+          <dt className="text-ink-subtle">Il tuo account</dt>
           <dd className="text-ink mt-1 font-medium">
             {labelAccountStatus(session.accountStatus)}
           </dd>
@@ -75,7 +75,7 @@ export default async function AppDashboardPage() {
           </dd>
         </div>
         <div>
-          <dt className="text-ink-subtle">Collegamento profilo</dt>
+          <dt className="text-ink-subtle">Profilo collegato</dt>
           <dd className="text-ink mt-1 font-medium">
             {labelPersonAssociation(
               session.personAssociationStatus,

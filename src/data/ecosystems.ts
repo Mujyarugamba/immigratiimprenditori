@@ -34,7 +34,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/persone",
     tagline: "Profili, competenze, professionisti",
     description:
-      "Le persone sono al centro della rete. Qui esplori i profili pubblici e i professionisti; il tuo profilo si completa nell’area riservata.",
+      "Le persone sono al centro della rete. Qui esplori profili e professionisti; il tuo profilo lo completi dopo l’accesso.",
     routes: ["/persone", "/professionisti"],
     ctas: [
       { label: "Esplora i professionisti", href: "/professionisti" },
@@ -45,9 +45,9 @@ export const ecosystems: EcosystemDef[] = [
     id: "imprese",
     label: "Imprese",
     href: "/imprese",
-    tagline: "Schede impresa e relazioni pubbliche",
+    tagline: "Imprese e relazioni",
     description:
-      "Le imprese collegano settori, territori, servizi, mercati e collaborazioni quando sono pubblici.",
+      "Imprese della rete: settori, territori, servizi, mercati e collaborazioni collegati.",
     routes: ["/imprese"],
     ctas: [
       { label: "Scopri le imprese", href: "/imprese" },
@@ -73,7 +73,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/mercati",
     tagline: "Paesi, interessi, relazioni estere",
     description:
-      "Un mercato è un ingresso: imprese presenti, attività e contenuti emergono dalle relazioni reali.",
+      "Paesi e aree internazionali dove imprese e professionisti della rete operano e crescono.",
     routes: ["/mercati"],
     ctas: [
       { label: "Esplora i mercati", href: "/mercati" },
@@ -86,7 +86,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/servizi",
     tagline: "Offerte e richieste",
     description:
-      "Chi offre un servizio e chi lo cerca restano in elenchi distinti, nella stessa sezione.",
+      "Puoi offrire un servizio o cercarne uno: due percorsi, una sola sezione.",
     routes: ["/servizi"],
     ctas: [
       { label: "Offerte di servizio", href: "/servizi?tipo=offerta" },
@@ -126,7 +126,7 @@ export const transversalLayers = [
     id: "organizzazioni",
     label: "Organizzazioni",
     href: "/organizzazioni",
-    description: "Associazioni, enti e organizzazioni pubbliche.",
+    description: "Associazioni, enti e organizzazioni della rete.",
   },
 ] as const;
 

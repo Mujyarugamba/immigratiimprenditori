@@ -59,7 +59,6 @@ export default async function MercatoDetailPage({ params }: PageProps) {
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             {market.name}
           </h1>
-          <p className="text-ink-muted text-sm font-medium">{market.code}</p>
           {market.summary ? (
             <p className="text-ink-muted text-lg leading-7">{market.summary}</p>
           ) : null}

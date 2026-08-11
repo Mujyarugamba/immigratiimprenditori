@@ -40,7 +40,7 @@ export async function AppNav({ session }: AppNavProps) {
             {session.email ?? session.authUserId}
           </p>
           <p className="text-ink-muted mt-2 text-xs">
-            Stato account:{" "}
+            Account:{" "}
             <span className="font-medium">
               {labelAccountStatus(session.accountStatus)}
             </span>

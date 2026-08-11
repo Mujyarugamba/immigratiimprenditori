@@ -112,7 +112,7 @@ export function Header() {
                 href="/"
                 className="text-ink-muted hover:text-ink text-[13px] font-medium"
               >
-                Sito pubblico
+                Torna al sito
               </Link>
             ) : (
               <>

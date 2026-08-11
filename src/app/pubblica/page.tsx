@@ -20,14 +20,14 @@ const actions = [
   {
     title: "Collega la tua impresa",
     description:
-      "Crea o collega un’impresa dall’area riservata. Collegarla e poterla gestire sono passaggi distinti.",
+      "Crea o collega un’impresa dall’area riservata. Essere collegato non significa sempre poter modificare la scheda.",
     href: "/app/imprese",
     cta: "Vai alle mie imprese",
   },
   {
     title: "Esplora opportunità",
     description:
-      "Scopri le occasioni pubbliche. Per pubblicarne una, usa l’area riservata quando disponibile.",
+      "Scopri le occasioni disponibili. Per pubblicarne una, usa l’area riservata dopo l’accesso.",
     href: "/opportunita",
     cta: "Trova un’opportunità",
   },

@@ -24,11 +24,11 @@ export function HomeSearch() {
     <form
       onSubmit={handleSubmit}
       role="search"
-      aria-label="Ricerca imprese, opportunità e professionisti"
+      aria-label="Ricerca imprese"
       className="border-line bg-surface-elevated shadow-soft w-full rounded-md border p-2 sm:p-2.5"
     >
       <label htmlFor={inputId} className="sr-only">
-        Cerca imprese, opportunità, professionisti, interpreti o collaborazioni
+        Cerca un&apos;impresa
       </label>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
         <input
@@ -37,7 +37,7 @@ export function HomeSearch() {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Cerca imprese, opportunità, professionisti…"
+          placeholder="Cerca un’impresa per nome o attività…"
           autoComplete="off"
           className="border-line bg-surface text-ink placeholder:text-ink-subtle focus:border-brand focus:bg-surface-elevated min-h-11 w-full flex-1 rounded-sm border px-3 text-sm focus:outline-none"
         />

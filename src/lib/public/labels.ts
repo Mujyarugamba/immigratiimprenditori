@@ -267,6 +267,30 @@ export const EDITORIAL_STATUS_LABELS: Record<string, string> = {
   withdrawn: "Ritirato",
 };
 
+export const OBSERVATORY_VALUE_NATURE_LABELS: Record<string, string> = {
+  count: "Conteggio",
+  percentage: "Percentuale",
+  currency: "Valuta",
+  ratio: "Rapporto",
+  index: "Indice",
+};
+
+export const OBSERVATORY_UNIT_LABELS: Record<string, string> = {
+  units: "Unità",
+  percent: "Percentuale",
+  eur: "Euro",
+  eur_thousands: "Migliaia di euro",
+  ratio: "Rapporto",
+  index_points: "Punti indice",
+};
+
+export const OBSERVATORY_PERIODICITY_LABELS: Record<string, string> = {
+  annual: "Annuale",
+  quarterly: "Trimestrale",
+  monthly: "Mensile",
+  point_in_time: "Puntuale",
+};
+
 export function textFilter(name: string, label: string, placeholder?: string): FilterField {
   return { kind: "text", name, label, placeholder };
 }

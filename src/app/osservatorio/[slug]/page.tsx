@@ -5,7 +5,12 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getPublicIndicatorBySlug } from "@/lib/data/public/observatory";
-import { formatItalianDate } from "@/lib/public/labels";
+import {
+  OBSERVATORY_PERIODICITY_LABELS,
+  OBSERVATORY_UNIT_LABELS,
+  formatItalianDate,
+  label,
+} from "@/lib/public/labels";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -51,9 +56,12 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
 
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Badge tone="brand">{indicator.code}</Badge>
-            <Badge tone="soft">{indicator.unit_code}</Badge>
-            <Badge tone="soft">{indicator.periodicity}</Badge>
+            <Badge tone="soft">
+              {label(OBSERVATORY_UNIT_LABELS, indicator.unit_code)}
+            </Badge>
+            <Badge tone="soft">
+              {label(OBSERVATORY_PERIODICITY_LABELS, indicator.periodicity)}
+            </Badge>
           </div>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             {indicator.title}
@@ -110,7 +118,6 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
                       <td className="border-line text-ink-muted border px-3 py-2">
                         {value.territory_label ??
                           value.country_label ??
-                          value.territory_code ??
                           "—"}
                       </td>
                       <td className="border-line text-ink-muted border px-3 py-2">

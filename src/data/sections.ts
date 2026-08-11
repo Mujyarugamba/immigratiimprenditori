@@ -5,71 +5,71 @@ export const sections = {
     slug: "imprese",
     title: "Imprese",
     description:
-      "Imprese nella rete: schede pubbliche, settori e percorsi imprenditoriali.",
-    emptyTitle: "Nessuna impresa pubblicata per ora",
+      "Imprese della rete: settori, territori e percorsi imprenditoriali.",
+    emptyTitle: "Non ci sono ancora imprese da mostrare",
     emptyDescription:
-      "Quando le imprese renderanno pubblica la propria scheda, compariranno qui.",
+      "Quando le imprese si presenteranno nella rete, le troverai qui.",
   },
   collaborazioni: {
     slug: "collaborazioni",
     title: "Collaborazioni",
     description:
       "Persone e organizzazioni che cercano o offrono una collaborazione.",
-    emptyTitle: "Nessuna collaborazione pubblicata",
+    emptyTitle: "Non ci sono collaborazioni pubblicate in questo momento",
     emptyDescription:
-      "Quando verranno pubblicate proposte di collaborazione, le troverai qui.",
+      "Quando ci saranno proposte di collaborazione, le troverai qui.",
   },
   opportunita: {
     slug: "opportunita",
     title: "Opportunità",
     description:
       "Bandi, progetti e occasioni utili per chi fa impresa o vuole sviluppare nuove iniziative.",
-    emptyTitle: "Nessuna opportunità aperta in questo momento",
+    emptyTitle: "Non ci sono opportunità disponibili in questo momento",
     emptyDescription:
-      "Le opportunità pubbliche compariranno qui quando saranno disponibili.",
+      "Quando ci saranno occasioni da condividere, le troverai qui.",
   },
   professionisti: {
     slug: "professionisti",
     title: "Professionisti",
     description:
       "Professionisti e competenze a supporto di imprese, reti e percorsi di sviluppo.",
-    emptyTitle: "Nessun professionista pubblicato",
+    emptyTitle: "Non ci sono ancora professionisti da mostrare",
     emptyDescription:
-      "Quando i professionisti pubblicheranno il profilo, li troverai qui.",
+      "Quando i professionisti si presenteranno nella rete, li troverai qui.",
   },
   "lingue-e-mercati": {
     slug: "lingue-e-mercati",
     title: "Mercati internazionali",
     description:
-      "Paesi e aree internazionali collegati a imprese, attività e relazioni della rete.",
-    emptyTitle: "Nessun mercato pubblicato",
+      "Paesi e aree internazionali dove imprese e professionisti della rete operano e crescono.",
+    emptyTitle: "Non ci sono ancora mercati da mostrare",
     emptyDescription:
-      "I mercati internazionali pubblici compariranno qui quando saranno disponibili.",
+      "Quando saranno disponibili paesi e aree internazionali, li troverai qui.",
   },
   eventi: {
     slug: "eventi",
     title: "Eventi",
     description:
       "Incontri, workshop e appuntamenti rilevanti per la comunità imprenditoriale.",
-    emptyTitle: "Nessun evento in programma",
+    emptyTitle: "Non ci sono eventi in programma",
     emptyDescription:
-      "Quando verranno pubblicati eventi pubblici, li troverai qui.",
+      "Quando ci saranno appuntamenti da condividere, li troverai qui.",
   },
   "notizie-e-guide": {
     slug: "notizie-e-guide",
     title: "Notizie e guide",
     description:
       "Aggiornamenti, approfondimenti e materiali utili per orientarsi nel percorso imprenditoriale.",
-    emptyTitle: "Nessuna notizia o guida pubblicata",
+    emptyTitle: "Non ci sono ancora notizie o guide da mostrare",
     emptyDescription:
-      "Storie e guide pubbliche compariranno qui quando saranno disponibili.",
+      "Quando ci saranno storie e guide da leggere, le troverai qui.",
   },
   osservatorio: {
     slug: "osservatorio",
     title: "Osservatorio",
     description:
-      "Indicatori e dati pubblicati per leggere l’imprenditoria di origine immigrata.",
-    emptyTitle: "Nessun indicatore pubblicato",
+      "Indicatori e dati per leggere l’imprenditoria di origine immigrata. Gli indicatori vengono pubblicati man mano che diventano disponibili.",
+    emptyTitle: "Non ci sono ancora indicatori da mostrare",
     emptyDescription:
       "Gli indicatori dell’Osservatorio compariranno qui quando saranno disponibili.",
   },
@@ -77,19 +77,17 @@ export const sections = {
     slug: "chi-siamo",
     title: "Chi siamo",
     description:
-      "La missione della piattaforma e il percorso con cui stiamo costruendo Immigrati Imprenditori.",
-    emptyTitle: "Presentazione in aggiornamento",
+      "Chi c’è dietro Immigrati Imprenditori e perché esiste questa rete.",
+    emptyTitle: "Chi siamo",
     emptyDescription:
-      "I contenuti di questa pagina saranno completati a breve.",
+      "Una rete dedicata agli imprenditori di origine immigrata che operano in Italia.",
   },
   contatti: {
     slug: "contatti",
     title: "Contatti",
-    description:
-      "Canali e modalità per entrare in contatto con la piattaforma.",
-    emptyTitle: "Contatti in aggiornamento",
-    emptyDescription:
-      "I recapiti e il modulo di contatto saranno disponibili a breve.",
+    description: "Come entrare in contatto con Immigrati Imprenditori.",
+    emptyTitle: "Contatti",
+    emptyDescription: "Scrivici: ti risponderemo appena possibile.",
   },
   pubblica: {
     slug: "pubblica",

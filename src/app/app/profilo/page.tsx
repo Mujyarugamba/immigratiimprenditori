@@ -66,18 +66,18 @@ export default async function ProfiloPage() {
         Il mio profilo
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Gestisci i dati pubblici della tua persona nella rete.
+        Gestisci come appari nella rete.
       </p>
 
       <dl className="border-line bg-surface-elevated mt-6 grid gap-3 rounded-md border p-5 text-sm shadow-soft sm:grid-cols-2">
         <div>
-          <dt className="text-ink-subtle">Stato account</dt>
+          <dt className="text-ink-subtle">Il tuo account</dt>
           <dd className="text-ink mt-1 font-medium">
             {labelAccountStatus(session.accountStatus)}
           </dd>
         </div>
         <div>
-          <dt className="text-ink-subtle">Collegamento profilo</dt>
+          <dt className="text-ink-subtle">Profilo collegato</dt>
           <dd className="text-ink mt-1 font-medium">
             {labelPersonAssociation(
               session.personAssociationStatus,

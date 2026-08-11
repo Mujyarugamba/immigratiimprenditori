@@ -46,8 +46,8 @@ export default async function ImpresePage() {
         Le mie imprese
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Imprese a cui sei collegato e imprese che puoi gestire. Collegamento e
-        gestione restano distinti.
+        Imprese a cui sei collegato e imprese che puoi gestire. Essere collegato
+        non significa sempre poter modificare la scheda.
       </p>
       <p className="text-ink-subtle mt-3 text-xs">
         Collegate: {linkedCount} · Gestibili: {manageableCount}
@@ -57,8 +57,8 @@ export default async function ImpresePage() {
       {items.length === 0 ? (
         <div className="mt-8">
           <EmptyStatePanel
-            title="Nessuna Impresa"
-            description="Non sei ancora collegato a un’impresa. Puoi creare una scheda: resterai collegato e, se serve, un amministratore potrà abilitare la gestione."
+            title="Nessuna impresa collegata"
+            description="Non sei ancora collegato a un’impresa. Puoi crearne una; se serve, un amministratore ti darà i permessi di modifica."
           />
         </div>
       ) : (

@@ -6,8 +6,8 @@ type PublicEmptyProps = {
 };
 
 export function PublicEmpty({
-  title = "Nessun risultato pubblico",
-  description = "Non ci sono contenuti pubblicati che corrispondono ai filtri. Prova a modificare la ricerca oppure torna più tardi.",
+  title = "Nessun risultato",
+  description = "Non ci sono risultati che corrispondono ai filtri. Prova a modificare la ricerca oppure torna più tardi.",
 }: PublicEmptyProps) {
   return <EmptyState title={title} description={description} />;
 }

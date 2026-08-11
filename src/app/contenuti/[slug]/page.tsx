@@ -55,7 +55,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
             href="/contenuti"
             className="text-brand hover:text-brand-dark text-sm font-medium"
           >
-            ← Torna all&apos;elenco contenuti
+            ← Torna a notizie e guide
           </Link>
           {showCulture ? (
             <Link

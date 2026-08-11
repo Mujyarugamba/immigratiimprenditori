@@ -14,7 +14,7 @@ export function EcosystemBanner({
   return (
     <aside className="border-brand/20 bg-brand-soft/40 mb-6 rounded-md border px-4 py-4 sm:px-5">
       <p className="text-brand text-[11px] font-semibold tracking-[0.14em] uppercase">
-        Ecosistema
+        Nella rete
       </p>
       <h2 className="text-ink mt-1 text-base font-semibold">{title}</h2>
       <p className="text-ink-muted mt-1.5 text-sm leading-6">{description}</p>
