@@ -53,8 +53,8 @@ export default async function CollaborazioniPage({ searchParams }: PageProps) {
       basePath="/collaborazioni"
       banner={
         <EcosystemBanner
-          title="Collaborazioni e opportunità"
-          description="Qui trovi chi cerca o offre una collaborazione. Per occasioni e proposte pubbliche usa Opportunità."
+          title="Cerchi un’occasione?"
+          description="Oltre alle collaborazioni, puoi esplorare bandi, progetti e altre opportunità."
           links={[{ href: "/opportunita", label: "Trova un’opportunità" }]}
         />
       }

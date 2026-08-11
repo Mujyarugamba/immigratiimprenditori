@@ -35,10 +35,9 @@ export default function ChiSiamoPage() {
             {PLATFORM_VALUE_PROPOSITION}
           </p>
           <p className="text-ink-muted text-sm leading-7">
-            Qui persone, imprese, professionisti e organizzazioni possono
+            Persone, imprese, professionisti e organizzazioni possono
             presentarsi, trovare opportunità, collaborare, offrire o cercare
-            servizi, partecipare a eventi ed esplorare mercati internazionali —
-            anche attraverso la cultura.
+            servizi, partecipare a eventi ed esplorare mercati internazionali.
           </p>
         </div>
 

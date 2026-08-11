@@ -67,7 +67,7 @@ export default async function HomePage() {
       <HomeDomainSection
         eyebrow="Persone"
         title="Competenze e professionisti"
-        description="Trova professionisti, competenze ed esperienze nella rete."
+        description="Trova professionisti, competenze ed esperienze."
         actionHref="/persone"
         actionLabel="Esplora le persone"
         emptyTitle="Nessun professionista disponibile."
@@ -85,7 +85,7 @@ export default async function HomePage() {
       <HomeDomainSection
         className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
         eyebrow="Imprese"
-        title="Imprese nella rete"
+        title="Attività, settori, territori"
         description="Scopri imprese, attività, settori, territori e relazioni."
         actionHref="/imprese"
         actionLabel="Scopri le imprese"
@@ -104,7 +104,7 @@ export default async function HomePage() {
       <HomeDomainSection
         eyebrow="Opportunità e collaborazioni"
         title="Trovare, proporre, collaborare"
-        description="Trova opportunità professionali, imprenditoriali e occasioni di collaborazione."
+        description="Trova opportunità professionali e imprenditoriali."
         actionHref="/opportunita"
         actionLabel="Esplora le opportunità"
         emptyTitle="Nessuna opportunità disponibile."

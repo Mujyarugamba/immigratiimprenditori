@@ -13,8 +13,8 @@ export function FinalCta() {
             </h2>
             <p className="text-ink-muted text-base leading-7">
               Crea il profilo, presenta l&apos;impresa, pubblica un&apos;opportunità
-              o indica i tuoi mercati. Pubblichi dopo l&apos;accesso; la rete resta
-              aperta a tutti.
+              o indica i tuoi mercati. Accedi per pubblicare; tutti possono
+              esplorare.
             </p>
           </div>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">

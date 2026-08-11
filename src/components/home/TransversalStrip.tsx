@@ -9,11 +9,11 @@ export function TransversalStrip() {
       <Container>
         <div className="mb-5 max-w-2xl space-y-2">
           <h2 className="text-ink text-xl font-semibold tracking-tight">
-            Altri percorsi nella rete
+            Altri percorsi
           </h2>
           <p className="text-ink-muted text-sm leading-6">
-            Eventi, cultura, notizie e osservatorio arricchiscono la rete:
-            aiutano a incontrarsi, informarsi e orientarsi.
+            Eventi, cultura, notizie e osservatorio per incontrarsi, informarsi
+            e orientarsi.
           </p>
         </div>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">

@@ -5,16 +5,25 @@
 **DB head:** `20260813150000` (local = remote, pending `0`) — C3 taxonomy enrichment; C4/P7 app-only (no further migrations)
 **Authority:** Access/RLS v1 (A1/A2) remains the security authority. This document does not redefine DB contracts.
 
-### Editorial voice (permanent — P7.6)
+### Editorial voice (permanent — P7.6 / P7.7)
 
-Immigrati Imprenditori parla al **presente**. Non annuncia ciò che un giorno diventerà: presenta ciò che è e ciò che permette di fare oggi.
+1. Immigrati Imprenditori parla al **presente**. Non annuncia ciò che un giorno diventerà: presenta ciò che è e ciò che permette di fare oggi.
+
+2. Il frontend presenta **contenuti, relazioni e azioni**; non spiega all’utente l’architettura, la tassonomia o le regole interne che li producono. (*Show the product. Do not explain the model.*)
+
+3. Quando una frase non aggiunge informazione o possibilità d’azione per l’utente, **la semplicità prevale sulla spiegazione**.
 
 Regole applicative:
 
 - Empty state = risultato corrente di lista/ricerca/filtro, non maturità della piattaforma.
-- Vietato nel copy user-facing: attesa di popolamento (“Non ci sono ancora…”, “Quando ci saranno…”, “li troverai qui…”), WIP/beta implicita, “sito nuovo”.
-- Consentito: “quando” per tempi evento, disponibilità dell’utente, conseguenze di un’azione (“Completa il profilo per…”), stati catalogo legittimi (es. “Disponibile in futuro” come status item).
+- Vietato nel copy user-facing: attesa di popolamento, WIP/beta implicita, meta-architettura (“Cultura collega…”, “resta Persone. Imprese…”), meta-tassonomia (“i servizi linguistici restano…”), residui isolati inutili.
+- Consentito: “quando” per tempi evento, disponibilità dell’utente, conseguenze di un’azione; “pubblico” solo come scelta di visibilità utente; stati catalogo legittimi.
 - Nessuna falsa prova sociale: non inventare numeri, card, partner o copertura.
+
+### P7.7 delta (final human UX & editorial polish — app/copy-only)
+
+- Cultura, footer, Home CTA, directory banners: rimozione meta-copy e ridondanze
+- Report: `p7.7-final-human-ux-editorial-polish-validation-report.md`
 
 ### P7.6 delta (established platform voice — app/copy-only)
 

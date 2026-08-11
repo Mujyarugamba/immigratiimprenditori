@@ -43,8 +43,8 @@ export function CreateBusinessForm() {
           <option value="collaborator">Collaboratore</option>
         </select>
         <span className="text-ink-subtle text-xs">
-          Il ruolo descrive la relazione: i permessi di gestione arrivano
-          separatamente.
+          Il ruolo descrive la tua relazione con l&apos;impresa. I permessi di
+          modifica si assegnano a parte.
         </span>
       </label>
 

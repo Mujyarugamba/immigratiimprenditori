@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site";
 const participateLinks = [
   { label: "Crea il tuo profilo", href: "/registrati" },
   { label: "Presenta la tua impresa", href: "/app/imprese" },
-  { label: "Pubblica nella rete", href: "/pubblica" },
+  { label: "Pubblica", href: "/pubblica" },
 ];
 
 export function Footer() {
@@ -95,24 +95,9 @@ export function Footer() {
       </Container>
 
       <div className="border-t border-white/10">
-        <Container className="flex flex-col gap-1 py-4 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
+        <Container className="py-4 text-xs text-white/50">
           <p>
             © {new Date().getFullYear()} {siteConfig.domain}
-          </p>
-          <p>
-            <Link
-              href="/osservatorio"
-              className="transition-colors hover:text-white/80"
-            >
-              Osservatorio
-            </Link>
-            {" · "}
-            <Link
-              href="/chi-siamo"
-              className="transition-colors hover:text-white/80"
-            >
-              Chi siamo
-            </Link>
           </p>
         </Container>
       </div>

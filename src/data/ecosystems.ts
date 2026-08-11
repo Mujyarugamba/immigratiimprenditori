@@ -34,7 +34,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/persone",
     tagline: "Profili, competenze, professionisti",
     description:
-      "Le persone sono al centro della rete. Qui esplori profili e professionisti; il tuo profilo lo completi dopo l’accesso.",
+      "Esplora profili e professionisti. Dopo l’accesso puoi completare il tuo profilo.",
     routes: ["/persone", "/professionisti"],
     ctas: [
       { label: "Esplora i professionisti", href: "/professionisti" },
@@ -47,7 +47,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/imprese",
     tagline: "Imprese e relazioni",
     description:
-      "Imprese della rete: settori, territori, servizi, mercati e collaborazioni collegati.",
+      "Scopri imprese, settori, territori, servizi, mercati e collaborazioni.",
     routes: ["/imprese"],
     ctas: [
       { label: "Scopri le imprese", href: "/imprese" },
@@ -60,7 +60,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/opportunita",
     tagline: "Trovare, proporre, collaborare",
     description:
-      "Le opportunità sono occasioni da cogliere. Le collaborazioni sono proposte di lavoro insieme. Percorsi distinti, nella stessa area di scoperta.",
+      "Trova occasioni da cogliere oppure proposte di collaborazione.",
     routes: ["/opportunita", "/collaborazioni"],
     ctas: [
       { label: "Trova opportunità", href: "/opportunita" },
@@ -86,7 +86,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/servizi",
     tagline: "Offerte e richieste",
     description:
-      "Puoi offrire un servizio o cercarne uno: due percorsi, una sola sezione.",
+      "Offri un servizio o cercane uno: scegli tra offerte e richieste.",
     routes: ["/servizi"],
     ctas: [
       { label: "Offerte di servizio", href: "/servizi?tipo=offerta" },
@@ -101,14 +101,14 @@ export const transversalLayers = [
     id: "eventi",
     label: "Eventi",
     href: "/eventi",
-    description: "Incontri e appuntamenti della rete.",
+    description: "Incontri, workshop e appuntamenti.",
   },
   {
     id: "cultura",
     label: "Cultura",
     href: "/cultura",
     description:
-      "Incontri culturali, persone e opportunità creative nella rete.",
+      "Incontri culturali, persone e opportunità creative.",
   },
   {
     id: "contenuti",
@@ -120,13 +120,13 @@ export const transversalLayers = [
     id: "osservatorio",
     label: "Osservatorio",
     href: "/osservatorio",
-    description: "Indicatori e dati pubblicati per leggere la rete.",
+    description: "Indicatori e dati sull’imprenditoria di origine immigrata.",
   },
   {
     id: "organizzazioni",
     label: "Organizzazioni",
     href: "/organizzazioni",
-    description: "Associazioni, enti e organizzazioni della rete.",
+    description: "Associazioni, enti e organizzazioni.",
   },
 ] as const;
 

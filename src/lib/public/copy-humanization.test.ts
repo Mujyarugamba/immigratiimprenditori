@@ -210,7 +210,64 @@ describe("P7.6 established platform voice", () => {
   it("footer has no progressive-population disclaimer", () => {
     const footer = readSrc("components/layout/Footer.tsx");
     assert.doesNotMatch(footer, /man mano|diventano disponibili|fase di/i);
-    assert.match(footer, /Osservatorio/);
-    assert.match(footer, /Chi siamo/);
+    assert.match(footer, /mainNav/);
+    assert.match(footer, /Scrivici/);
+    assert.ok(moreNav.some((n) => n.label === "Osservatorio"));
+    assert.ok(moreNav.some((n) => n.label === "Chi siamo"));
+  });
+});
+
+/** Meta-architecture / taxonomy explanations that must not leak into UI copy. */
+const FORBIDDEN_META =
+  /Immigrati Imprenditori resta|già presenti nella rete|I servizi linguistici restano|Cultura collega ciò che già esiste|Osservatorio\s*·\s*Chi siamo|classificazione strutturata|una sola volta|elenchi isolati|record reali|Nessun dato dimostrativo|in fase di sviluppo/i;
+
+describe("P7.7 final human UX editorial polish", () => {
+  it("cultura hub shows product, not architecture or taxonomy rules", () => {
+    const page = readApp("cultura/page.tsx");
+    assert.doesNotMatch(page, FORBIDDEN_META);
+    assert.doesNotMatch(page, /PLATFORM_IDENTITY|pubblic[oi] con competenze|Imprese pubbliche|elenco dedicato|oppure collegati a un evento/i);
+    assert.match(page, /Cultura, incontri, relazioni/);
+    assert.match(page, /Professionisti con competenze culturali/);
+    assert.match(page, /Imprese attive nelle industrie culturali/);
+    assert.match(page, /Trova chi offre servizi culturali/);
+    assert.match(page, /Notizie, guide, esperienze e racconti/);
+    assert.match(page, /Presenta ciò che fai/);
+    assert.doesNotMatch(page, /Nella rete/);
+  });
+
+  it("footer has no isolated Osservatorio · Chi siamo bar", () => {
+    const footer = readSrc("components/layout/Footer.tsx");
+    assert.doesNotMatch(footer, /Osservatorio\s*·\s*Chi siamo/);
+    assert.doesNotMatch(footer, /\{\s*" · "\s*\}/);
+    assert.doesNotMatch(footer, /href="\/osservatorio"/);
+    assert.doesNotMatch(footer, /href="\/chi-siamo"/);
+    assert.match(footer, /mainNav/);
+    assert.match(footer, /Scrivici/);
+    assert.match(footer, /©/);
+    assert.ok(moreNav.some((n) => n.href === "/osservatorio"));
+    assert.ok(moreNav.some((n) => n.href === "/chi-siamo"));
+  });
+
+  it("home CTA avoids mechanical access wording", () => {
+    const cta = readSrc("components/home/FinalCta.tsx");
+    assert.match(cta, /Accedi per pubblicare/);
+    assert.doesNotMatch(cta, /Pubblichi dopo l'accesso|la rete resta aperta/i);
+  });
+
+  it("key surfaces avoid known meta-copy regressions", () => {
+    for (const rel of [
+      "page.tsx",
+      "persone/page.tsx",
+      "cultura/page.tsx",
+      "pubblica/page.tsx",
+      "servizi/page.tsx",
+      "opportunita/page.tsx",
+      "collaborazioni/page.tsx",
+      "chi-siamo/page.tsx",
+    ]) {
+      assert.doesNotMatch(readApp(rel), FORBIDDEN_META, rel);
+    }
+    assert.doesNotMatch(readSrc("components/layout/Footer.tsx"), FORBIDDEN_META);
+    assert.doesNotMatch(readSrc("components/home/TransversalStrip.tsx"), FORBIDDEN_META);
   });
 });

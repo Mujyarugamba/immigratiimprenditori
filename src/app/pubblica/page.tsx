@@ -20,7 +20,7 @@ const actions = [
   {
     title: "Collega la tua impresa",
     description:
-      "Crea o collega un’impresa dall’area riservata. Essere collegato non significa sempre poter modificare la scheda.",
+      "Crea o collega un’impresa dall’area riservata.",
     href: "/app/imprese",
     cta: "Vai alle mie imprese",
   },
@@ -41,7 +41,7 @@ const actions = [
   {
     title: "Offri o cerca un servizio",
     description:
-      "Consulta offerte e richieste in elenchi separati: chi offre e chi cerca restano distinti.",
+      "Consulta chi offre un servizio e chi ne cerca uno.",
     href: "/servizi",
     cta: "Vedi i servizi",
   },

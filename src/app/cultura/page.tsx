@@ -5,7 +5,6 @@ import { PublicResultCard } from "@/components/public/PublicResultCard";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { PLATFORM_IDENTITY } from "@/data/ecosystems";
 import { loadCultureHub } from "@/lib/data/public/culture";
 import {
   ACTIVITY_SCOPE_LABELS,
@@ -51,9 +50,6 @@ export default async function CulturaHubPage() {
     <>
       <Section>
         <Container className="max-w-3xl space-y-6">
-          <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
-            Nella rete
-          </p>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             Cultura, incontri, relazioni.
           </h1>
@@ -63,11 +59,8 @@ export default async function CulturaHubPage() {
             possono nascere relazioni, collaborazioni e nuove opportunità.
           </p>
           <p className="text-ink-muted text-sm leading-6">
-            Immigrati Imprenditori resta{" "}
-            <span className="text-ink font-medium">{PLATFORM_IDENTITY}</span>{" "}
-            Qui trovi incontri, persone, organizzazioni, imprese, opportunità e
-            storie legate alla cultura e alle industrie creative — già presenti
-            nella rete.
+            Scopri incontri, persone, organizzazioni, imprese, opportunità e
+            storie legate alla cultura e alle industrie creative.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="#incontri">Scopri gli incontri</ButtonLink>
@@ -89,7 +82,7 @@ export default async function CulturaHubPage() {
                 Eventi culturali
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Scopri gli incontri culturali della rete.
+                Concerti, mostre, festival e altri appuntamenti culturali.
               </p>
             </div>
             <Link
@@ -134,11 +127,11 @@ export default async function CulturaHubPage() {
                   Opportunità e collaborazioni
                 </p>
                 <h2 className="text-ink text-2xl font-semibold tracking-tight">
-                  Occasioni culturali nella rete
+                  Occasioni culturali
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Occasioni legate alla cultura, al patrimonio o alle industrie
-                  creative — oppure collegate a un evento culturale.
+                  Opportunità legate alla cultura, al patrimonio e alle
+                  industrie creative.
                 </p>
               </div>
               <Link
@@ -222,7 +215,7 @@ export default async function CulturaHubPage() {
                 Professionisti culturali e creativi
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Profili pubblici con competenze culturali, creative o di
+                Professionisti con competenze culturali, creative o di
                 mediazione culturale.
               </p>
             </div>
@@ -304,7 +297,7 @@ export default async function CulturaHubPage() {
                   Imprese culturali e creative
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Imprese pubbliche attive nelle industrie culturali e creative.
+                  Imprese attive nelle industrie culturali e creative.
                 </p>
               </div>
               <Link
@@ -347,8 +340,8 @@ export default async function CulturaHubPage() {
                 Servizi culturali e creativi
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Offerte e richieste pubbliche in ambito culturale e creativo. I
-                servizi linguistici restano in un elenco dedicato.
+                Trova chi offre servizi culturali e creativi o cerca queste
+                competenze.
               </p>
             </div>
             <Link
@@ -420,8 +413,7 @@ export default async function CulturaHubPage() {
                 Storie culturali
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Notizie, guide e racconti legati alla cultura, oppure collegati
-                a un evento culturale.
+                Notizie, guide, esperienze e racconti dal mondo della cultura.
               </p>
             </div>
             <Link
@@ -462,11 +454,11 @@ export default async function CulturaHubPage() {
                   Connessioni internazionali
                 </p>
                 <h2 className="text-ink text-2xl font-semibold tracking-tight">
-                  Mercati collegati agli incontri culturali
+                  Mercati e incontri culturali
                 </h2>
                 <p className="text-ink-muted text-sm leading-6">
-                  Paesi e aree internazionali collegati agli eventi culturali
-                  della rete.
+                  Paesi e aree internazionali legati a eventi e iniziative
+                  culturali.
                 </p>
               </div>
               <Link
@@ -497,11 +489,11 @@ export default async function CulturaHubPage() {
       <Section className="border-line border-t py-14 sm:py-16 lg:py-20">
         <Container className="max-w-3xl space-y-6">
           <h2 className="text-ink text-2xl font-semibold tracking-tight">
-            Continua nella rete
+            Entra nella rete
           </h2>
           <p className="text-ink-muted text-sm leading-6">
-            Cultura collega ciò che già esiste nella rete. Entra per
-            presentarti, collaborare e pubblicare.
+            Presenta ciò che fai, incontra persone e organizzazioni, proponi
+            una collaborazione o condividi un&apos;opportunità.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <ButtonLink href="/registrati" variant="accent">
@@ -511,14 +503,11 @@ export default async function CulturaHubPage() {
             <ButtonLink href="/eventi?tipo=cultural" variant="secondary">
               Scopri gli eventi
             </ButtonLink>
-            <ButtonLink href="/opportunita" variant="secondary">
+            <ButtonLink href="/opportunita?ambito=culture" variant="secondary">
               Esplora opportunità
             </ButtonLink>
             <ButtonLink href="/collaborazioni?ambito=culture" variant="secondary">
               Cerca collaborazioni
-            </ButtonLink>
-            <ButtonLink href="/servizi?categoria=cultural_creative" variant="ghost">
-              Servizi culturali
             </ButtonLink>
           </div>
         </Container>

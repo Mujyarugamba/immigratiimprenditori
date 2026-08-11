@@ -16,7 +16,7 @@ import {
 export const metadata: Metadata = {
   title: "Opportunità e collaborazioni",
   description:
-    "Bandi, progetti e occasioni utili; collaborazioni in un percorso a parte.",
+    "Bandi, progetti e occasioni utili. Collaborazioni: proposte di lavoro insieme.",
 };
 
 type PageProps = {
@@ -48,15 +48,15 @@ export default async function OpportunitaPage({ searchParams }: PageProps) {
   return (
     <PublicListLayout
       title="Opportunità"
-      description="Bandi, progetti e occasioni utili. Per lavorare insieme, vedi Collaborazioni."
+      description="Bandi, progetti e occasioni utili."
       basePath="/opportunita"
       banner={
         <EcosystemBanner
-          title="Opportunità e collaborazioni"
-          description="Qui trovi le opportunità — occasioni da cogliere. Se cerchi o offri una collaborazione, vai alle Collaborazioni."
+          title="Cerchi una collaborazione?"
+          description="Oltre alle opportunità, puoi trovare chi cerca o offre una collaborazione."
           links={[
             { href: "/collaborazioni", label: "Cerca una collaborazione" },
-            { href: "/pubblica", label: "Pubblica nella rete" },
+            { href: "/pubblica", label: "Pubblica" },
           ]}
         />
       }

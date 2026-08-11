@@ -24,7 +24,7 @@ import {
 
 const title = "Servizi";
 const description =
-  "Offerte e richieste di servizi pubblicate dalla community: consulenza, formazione, supporto linguistico e altro.";
+  "Offerte e richieste di servizi: consulenza, formazione, supporto linguistico e altro.";
 
 export const metadata: Metadata = {
   title,
@@ -110,7 +110,7 @@ export default async function ServiziPage({ searchParams }: PageProps) {
         <PublicPageHeader title={title} description={description} />
         <EcosystemBanner
           title="Offro o cerco un servizio"
-          description="Scegli se offri o cerchi un servizio. Per competenze vedi anche i professionisti; per le imprese, esplora le imprese della rete."
+          description="Scegli tra offerte e richieste. Puoi anche esplorare professionisti e imprese."
           links={[
             { href: "/professionisti", label: "Trova un professionista" },
             { href: "/imprese", label: "Scopri le imprese" },

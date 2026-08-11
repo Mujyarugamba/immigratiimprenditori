@@ -5,7 +5,7 @@ export const sections = {
     slug: "imprese",
     title: "Imprese",
     description:
-      "Scopri imprese, attività, settori, territori e relazioni della rete.",
+      "Scopri imprese, attività, settori, territori e relazioni.",
     emptyTitle: "Nessuna impresa disponibile.",
   },
   collaborazioni: {
@@ -19,7 +19,7 @@ export const sections = {
     slug: "opportunita",
     title: "Opportunità",
     description:
-      "Trova opportunità professionali, imprenditoriali e occasioni di collaborazione.",
+      "Trova opportunità professionali e imprenditoriali.",
     emptyTitle: "Nessuna opportunità disponibile.",
   },
   professionisti: {
@@ -39,7 +39,7 @@ export const sections = {
   eventi: {
     slug: "eventi",
     title: "Eventi",
-    description: "Scopri incontri, workshop e appuntamenti della rete.",
+    description: "Scopri incontri, workshop e appuntamenti.",
     emptyTitle: "Nessun evento in programma.",
   },
   "notizie-e-guide": {
@@ -76,10 +76,10 @@ export const sections = {
     slug: "pubblica",
     title: "Pubblica",
     description:
-      "Pubblica profilo, impresa, opportunità, servizi e mercati nella rete.",
+      "Pubblica profilo, impresa, opportunità, servizi e mercati.",
     emptyTitle: "Pubblicazione",
     emptyDescription:
-      "Usa i percorsi disponibili per entrare nella rete e pubblicare ciò che fai.",
+      "Scegli cosa pubblicare e completa l’azione dall’area riservata.",
   },
 } as const satisfies Record<string, SectionContent>;
 

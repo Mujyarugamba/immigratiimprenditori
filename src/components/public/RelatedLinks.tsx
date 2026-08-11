@@ -20,12 +20,12 @@ export function RelatedLinks({ groups }: RelatedLinksProps) {
   if (visible.length === 0) return null;
 
   return (
-    <section className="space-y-6" aria-labelledby="related-network-heading">
+    <section className="space-y-6" aria-labelledby="related-links-heading">
       <h2
-        id="related-network-heading"
+        id="related-links-heading"
         className="text-ink text-xl font-semibold tracking-tight"
       >
-        Nella rete
+        Collegamenti
       </h2>
       <div className="grid gap-6 sm:grid-cols-2">
         {visible.map((group) => (
