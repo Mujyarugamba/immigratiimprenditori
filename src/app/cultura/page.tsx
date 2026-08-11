@@ -89,7 +89,7 @@ export default async function CulturaHubPage() {
                 Eventi culturali
               </h2>
               <p className="text-ink-muted text-sm leading-6">
-                Appuntamenti culturali pubblici con date imminenti o in corso.
+                Scopri gli incontri culturali della rete.
               </p>
             </div>
             <Link
@@ -100,10 +100,7 @@ export default async function CulturaHubPage() {
             </Link>
           </div>
           {events.length === 0 ? (
-            <PublicEmpty
-              title="Nessun incontro culturale in programma."
-              description="Quando verranno pubblicati eventi culturali con date future, compariranno qui."
-            />
+            <PublicEmpty title="Nessun incontro culturale in programma." />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {events.map((item) => (
@@ -152,10 +149,7 @@ export default async function CulturaHubPage() {
               </Link>
             </div>
             {opportunities.length === 0 ? (
-              <PublicEmpty
-                title="Nessuna opportunità culturale pubblicata."
-                description="Compariranno qui occasioni legate a cultura, patrimonio o industrie creative, oppure a eventi culturali."
-              />
+              <PublicEmpty title="Nessuna opportunità culturale disponibile." />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {opportunities.map((o) => (
@@ -193,10 +187,7 @@ export default async function CulturaHubPage() {
               </Link>
             </div>
             {collaborations.length === 0 ? (
-              <PublicEmpty
-                title="Nessuna collaborazione culturale pubblicata."
-                description="Compariranno qui collaborazioni legate a cultura, patrimonio o industrie creative."
-              />
+              <PublicEmpty title="Nessuna collaborazione culturale disponibile." />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {collaborations.map((c) => (
@@ -243,10 +234,7 @@ export default async function CulturaHubPage() {
             </Link>
           </div>
           {professionals.length === 0 ? (
-            <PublicEmpty
-              title="Nessun professionista culturale o creativo pubblicato."
-              description="Compariranno qui profili con competenze culturali, creative o di mediazione."
-            />
+            <PublicEmpty title="Nessun professionista culturale o creativo disponibile." />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {professionals.map((p) => (
@@ -290,10 +278,7 @@ export default async function CulturaHubPage() {
               </Link>
             </div>
             {organizations.length === 0 ? (
-              <PublicEmpty
-                title="Nessuna organizzazione culturale pubblicata."
-                description="Compariranno qui organizzazioni con attività in cultura, patrimonio o industrie creative."
-              />
+              <PublicEmpty title="Nessuna organizzazione culturale disponibile." />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {organizations.map((o) => (
@@ -330,10 +315,7 @@ export default async function CulturaHubPage() {
               </Link>
             </div>
             {businesses.length === 0 ? (
-              <PublicEmpty
-                title="Nessuna impresa culturale o creativa pubblicata."
-                description="Compariranno qui imprese con settori culturali e creativi (audiovisivo, editoria, musica, spettacolo, design, moda, artigianato, patrimonio)."
-              />
+              <PublicEmpty title="Nessuna impresa culturale o creativa disponibile." />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {businesses.map((b) => (
@@ -377,10 +359,7 @@ export default async function CulturaHubPage() {
             </Link>
           </div>
           {serviceOffers.length === 0 && serviceRequests.length === 0 ? (
-            <PublicEmpty
-              title="Nessun servizio culturale o creativo pubblicato."
-              description="Compariranno qui offerte e richieste di servizi culturali e creativi."
-            />
+            <PublicEmpty title="Nessun servizio culturale o creativo disponibile." />
           ) : (
             <div className="space-y-10">
               {serviceOffers.length > 0 ? (
@@ -453,10 +432,7 @@ export default async function CulturaHubPage() {
             </Link>
           </div>
           {contents.length === 0 ? (
-            <PublicEmpty
-              title="Nessuna storia culturale pubblicata."
-              description="Compariranno qui notizie e guide culturali, oppure collegate a eventi culturali."
-            />
+            <PublicEmpty title="Nessuna storia culturale disponibile." />
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {contents.map((c) => (

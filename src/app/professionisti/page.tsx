@@ -62,8 +62,8 @@ export default async function ProfessionistiPage({ searchParams }: PageProps) {
           ? [label(PRACTICE_MODES, item.practice_mode_code)]
           : undefined,
       })}
-      emptyTitle="Nessun professionista trovato"
-      emptyDescription="Non ci sono profili pubblicati che corrispondono ai filtri selezionati."
+      emptyTitle="Nessun professionista trovato."
+      emptyDescription="Nessun professionista corrisponde ai filtri selezionati."
     />
   );
 }

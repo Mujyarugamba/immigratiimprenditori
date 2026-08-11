@@ -60,8 +60,8 @@ export default async function MercatiPage({ searchParams }: PageProps) {
         description: item.summary,
         badges: [label(MARKET_KINDS, item.market_kind)],
       })}
-      emptyTitle="Nessun mercato trovato"
-      emptyDescription="Non ci sono mercati pubblicati che corrispondono ai filtri selezionati."
+      emptyTitle="Nessun mercato trovato."
+      emptyDescription="Nessun mercato corrisponde ai filtri selezionati."
     />
   );
 }

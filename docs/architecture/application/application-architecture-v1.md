@@ -1,9 +1,25 @@
 # Application Architecture v1
 
-**Status:** P1–P6 application blocks implemented — **v1 release-ready**; C2→C4 Cultura; **P7.3 public Persona** `/persone/[slug]` — see `p7.3-public-person-profile-validation-report.md`
+**Status:** P1–P6 application blocks implemented — **v1 release-ready**; C2→C4 Cultura; **P7.3 public Persona** `/persone/[slug]` — see `p7.3-public-person-profile-validation-report.md`; **P7.6 established platform voice** — see `p7.6-established-platform-voice-validation-report.md`
 **Baseline Git:** `4bf213b7f9391142cf30533ed261243a2b709250` (`v0.3.0-db-access-rls-v1`)
 **DB head:** `20260813150000` (local = remote, pending `0`) — C3 taxonomy enrichment; C4/P7 app-only (no further migrations)
 **Authority:** Access/RLS v1 (A1/A2) remains the security authority. This document does not redefine DB contracts.
+
+### Editorial voice (permanent — P7.6)
+
+Immigrati Imprenditori parla al **presente**. Non annuncia ciò che un giorno diventerà: presenta ciò che è e ciò che permette di fare oggi.
+
+Regole applicative:
+
+- Empty state = risultato corrente di lista/ricerca/filtro, non maturità della piattaforma.
+- Vietato nel copy user-facing: attesa di popolamento (“Non ci sono ancora…”, “Quando ci saranno…”, “li troverai qui…”), WIP/beta implicita, “sito nuovo”.
+- Consentito: “quando” per tempi evento, disponibilità dell’utente, conseguenze di un’azione (“Completa il profilo per…”), stati catalogo legittimi (es. “Disponibile in futuro” come status item).
+- Nessuna falsa prova sociale: non inventare numeri, card, partner o copertura.
+
+### P7.6 delta (established platform voice — app/copy-only)
+
+- Home, directory, Cultura, footer, Osservatorio, auth/private: empty e descrizioni al presente
+- Report: `p7.6-established-platform-voice-validation-report.md`
 
 ### P7.3 delta (public Persona profile — app-only)
 

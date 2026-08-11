@@ -76,8 +76,8 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
           ? [formatItalianDate(item.published_at)]
           : undefined,
       })}
-      emptyTitle="Nessuna notizia o guida trovata"
-      emptyDescription="Non ci sono storie pubblicate che corrispondono ai filtri selezionati."
+      emptyTitle="Nessuna notizia o guida trovata."
+      emptyDescription="Nessuna notizia o guida corrisponde ai filtri selezionati."
     />
   );
 }

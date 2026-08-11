@@ -58,7 +58,7 @@ export default async function ImpresePage() {
         <div className="mt-8">
           <EmptyStatePanel
             title="Nessuna impresa collegata"
-            description="Non sei ancora collegato a un’impresa. Puoi crearne una; se serve, un amministratore ti darà i permessi di modifica."
+            description="Non sei collegato a un’impresa. Puoi crearne una; se serve, un amministratore ti darà i permessi di modifica."
           />
         </div>
       ) : (

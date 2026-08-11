@@ -60,11 +60,12 @@ export default function PubblicaPage() {
       <Container className="max-w-3xl space-y-8">
         <header className="space-y-3">
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
-            Pubblica la tua presenza nella rete
+            Pubblica e fatti conoscere
           </h1>
           <p className="text-ink-muted text-lg leading-7">
-            Da qui raggiungi i percorsi già disponibili. Le azioni di
-            pubblicazione avvengono nell&apos;area riservata.
+            Scegli cosa pubblicare: profilo, impresa, opportunità, collaborazioni,
+            servizi o mercati. Le azioni di pubblicazione avvengono nell&apos;area
+            riservata.
           </p>
         </header>
 

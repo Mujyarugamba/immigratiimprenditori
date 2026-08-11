@@ -67,11 +67,10 @@ export default async function HomePage() {
       <HomeDomainSection
         eyebrow="Persone"
         title="Competenze e professionisti"
-        description="Trova chi può aiutarti con competenze e servizi professionali. Il tuo profilo lo completi dopo l’accesso."
+        description="Trova professionisti, competenze ed esperienze nella rete."
         actionHref="/persone"
         actionLabel="Esplora le persone"
-        emptyTitle="Non ci sono ancora professionisti da mostrare"
-        emptyDescription="Quando i professionisti si presenteranno nella rete, li troverai qui."
+        emptyTitle="Nessun professionista disponibile."
         items={professionals.map((p) => ({
           href: `/professionisti/${p.id}`,
           title: p.headline || "Professionista",
@@ -87,11 +86,10 @@ export default async function HomePage() {
         className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
         eyebrow="Imprese"
         title="Imprese nella rete"
-        description="Imprese che operano in Italia: settori, territori, servizi e mercati collegati."
+        description="Scopri imprese, attività, settori, territori e relazioni."
         actionHref="/imprese"
         actionLabel="Scopri le imprese"
-        emptyTitle="Non ci sono ancora imprese da mostrare"
-        emptyDescription="Quando le imprese si presenteranno nella rete, le troverai qui."
+        emptyTitle="Nessuna impresa disponibile."
         items={businesses.map((b) => ({
           href: `/imprese/${b.id}`,
           title: b.public_name,
@@ -106,11 +104,10 @@ export default async function HomePage() {
       <HomeDomainSection
         eyebrow="Opportunità e collaborazioni"
         title="Trovare, proporre, collaborare"
-        description="Occasioni da cogliere e proposte di lavoro insieme, in un unico percorso di scoperta."
+        description="Trova opportunità professionali, imprenditoriali e occasioni di collaborazione."
         actionHref="/opportunita"
         actionLabel="Esplora le opportunità"
-        emptyTitle="Non ci sono opportunità disponibili in questo momento"
-        emptyDescription="Quando ci saranno occasioni o collaborazioni da condividere, le troverai qui."
+        emptyTitle="Nessuna opportunità disponibile."
         items={[
           ...opportunities.map((o) => ({
             href: `/opportunita/${o.id}`,
@@ -141,11 +138,10 @@ export default async function HomePage() {
         className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
         eyebrow="Mercati internazionali"
         title="Relazioni oltre confine"
-        description="Paesi e aree dove imprese e professionisti della rete operano, incontrano e crescono."
+        description="Esplora paesi e mercati in cui imprese e professionisti della rete operano, sviluppano relazioni e crescono."
         actionHref="/mercati"
         actionLabel="Esplora i mercati"
-        emptyTitle="Non ci sono ancora mercati da mostrare"
-        emptyDescription="Quando saranno disponibili paesi e aree internazionali, li troverai qui."
+        emptyTitle="Nessun mercato disponibile."
         items={markets.map((m) => ({
           href: `/mercati/${m.code}`,
           title: m.name,
@@ -160,11 +156,10 @@ export default async function HomePage() {
       <HomeDomainSection
         eyebrow="Servizi"
         title="Offerte per lavorare e crescere"
-        description="Servizi offerti nella rete. Se cerchi aiuto, apri anche le richieste."
+        description="Trova servizi professionali e imprenditoriali oppure pubblica ciò di cui hai bisogno."
         actionHref="/servizi"
         actionLabel="Vedi i servizi"
-        emptyTitle="Non ci sono ancora servizi da mostrare"
-        emptyDescription="Quando qualcuno offrirà o cercherà un servizio, lo troverai qui."
+        emptyTitle="Nessun servizio disponibile."
         items={services.map((s) => ({
           href: `/servizi/offerte/${s.id}`,
           title: s.title,
@@ -182,11 +177,10 @@ export default async function HomePage() {
         className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
         eyebrow="Eventi e storie"
         title="Incontrarsi e orientarsi"
-        description="Eventi e storie che aiutano a conoscersi e a trovare la propria strada nella rete."
+        description="Eventi e storie per conoscersi, scoprire esperienze e creare nuove connessioni."
         actionHref="/eventi"
         actionLabel="Scopri gli eventi"
-        emptyTitle="Non ci sono eventi in programma"
-        emptyDescription="Quando ci saranno appuntamenti o storie da condividere, li troverai qui."
+        emptyTitle="Nessun evento in programma."
         items={[
           ...events.map((e) => ({
             href: `/eventi/${e.id}`,

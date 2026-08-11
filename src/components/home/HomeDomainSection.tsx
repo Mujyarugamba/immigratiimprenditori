@@ -32,8 +32,8 @@ export function HomeDomainSection({
   actionLabel,
   items,
   className = "bg-surface py-14 sm:py-16 lg:py-20",
-  emptyTitle = "Ancora niente da mostrare",
-  emptyDescription = "Quando ci saranno contenuti in questa sezione, li troverai qui.",
+  emptyTitle = "Nessun risultato.",
+  emptyDescription,
 }: HomeDomainSectionProps) {
   return (
     <Section className={className}>

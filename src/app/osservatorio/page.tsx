@@ -63,8 +63,8 @@ export default async function OsservatorioPage({ searchParams }: PageProps) {
             : "",
         ].filter(Boolean),
       })}
-      emptyTitle="Non ci sono ancora indicatori da mostrare"
-      emptyDescription="Gli indicatori dell’Osservatorio compariranno qui quando saranno disponibili."
+      emptyTitle="Nessun indicatore disponibile."
+      emptyDescription="Nessun indicatore corrisponde ai filtri selezionati."
     />
   );
 }

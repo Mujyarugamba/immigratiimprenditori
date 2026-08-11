@@ -5,73 +5,56 @@ export const sections = {
     slug: "imprese",
     title: "Imprese",
     description:
-      "Imprese della rete: settori, territori e percorsi imprenditoriali.",
-    emptyTitle: "Non ci sono ancora imprese da mostrare",
-    emptyDescription:
-      "Quando le imprese si presenteranno nella rete, le troverai qui.",
+      "Scopri imprese, attività, settori, territori e relazioni della rete.",
+    emptyTitle: "Nessuna impresa disponibile.",
   },
   collaborazioni: {
     slug: "collaborazioni",
     title: "Collaborazioni",
     description:
       "Persone e organizzazioni che cercano o offrono una collaborazione.",
-    emptyTitle: "Non ci sono collaborazioni pubblicate in questo momento",
-    emptyDescription:
-      "Quando ci saranno proposte di collaborazione, le troverai qui.",
+    emptyTitle: "Nessuna collaborazione disponibile.",
   },
   opportunita: {
     slug: "opportunita",
     title: "Opportunità",
     description:
-      "Bandi, progetti e occasioni utili per chi fa impresa o vuole sviluppare nuove iniziative.",
-    emptyTitle: "Non ci sono opportunità disponibili in questo momento",
-    emptyDescription:
-      "Quando ci saranno occasioni da condividere, le troverai qui.",
+      "Trova opportunità professionali, imprenditoriali e occasioni di collaborazione.",
+    emptyTitle: "Nessuna opportunità disponibile.",
   },
   professionisti: {
     slug: "professionisti",
     title: "Professionisti",
     description:
-      "Professionisti e competenze a supporto di imprese, reti e percorsi di sviluppo.",
-    emptyTitle: "Non ci sono ancora professionisti da mostrare",
-    emptyDescription:
-      "Quando i professionisti si presenteranno nella rete, li troverai qui.",
+      "Trova professionisti, competenze ed esperienze a supporto di imprese e percorsi di sviluppo.",
+    emptyTitle: "Nessun professionista disponibile.",
   },
   "lingue-e-mercati": {
     slug: "lingue-e-mercati",
     title: "Mercati internazionali",
     description:
-      "Paesi e aree internazionali dove imprese e professionisti della rete operano e crescono.",
-    emptyTitle: "Non ci sono ancora mercati da mostrare",
-    emptyDescription:
-      "Quando saranno disponibili paesi e aree internazionali, li troverai qui.",
+      "Esplora paesi e mercati in cui imprese e professionisti della rete operano, sviluppano relazioni e crescono.",
+    emptyTitle: "Nessun mercato disponibile.",
   },
   eventi: {
     slug: "eventi",
     title: "Eventi",
-    description:
-      "Incontri, workshop e appuntamenti rilevanti per la comunità imprenditoriale.",
-    emptyTitle: "Non ci sono eventi in programma",
-    emptyDescription:
-      "Quando ci saranno appuntamenti da condividere, li troverai qui.",
+    description: "Scopri incontri, workshop e appuntamenti della rete.",
+    emptyTitle: "Nessun evento in programma.",
   },
   "notizie-e-guide": {
     slug: "notizie-e-guide",
     title: "Notizie e guide",
     description:
       "Aggiornamenti, approfondimenti e materiali utili per orientarsi nel percorso imprenditoriale.",
-    emptyTitle: "Non ci sono ancora notizie o guide da mostrare",
-    emptyDescription:
-      "Quando ci saranno storie e guide da leggere, le troverai qui.",
+    emptyTitle: "Nessuna notizia o guida disponibile.",
   },
   osservatorio: {
     slug: "osservatorio",
     title: "Osservatorio",
     description:
-      "Indicatori e dati per leggere l’imprenditoria di origine immigrata. Gli indicatori vengono pubblicati man mano che diventano disponibili.",
-    emptyTitle: "Non ci sono ancora indicatori da mostrare",
-    emptyDescription:
-      "Gli indicatori dell’Osservatorio compariranno qui quando saranno disponibili.",
+      "Indicatori e dati per leggere l’imprenditoria di origine immigrata.",
+    emptyTitle: "Nessun indicatore disponibile.",
   },
   "chi-siamo": {
     slug: "chi-siamo",
@@ -93,10 +76,10 @@ export const sections = {
     slug: "pubblica",
     title: "Pubblica",
     description:
-      "Percorsi per pubblicare profilo, impresa, opportunità, servizi e mercati nella rete.",
+      "Pubblica profilo, impresa, opportunità, servizi e mercati nella rete.",
     emptyTitle: "Pubblicazione",
     emptyDescription:
-      "Usa i percorsi disponibili per entrare nella rete e pubblicare la tua presenza.",
+      "Usa i percorsi disponibili per entrare nella rete e pubblicare ciò che fai.",
   },
 } as const satisfies Record<string, SectionContent>;
 

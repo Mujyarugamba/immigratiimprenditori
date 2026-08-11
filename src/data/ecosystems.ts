@@ -73,7 +73,7 @@ export const ecosystems: EcosystemDef[] = [
     href: "/mercati",
     tagline: "Paesi, interessi, relazioni estere",
     description:
-      "Paesi e aree internazionali dove imprese e professionisti della rete operano e crescono.",
+      "Esplora paesi e mercati in cui imprese e professionisti della rete operano, sviluppano relazioni e crescono.",
     routes: ["/mercati"],
     ctas: [
       { label: "Esplora i mercati", href: "/mercati" },

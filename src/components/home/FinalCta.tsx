@@ -9,7 +9,7 @@ export function FinalCta() {
         <div className="border-line bg-surface-elevated flex flex-col gap-6 border px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12">
           <div className="max-w-xl space-y-3">
             <h2 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
-              Entra nella rete e pubblica la tua presenza
+              Entra nella rete e fatti conoscere
             </h2>
             <p className="text-ink-muted text-base leading-7">
               Crea il profilo, presenta l&apos;impresa, pubblica un&apos;opportunità

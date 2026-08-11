@@ -107,7 +107,12 @@ export function Footer() {
               Osservatorio
             </Link>
             {" · "}
-            indicatori pubblicati man mano che diventano disponibili
+            <Link
+              href="/chi-siamo"
+              className="transition-colors hover:text-white/80"
+            >
+              Chi siamo
+            </Link>
           </p>
         </Container>
       </div>

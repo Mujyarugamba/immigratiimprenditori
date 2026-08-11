@@ -79,8 +79,8 @@ export default async function OpportunitaPage({ searchParams }: PageProps) {
           ? [`Pubblicata il ${formatItalianDate(item.platform_published_at)}`]
           : undefined,
       })}
-      emptyTitle="Nessuna opportunità trovata"
-      emptyDescription="Non ci sono opportunità pubblicate che corrispondono ai filtri selezionati."
+      emptyTitle="Nessuna opportunità trovata."
+      emptyDescription="Nessuna opportunità corrisponde ai filtri selezionati."
     />
   );
 }

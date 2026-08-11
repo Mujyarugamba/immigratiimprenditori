@@ -74,8 +74,8 @@ export default async function CollaborazioniPage({ searchParams }: PageProps) {
           label(COLLABORATION_STATUSES, item.operational_status),
         ],
       })}
-      emptyTitle="Nessuna collaborazione trovata"
-      emptyDescription="Non ci sono collaborazioni pubblicate che corrispondono ai filtri selezionati."
+      emptyTitle="Nessuna collaborazione trovata."
+      emptyDescription="Nessuna collaborazione corrisponde ai filtri selezionati."
     />
   );
 }

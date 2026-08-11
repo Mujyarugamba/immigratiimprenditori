@@ -73,8 +73,8 @@ export default async function EventiPage({ searchParams }: PageProps) {
             ].filter(Boolean) as string[]
           : undefined,
       })}
-      emptyTitle="Nessun evento trovato"
-      emptyDescription="Non ci sono eventi pubblicati che corrispondono ai filtri selezionati."
+      emptyTitle="Nessun evento trovato."
+      emptyDescription="Nessun evento corrisponde ai filtri selezionati."
     />
   );
 }

@@ -63,7 +63,7 @@ export default async function PersoneHubPage() {
               <Link href="/imprese" className="text-brand font-medium">
                 Imprese collegate
               </Link>{" "}
-              — quando disponibili, emergono dalle schede e dalle relazioni.
+              — emergono dalle schede e dalle relazioni.
             </li>
             <li>
               <Link href="/servizi" className="text-brand font-medium">
@@ -78,10 +78,7 @@ export default async function PersoneHubPage() {
       {people.length === 0 ? (
         <Section className="bg-surface-elevated">
           <Container>
-            <PublicEmpty
-              title="Non ci sono ancora profili da mostrare"
-              description="Quando le persone pubblicheranno il proprio profilo, compariranno qui."
-            />
+            <PublicEmpty title="Nessun profilo disponibile." />
           </Container>
         </Section>
       ) : (
@@ -92,8 +89,7 @@ export default async function PersoneHubPage() {
           description="Persone che hanno scelto di presentarsi."
           actionHref="/registrati"
           actionLabel="Entra nella rete"
-          emptyTitle="Non ci sono ancora profili da mostrare"
-          emptyDescription="Quando le persone pubblicheranno il proprio profilo, compariranno qui."
+          emptyTitle="Nessun profilo disponibile."
           items={people.map((p) => ({
             href: `/persone/${p.slug}`,
             title: p.display_name,
@@ -111,8 +107,7 @@ export default async function PersoneHubPage() {
           description="Competenze e servizi professionali."
           actionHref="/professionisti"
           actionLabel="Vedi tutti i professionisti"
-          emptyTitle="Non ci sono ancora professionisti da mostrare"
-          emptyDescription="Quando i professionisti si presenteranno, li troverai qui."
+          emptyTitle="Nessun professionista disponibile."
           items={professionals.map((p) => ({
             href: `/professionisti/${p.id}`,
             title: p.headline || "Professionista",

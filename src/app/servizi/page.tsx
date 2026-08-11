@@ -128,10 +128,10 @@ export default async function ServiziPage({ searchParams }: PageProps) {
           <PublicEmpty
             title={
               tipo === "offerta"
-                ? "Nessuna offerta trovata"
-                : "Nessuna richiesta trovata"
+                ? "Nessuna offerta trovata."
+                : "Nessuna richiesta trovata."
             }
-            description="Non ci sono servizi pubblicati che corrispondono ai filtri selezionati."
+            description="Nessun servizio corrisponde ai filtri selezionati."
           />
         ) : (
           <>

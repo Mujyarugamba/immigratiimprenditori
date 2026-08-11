@@ -137,3 +137,80 @@ describe("P7.4 / P7.5 frontend copy humanization", () => {
     assert.match(detail, /OBSERVATORY_UNIT_LABELS/);
   });
 });
+
+/** User-facing “new / waiting platform” patterns — not legitimate grammar of “quando”. */
+const FORBIDDEN_NEW_SITE =
+  /Non ci sono ancora|Quando saranno disponibili|Quando ci saranno|Quando qualcuno|Quando i professionisti|Quando le imprese|Quando le persone|li troverai qui|le troverai qui|lo troverai qui|compariranno qui|presto troverai|prossimamente|in fase di sviluppo|stiamo preparando|stiamo lavorando|man mano che diventano disponibili|da mostrare|si presenteranno nella rete/i;
+
+describe("P7.6 established platform voice", () => {
+  const surfaces = [
+    "page.tsx",
+    "persone/page.tsx",
+    "imprese/page.tsx",
+    "professionisti/page.tsx",
+    "opportunita/page.tsx",
+    "collaborazioni/page.tsx",
+    "servizi/page.tsx",
+    "mercati/page.tsx",
+    "eventi/page.tsx",
+    "cultura/page.tsx",
+    "organizzazioni/page.tsx",
+    "contenuti/page.tsx",
+    "osservatorio/page.tsx",
+    "chi-siamo/page.tsx",
+    "pubblica/page.tsx",
+    "accedi/page.tsx",
+    "registrati/page.tsx",
+    "app/page.tsx",
+    "app/profilo/page.tsx",
+    "app/imprese/page.tsx",
+  ];
+
+  it("public and private surfaces avoid waiting / new-site empty copy", () => {
+    for (const rel of surfaces) {
+      const src = readApp(rel);
+      assert.doesNotMatch(
+        src,
+        FORBIDDEN_NEW_SITE,
+        `forbidden new-site voice in ${rel}`,
+      );
+    }
+    assert.doesNotMatch(readSrc("components/layout/Footer.tsx"), FORBIDDEN_NEW_SITE);
+    assert.doesNotMatch(readSrc("components/home/FinalCta.tsx"), FORBIDDEN_NEW_SITE);
+    assert.doesNotMatch(readSrc("data/sections.ts"), FORBIDDEN_NEW_SITE);
+    assert.doesNotMatch(readSrc("data/ecosystems.ts"), FORBIDDEN_NEW_SITE);
+    assert.doesNotMatch(readSrc("components/ui/EmptyState.tsx"), FORBIDDEN_NEW_SITE);
+  });
+
+  it("home empty states speak in the present", () => {
+    const home = readApp("page.tsx");
+    assert.match(home, /Nessun professionista disponibile\./);
+    assert.match(home, /Nessuna impresa disponibile\./);
+    assert.match(home, /Nessuna opportunità disponibile\./);
+    assert.match(home, /Nessun mercato disponibile\./);
+    assert.match(home, /Nessun servizio disponibile\./);
+    assert.match(home, /Nessun evento in programma\./);
+    assert.match(
+      home,
+      /operano, sviluppano relazioni e crescono/,
+    );
+    assert.match(
+      home,
+      /Eventi e storie per conoscersi, scoprire esperienze e creare nuove connessioni/,
+    );
+    assert.doesNotMatch(home, /emptyDescription=/);
+  });
+
+  it("final CTA invites concrete action today", () => {
+    const cta = readSrc("components/home/FinalCta.tsx");
+    assert.match(cta, /Entra nella rete e fatti conoscere/);
+    assert.doesNotMatch(cta, /pubblica la tua presenza/i);
+  });
+
+  it("footer has no progressive-population disclaimer", () => {
+    const footer = readSrc("components/layout/Footer.tsx");
+    assert.doesNotMatch(footer, /man mano|diventano disponibili|fase di/i);
+    assert.match(footer, /Osservatorio/);
+    assert.match(footer, /Chi siamo/);
+  });
+});

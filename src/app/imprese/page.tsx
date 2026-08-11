@@ -65,8 +65,8 @@ export default async function ImpresePage({ searchParams }: PageProps) {
           item.founding_year ? `Avvio ${item.founding_year}` : null,
         ].filter(Boolean) as string[],
       })}
-      emptyTitle="Nessuna impresa trovata"
-      emptyDescription="Non ci sono imprese pubblicate che corrispondono ai filtri selezionati."
+      emptyTitle="Nessuna impresa trovata."
+      emptyDescription="Nessuna impresa corrisponde ai filtri selezionati."
     />
   );
 }

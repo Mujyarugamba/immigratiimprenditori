@@ -62,8 +62,8 @@ export default async function OrganizzazioniPage({ searchParams }: PageProps) {
         badges: [label(ORGANIZATION_TYPES, item.type_code)],
         meta: item.seat_city_label ? [item.seat_city_label] : undefined,
       })}
-      emptyTitle="Nessuna organizzazione trovata"
-      emptyDescription="Non ci sono organizzazioni pubblicate che corrispondono ai filtri selezionati."
+      emptyTitle="Nessuna organizzazione trovata."
+      emptyDescription="Nessuna organizzazione corrisponde ai filtri selezionati."
     />
   );
 }
