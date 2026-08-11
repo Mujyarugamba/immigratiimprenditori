@@ -59,7 +59,7 @@ export type MembershipListItem = {
   isSelf: boolean;
 };
 
-/** Columns authenticated may UPDATE on profiles (Access A4.2). */
+/** Columns authenticated may UPDATE on profiles (Access A4.2 / L1.1b without phone). */
 export const PROFILE_SELF_EDITABLE_FIELDS = [
   "display_name",
   "slug",
@@ -72,7 +72,6 @@ export const PROFILE_SELF_EDITABLE_FIELDS = [
   "region",
   "country",
   "website",
-  "phone",
   "avatar_url",
   "is_public",
 ] as const;
@@ -92,7 +91,6 @@ export type ProfileSelfUpdate = Partial<{
   region: string | null;
   country: string | null;
   website: string | null;
-  phone: string | null;
   avatar_url: string | null;
   is_public: boolean;
 }>;

@@ -111,8 +111,14 @@ Required human/legal inputs before or during L1.2 drafting.
 
 ## L. Phone / contact hardening (product + privacy)
 
-1. Column-level restriction for `profiles.phone` on public RLS (tech gap noted)
-2. Whether phone should ever be public with explicit consent
+| Item | Status after L1.1b |
+|---|---|
+| L1.1 UI≠RLS phone gap on `profiles` | **RESOLVED** — contacts in `person_contact_channels`; legacy phone NULL; anon no table SELECT; network RPC |
+| Phone/email internet-public? | **NO** — registered network only when user opts in |
+| Auth email as contact? | **NO** — separate `contact_email` |
+| Impresa commercial channel public rules | **STILL OPEN** (product) — not same as Persona |
+| Org institutional / official personal contacts | **STILL OPEN** if product later exposes them publicly |
+| Opp/Collab/Service contact CTAs | **STILL OPEN** when create/contact UX lands |
 
 ---
 

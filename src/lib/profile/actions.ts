@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { updateOwnPersona } from "@/lib/data/authenticated/persona";
+import { upsertOwnPersonContact } from "@/lib/data/authenticated/person-contact";
 import { pickProfileSelfUpdate } from "@/lib/profile/whitelist";
 import { isValidProfileSlug } from "@/lib/profile/slug";
 import { slugify } from "@/lib/editorial/slug";
@@ -66,6 +67,15 @@ export async function updateProfileAction(
   }
   patch.slug = normalizedSlug;
 
+  const contactEmailRaw = String(formData.get("contact_email") ?? "").trim();
+  if (contactEmailRaw && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmailRaw)) {
+    return {
+      ok: false,
+      message: "Email professionale non valida.",
+      fieldErrors: { contact_email: "Formato non valido" },
+    };
+  }
+
   const result = await updateOwnPersona(session.personId, patch);
   if (!result.ok) {
     const err = result.error as AppError;
@@ -81,7 +91,24 @@ export async function updateProfileAction(
     return { ok: false, message: toUserMessage(err) };
   }
 
+  const contactResult = await upsertOwnPersonContact(session.personId, {
+    phone: String(formData.get("phone") ?? ""),
+    contact_email: contactEmailRaw,
+    share_phone_with_network:
+      formData.get("share_phone_with_network") === "true" ||
+      formData.get("share_phone_with_network") === "on",
+    share_contact_email_with_network:
+      formData.get("share_contact_email_with_network") === "true" ||
+      formData.get("share_contact_email_with_network") === "on",
+  });
+  if (!contactResult.ok) {
+    return { ok: false, message: toUserMessage(contactResult.error) };
+  }
+
   revalidatePath("/app/profilo");
   revalidatePath("/app");
+  if (patch.slug) {
+    revalidatePath(`/persone/${patch.slug}`);
+  }
   return { ok: true, message: "Profilo aggiornato." };
 }

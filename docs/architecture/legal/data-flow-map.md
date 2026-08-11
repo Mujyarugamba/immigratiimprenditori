@@ -1,6 +1,7 @@
-# Data Flow Map — L1.1
+# Data Flow Map — L1.1 (+ L1.1b update)
 
 **Audit date:** 2026-08-11
+**L1.1b update:** 2026-08-11 — Persona network contacts
 Factual technical flows only. Legal bases = TO BE DETERMINED.
 
 ---
@@ -61,14 +62,22 @@ Service role: **server-only** for provision RPCs — **CONFIRMED** (`env.example
 
 ---
 
-## 4. Public Persona publication
+## 4. Public Persona publication (+ L1.1b contacts)
 
 ```
 USER toggles is_public=true (default false)
   → profiles published_at trigger/checks
-  → Anon/authenticated SELECT via RLS (full row including phone)
-  → Next public layer selects allow-list WITHOUT phone
-  → /persone/[slug] HTML + metadata (title/description)
+  → Anon/authenticated SELECT profiles via RLS (discovery fields)
+  → Next public allow-list (no phone / no contact_email)
+  → /persone/[slug] HTML + metadata (title/description from public fields)
+
+Optional professional contacts (separate table):
+  USER edits person_contact_channels + share_* (default false)
+  → Anon: person_has_shared_network_contact → CTA only (no values)
+  → Registered active: person_contact_network_get → masked tel/mailto
+  → Anon has no SELECT on person_contact_channels
+  → Legacy profiles.phone forced NULL
+
   → Crawlability: robots allow /; sitemap lists /persone hub only
      (individual slugs not in sitemap; not disallowed) — CONFIRMED
 ```

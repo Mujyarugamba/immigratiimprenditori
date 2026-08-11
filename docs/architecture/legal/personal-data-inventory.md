@@ -1,7 +1,9 @@
-# Personal Data Inventory — L1.1
+# Personal Data Inventory — L1.1 (+ L1.1b update)
 
 **Audit date:** 2026-08-11
+**L1.1b update:** 2026-08-11 — Persona professional contacts
 **Persona model:** `public.profiles` (no separate people table) — **CONFIRMED**
+**Contact SoT (Persona):** `public.person_contact_channels` — **L1.1b**
 
 ---
 
@@ -35,23 +37,34 @@
 
 ## 3. Persona (`profiles`) — user-facing fields
 
-| Field | Entered via | Public UI select | Public render | RLS published row |
+| Field | Entered via | Public UI select | Public render | Anon DB path |
 |---|---|---|---|---|
-| display_name | onboarding + profile | YES | YES | YES |
+| display_name | onboarding + profile | YES | YES | YES (published) |
 | slug | profile | YES | YES (URL) | YES |
 | bio | profile | YES | YES | YES |
 | city, province, region, country | profile | YES | YES | YES |
-| website | profile | YES | YES | YES |
-| phone | profile | **NO** | **NO** | **YES (full row SELECT)** — gap UI≠RLS |
+| website | profile | YES | YES | YES (presentation) |
 | avatar_url | grantable; **UI edit NOT FOUND** | YES | YES if set | YES |
 | organization_name / role_description | grantable; limited UI | YES | YES if set | YES |
 | organization_type | grantable | NO | NO | YES |
 | is_public | profile toggle | NO (gate) | — | gate |
 | is_active, published_at, deleted_at | system / limited grants | NO | NO | internal |
+| `profiles.phone` (legacy) | retired | NO | NO | column forced NULL (`CHECK`) |
+
+### 3b. Persona professional contacts (`person_contact_channels`) — L1.1b
+
+| Field | Entered via | Anon values | Registered network | Owner | Default share |
+|---|---|---|---|---|---|
+| phone | profile form | NO (table no SELECT) | Via RPC if share | YES | share false |
+| contact_email | profile form | NO | Via RPC if share | YES | share false |
+| share_* flags | checkboxes | NO | Indirect (mask) | YES | false |
+
+Anon may call `person_has_shared_network_contact` (boolean for CTA only).
+**Auth email is never written to `contact_email`.**
 
 **Email on profiles:** **NOT FOUND**.
 
-**Default visibility:** `is_public` default **false** — **CONFIRMED**.
+**Default visibility:** `is_public` default **false** — **CONFIRMED**. Contact share defaults **false** — **CONFIRMED**.
 
 ---
 
@@ -111,7 +124,7 @@ Opportunities, Collaborations, Services, Events, Markets, Professionals — sche
 | DATA | Private default? | Can be public? | Public route | User control? | RLS control? |
 |---|---|---|---|---|---|
 | Auth email | YES | NO (app) | — | change via Auth (no UI found) | Auth |
-| Persona phone | YES (UI) | Not by app UI | — | YES edit | Row public SELECT includes phone if published |
+| Persona professional phone/email | YES until share opt-in | Network-only if share | `/persone/[slug]` CTA | YES share checkboxes | Separate table + RPC |
 | Persona bio/name/geo/website | YES until `is_public` | YES | `/persone/[slug]` | YES `is_public` | YES |
 | Impresa unpublished | YES | YES if manager publishes | `/imprese/[id]` | Manager | YES |
 | Opportunity etc. | Until published+public visibility | YES | domain routes | No self-serve UI today | YES |

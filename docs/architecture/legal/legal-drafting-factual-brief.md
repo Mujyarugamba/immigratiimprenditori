@@ -1,10 +1,11 @@
-# Legal Drafting Factual Brief — L1.1
+# Legal Drafting Factual Brief — L1.1 (+ L1.1b)
 
 **Purpose:** Allow L1.2 drafters to write Privacy / Cookie / Terms / External Data disclaimer **without reading the full repository**.
 **Contains:** technical facts + open decisions.
 **Does not contain:** legal bases, final policy text, invented controllers.
 
-**Baseline:** git `e884e67` (pre-L1.1) → L1.1 docs commit supersedes; site https://www.immigratiimprenditori.it · Stack Next.js + Vercel + Supabase Auth + PostgreSQL.
+**Baseline:** L1.1 audit + **L1.1b Contact & Visibility Model** (see `l1.1b-contact-visibility-model.md`).
+Site https://www.immigratiimprenditori.it · Stack Next.js + Vercel + Supabase Auth + PostgreSQL.
 
 ---
 
@@ -36,14 +37,21 @@
 
 ---
 
-## 4. Persona / public profile
+## 4. Persona / public profile & contacts (L1.1b)
 
 - Table `profiles`; default `is_public=false`.
-- User can toggle public and edit: name, slug, bio, territory, website, phone, is_public.
-- Public page `/persone/[slug]` shows: name, bio, territory, website, avatar if URL set, org/role texts if set — **not phone, not email**.
-- **Gap:** RLS allows SELECT of full published row including phone; only Next.js omits phone.
-- Sitemap lists `/persone` hub; individual slugs not listed but robots do not disallow them; metadata indexable when public.
+- User can toggle public and edit presentation: name, slug, bio, territory, website, is_public.
+- **Professional contacts** live in `person_contact_channels` (phone, `contact_email`) with explicit share-to-network checkboxes (**default off**).
+- **Auth / login email** stays on `auth.users` and is **never** used as the professional contact email.
+- Public page `/persone/[slug]`:
+  - anonymous: discovery fields + website; if contacts are shared, CTA “Accedi per vedere i contatti” (**no values** in HTML);
+  - registered active: tel/mailto for contacts the owner chose to share (RPC-masked).
+- Legacy `profiles.phone` retired (forced NULL). Anon cannot SELECT `person_contact_channels`.
+- **No in-app messaging / chat.**
+- Sitemap lists `/persone` hub; individual slugs not listed but robots do not disallow them; metadata from public presentation fields only.
 - Account close: **admin-only**; does not delete Auth/profile. No self-service erasure UI.
+
+**L1.2 may declare:** network publicly explorable for discovery; some profile fields intended for publication; optional professional contacts shared only with registered users under user control; Auth data private; purpose = professional/entrepreneurial visibility and contact.
 
 ---
 
@@ -116,7 +124,8 @@
 
 ## 13. Open decisions checklist (must fill)
 
-See `legal-open-decisions.md` — especially titolare, retention, deletion, minors, UGC licence, governing law, signup acceptance UX, phone public hardening.
+See `legal-open-decisions.md` — especially titolare, retention, deletion, minors, UGC licence, governing law, signup acceptance UX.
+Persona phone/contact hardening for L1.1 gap: **resolved in L1.1b** (network opt-in; not internet-public).
 
 ---
 

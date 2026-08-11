@@ -6,7 +6,7 @@ import type { PublicProfessionalCategory } from "@/lib/data/public/professionals
  * Public Persona columns — explicit allow-list.
  * Never select phone, email, account lifecycle, or auth ids for public UI.
  */
-const PUBLIC_PERSON_SELECT =
+export const PUBLIC_PERSON_SELECT =
   "id, slug, display_name, bio, city, province, region, country, website, avatar_url, organization_name, role_description";
 
 export type PublicPerson = {

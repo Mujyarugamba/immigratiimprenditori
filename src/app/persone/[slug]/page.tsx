@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PersonNetworkContact } from "@/components/public/PersonNetworkContact";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import {
+  getNetworkPersonContact,
+  personHasSharedNetworkContact,
+} from "@/lib/data/authenticated/person-contact";
 import {
   formatPersonTerritory,
   getPublicPersonBySlug,
@@ -16,6 +21,7 @@ import {
   MEMBERSHIP_ROLE_LABELS,
   PRACTICE_MODES,
 } from "@/lib/public/labels";
+import { getApplicationSession } from "@/lib/session/get-application-session";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -42,10 +48,18 @@ export default async function PersonaPubblicaPage({ params }: PageProps) {
     notFound();
   }
 
-  const [professional, businesses] = await Promise.all([
-    getPublicProfessionalForPerson(person.id).catch(() => null),
-    listPublicBusinessesForPerson(person.id).catch(() => []),
-  ]);
+  const session = await getApplicationSession();
+  const isActiveRegistered = Boolean(session?.isActiveAccount);
+
+  const [professional, businesses, hasSharedContact, networkContact] =
+    await Promise.all([
+      getPublicProfessionalForPerson(person.id).catch(() => null),
+      listPublicBusinessesForPerson(person.id).catch(() => []),
+      personHasSharedNetworkContact(person.id).catch(() => false),
+      isActiveRegistered
+        ? getNetworkPersonContact(person.id).catch(() => null)
+        : Promise.resolve(null),
+    ]);
 
   const territory = formatPersonTerritory(person);
   const websiteHref = normalizeWebsite(person.website);
@@ -113,6 +127,14 @@ export default async function PersonaPubblicaPage({ params }: PageProps) {
             </p>
           ) : null}
         </header>
+
+        <PersonNetworkContact
+          personId={person.id}
+          slug={person.slug}
+          isActiveRegistered={isActiveRegistered}
+          contact={networkContact}
+          hasAnySharedChannel={hasSharedContact}
+        />
 
         {professional ? (
           <section className="space-y-4" aria-labelledby="competenze-heading">

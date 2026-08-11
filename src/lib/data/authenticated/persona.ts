@@ -21,14 +21,13 @@ export type PersonaProfile = {
   region: string | null;
   country: string | null;
   website: string | null;
-  phone: string | null;
   avatar_url: string | null;
   is_public: boolean | null;
   is_active: boolean | null;
 };
 
 const SELF_SELECT =
-  "id, display_name, slug, bio, organization_name, organization_type, role_description, city, province, region, country, website, phone, avatar_url, is_public, is_active";
+  "id, display_name, slug, bio, organization_name, organization_type, role_description, city, province, region, country, website, avatar_url, is_public, is_active";
 
 /** Self Persona row by Access person id (not auth.uid as policy). */
 export async function getPersonaById(

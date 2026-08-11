@@ -15,6 +15,7 @@ export function pickProfileSelfUpdate(
       out.is_public = value === true || value === "true" || value === "on";
       continue;
     }
+    // phone / contact_email live on person_contact_channels (L1.1b), not profiles.
     if (value === undefined) continue;
     if (value === null || value === "") {
       if (key === "display_name" || key === "slug") continue;

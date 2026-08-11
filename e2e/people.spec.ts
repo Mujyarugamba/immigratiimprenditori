@@ -30,13 +30,32 @@ async function publishPersonProfile(
       bio: "Bio pubblica di test P7.3",
       city: "Milano",
       country: "Italia",
-      phone: "+390212345678",
       is_public: true,
       website: "https://example.com",
     }),
   });
   if (!res.ok) {
     throw new Error(`publish profile failed: ${await res.text()}`);
+  }
+
+  // Unshared professional phone (must not appear for anon).
+  const contactRes = await fetch(`${env.API_URL}/rest/v1/person_contact_channels`, {
+    method: "POST",
+    headers: {
+      apikey: env.ANON_KEY,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify({
+      person_id: uid,
+      phone: "+390212345678",
+      share_phone_with_network: false,
+      share_contact_email_with_network: false,
+    }),
+  });
+  if (!contactRes.ok) {
+    throw new Error(`upsert contact failed: ${await contactRes.text()}`);
   }
 }
 

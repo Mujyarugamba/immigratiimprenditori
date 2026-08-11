@@ -193,6 +193,17 @@ Piano di Migration — Dominio PERSONE
 
 ---
 
+## Addendum L1.1b (fuori dalla sequenza M1–M5 storica)
+
+Migration additive già applicate sul progetto collegato:
+
+- `20260814100000_create_person_contact_channels.sql`
+- `20260814110000_harden_legacy_profiles_phone.sql`
+
+Non sostituiscono M1–M5; estendono i recapiti professionali come da `physical/persone.md` (addendum Contatti) e `docs/architecture/legal/l1.1b-contact-visibility-model.md`.
+
+---
+
 ## Conclusione
 
 Questo piano non modifica né reinterpreta alcuna decisione del modello fisico approvato: si limita a stabilire in quale ordine, con quali precondizioni e con quali verifiche le cinque migration del dominio Persone (estensione di `profiles`, correzione di `profile_languages`, creazione di `competencies`, `profile_competencies`, `personal_stories`) possano essere create e applicate senza rompere le migration già applicate, senza introdurre incoerenze interne, e con un percorso di rollback definito per ciascuno step. L'unico vincolo tecnico rigido è l'ordine relativo tra M1 e (M2, M4, M5), dovuto alla dipendenza delle rispettive policy pubbliche dalle nuove colonne di `profiles`; tutto il resto della sequenza è organizzato per chiarezza narrativa, non per necessità tecnica. Il rischio principale che questo piano non può risolvere, perché fuori dal proprio ambito, è l'incoerenza che M1 introduce nelle policy pubbliche di quattro tabelle di altri domini non ancora applicate: viene segnalato esplicitamente, non corretto.

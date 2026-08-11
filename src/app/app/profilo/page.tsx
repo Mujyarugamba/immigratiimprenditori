@@ -6,6 +6,7 @@ import {
   getPersonaById,
   isProfileIncomplete,
 } from "@/lib/data/authenticated/persona";
+import { getOwnPersonContact } from "@/lib/data/authenticated/person-contact";
 import {
   labelAccountStatus,
   labelPersonAssociation,
@@ -58,6 +59,7 @@ export default async function ProfiloPage() {
   }
 
   const profile = await getPersonaById(session.personId);
+  const contact = await getOwnPersonContact(session.personId);
   const incomplete = isProfileIncomplete(profile);
 
   return (
@@ -117,7 +119,7 @@ export default async function ProfiloPage() {
           </Link>
         </p>
       ) : profile ? (
-        <ProfileEditForm profile={profile} />
+        <ProfileEditForm profile={profile} contact={contact} />
       ) : (
         <ErrorState
           title="Profilo non disponibile"
