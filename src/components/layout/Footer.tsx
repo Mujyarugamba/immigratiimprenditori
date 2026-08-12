@@ -3,14 +3,66 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Container } from "@/components/ui/Container";
-import { mainNav } from "@/data/navigation";
+import { moreNav, primaryNav } from "@/data/navigation";
 import { siteConfig } from "@/lib/site";
+import type { NavItem } from "@/types/navigation";
 
-const participateLinks = [
+const participateLinks: NavItem[] = [
   { label: "Crea il tuo profilo", href: "/registrati" },
   { label: "Presenta la tua impresa", href: "/app/imprese" },
   { label: "Pubblica", href: "/pubblica" },
 ];
+
+/** Footer “Rete” column order (labels from moreNav; no domains dropped). */
+const RETE_ORDER = [
+  "/professionisti",
+  "/collaborazioni",
+  "/eventi",
+  "/cultura",
+  "/contenuti",
+  "/osservatorio",
+  "/organizzazioni",
+  "/chi-siamo",
+] as const;
+
+function footerReteLinks(): NavItem[] {
+  const byHref = new Map(moreNav.map((item) => [item.href, item]));
+  const ordered = RETE_ORDER.map((href) => byHref.get(href)).filter(
+    (item): item is NavItem => Boolean(item),
+  );
+  const extras = moreNav.filter(
+    (item) => !RETE_ORDER.includes(item.href as (typeof RETE_ORDER)[number]),
+  );
+  return [...ordered, ...extras];
+}
+
+function FooterNavColumn({
+  title,
+  items,
+}: {
+  title: string;
+  items: NavItem[];
+}) {
+  return (
+    <nav aria-label={title}>
+      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-white/50 uppercase">
+        {title}
+      </p>
+      <ul className="space-y-1">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="text-sm leading-5 text-white/75 transition-colors hover:text-white"
+            >
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export function Footer() {
   const pathname = usePathname();
@@ -23,60 +75,30 @@ export function Footer() {
     return null;
   }
 
+  const reteLinks = footerReteLinks();
+
   return (
     <footer className="bg-brand-dark mt-auto text-white">
-      <Container className="grid gap-8 py-9 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-        <div className="space-y-3 lg:col-span-1">
+      <Container className="grid gap-6 py-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-5 lg:py-7">
+        <div className="space-y-2">
           <p className="text-sm leading-tight">
             <span className="text-brand-soft font-semibold">Immigrati</span>{" "}
             <span className="font-medium text-white">Imprenditori</span>
           </p>
-          <p className="text-sm leading-6 text-white/70">
+          <p className="max-w-xs text-sm leading-5 text-white/70 lg:max-w-none">
             {siteConfig.description}
           </p>
         </div>
 
-        <nav aria-label="Navigazione footer">
-          <p className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-white/50 uppercase">
-            Navigazione
-          </p>
-          <ul className="grid gap-1.5 sm:grid-cols-1">
-            {mainNav.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="text-sm text-white/75 transition-colors hover:text-white"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <FooterNavColumn title="Esplora" items={primaryNav} />
+        <FooterNavColumn title="Rete" items={reteLinks} />
+        <FooterNavColumn title="Partecipa" items={participateLinks} />
 
         <div>
-          <p className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-white/50 uppercase">
-            Partecipa
-          </p>
-          <ul className="space-y-1.5">
-            {participateLinks.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  className="text-sm text-white/75 transition-colors hover:text-white"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <p className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-white/50 uppercase">
+          <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-white/50 uppercase">
             Contatti
           </p>
-          <ul className="space-y-1.5 text-sm text-white/75">
+          <ul className="space-y-1 text-sm leading-5 text-white/75">
             <li>
               <a
                 href={`mailto:info@${siteConfig.domain}`}
@@ -95,11 +117,14 @@ export function Footer() {
       </Container>
 
       <div className="border-t border-white/10">
-        <Container className="flex flex-col gap-3 py-4 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
+        <Container className="flex flex-col gap-2 py-3 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {siteConfig.domain}
           </p>
-          <nav aria-label="Documenti legali" className="flex flex-wrap gap-x-4 gap-y-1">
+          <nav
+            aria-label="Documenti legali"
+            className="flex flex-wrap gap-x-4 gap-y-1"
+          >
             <Link href="/privacy" className="hover:text-white">
               Privacy
             </Link>

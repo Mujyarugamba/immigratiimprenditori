@@ -19,10 +19,18 @@ type HomeDomainSectionProps = {
   actionHref: string;
   actionLabel: string;
   items: HomeCard[];
+  /** Background / border utilities only — vertical padding is density-aware. */
   className?: string;
   emptyTitle?: string;
   emptyDescription?: string;
 };
+
+function stripPy(className: string): string {
+  return className
+    .split(/\s+/)
+    .filter((token) => token && !/^py-/.test(token) && !/^sm:py-/.test(token) && !/^lg:py-/.test(token))
+    .join(" ");
+}
 
 export function HomeDomainSection({
   eyebrow,
@@ -31,12 +39,16 @@ export function HomeDomainSection({
   actionHref,
   actionLabel,
   items,
-  className = "bg-surface py-14 sm:py-16 lg:py-20",
+  className = "bg-surface",
   emptyTitle = "Nessun risultato.",
   emptyDescription,
 }: HomeDomainSectionProps) {
+  const empty = items.length === 0;
+  const tone = stripPy(className);
+  const padding = empty ? "py-6 sm:py-7" : "py-8 sm:py-10";
+
   return (
-    <Section className={className}>
+    <Section className={`${tone} ${padding}`.trim()}>
       <Container>
         <HomeSectionHeader
           eyebrow={eyebrow}
@@ -44,11 +56,12 @@ export function HomeDomainSection({
           description={description}
           actionHref={actionHref}
           actionLabel={actionLabel}
+          compact={empty}
         />
-        {items.length === 0 ? (
+        {empty ? (
           <PublicEmpty title={emptyTitle} description={emptyDescription} />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
               <PublicResultCard
                 key={item.href}

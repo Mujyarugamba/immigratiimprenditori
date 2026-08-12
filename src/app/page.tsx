@@ -108,7 +108,7 @@ export default async function HomePage({
       />
 
       <HomeDomainSection
-        className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
+        className="bg-surface-elevated"
         eyebrow="Imprese"
         title="Attività, settori, territori"
         description="Scopri imprese, attività, settori, territori e relazioni."
@@ -160,7 +160,7 @@ export default async function HomePage({
       />
 
       <HomeDomainSection
-        className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
+        className="bg-surface-elevated"
         eyebrow="Mercati internazionali"
         title="Relazioni oltre confine"
         description="Esplora paesi e mercati in cui imprese e professionisti della rete operano, sviluppano relazioni e crescono."
@@ -199,7 +199,7 @@ export default async function HomePage({
       <TransversalStrip />
 
       <HomeDomainSection
-        className="bg-surface-elevated py-14 sm:py-16 lg:py-20"
+        className="bg-surface-elevated"
         eyebrow="Eventi e storie"
         title="Incontrarsi e orientarsi"
         description="Eventi e storie per conoscersi, scoprire esperienze e creare nuove connessioni."

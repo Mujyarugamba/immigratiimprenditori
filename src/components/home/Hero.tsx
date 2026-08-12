@@ -9,9 +9,9 @@ import { HomeSearch } from "@/components/home/HomeSearch";
 
 export function Hero() {
   return (
-    <Section className="border-line bg-surface border-b py-10 sm:py-14">
+    <Section className="border-line bg-surface border-b py-8 sm:py-11">
       <Container>
-        <div className="max-w-3xl space-y-5">
+        <div className="max-w-3xl space-y-4">
           <p className="text-brand text-[11px] font-semibold tracking-[0.16em] uppercase">
             Rete economica digitale
           </p>

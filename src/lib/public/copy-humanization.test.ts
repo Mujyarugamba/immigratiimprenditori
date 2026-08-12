@@ -210,7 +210,7 @@ describe("P7.6 established platform voice", () => {
   it("footer has no progressive-population disclaimer", () => {
     const footer = readSrc("components/layout/Footer.tsx");
     assert.doesNotMatch(footer, /man mano|diventano disponibili|fase di/i);
-    assert.match(footer, /mainNav/);
+    assert.match(footer, /primaryNav|moreNav/);
     assert.match(footer, /Scrivici/);
     assert.ok(moreNav.some((n) => n.label === "Osservatorio"));
     assert.ok(moreNav.some((n) => n.label === "Chi siamo"));
@@ -241,7 +241,10 @@ describe("P7.7 final human UX editorial polish", () => {
     assert.doesNotMatch(footer, /\{\s*" · "\s*\}/);
     assert.doesNotMatch(footer, /href="\/osservatorio"/);
     assert.doesNotMatch(footer, /href="\/chi-siamo"/);
-    assert.match(footer, /mainNav/);
+    assert.match(footer, /primaryNav/);
+    assert.match(footer, /moreNav/);
+    assert.match(footer, /Esplora/);
+    assert.match(footer, /Rete/);
     assert.match(footer, /Scrivici/);
     assert.match(footer, /©/);
     assert.ok(moreNav.some((n) => n.href === "/osservatorio"));

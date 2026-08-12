@@ -4,11 +4,11 @@ import { Section } from "@/components/ui/Section";
 
 export function FinalCta() {
   return (
-    <Section className="bg-surface py-16 sm:py-20">
+    <Section className="bg-surface py-10 sm:py-12">
       <Container>
-        <div className="border-line bg-surface-elevated flex flex-col gap-6 border px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12">
-          <div className="max-w-xl space-y-3">
-            <h2 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
+        <div className="border-line bg-surface-elevated flex flex-col gap-5 border px-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-8">
+          <div className="max-w-xl space-y-2">
+            <h2 className="text-ink text-2xl font-semibold tracking-tight sm:text-3xl">
               Entra nella rete e fatti conoscere
             </h2>
             <p className="text-ink-muted text-base leading-7">

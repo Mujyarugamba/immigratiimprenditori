@@ -5,9 +5,9 @@ import { ecosystems } from "@/data/ecosystems";
 
 export function EcosystemGrid() {
   return (
-    <Section className="bg-surface-elevated py-12 sm:py-16">
+    <Section className="bg-surface-elevated py-10 sm:py-12">
       <Container>
-        <div className="mb-8 max-w-2xl space-y-3">
+        <div className="mb-6 max-w-2xl space-y-2">
           <h2 className="text-ink text-2xl font-semibold tracking-tight sm:text-3xl">
             Cinque porte d&apos;ingresso, una rete
           </h2>
