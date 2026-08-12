@@ -16,15 +16,16 @@
 | Terms acceptance signup | Checkbox Termini + Privacy informativa (non consenso) |
 | M1–M4 | Applicati local+remote |
 
-## VERIFICA MANUALE (pre-deploy)
+## VERIFICA MANUALE (post Production gate)
 
-1. Configurare `LEGAL_SUBJECT_HMAC_SECRET` su Vercel Production (**NOT CONFIGURED** al 2026-08-12)
-2. Regione progetto Supabase + accettazione DPA account AIPEL
-3. Regione deploy Vercel + accettazione DPA account AIPEL
-4. SMTP Auth produzione
-5. Nomi/attributi cookie Auth runtime in Production
-6. Ciclo backup provider (numerico)
-7. Decisione Gestore: eventuali utenti già iscritti con Termini `2026-08-11` devono riactettare `2026-08-12`? (nuovo signup usa già `2026-08-12`; nessun workflow di re-consent implementato in L1.4)
+1. `LEGAL_SUBJECT_HMAC_SECRET` Production — **CONFIGURED** (2026-08-12; value never stored in repo/reports)
+2. Accettazione DPA account AIPEL (Vercel / Supabase) — MANUAL
+3. Regione Vercel runtime — MANUAL (Supabase project region **VERIFIED** `eu-west-3`)
+4. SMTP Auth produzione — MANUAL
+5. Nomi/attributi cookie Auth runtime in Production — MANUAL
+6. Ciclo backup provider (numerico) — MANUAL
+7. Re-consent Termini `2026-08-11` → `2026-08-12` — **N/A** (0 acceptance rows di qualsiasi versione sul remoto)
+8. Ops: 1 account attivo senza riga `terms_acceptances` — follow-up amministrativo (non re-consent di versione precedente)
 
 ## RESIDUI TECNICI NON BLOCCANTI PER I TESTI
 
