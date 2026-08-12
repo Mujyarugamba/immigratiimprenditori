@@ -56,6 +56,7 @@
 13. Nessuna autoassegnazione di ruoli o grant.
 14. Pubblicazione = lifecycle **specifico** del dominio (nessuna regola globale `published_at IS NOT NULL`).
 15. DELETE fisico eccezionale; preferire withdraw/archive/close.
+15bis. **L1.3-M2 legal retention:** residual minimized proof after account closure/deletion lives in `public.legal_retention_records` (separate, non-public, reason-bound, retention-bound). **Not a backup** and **not** a full Account/Persona copy. Soft `closed` does not auto-archive. Hard Account DELETE must first satisfy `terms_acceptances` RESTRICT (archive Terms proof into M2 when still needed, or dispose operational proof). See `docs/architecture/legal/retention-schedule.md`.
 16. Ownership non modificabile liberamente via UPDATE.
 17. Nessun nuovo ruolo persistito.
 18. Nessun `can_*` persistito; helper booleani sono funzioni, non colonne.
