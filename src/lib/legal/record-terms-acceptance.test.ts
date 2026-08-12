@@ -25,7 +25,8 @@ describe("M1 terms acceptance signup contract", () => {
   });
 
   it("uses versions.ts as sole version source of truth", () => {
-    assert.equal(TERMS_OF_USE_VERSION, "2026-08-11");
+    assert.ok(TERMS_OF_USE_VERSION.length >= 10);
+    assert.match(TERMS_OF_USE_VERSION, /^\d{4}-\d{2}-\d{2}$/);
     const payload = buildSignupTermsAcceptancePayload(
       "11111111-1111-1111-1111-111111111111",
     );

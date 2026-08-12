@@ -1,189 +1,140 @@
 # Privacy Policy
 
 **Informativa sul trattamento dei dati personali — Immigrati Imprenditori**
-**Versione bozza revisionata:** 11 agosto 2026
-**Stato:** bozza di lavoro — da pubblicare solo dopo chiusura dei punti bloccanti indicati nel Legal Review Report
+**Versione:** 12 agosto 2026
 
 ---
 
-DOCUMENTO DA REVISIONARE PRIMA DELLA PUBBLICAZIONE DEFINITIVA. Questa bozza recepisce le decisioni del Titolare del 11 agosto 2026 e l’audit tecnico L1.1 / L1.1b. Non costituisce attestazione di conformità legale assoluta.
+## 1. Titolare del trattamento
 
-## 1. Chi gestisce i dati
+Il **Titolare del trattamento** è **Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia**, in forma abbreviata **AIPEL**, Associazione con sede in Viale Molise n. 54, 20137 Milano (MI), Codice Fiscale 97342380157, Partita IVA 04222160964.
 
-Il **Titolare del trattamento** è:
-
-**Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)**
-Forma giuridica: Associazione
-Sede: Viale Molise n. 54, 20137 Milano (MI)
-Codice fiscale: 97342380157
-Partita IVA: 04222160964
-
-**Contatto privacy** (anche per l’esercizio dei diritti): **info@immigratiimprenditori.it**
-Allo stato attuale non è prevista una casella `privacy@` separata. La stessa email può essere utilizzata per le comunicazioni relative alla protezione dei dati personali.
-
-Contatto generale della piattaforma: **info@immigratiimprenditori.it**.
+Contatto per l’esercizio dei diritti privacy e per ogni comunicazione relativa alla protezione dei dati personali: **info@immigratiimprenditori.it**. Lo stesso indirizzo è utilizzato anche come contatto generale della piattaforma.
 
 ## 2. La piattaforma e le persone interessate
 
-Immigrati Imprenditori è una rete economica e professionale esplorabile pubblicamente. Permette a persone, professionisti, imprese e organizzazioni di presentarsi, pubblicare informazioni e creare relazioni professionali e imprenditoriali.
+Immigrati Imprenditori è una rete economica e professionale esplorabile pubblicamente, gestita da AIPEL. Permette a persone, professionisti, imprese e organizzazioni di presentarsi, pubblicare informazioni professionali e creare relazioni professionali e imprenditoriali.
 
-L’informativa riguarda visitatori, utenti registrati, persone con profilo, professionisti, soggetti collegati o abilitati a gestire imprese, referenti di organizzazioni, redattori e amministratori.
+La presente informativa riguarda: visitatori del sito pubblico, utenti registrati, persone con profilo, professionisti, soggetti collegati o abilitati a gestire imprese, referenti di organizzazioni, redattori e amministratori della piattaforma.
 
 ## 3. Dati trattati
 
-- **Credenziali e account:** indirizzo email utilizzato per autenticazione, identificativi tecnici, stato dell’account e dati necessari alla gestione della sessione. La password è gestita tramite il servizio di autenticazione e non è pubblicata.
-- **Profilo personale:** nome visualizzato, indirizzo pubblico del profilo (slug), biografia, territorio, Paese, sito web, avatar ove previsto, stato di visibilità e altri dati professionali inseriti dall’utente.
-- **Recapiti professionali facoltativi:** telefono e email professionale distinta dall’email di autenticazione. I recapiti condivisi con la rete sono destinati alla consultazione degli utenti registrati secondo le impostazioni previste dalla piattaforma (modello L1.1b).
-- **Dati relativi a imprese, attività professionali, organizzazioni, opportunità, collaborazioni, servizi, eventi e contenuti** che l’utente inserisce o gestisce.
-- **Dati tecnici generati dal sistema:** identificativi, timestamp, stati di pubblicazione, ruoli e autorizzazioni, relazioni di gestione e altri dati necessari al funzionamento e alla sicurezza.
-- **Dati tecnici di navigazione e log** trattati dai fornitori infrastrutturali nella misura necessaria all’erogazione e alla sicurezza del servizio.
+- **Credenziali e account:** indirizzo email utilizzato per l’autenticazione, identificativi tecnici, stato dell’account e dati necessari alla gestione della sessione. La password è gestita dal servizio di autenticazione e non è pubblicata né visibile ad AIPEL in chiaro.
+- **Profilo personale:** nome visualizzato, indirizzo pubblico del profilo, biografia, territorio, Paese, sito web, avatar ove previsto, stato di visibilità e altri dati professionali che l’utente sceglie di inserire.
+- **Recapiti professionali facoltativi:** telefono professionale e, ove previsto, email professionale di contatto distinta dall’email di autenticazione. Sono condivisi con la rete solo su scelta dell’utente e sono consultabili dagli utenti registrati secondo le impostazioni disponibili sulla piattaforma.
+- **Dati relativi a imprese, attività professionali, organizzazioni, opportunità, collaborazioni, servizi, eventi e contenuti** che l’utente inserisce o gestisce nell’ambito dei propri ruoli e autorizzazioni.
+- **Dati tecnici generati dal sistema:** identificativi, timestamp, stati di pubblicazione, ruoli e autorizzazioni, relazioni di gestione tra utenti ed entità, e altri dati necessari al funzionamento e alla sicurezza della piattaforma.
+- **Dati tecnici di navigazione e log** trattati dai fornitori infrastrutturali (Vercel, Supabase) nella misura necessaria all’erogazione e alla sicurezza del servizio.
 
 ## 4. Dati pubblici, dati della rete e dati privati
 
 La piattaforma adotta tre livelli funzionali di visibilità:
 
-1. **Pubblico:** le informazioni destinate alla presentazione nella rete, come nome, bio, territorio, competenze, attività, imprese e organizzazioni pubbliche collegate, servizi, sito web e altre informazioni rese pubbliche dall’utente o dal soggetto che le gestisce.
-2. **Utenti registrati:** i recapiti professionali che l’interessato sceglie di condividere con la rete, secondo il modello di visibilità applicato dalla piattaforma.
-3. **Privato:** email di autenticazione, identificativi tecnici, ruoli, autorizzazioni, dati amministrativi e informazioni non destinate alla pubblicazione.
+1. **Pubblico (Internet):** le informazioni destinate alla presentazione nella rete — ad esempio nome, avatar, bio, territorio, competenze, categorie professionali, attività, imprese e organizzazioni pubbliche collegate, servizi, opportunità, collaborazioni, contenuti, sito web professionale — quando il profilo o il relativo contenuto è reso pubblico dall’utente o dal soggetto che lo gestisce. Questi dati possono essere consultati senza autenticazione e possono essere indicizzati dai motori di ricerca.
+2. **Utenti registrati:** i recapiti professionali che l’interessato sceglie di condividere con la rete sono visibili solo a chi dispone di un account registrato, secondo il modello di visibilità implementato dalla piattaforma.
+3. **Privato:** email di autenticazione, credenziali, identificativi tecnici, ruoli, autorizzazioni, dati amministrativi e ogni altra informazione non destinata alla rete restano riservati e non sono resi pubblici né condivisi con gli utenti registrati.
 
-L’email utilizzata per accedere alla piattaforma **non** viene automaticamente trasformata in un recapito professionale.
+L’email utilizzata per accedere alla piattaforma **non** viene mai trasformata automaticamente in un recapito professionale pubblico o condiviso con la rete.
+
+La pubblicazione di dati professionali su iniziativa dell’utente è parte della funzione della piattaforma. Resta garantito che: (a) l’utente sceglie cosa rendere pubblico e cosa condividere solo con gli utenti registrati; (b) tali scelte sono modificabili nell’area riservata; (c) nulla di ciò che l’utente inserisce diventa pubblico senza una sua azione in tal senso.
 
 ## 5. Perché trattiamo i dati e basi giuridiche
 
-Il trattamento è finalizzato, in particolare, a:
-
-- creare e gestire l’account e la sessione;
-- consentire all’utente di creare, aggiornare e rendere visibile il proprio profilo;
-- permettere la presentazione e la gestione di imprese, attività professionali e organizzazioni;
-- consentire la pubblicazione e consultazione di opportunità, collaborazioni, servizi, eventi e contenuti;
-- favorire la scoperta reciproca e il contatto professionale tra soggetti della rete;
-- gestire autorizzazioni, moderazione, sicurezza, integrità e funzionamento tecnico della piattaforma;
-- adempiere a obblighi di legge e gestire eventuali contestazioni.
-
-**Basi giuridiche adottate** (il consenso non è utilizzato come base giuridica universale):
-
 | Finalità | Base giuridica |
 |---|---|
-| Gestione account e sessione | Esecuzione del rapporto contrattuale / misure precontrattuali (art. 6.1.b GDPR) |
-| Pubblicazione del profilo richiesta dall’utente | Esecuzione del rapporto contrattuale (art. 6.1.b GDPR) |
-| Gestione imprese/organizzazioni (funzioni di servizio) | Esecuzione del rapporto contrattuale (art. 6.1.b GDPR) |
-| Controlli, sicurezza e prevenzione abusi su imprese/organizzazioni e piattaforma | Legittimo interesse, ove appropriato (art. 6.1.f GDPR) |
-| Recapiti professionali volontariamente messi a disposizione secondo il modello della piattaforma | Esecuzione del rapporto contrattuale / scelta funzionale dell’utente nell’ambito del servizio (art. 6.1.b GDPR) |
-| Sicurezza, log e prevenzione abusi | Legittimo interesse (art. 6.1.f GDPR) |
-| Adempimenti normativi | Obbligo legale (art. 6.1.c GDPR) |
-| Tutela e difesa dei diritti | Legittimo interesse, quando applicabile (art. 6.1.f GDPR) |
-| Cookie / meccanismi strettamente tecnici necessari al funzionamento | Disciplina applicabile ai cookie tecnici, senza consenso preventivo quando ricorrono i relativi presupposti (v. Cookie Policy) |
+| Creare e gestire l’account e la sessione | Esecuzione di un contratto (art. 6, par. 1, lett. b, GDPR) |
+| Creazione, aggiornamento e pubblicazione del profilo su iniziativa dell’utente | Esecuzione di un contratto (art. 6, par. 1, lett. b, GDPR) |
+| Presentazione e gestione di imprese, attività professionali e organizzazioni | Esecuzione di un contratto (art. 6, par. 1, lett. b) e, per i controlli di autorizzazione, legittimo interesse (art. 6, par. 1, lett. f) |
+| Pubblicazione e consultazione di opportunità, collaborazioni, servizi, eventi e contenuti | Esecuzione di un contratto (art. 6, par. 1, lett. b, GDPR) |
+| Scoperta reciproca e contatto professionale tramite recapiti volontariamente condivisi | Esecuzione di un contratto / scelta funzionale dell’utente (art. 6, par. 1, lett. b, GDPR) |
+| Autorizzazioni, moderazione, sicurezza, integrità e funzionamento tecnico | Legittimo interesse (art. 6, par. 1, lett. f, GDPR) |
+| Adempimenti di legge | Obbligo legale (art. 6, par. 1, lett. c, GDPR) |
+| Tutela e difesa dei diritti, anche rispetto a dati mantenuti in forma minimizzata dopo la cancellazione di un account | Legittimo interesse (art. 6, par. 1, lett. f, GDPR), quando applicabile |
 
-Eventuali trattamenti basati sul consenso saranno utilizzati solo ove realmente necessari e saranno distinti dalle finalità sopra indicate.
+Il consenso **non** è utilizzato come base giuridica generale. È riservato a eventuali funzionalità non essenziali future (ad esempio comunicazioni promozionali non legate al servizio), e in tal caso sarà richiesto in modo specifico e separato.
 
 ## 6. Profilo pubblico e indicizzazione
 
-Quando l’utente rende pubblico il proprio profilo o pubblica informazioni destinate alla rete, tali informazioni possono essere accessibili senza autenticazione e, ove tecnicamente indicizzabili, possono essere rilevate dai motori di ricerca. I recapiti classificati come riservati agli utenti registrati non devono essere inclusi nelle superfici pubbliche anonime.
+Quando l’utente rende pubblico il proprio profilo o pubblica informazioni destinate alla rete, tali informazioni possono essere accessibili senza autenticazione e, ove tecnicamente indicizzabili, possono essere rilevate dai motori di ricerca. I recapiti riservati agli utenti registrati non sono inclusi nelle superfici pubbliche e non sono indicizzabili.
 
 ## 7. Contenuti inseriti dagli utenti
 
-Bio, descrizioni e altri campi liberi possono contenere informazioni inserite direttamente dall’utente. L’utente deve evitare di pubblicare dati personali di terzi senza averne titolo e deve utilizzare i campi della piattaforma in modo coerente con la loro finalità professionale.
+Bio, descrizioni e altri campi liberi possono contenere informazioni inserite dall’utente. L’utente deve evitare di pubblicare dati personali di terzi senza averne titolo. La licenza concessa ad AIPEL sui contenuti pubblicati è descritta nei Termini d’Uso ed è limitata a quanto necessario per il funzionamento della piattaforma; l’utente mantiene la titolarità dei propri contenuti.
 
 ## 8. Fornitori tecnici
 
-La piattaforma utilizza **Vercel** per l’erogazione dell’applicazione web e **Supabase** per servizi che comprendono autenticazione e database. Ruoli contrattuali (titolare/responsabile), localizzazione dei trattamenti, eventuali trasferimenti internazionali, DPA e ulteriori subfornitori devono essere verificati sulla documentazione contrattuale vigente prima della pubblicazione definitiva.
+La piattaforma utilizza **Vercel** per l’erogazione dell’applicazione web e **Supabase** per servizi che comprendono autenticazione e database. Tali fornitori possono agire come responsabili del trattamento nella misura in cui trattano dati personali per conto di AIPEL.
+
+Ruoli contrattuali, localizzazione dei trattamenti, eventuali trasferimenti internazionali verso Paesi extra-SEE e l’eventuale Data Processing Agreement (DPA) con ciascun fornitore sono disciplinati dalla documentazione contrattuale vigente con tali fornitori. Qualora risultassero trasferimenti verso Paesi terzi privi di decisione di adeguatezza, AIPEL adotta le garanzie previste dal Capo V del GDPR (ad esempio Clausole Contrattuali Standard), ove applicabili.
+
+I fornitori tecnici possono mantenere copie di backup secondo il proprio normale ciclo tecnico; tali copie non costituiscono un archivio operativo di AIPEL e sono soggette a quanto descritto al § 11.
 
 ## 9. Cookie e tecnologie analoghe
 
-L’audit tecnico attuale non ha rilevato strumenti di analytics, pixel pubblicitari o sistemi di profilazione. Sono utilizzati meccanismi tecnici necessari alla sessione di autenticazione e alla gestione dell’impresa selezionata. Per i dettagli si rinvia alla Cookie Policy.
+L’audit tecnico attuale non ha rilevato strumenti di analytics, pixel pubblicitari o sistemi di profilazione. Sono utilizzati meccanismi tecnici necessari alla sessione di autenticazione e alla gestione dell’impresa selezionata nell’area riservata. Per i dettagli si rinvia alla Cookie Policy.
 
-## 10. Conservazione
+## 10. Conservazione dei dati
 
-Non si applica una durata universale e arbitraria a tutte le categorie di dati.
+AIPEL non adotta una durata di conservazione unica e arbitraria per tutti i dati. Il principio applicato è il seguente:
 
-**Principio adottato:** ogni categoria di dati è conservata per il periodo **necessario** alla finalità per cui è trattata.
-
-- Quando una disposizione normativa impone uno specifico periodo di conservazione, si applica il periodo previsto dalla legge.
-- Quando non esiste un termine legale specifico, la conservazione è limitata al periodo normalmente necessario, proporzionato e giustificabile rispetto alla finalità.
-- Alla cessazione della necessità di conservazione: **cancellazione definitiva** oppure, quando appropriata, **anonimizzazione effettivamente irreversibile**.
-
-La piattaforma può mantenere internamente una *retention schedule* più dettagliata per categorie di trattamento.
-
-**Criteri di determinazione (art. 13 GDPR — formulazione prudente):**
+- ogni categoria di dati è conservata per il periodo necessario alla finalità per cui è trattata;
+- quando una disposizione normativa impone uno specifico periodo di conservazione, si applica quel periodo;
+- in assenza di un termine legale specifico, la conservazione è limitata al periodo normalmente necessario, proporzionato e giustificabile rispetto alla finalità;
+- al termine della necessità, i dati sono cancellati definitivamente oppure resi anonimi in modo effettivamente irreversibile, quando l’anonimizzazione è appropriata.
 
 | Categoria | Criterio di conservazione |
 |---|---|
 | Account e credenziali | Per la durata del rapporto di utilizzo del servizio e, dopo la cessazione, soltanto per il tempo strettamente necessario a completare la procedura di cancellazione e a gestire eventuali obblighi o contestazioni residui |
-| Profilo e dati di presentazione | Finché l’account è attivo e l’utente mantiene tali dati; alla cancellazione dell’account, rimozione dalla presenza pubblica e dai sistemi operativi secondo il modello di cui al §11 |
-| Recapiti professionali | Finché l’utente li conserva e, se condivisi, finché restano funzionali alla finalità di contatto nella rete; rimossi dai sistemi operativi con la cancellazione dell’account o prima, su modifica dell’utente |
-| Contenuti pubblicati / UGC | Per la durata della pubblicazione e, dopo ritiro o cancellazione account, solo se e nella misura in cui sussista una concreta ragione di conservazione separata (obblighi, contestazioni, sicurezza, tutela diritti) |
-| Log di sicurezza e prevenzione abusi | Per il tempo normalmente necessario alle finalità di sicurezza e prevenzione/accertamento di abusi, secondo criteri tecnici e organizzativi interni proporzionati |
-| Backup tecnici | Secondo il normale ciclo tecnico di rotazione: non costituiscono archivio operativo e non sono usati per ripristinare volontariamente un account cancellato |
+| Profilo e dati di presentazione | Finché l’account è attivo e l’utente mantiene tali dati; alla cancellazione dell’account, rimozione dalla presenza pubblica e dai sistemi operativi secondo il § 11 |
+| Recapiti professionali | Finché l’utente li conserva e, se condivisi, finché restano funzionali al contatto nella rete; rimossi con la cancellazione dell’account o prima, su modifica dell’utente |
+| Prova di accettazione dei Termini d’uso | Conservata per quanto necessario a dimostrare l’avvenuta accettazione e a gestire eventuali contestazioni o obblighi correlati |
+| Contenuti pubblicati | Per la durata della pubblicazione e, dopo ritiro o cancellazione account, solo se sussiste una concreta ragione di conservazione separata |
+| Log di sicurezza e prevenzione abusi | Per il tempo normalmente necessario alle finalità di sicurezza, secondo criteri interni proporzionati |
+| Eventuale archivio legale separato | Solo per i dati strettamente necessari e solo finché sussiste la ragione concreta di conservazione |
+| Backup tecnici | Secondo il normale ciclo di rotazione dei fornitori; non costituiscono archivio operativo |
 
-**Non** si dichiara in questa informativa che “tutti i dati sono conservati per 10 anni” né si indicano termini rigidi (es. 90 giorni / 5 anni / 10 anni) in assenza di una specifica categoria, finalità o obbligo concretamente applicabile.
+## 11. Cancellazione dell’account
 
-## 11. Modifica, visibilità, chiusura account e cancellazione
+Puoi cancellare il tuo account dall’**area riservata** (sezione dedicata nel profilo). La cancellazione richiede una conferma forte (reinserimento della password e digitazione di una frase di conferma) e chiude definitivamente l’account personale.
 
-L’utente può modificare i dati che la piattaforma rende gestibili e può controllare la pubblicazione del profilo secondo le funzioni disponibili.
+Alla cancellazione dell’account:
 
-### 11.1 Modello adottato di cancellazione dell’account
+- cessano l’autenticazione, l’accesso all’area riservata, i ruoli e le autorizzazioni personali, nonché i collegamenti di gestione attribuiti a quell’account in quanto dipendenti dalla sua identità;
+- il profilo personale viene rimosso dalla rete e non resta più pubblicamente consultabile;
+- i recapiti personali/professionali collegati all’account vengono rimossi dai sistemi operativi;
+- i dati personali per cui non sussiste più una ragione di conservazione sono eliminati dai sistemi operativi;
+- i soli dati per cui esiste ancora una **concreta** ragione di conservazione — ad esempio obblighi di legge, contestazioni, sicurezza, prevenzione o accertamento di abusi, tutela o difesa di un diritto, prova delle operazioni quando necessaria — possono essere mantenuti in un **archivio separato**, non pubblico e ad accesso fortemente limitato, nella misura minima necessaria. **Non** viene conservata automaticamente una copia integrale del profilo o dell’account.
 
-È stato adottato il seguente modello funzionale e giuridico.
+La cancellazione dell’account di una persona **non** comporta l’automatica cancellazione di imprese, organizzazioni, opportunità, eventi, contenuti o altre entità autonome della piattaforma per il solo fatto che quell’utente le amministrava o gestiva. Alla cancellazione cessa l’autorità di gestione di quella persona sulle entità collegate: se un’entità dispone di altri gestori autorizzati, continua a operare normalmente; se l’account cancellato era l’unico gestore, l’entità può comunque permanere sulla piattaforma secondo il proprio stato, in attesa che la gestione sia attribuita a un altro soggetto tramite le procedure della piattaforma. **Nessun nuovo gestore viene assegnato automaticamente.**
 
-L’utente dovrà poter **richiedere direttamente dalla propria area riservata** la cancellazione del proprio account. La relativa **funzione tecnica self-service sarà implementata successivamente**; allo stato attuale essa **non è ancora disponibile** nell’applicazione.
+I contenuti pubblicati dall’utente seguono un regime che dipende dalla loro natura, dalla titolarità, dal rapporto con eventuali entità autonome collegate e dagli obblighi applicabili, e non una regola unica e automatica di cancellazione o conservazione.
 
-La cancellazione dell’account comporta:
+Le copie tecniche di backup possono sopravvivere temporaneamente secondo il normale ciclo tecnico dei fornitori; non costituiscono un archivio operativo, non sono usate per ripristinare volontariamente un account cancellato, restano protette e vengono eliminate con la normale rotazione. In caso di ripristino da backup per disaster recovery, le cancellazioni già validamente effettuate sono nuovamente applicate ove tecnicamente necessario.
 
-**A.** rimozione della presenza dalla piattaforma e cessazione della relativa visibilità;
-**B.** eliminazione dai sistemi operativi dei dati personali che non devono più essere conservati;
-**C.** eventuale conservazione **separata**, **non pubblica** e ad accesso fortemente limitato **esclusivamente** dei dati per i quali esista ancora una concreta ragione di conservazione, ad esempio:
+La cancellazione dell’account **non** va confusa con il diritto alla cancellazione previsto dall’art. 17 GDPR. La chiusura volontaria dell’account attiva il processo operativo sopra descritto; le richieste formulate ai sensi della normativa sulla protezione dei dati personali restano disciplinate dal § 12 e possono essere esercitate anche indipendentemente dalla chiusura dell’account.
 
-- obblighi di legge;
-- contestazioni;
-- sicurezza;
-- prevenzione o accertamento di abusi;
-- tutela o difesa di diritti;
-- prova delle operazioni quando necessaria.
-
-**Minimizzazione:** non viene conservata automaticamente una copia completa del profilo/account in un archivio. Nell’eventuale archivio separato sono conservati soltanto i dati effettivamente necessari e, nell’organizzazione interna del trattamento, deve essere identificabile la ragione della loro conservazione.
-
-### 11.2 Backup
-
-Le copie tecniche di backup possono sopravvivere temporaneamente alla cancellazione dai sistemi operativi secondo il normale ciclo tecnico di backup. Tali copie:
-
-- non costituiscono un archivio operativo;
-- non devono essere utilizzate per ripristinare volontariamente un account cancellato;
-- restano protette e con accesso limitato;
-- vengono eliminate attraverso la normale rotazione dei backup.
-
-In caso di disaster recovery che comporti il ripristino di una copia precedente, le cancellazioni già validamente effettuate devono essere nuovamente applicate, ove tecnicamente necessario. Non si indica in questa informativa una durata numerica del backup non verificata tecnicamente.
-
-### 11.3 Distinzione rispetto all’art. 17 GDPR
-
-La **cancellazione volontaria dell’account** attiva il processo operativo descritto sopra.
-Le **richieste dell’interessato ai sensi dell’art. 17 GDPR** (diritto alla cancellazione) restano distinte: sono gestite secondo la normativa applicabile e possono avere presupposti ed eccezioni proprie.
-
-Fino all’implementazione della funzione self-service, le richieste relative alla cancellazione dell’account possono essere inviate a **info@immigratiimprenditori.it**.
+Per problemi tecnici o richieste di assistenza relative alla cancellazione puoi scrivere a **info@immigratiimprenditori.it**.
 
 ## 12. Diritti dell’interessato
 
 Nei casi previsti dalla normativa applicabile, l’interessato può esercitare i diritti di accesso, rettifica, cancellazione, limitazione, opposizione e portabilità, nonché revocare un eventuale consenso senza pregiudicare la liceità del trattamento precedente.
 
-Le richieste possono essere inviate a: **info@immigratiimprenditori.it**.
-È inoltre possibile proporre reclamo all’autorità di controllo competente (in Italia, il Garante per la protezione dei dati personali).
+Le richieste possono essere inviate a **info@immigratiimprenditori.it**. AIPEL fornisce riscontro senza ingiustificato ritardo e, in ogni caso, entro un mese dal ricevimento della richiesta, termine prorogabile di due mesi ove necessario in considerazione della complessità e del numero delle richieste, con informazione all’interessato entro un mese dal ricevimento, come previsto dall’art. 12, par. 3, GDPR.
+
+È inoltre possibile proporre reclamo al Garante per la protezione dei dati personali ([www.garanteprivacy.it](https://www.garanteprivacy.it)) o all’autorità di controllo competente.
 
 ## 13. Minori
 
-La registrazione e l’utilizzo di un account sono riservati a chi ha compiuto **18 anni**.
-La piattaforma non è destinata ai minori di età.
+L’utilizzo della piattaforma è riservato a utenti che abbiano compiuto **18 anni**. AIPEL non tratta consapevolmente dati di minorenni. Qualora venisse a conoscenza di un account riconducibile a un minorenne, AIPEL provvede alla disattivazione dell’account e alla cancellazione dei relativi dati, salvo diversi obblighi di legge.
 
 ## 14. Decisioni automatizzate e profilazione
 
-L’audit tecnico non ha rilevato sistemi di profilazione comportamentale, advertising personalizzato o decisioni automatizzate con effetti analoghi a una decisione umana significativa. Le normali funzioni di ricerca, filtro, autorizzazione e controllo degli accessi non sono presentate come sistemi di profilazione commerciale.
+L’audit tecnico non ha rilevato sistemi di profilazione comportamentale, pubblicità personalizzata o decisioni automatizzate con effetti giuridici o analogamente significativi sull’interessato ai sensi dell’art. 22 GDPR. Le normali funzioni di ricerca, filtro, autorizzazione e controllo degli accessi non costituiscono sistemi di profilazione commerciale.
 
 ## 15. Sicurezza
 
-La piattaforma utilizza separazione tra aree pubbliche e riservate, autenticazione, controlli di accesso e policy a livello database. Nessuna misura tecnica può tuttavia eliminare ogni rischio connesso alla trasmissione e conservazione di informazioni online.
+La piattaforma adotta misure tecniche e organizzative comprendenti la separazione tra aree pubbliche e riservate, l’autenticazione, i controlli di accesso e policy di sicurezza a livello database. Nessuna misura tecnica può tuttavia eliminare ogni rischio connesso alla trasmissione e alla conservazione di informazioni online.
 
 ## 16. Aggiornamenti
 
-La presente informativa potrà essere aggiornata per riflettere modifiche del servizio, dei fornitori o della normativa. La versione pubblicata indicherà la data dell’ultimo aggiornamento.
-
----
-
-*Fine Privacy Policy (bozza)*
+La presente informativa potrà essere aggiornata per riflettere modifiche del servizio, dei fornitori o della normativa applicabile. La versione pubblicata indicherà la data dell’ultimo aggiornamento.

@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { LEGAL_DOC_FILES, type LegalDocId } from "@/lib/legal/versions";
 
 const INTERNAL_LINE =
-  /(bozza|DOCUMENTO DA REVISIONARE|Legal Review|Change Log|Decision Table|Revisione Claude|\[TASK TECNICO|\[VERIFICA|\[DA DEFINIRE|^\*Fine |\*\*Stato:\*\*|\*\*Versione bozza)/i;
+  /(versione\s+bozza|bozza\s+di\s+lavoro|bozza\s+revisionata|\(bozza\)|DOCUMENTO DA REVISIONARE|DOCUMENTO DA VERIFICARE|Legal Review Report|Change Log|Decision Table|Revisione Claude|\[TASK TECNICO|\[VERIFICA TECNICA|\[VERIFICA|\[DA DEFINIRE|\[DA CONFERMARE|^\*Fine |\*\*Stato:\*\*|\*\*Versione bozza)/i;
 
 /**
  * Loads legal markdown from docs/architecture/legal and strips internal review markers

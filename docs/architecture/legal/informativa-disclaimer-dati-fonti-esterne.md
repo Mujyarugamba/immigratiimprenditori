@@ -1,20 +1,17 @@
-# Informativa e Disclaimer su dati e fonti esterne
+# Informativa su dati e fonti esterne
 
 **Osservatorio, open data, opportunità e contenuti da fonti terze — Immigrati Imprenditori**
-**Versione bozza revisionata:** 11 agosto 2026
-**Stato:** bozza di lavoro — da pubblicare solo dopo chiusura dei punti bloccanti indicati nel Legal Review Report
+**Versione:** 12 agosto 2026
 
 ---
 
-DOCUMENTO DA REVISIONARE PRIMA DELLA PUBBLICAZIONE DEFINITIVA. Coordinato con Privacy Policy e Termini d’uso. Non costituisce attestazione di conformità legale assoluta.
-
 ## 1. Finalità
 
-Immigrati Imprenditori, gestita da **Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)** (Viale Molise n. 54, 20137 Milano (MI) — C.F. 97342380157 — P.IVA 04222160964), può utilizzare dati e informazioni provenienti da fonti pubbliche, istituzionali o comunque legittimamente riutilizzabili per arricchire l’Osservatorio e altri domini informativi della piattaforma.
+Immigrati Imprenditori, gestita da AIPEL (Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia), può utilizzare dati e informazioni provenienti da fonti pubbliche, istituzionali o comunque legittimamente riutilizzabili per arricchire l’Osservatorio e altri domini informativi della piattaforma.
 
 ## 2. Principio di provenienza
 
-Quando un’informazione deriva da una fonte esterna, la piattaforma deve conservarne e, quando opportuno, mostrarne la provenienza. La fonte originaria resta il riferimento per il dato, il documento o l’atto ufficiale.
+Quando un’informazione deriva da una fonte esterna, la piattaforma ne conserva e, quando opportuno, ne mostra la provenienza. **La fonte originaria resta il riferimento definitivo** per il dato, il documento o l’atto ufficiale: qualunque rielaborazione della piattaforma è un valore aggiunto informativo, non un sostituto della fonte.
 
 ## 3. Tipi di informazioni
 
@@ -25,69 +22,71 @@ Quando un’informazione deriva da una fonte esterna, la piattaforma deve conser
 - informazioni culturali, eventi e contenuti selezionati da fonti compatibili;
 - metadati necessari a documentare fonte, data di acquisizione, licenza e aggiornamento.
 
-## 4. Fonti previste dal programma dati
+## 4. Fonti del programma dati
 
-Il programma di acquisizione esterna ha individuato, tra le fonti prioritarie o potenziali, ISTAT, Eurostat, Unioncamere/Movimprese, Incentivi.gov, World Bank, OECD, Regione Lombardia, fonti europee di finanziamento e fonti culturali pubbliche. L’inclusione in questa lista **non** significa che ogni fonte sia già importata o utilizzata.
+Il programma di acquisizione esterna contempla, tra le fonti prioritarie o potenziali, istituzioni e organismi pubblici quali ISTAT, Eurostat, Unioncamere/Movimprese, Incentivi.gov, World Bank, OECD, Regione Lombardia, fonti ufficiali dell’Unione europea e fonti pubbliche relative a cultura ed eventi. L’inclusione in questo elenco non significa che ogni fonte sia sempre attiva o utilizzata in un dato momento: alcune informazioni e indicatori pubblicati sulla piattaforma possono provenire da fonti pubbliche esterne, identificate nella piattaforma quando applicabile.
 
 ## 5. Cosa non viene fatto
 
 - non vengono creati profili personali o anagrafiche di imprese tramite scraping indiscriminato del web;
-- non vengono importati microdati personali per popolare profili della rete;
+- non vengono importati microdati personali per popolare automaticamente profili della rete;
 - la stampa e gli articoli giornalistici non sono trattati come fonte primaria di indicatori quando esiste una fonte statistica o istituzionale originaria;
 - non viene presentata come ufficiale un’elaborazione della piattaforma che non lo sia.
 
-## 6. Aggiornamento e revisioni
+## 6. Regola operativa di acquisizione
 
-Dati statistici e open data possono essere corretti, revisionati o aggiornati dalla fonte. La piattaforma può riportare la data di riferimento, la data di acquisizione e altre informazioni di provenienza per consentire di interpretare correttamente il dato.
+Prima si verifica che il dato possa essere legittimamente utilizzato, poi lo si importa. La presente informativa descrive come la piattaforma tratta i dati esterni una volta acquisiti legittimamente, e non costituisce di per sé un’autorizzazione ad acquisire dati la cui licenza non lo consenta.
 
-## 7. Definizioni e comparabilità
+## 7. Aggiornamento e revisioni
 
-Indicatori provenienti da fonti diverse possono utilizzare definizioni, popolazioni, periodi, territori o metodologie differenti. Per esempio, una definizione camerale di impresa straniera non deve essere automaticamente considerata equivalente a una classificazione basata su cittadinanza, luogo di nascita o altri criteri statistici. Le definizioni della fonte devono essere preservate e rese comprensibili.
+Dati statistici e open data possono essere corretti, revisionati o aggiornati dalla fonte originaria. La piattaforma riporta, quando disponibili, la data di riferimento, la data di acquisizione e altre informazioni di provenienza.
 
-## 8. Elaborazioni della piattaforma
+## 8. Definizioni e comparabilità
 
-Quando la piattaforma calcola, aggrega, normalizza o presenta un dato derivato, deve distinguere l’elaborazione propria dal valore pubblicato dalla fonte e documentare, in misura adeguata, il metodo utilizzato.
+Indicatori provenienti da fonti diverse possono utilizzare definizioni, popolazioni, periodi, territori o metodologie differenti. Le definizioni della fonte originaria sono preservate e rese comprensibili all’utente, anche quando la piattaforma le presenta in forma sintetica.
 
-## 9. Bandi, incentivi e opportunità
+## 9. Elaborazioni della piattaforma
 
-Le schede relative a bandi, incentivi e opportunità hanno finalità informativa. Requisiti, importi, scadenze, procedure e condizioni possono essere modificati dall’ente responsabile. Prima di presentare una domanda o assumere decisioni economiche, l’utente deve consultare il bando, l’atto o la pagina ufficiale indicata come fonte (**fa fede la fonte ufficiale**).
+Quando la piattaforma calcola, aggrega, normalizza o presenta un dato derivato, distingue chiaramente l’elaborazione propria dal valore pubblicato dalla fonte originaria e documenta, in misura adeguata, il metodo utilizzato.
 
-## 10. Eventi e informazioni culturali
+## 10. Bandi, incentivi e opportunità
+
+Le schede relative a bandi, incentivi e opportunità hanno finalità informativa. Requisiti, importi, scadenze, procedure e condizioni possono essere modificati dall’ente responsabile in qualsiasi momento. **Prima di presentare una domanda o di assumere decisioni economiche, l’utente deve sempre consultare il bando, l’atto o la pagina ufficiale indicata come fonte.** La piattaforma non garantisce l’esito di alcuna domanda o partecipazione.
+
+## 11. Eventi e informazioni culturali
 
 Informazioni su eventi e iniziative culturali provenienti da fonti esterne possono subire variazioni, rinvii o cancellazioni. Quando disponibile, la pagina o il soggetto organizzatore originario costituisce il riferimento per le informazioni operative.
 
-## 11. Licenze e riuso
+## 12. Fonti giornalistiche e secondarie
 
-Ogni dataset o contenuto esterno deve essere utilizzato nel rispetto della licenza, delle condizioni di riuso e degli obblighi di attribuzione applicabili alla specifica fonte. Il programma dati esterni prevede documentazione di registry/provenance (D1); **l’import operativo non è ancora eseguito**. Quando i dati esterni saranno pubblicati sulla piattaforma, provenienza e condizioni di riuso saranno indicate in modo coerente con quel modello.
+La piattaforma può fare riferimento, a fini editoriali e nei limiti consentiti dalla normativa applicabile in materia di proprietà intellettuale, a giornali, radio, report, articoli, ricerche private o comunicati. Quando una fonte giornalistica cita una fonte istituzionale originaria, la piattaforma preferisce e cita la fonte originaria. Le fonti giornalistiche possono essere utilizzate editorialmente, ma non sono trattate come un dataset da riprodurre sistematicamente.
 
-## 12. Dati personali
+## 13. Licenze e riuso
 
-Il programma dati esterni è orientato principalmente a dati aggregati, open data, informazioni su opportunità, mercati e contenuti. Non deve essere utilizzato per creare automaticamente profili personali della rete attraverso raccolta indiscriminata di dati nominativi disponibili online.
+Ogni dataset o contenuto esterno è utilizzato nel rispetto della licenza, delle condizioni di riuso e degli obblighi di attribuzione applicabili alla specifica fonte. La piattaforma mantiene documentazione interna di licenze e provenienza per i dataset acquisiti.
 
-Quando un’informazione esterna contiene dati personali, si applicano anche la Privacy Policy e le regole della piattaforma sulla pubblicazione.
+## 14. Dati personali nelle fonti esterne
 
-## 13. Accuratezza
+Il programma dati esterni è orientato principalmente a dati aggregati, open data, informazioni su opportunità, mercati e contenuti, e non a dati personali. Qualora una fonte esterna legittimamente utilizzabile contenga incidentalmente dati personali, tali dati sono trattati nel rispetto della Privacy Policy e limitatamente a quanto necessario per la finalità informativa perseguita.
 
-La piattaforma mira a riportare fedelmente le informazioni acquisite e a indicarne la provenienza, ma non può garantire che ogni fonte esterna sia priva di errori, completa o aggiornata in tempo reale. In caso di contrasto, prevale la fonte ufficiale originaria.
+## 15. Accuratezza
 
-## 14. Segnalazioni
+La piattaforma mira a riportare fedelmente le informazioni acquisite e a indicarne la provenienza, ma non può garantire che ogni fonte esterna sia priva di errori, completa o aggiornata in tempo reale. **In caso di contrasto tra un’informazione pubblicata dalla piattaforma e la fonte ufficiale originaria, prevale sempre quest’ultima.** Restano ferme le responsabilità che non possono essere escluse o limitate per legge.
 
-Errori, attribuzioni non corrette o richieste relative a una fonte possono essere segnalati a **info@immigratiimprenditori.it**.
+## 16. Segnalazioni
 
-## 15. Coordinamento con Privacy e Termini
+Errori, attribuzioni non corrette o altre richieste relative a una fonte o a un dato pubblicato possono essere segnalati a **info@immigratiimprenditori.it**.
 
-L’utilizzo della piattaforma resta soggetto ai Termini d’uso. Il trattamento dei dati personali è disciplinato dalla Privacy Policy. Cookie e tecnologie analoghe sono descritti nella Cookie Policy.
+## 17. Coordinamento con Privacy Policy e Termini d’Uso
 
-## 16. Contatti del Gestore
+Quando un’informazione esterna contiene dati personali, si applicano anche la Privacy Policy e le regole della piattaforma sulla pubblicazione dei contenuti. L’utilizzo della piattaforma resta soggetto ai Termini d’Uso.
+
+## 18. Contatti del Gestore
 
 **AIPEL** — Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia
 Viale Molise n. 54, 20137 Milano (MI) — C.F. 97342380157 — P.IVA 04222160964
 Email: info@immigratiimprenditori.it
 
-## 17. Aggiornamenti
+## 19. Aggiornamenti
 
-Questa informativa deve essere aggiornata insieme al registro delle fonti e al processo di ingestion quando vengono introdotte nuove categorie di dati, nuove licenze o nuove modalità di elaborazione.
-
----
-
-*Fine Informativa/Disclaimer dati e fonti esterne (bozza)*
+La presente informativa deve essere aggiornata insieme al registro delle fonti e al processo di acquisizione dei dati ogni volta che vengono introdotte nuove categorie di dati, nuove licenze o nuove modalità di elaborazione.
