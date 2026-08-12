@@ -7,6 +7,8 @@ const variants = {
     "border border-line bg-surface-elevated text-ink hover:border-line-strong hover:bg-surface focus-visible:outline-line-strong",
   accent:
     "bg-accent text-white hover:bg-accent-dark focus-visible:outline-accent shadow-soft",
+  destructive:
+    "bg-accent-dark text-white hover:bg-accent focus-visible:outline-accent-dark shadow-soft",
   ghost:
     "text-ink-muted hover:bg-surface-muted hover:text-ink focus-visible:outline-line-strong",
 } as const;

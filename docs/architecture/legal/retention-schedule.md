@@ -58,12 +58,14 @@ No `other` / `misc` / `general`.
 
 ---
 
-## Terms acceptance ↔ M2 / future M3
+## Terms acceptance ↔ M2 / M3
 
 1. **While Account lives (incl. soft `closed`):** operational proof stays in `terms_acceptances` (M1, FK `ON DELETE RESTRICT`).
-2. **If M3 needs hard Account DELETE and proof is still required:** server/service inserts minimized `terms_acceptance_proof` into `legal_retention_records` (`subject_ref` opaque + proof_* + `retain_until` or indefinite-review), then removes the operational `terms_acceptances` row, then hard-deletes Account (`source_account_id` SET NULL).
-3. **If no concrete reason remains:** do **not** archive; delete operational proof with the account wipe path.
-4. **Final disposal:** `legal_retention_dispose_record` clears proof/marker fields and marks `disposed` — not silent forever retention.
+2. **M3 self-delete (phase 1):** soft-close Account; **does not** auto-insert M2; **does not** hard-delete Account; Terms rows remain until a later hard-delete disposal path.
+3. **If later hard Account DELETE and proof is still required:** server/service inserts minimized `terms_acceptance_proof` into `legal_retention_records` (`subject_ref` = HMAC opaque from `LEGAL_SUBJECT_HMAC_SECRET` + proof_* + `retain_until` or indefinite-review), then removes the operational `terms_acceptances` row, then hard-deletes Account (`source_account_id` SET NULL).
+4. **If no concrete reason remains:** do **not** archive; delete operational proof with the account wipe path.
+5. **Final disposal:** `legal_retention_dispose_record` clears proof/marker fields and marks `disposed` — not silent forever retention.
+6. **Orphan managers:** businesses/orgs retention is **not** M2 — see M4 reassignment (not archive).
 
 ---
 

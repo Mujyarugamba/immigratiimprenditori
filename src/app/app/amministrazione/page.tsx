@@ -30,6 +30,12 @@ const sections = [
     title: "Autorizzazioni imprese",
     description: "Prima abilitazione dei permessi di gestione su un’impresa.",
   },
+  {
+    href: "/app/amministrazione/riassegnazioni",
+    title: "Gestione da riassegnare",
+    description:
+      "Imprese e organizzazioni senza gestore operativo dopo cancellazione account.",
+  },
 ] as const;
 
 export default async function AmministrazioneDashboardPage() {

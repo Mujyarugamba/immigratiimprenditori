@@ -80,4 +80,22 @@ describe("service-role boundary", () => {
       assert.doesNotMatch(src, /createAdminClient|SERVICE_ROLE/);
     }
   });
+
+  it("self-delete Auth ban helper is server-only and uses admin client", () => {
+    const ban = readFileSync(
+      join(here, "..", "access", "ban-auth-user.ts"),
+      "utf8",
+    );
+    assert.match(ban, /createAdminClient/);
+    assert.match(ban, /ban_duration/);
+    assert.match(ban, /must not run in the browser/);
+  });
+
+  it("DeleteAccountForm does not import admin/service role", () => {
+    const form = readFileSync(
+      join(here, "..", "..", "components", "app", "DeleteAccountForm.tsx"),
+      "utf8",
+    );
+    assert.doesNotMatch(form, /createAdminClient|SERVICE_ROLE|service_role/);
+  });
 });

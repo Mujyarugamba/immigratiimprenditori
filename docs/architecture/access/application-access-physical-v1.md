@@ -496,9 +496,36 @@ Nessuna scelta lasciata al Migration Plan.
 | Draft non pubblicati | No | Sì se previsto | Sì se editorial | Sì | — |
 | Owned | Come AR | Come AR | Come AR | — | CASCADE dominio |
 | Revisioni/storico | No | No | No | Eccezionale | supersede |
-| Account | No | — | — | close/disable | status |
-| Ruoli / grant | No | — | — | revoke | `revoked` |
-| Membership | No | chiusura lifecycle | — | sì | relation_status |
+| Account | No hard DELETE self | — | — | close/disable; **M3 self soft-close** | status `closed` |
+| Ruoli / grant | No | — | — | revoke; **M3 self revoke** | `revoked` |
+| Membership | No | chiusura lifecycle | — | sì | relation_status; **M3 self conclude** |
+
+### 20.1 L1.3-M3 self-service account deletion (contract)
+
+| Elemento | Scelta |
+|---|---|
+| RPC | `access_self_delete_preflight()` · `access_self_delete_account()` |
+| Migration | `20260817100000_create_self_service_account_deletion.sql` (**APPLIED** local+remote with M4) |
+| Identity | solo `auth.uid()` → Account; **no** `account_id` client |
+| Account | soft `closed` (non hard DELETE in M3) |
+| Persona | minimize + `deleted_at`; non copia in M2 |
+| Contatti | DELETE `person_contact_channels` |
+| Auth | ban Admin API server-side (non SQL); `profiles→auth.users` CASCADE impedisce hard Auth DELETE mentre Persona serve a FK RESTRICT |
+| Ultimo Adm | refuse |
+| Ultimo gestore Impresa / `owner_person_id` Org | **M4** pending case + Adm resolve (no refuse after M4 replace) |
+| Review | `docs/architecture/legal/l1.3-m3-self-service-account-deletion-review.md` |
+
+### 20.2 L1.3-M4 management reassignment
+
+| Elemento | Scelta |
+|---|---|
+| Table | `management_reassignment_cases` (typed business/organization XOR) |
+| Migration | `20260818100000_create_management_reassignment_cases.sql` (**APPLIED** local+remote) |
+| Open | Trigger on BMMA zero-ACT + M3 pre-open; org open from self-delete |
+| Resolve business | `access_resolve_business_reassignment` → canonical `access_bootstrap_business_grant` |
+| Resolve org | `access_resolve_organization_reassignment` → `owner_person_id` (GUC bypass immutability) |
+| Visibility | Admin SELECT only; not public |
+| Review | `docs/architecture/legal/l1.3-m4-management-reassignment-review.md` |
 
 ---
 

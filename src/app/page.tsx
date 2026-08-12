@@ -38,7 +38,15 @@ export const metadata: Metadata = {
   description: PLATFORM_VALUE_PROPOSITION,
 };
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const deleted = params.account_deleted;
+  const deletedFlag = Array.isArray(deleted) ? deleted[0] : deleted;
+
   const [
     businesses,
     professionals,
@@ -61,6 +69,25 @@ export default async function HomePage() {
 
   return (
     <>
+      {deletedFlag === "1" ? (
+        <p
+          className="border-brand/30 bg-brand-soft text-ink mx-auto mt-4 max-w-3xl rounded-md border px-4 py-3 text-sm"
+          role="status"
+        >
+          Il tuo account è stato cancellato. Grazie per aver fatto parte della
+          rete.
+        </p>
+      ) : null}
+      {deletedFlag === "partial" ? (
+        <p
+          className="border-accent/30 bg-accent-soft text-ink mx-auto mt-4 max-w-3xl rounded-md border px-4 py-3 text-sm"
+          role="status"
+        >
+          L’account è chiuso. Se non riesci più ad accedere, il sistema completa
+          automaticamente la chiusura dell’accesso. Contatta il supporto se
+          serve assistenza.
+        </p>
+      ) : null}
       <Hero />
       <EcosystemGrid />
 

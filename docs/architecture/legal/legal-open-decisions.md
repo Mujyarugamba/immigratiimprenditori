@@ -1,125 +1,41 @@
-# Legal Open Decisions — L1.1 → L1.2
+# Legal Open Decisions — post L1.3 alignment (arresto pre-apply)
 
-**These are NOT decided by the repository.**
-Required human/legal inputs before or during L1.2 drafting.
+## CHIUSO
 
----
-
-## A. Controller identity (Titolare)
-
-| Item | Status |
+| Tema | Decisione |
 |---|---|
-| Legal denomination | **MISSING — TO BE PROVIDED BY USER** |
-| Legal form (associazione/ente/srl/…) | **MISSING** |
-| Registered seat / address | **MISSING** |
-| Codice fiscale | **MISSING** |
-| Partita IVA | **MISSING** |
-| PEC | **MISSING** |
-| Legal representative | **MISSING** |
-| Privacy contact email | **MISSING** (only `info@immigratiimprenditori.it` found as contact) |
-| DPO (if any) | **MISSING / UNKNOWN** |
+| Titolare AIPEL | Associazione; Viale Molise n. 54, 20137 Milano (MI); CF 97342380157; P.IVA 04222160964 |
+| Contatto privacy | info@immigratiimprenditori.it |
+| Età minima | 18 |
+| Basi giuridiche | Confermate (no consenso universale) |
+| Retention principle | Per finalità + minimizzazione |
+| Cancellazione account (principio) | A/B/C; distinto art. 17; self-service da implementare |
+| Cookie Case A | Confermato |
+| L1.1b contatti | Confermato |
+| Legge / foro | Legge italiana; consumatore → foro inderogabile; altri → Foro di Milano |
 
-**KNOWN from product:** brand «Immigrati Imprenditori»; domain `immigratiimprenditori.it`; contact `info@immigratiimprenditori.it`.
+## VERIFICA NECESSARIA (manuale)
 
----
+1. Regione progetto Supabase + accettazione DPA
+2. Regione deploy Vercel + accettazione DPA
+3. SMTP Auth produzione
+4. Nomi/attributi cookie Auth in produzione
+5. Ciclo backup provider (numerico)
 
-## B. Retention & deletion
+## TASK TECNICO / MIGRATION (L1.3)
 
-1. Retention period for Auth accounts after close
-2. Whether closed accounts are anonymised / hard-deleted
-3. Persona soft-delete policy and self-service
-4. Retention of withdrawn editorial/UGC
-5. Log retention (align with Vercel/Supabase contracts)
-6. Backup retention
+1. **M1** `terms_acceptances` — **APPLICATO** local+remote · signup wired  
+2. Wire signup: checkbox Termini + insert version/timestamp — **CHIUSO**  
+3. **M2** legal retention archive — **APPLICATO** local+remote  
+4. **M3** self-service cancellazione account — **APPLICATO** + UX + Auth ban  
+5. **M4** orphan management reassignment — **APPLICATO** + admin resolve UI  
 
----
+## BLOCCANTI residui per chiusura L1.3 (post M3+M4)
 
-## C. Account rights UX
-
-1. Self-service account closure?
-2. Self-service data export?
-3. Self-service erasure vs admin process + email request?
-4. Effect of closure on public Persona / Impresa / memberships
-
----
-
-## D. Minors
-
-1. Minimum age
-2. Whether under-age registration is prohibited
+- Confermare `LEGAL_SUBJECT_HMAC_SECRET` su Vercel Production prima del deploy app  
+- Verifiche DPA/regioni se i testi pubblici affermano garanzie specifiche  
+- Legal finalization / publish definitive texts after technical alignment check
 
 ---
 
-## E. UGC / IP
-
-1. User retains ownership of UGC?
-2. Licence granted to platform (display, store, moderate)?
-3. Takedown / notice procedure
-4. Third-party data in free-text — user warranty
-
----
-
-## F. Moderation & community
-
-1. Community/Content rules: **separate doc vs inside Terms** (recommendation topic)
-2. Report abuse channel (currently **NOT FOUND** in app)
-3. Suspension / ban policy
-4. Editorial vs user content standards
-
----
-
-## G. Communications
-
-1. Marketing emails — allowed? opt-in? (currently **no marketing system FOUND**)
-2. Transactional Auth email disclosure
-
----
-
-## H. Cookies / future analytics
-
-1. Confirm Case A stance for current launch
-2. Whether functional cookie `ii_selected_business_id` needs mention-only vs consent
-3. Future analytics vendor (would force Case B + CMP)
-4. Google Fonts runtime verification if counsel requires
-
----
-
-## I. External data & opportunities
-
-1. External Data & Sources Disclaimer text ownership
-2. Opportunity “fa fede il bando ufficiale” disclaimer
-3. Observatory methodology disclaimer
-
----
-
-## J. Contracts / transfers
-
-1. Supabase DPA + region
-2. Vercel DPA + region
-3. Auth email SMTP provider (if not Supabase default)
-4. Governing law / jurisdiction
-
----
-
-## K. Signup UX legal
-
-1. Link to Privacy / Terms on `/registrati`
-2. Whether acceptance checkbox is required (legal call)
-3. Separate marketing opt-in (if ever)
-
----
-
-## L. Phone / contact hardening (product + privacy)
-
-| Item | Status after L1.1b |
-|---|---|
-| L1.1 UI≠RLS phone gap on `profiles` | **RESOLVED** — contacts in `person_contact_channels`; legacy phone NULL; anon no table SELECT; network RPC |
-| Phone/email internet-public? | **NO** — registered network only when user opts in |
-| Auth email as contact? | **NO** — separate `contact_email` |
-| Impresa commercial channel public rules | **STILL OPEN** (product) — not same as Persona |
-| Org institutional / official personal contacts | **STILL OPEN** if product later exposes them publicly |
-| Opp/Collab/Service contact CTAs | **STILL OPEN** when create/contact UX lands |
-
----
-
-*End open decisions*
+*End*

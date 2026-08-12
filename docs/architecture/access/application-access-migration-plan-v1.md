@@ -157,6 +157,8 @@ Nomi definitivi: quelli già citati in A2 (`assign_application_role`, `revoke_ap
 | `access_update_own_account` | Acc | whitelist | UPDATE limitato | accounts | no `account_status`/roles/person | A3.4 | obbligatoria v1 (column priv + RPC) |
 | `update_own_profile` | Acc active | whitelist | UPDATE profiles | profiles | A2: column-level GRANT primario; RPC se campi non coperti da GRANT | A3.4 / A4.2 | obbligatoria v1 (path UPDATE) |
 | `access_close_account` | Adm/Svc | account_id | status closed/disabled | accounts | Adm o Svc | A3.4 | obbligatoria v1 |
+| `access_self_delete_preflight` | Acc (self) | — | read blockers | — | auth.uid only | L1.3-M3 | **APPLIED** (M3→M4) |
+| `access_self_delete_account` | Acc (self) | — | soft-close + revoke + minimize; orphans open M4 cases | accounts, roles, grants, memberships, profiles, contacts, … | refuse last admin only (post-M4) | L1.3-M3/M4 | **APPLIED** |
 | `assign_application_role` | Adm/Svc | account_id, role_code | INSERT/reactivate | account_role_assignments | no self-elevate; whitelist | A3.4 | obbligatoria v1 (nome A2) |
 | `revoke_application_role` | Adm/Svc | assignment_id | status revoked | account_role_assignments | ultimo Adm = check applicativo | A3.4 | obbligatoria v1 (nome A2) |
 | `access_bootstrap_business_grant` | Adm/Svc | membership_id | INSERT authorization granted | management_authorizations | B1; membership active; “primo” attestato in RPC | A3.4 | obbligatoria v1 |
@@ -436,11 +438,18 @@ Dry-run solo post suite locale verde; elenco exact 21 migration; history; apply 
 * Bootstrap Adm: procedura Svc/SQL controllata **fuori** migration pubbliche.  
 * **M8.2:** `docs/architecture/migrations/access-rls-m8.2-validation-report.md` (nome definitivo al momento della chiusura).
 
+### L1.3-M3 / M4 (post Access v1)
+
+* M3 SQL: `20260817100000_create_self_service_account_deletion.sql` — **APPLIED** local+remote.
+* M4 SQL: `20260818100000_create_management_reassignment_cases.sql` — cases + resolve; **replaces** M3 self-delete RPCs for orphans; **APPLIED** local+remote.
+* Apply order used: **M3 → M4**. Validation: `l1.3-m3-m4-implementation-validation-report.md`.
+* No auto-owner. Officials ≠ ownership.
+
 ---
 
 ## 16. Elementi esclusi
 
-Membership Org; deleghe; consensi; matching; Account servizio tipizzato; audit avanzato; trigger ultimo Adm/gestore; override emergenziale; workflow verifica; nuove entità/ruoli; modifica contratti dominio; training reopen in v1.
+Membership Org; deleghe; consensi; matching; Account servizio tipizzato; audit avanzato; trigger ultimo Adm/gestore (**partially superseded by M3 refuse guards; M4 still required for reassignment**); override emergenziale; workflow verifica; nuove entità/ruoli; modifica contratti dominio; training reopen in v1.
 
 ---
 

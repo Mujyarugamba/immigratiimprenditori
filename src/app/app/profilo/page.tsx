@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DeleteAccountForm } from "@/components/app/DeleteAccountForm";
 import { ProfileEditForm } from "@/components/app/ProfileEditForm";
+import { loadSelfDeletePreflight } from "@/lib/access/self-delete-actions";
+import { selfDeleteBlockerMessage } from "@/lib/access/self-delete";
 import {
   getPersonaById,
   isProfileIncomplete,
@@ -61,6 +64,13 @@ export default async function ProfiloPage() {
   const profile = await getPersonaById(session.personId);
   const contact = await getOwnPersonContact(session.personId);
   const incomplete = isProfileIncomplete(profile);
+  const preflightLoad = await loadSelfDeletePreflight();
+  const deleteBlocked =
+    preflightLoad.ok && !preflightLoad.preflight.can_proceed
+      ? selfDeleteBlockerMessage(preflightLoad.preflight)
+      : null;
+  const willOpenReassignment =
+    preflightLoad.ok && preflightLoad.preflight.m4_cases_will_open;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -128,6 +138,13 @@ export default async function ProfiloPage() {
           actionLabel="Completa il profilo"
         />
       )}
+
+      {session.isActiveAccount ? (
+        <DeleteAccountForm
+          blockedMessage={deleteBlocked}
+          willOpenReassignment={willOpenReassignment}
+        />
+      ) : null}
     </div>
   );
 }
