@@ -17,7 +17,7 @@ export async function banAuthUser(authUserId: string): Promise<BanAuthUserResult
     throw new Error("banAuthUser must not run in the browser");
   }
   if (!/^[0-9a-f-]{36}$/i.test(authUserId)) {
-    return { ok: false, message: "Identificativo Auth non valido." };
+    return { ok: false, message: "ID accesso non valido." };
   }
 
   try {

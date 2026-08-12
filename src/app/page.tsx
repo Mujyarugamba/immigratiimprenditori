@@ -83,9 +83,7 @@ export default async function HomePage({
           className="border-accent/30 bg-accent-soft text-ink mx-auto mt-4 max-w-3xl rounded-md border px-4 py-3 text-sm"
           role="status"
         >
-          L’account è chiuso. Se non riesci più ad accedere, il sistema completa
-          automaticamente la chiusura dell’accesso. Contatta il supporto se
-          serve assistenza.
+          L’account è chiuso. Se non riesci ad accedere, contatta il supporto.
         </p>
       ) : null}
       <Hero />

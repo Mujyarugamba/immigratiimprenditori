@@ -20,11 +20,11 @@ export function BootstrapGrantForm() {
         gestione su un collegamento impresa già attivo.
       </p>
       <FormField
-        label="Identificativo collegamento"
+        label="ID collegamento"
         name="membership_id"
         required
         disabled={pending}
-        hint="Identificativo del collegamento persona–impresa (visibile nel dettaglio impresa)"
+        hint="Visibile nel dettaglio impresa"
       />
       {state.message ? (
         <p
@@ -37,7 +37,7 @@ export function BootstrapGrantForm() {
         </p>
       ) : null}
       <Button type="submit" disabled={pending}>
-        {pending ? "Esecuzione…" : "Abilita prima gestione"}
+        {pending ? "Abilitazione…" : "Abilita prima gestione"}
       </Button>
     </form>
   );

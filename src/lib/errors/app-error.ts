@@ -53,14 +53,14 @@ export function mapPostgresError(error: unknown): AppError {
   if (msg.includes("self-elevate")) {
     return appError(
       "forbidden",
-      "Non puoi assegnarti un ruolo elevato (auto-promozione bloccata).",
+      "Non puoi assegnarti un ruolo elevato.",
       { cause: err },
     );
   }
   if (msg.includes("not bootstrapped") || msg.includes("first grant already")) {
     return appError(
       "account_state",
-      "La prima autorizzazione di gestione va abilitata da un Amministratore applicativo.",
+      "La prima autorizzazione di gestione va abilitata da un amministratore.",
       { cause: err },
     );
   }

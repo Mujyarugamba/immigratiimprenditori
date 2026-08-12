@@ -18,7 +18,7 @@ async function requireAdminSession() {
   if (!guard.ok || !session?.accountId) {
     return {
       ok: false as const,
-      message: "Solo Amministratore applicativo può eseguire l'operazione.",
+      message: "Solo un amministratore può eseguire l'operazione.",
     };
   }
   return { ok: true as const, session };
@@ -36,7 +36,7 @@ export async function resolveBusinessReassignmentAction(
   if (!caseId || !membershipId) {
     return {
       ok: false,
-      message: "Identificativo caso e collegamento impresa obbligatori.",
+      message: "ID caso e collegamento impresa obbligatori.",
     };
   }
 
@@ -71,7 +71,7 @@ export async function resolveOrganizationReassignmentAction(
   if (!caseId || !personId) {
     return {
       ok: false,
-      message: "Identificativo caso e profilo obbligatori.",
+      message: "ID caso e profilo obbligatori.",
     };
   }
 

@@ -17,13 +17,12 @@ const sections = [
   {
     href: "/app/amministrazione/account",
     title: "Account",
-    description:
-      "Elenco account applicativi, stato e collegamento del profilo.",
+    description: "Elenco account, stato e profilo collegato.",
   },
   {
     href: "/app/amministrazione/ruoli",
     title: "Ruoli",
-    description: "Assegnazioni redattore e amministratore applicativo.",
+    description: "Assegnazioni redattore e amministratore.",
   },
   {
     href: "/app/amministrazione/imprese",
@@ -34,7 +33,7 @@ const sections = [
     href: "/app/amministrazione/riassegnazioni",
     title: "Gestione da riassegnare",
     description:
-      "Imprese e organizzazioni senza gestore operativo dopo cancellazione account.",
+      "Imprese e organizzazioni senza gestore dopo la cancellazione di un account.",
   },
 ] as const;
 
@@ -56,18 +55,16 @@ export default async function AmministrazioneDashboardPage() {
         Dashboard Amministrazione
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
-        Area riservata agli amministratori applicativi. Gestisci account utenti,
-        ruoli elevati e la prima abilitazione dei permessi di gestione sulle
+        Gestisci account, ruoli e la prima abilitazione dei permessi sulle
         imprese.
         {session?.isEditor
-          ? " Il tuo account ha anche accesso alla redazione: le due aree restano separate."
-          : " Non risulti redattore."}
+          ? " Hai anche accesso alla redazione: le due aree restano separate."
+          : null}
       </p>
 
       <p className="border-line bg-surface-elevated text-ink mt-4 rounded-md border p-4 text-sm shadow-soft">
-        <strong>Amministrazione ≠ Redazione:</strong> questa area non espone
-        strumenti editoriali. I ruoli di redattore e amministratore applicativo
-        sono distinti e si assegnano solo da qui.
+        Amministrazione e redazione sono aree distinte. I ruoli di redattore e
+        amministratore si assegnano da qui.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">

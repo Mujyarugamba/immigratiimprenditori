@@ -184,12 +184,12 @@ export function OrganizationEditForm({
             </select>
           </label>
           <FormField
-            label="Identificativo profilo (opzionale)"
+            label="ID profilo (opzionale)"
             name="person_id"
             disabled={offPending}
             hint="Oppure usa un'etichetta esterna"
           />
-          <FormField label="Label esterna" name="display_label" disabled={offPending} />
+          <FormField label="Nome esterno" name="display_label" disabled={offPending} />
           <FormField label="Email" name="email" disabled={offPending} />
           {offState.message ? (
             <p className={offState.ok ? "text-brand-dark text-sm" : "text-accent-dark text-sm"}>{offState.message}</p>

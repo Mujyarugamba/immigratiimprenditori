@@ -20,7 +20,7 @@ export const PERSON_ASSOCIATION_LABELS: Record<string, string> = {
 
 export const APPLICATION_ROLE_LABELS: Record<string, string> = {
   redattore: "Redattore",
-  amministratore_applicativo: "Amministratore applicativo",
+  amministratore_applicativo: "Amministratore",
 };
 
 export const ASSIGNMENT_STATUS_LABELS: Record<string, string> = {

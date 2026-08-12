@@ -58,11 +58,9 @@ function GrantButton({
 function RevokeButton({
   authorizationId,
   businessId,
-  isSelf,
 }: {
   authorizationId: string;
   businessId: string;
-  isSelf: boolean;
 }) {
   const [state, action, pending] = useActionState(
     revokeManagementAction,
@@ -73,7 +71,7 @@ function RevokeButton({
       <input type="hidden" name="authorization_id" value={authorizationId} />
       <input type="hidden" name="business_id" value={businessId} />
       <Button type="submit" size="sm" variant="ghost" disabled={pending}>
-        {pending ? "…" : isSelf ? "Autorevoca" : "Revoca"}
+        {pending ? "…" : "Revoca"}
       </Button>
       {state.message ? (
         <p className="text-ink-muted mt-1 text-xs" role="status">
@@ -150,7 +148,6 @@ export function MembershipGrantsPanel({
               <RevokeButton
                 authorizationId={m.authorizationId}
                 businessId={businessId}
-                isSelf={m.isSelf}
               />
             ) : null}
             {!canManage &&
@@ -160,7 +157,6 @@ export function MembershipGrantsPanel({
               <RevokeButton
                 authorizationId={m.authorizationId}
                 businessId={businessId}
-                isSelf
               />
             ) : null}
             {m.isSelf && m.relationStatus === "active" ? (

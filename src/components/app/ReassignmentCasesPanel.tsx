@@ -21,7 +21,7 @@ function BusinessResolveForm({ caseId }: { caseId: string }) {
     <form action={action} className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
       <input type="hidden" name="case_id" value={caseId} />
       <FormField
-        label="Identificativo collegamento"
+        label="ID collegamento"
         name="membership_id"
         required
         disabled={pending}
@@ -53,7 +53,7 @@ function OrganizationResolveForm({ caseId }: { caseId: string }) {
     <form action={action} className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
       <input type="hidden" name="case_id" value={caseId} />
       <FormField
-        label="Identificativo profilo"
+        label="ID profilo"
         name="new_owner_person_id"
         required
         disabled={pending}

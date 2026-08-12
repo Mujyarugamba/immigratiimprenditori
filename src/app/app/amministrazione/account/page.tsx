@@ -31,7 +31,7 @@ export default async function AdminAccountsPage({ searchParams }: PageProps) {
           Account
         </h1>
         <p className="text-ink-muted mt-1 text-sm">
-          Elenco account applicativi. Nessuna password o token esposti.
+          Elenco account. Credenziali e secret non sono mostrati.
         </p>
       </div>
 
@@ -41,13 +41,13 @@ export default async function AdminAccountsPage({ searchParams }: PageProps) {
       >
         <div className="flex min-w-[200px] flex-1 flex-col gap-1.5">
           <label htmlFor="q" className="text-ink text-sm font-medium">
-            Cerca (id parziale)
+            Cerca
           </label>
           <input
             id="q"
             name="q"
             defaultValue={q}
-            placeholder="Cerca per identificativo…"
+            placeholder="Cerca per ID…"
             className="border-line bg-surface text-ink focus:border-brand focus:ring-brand/30 rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
           />
         </div>

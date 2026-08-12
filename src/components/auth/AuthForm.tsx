@@ -89,7 +89,6 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
             id="accept_terms-privacy-note"
             className="text-ink-subtle pl-7 text-xs leading-snug"
           >
-            Informativa sulla{" "}
             <Link
               href={LEGAL_ROUTES.privacy}
               className="text-brand font-medium underline-offset-2 hover:underline"
@@ -97,8 +96,7 @@ export function AuthForm({ mode, action, next }: AuthFormProps) {
               rel="noopener noreferrer"
             >
               Privacy Policy
-            </Link>{" "}
-            (solo informativa, non è un consenso).
+            </Link>
           </p>
           {termsError ? (
             <p

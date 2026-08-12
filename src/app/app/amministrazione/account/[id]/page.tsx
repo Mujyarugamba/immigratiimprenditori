@@ -77,7 +77,7 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
         <Field label="Stato">
           {ACCOUNT_STATUS_LABELS[account.account_status]}
         </Field>
-        <Field label="Identificativo accesso">
+        <Field label="ID accesso">
           <span className="font-mono text-xs">{account.auth_user_id}</span>
         </Field>
         <Field label="Profilo collegato">
@@ -141,7 +141,7 @@ export default async function AdminAccountDetailPage({ params }: PageProps) {
       <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">
         <h2 className="text-ink text-base font-semibold">Ruoli elevati</h2>
         <p className="text-ink-muted mt-1 text-sm">
-          Assegnazione controllata dal sistema. Auto-promozione bloccata.
+          Non puoi assegnarti un ruolo elevato.
         </p>
 
         <div className="mt-4 overflow-x-auto">

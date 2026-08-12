@@ -56,8 +56,8 @@ test.describe("L1.4 signup legal UX", () => {
     await expect(
       page.getByText(/Accetto i Termini/i),
     ).toBeVisible();
-    await expect(
-      page.getByText(/non è un consenso/i),
-    ).toBeVisible();
+    await expect(page.getByText(/solo informativa|non è un consenso/i)).toHaveCount(
+      0,
+    );
   });
 });

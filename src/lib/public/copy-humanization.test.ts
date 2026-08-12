@@ -270,4 +270,48 @@ describe("P7.7 final human UX editorial polish", () => {
     assert.doesNotMatch(readSrc("components/layout/Footer.tsx"), FORBIDDEN_META);
     assert.doesNotMatch(readSrc("components/home/TransversalStrip.tsx"), FORBIDDEN_META);
   });
+
+  it("signup Privacy link has no legal overexplanation", () => {
+    const auth = readSrc("components/auth/AuthForm.tsx");
+    assert.match(auth, /Privacy Policy/);
+    assert.doesNotMatch(auth, /solo informativa|non è un consenso/i);
+    assert.match(auth, /Accetto i/);
+    assert.match(auth, /Termini/);
+  });
+
+  it("self-delete user copy stays short and non-technical", () => {
+    const copy = readSrc("lib/access/self-delete.ts");
+    const userBlock = copy.slice(copy.indexOf("SELF_DELETE_USER_COPY"));
+    assert.doesNotMatch(
+      userBlock,
+      /tombstone|soft-close|Auth ban|retention archive|subject_ref|RPC/i,
+    );
+    assert.match(userBlock, /Chiude l’account|Cancella account/);
+  });
+
+  it("public headers avoid under-construction eyebrow", () => {
+    const intro = readSrc("components/ui/SectionIntro.tsx");
+    assert.doesNotMatch(intro, /Sezione in preparazione|in costruzione/i);
+  });
+
+  it("user pages avoid primary technical acronyms in copy", () => {
+    for (const rel of [
+      "registrati/page.tsx",
+      "accedi/page.tsx",
+      "app/page.tsx",
+      "app/profilo/page.tsx",
+      "cultura/page.tsx",
+      "osservatorio/page.tsx",
+    ]) {
+      assert.doesNotMatch(
+        readApp(rel),
+        /\bUUID\b|\bRPC\b|\bRLS\b|\bCTX\b|\bACT\b|source of truth|SQLSTATE/i,
+        rel,
+      );
+    }
+    assert.doesNotMatch(
+      readSrc("components/auth/AuthForm.tsx"),
+      /\bUUID\b|\bRPC\b|\bRLS\b/,
+    );
+  });
 });

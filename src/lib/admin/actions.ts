@@ -31,7 +31,7 @@ async function requireAdminSession() {
   if (!guard.ok || !session?.accountId) {
     return {
       ok: false as const,
-      message: "Solo Amministratore applicativo può eseguire l'operazione.",
+      message: "Solo un amministratore può eseguire l'operazione.",
     };
   }
   return { ok: true as const, session, accountId: session.accountId };
@@ -48,7 +48,7 @@ export async function assignRoleAction(
   const roleCode = String(formData.get("role_code") ?? "").trim();
 
   if (!targetAccountId) {
-    return { ok: false, message: "Identificativo account obbligatorio." };
+    return { ok: false, message: "ID account obbligatorio." };
   }
   if (!isWhitelistedRole(roleCode)) {
     return { ok: false, message: "Ruolo non consentito." };
@@ -56,7 +56,7 @@ export async function assignRoleAction(
   if (targetAccountId === gate.accountId) {
     return {
       ok: false,
-      message: "Non puoi assegnarti un ruolo elevato (auto-promozione bloccata).",
+      message: "Non puoi assegnarti un ruolo elevato.",
     };
   }
 
@@ -107,7 +107,7 @@ export async function closeAccountAction(
 
   const accountId = String(formData.get("account_id") ?? "").trim();
   if (!accountId) {
-    return { ok: false, message: "Identificativo account assente." };
+    return { ok: false, message: "ID account assente." };
   }
 
   const result = await closeAccount(accountId);

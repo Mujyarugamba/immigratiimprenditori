@@ -7,13 +7,15 @@ type SectionIntroProps = {
 export function SectionIntro({
   title,
   description,
-  eyebrow = "Sezione in preparazione",
+  eyebrow,
 }: SectionIntroProps) {
   return (
     <div className="max-w-2xl space-y-3">
-      <p className="text-brand text-[11px] font-semibold tracking-[0.14em] uppercase">
-        {eyebrow}
-      </p>
+      {eyebrow ? (
+        <p className="text-brand text-[11px] font-semibold tracking-[0.14em] uppercase">
+          {eyebrow}
+        </p>
+      ) : null}
       <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
         {title}
       </h1>

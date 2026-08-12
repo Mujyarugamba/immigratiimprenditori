@@ -45,7 +45,7 @@ export function ProfileEditForm({ profile, contact }: Props) {
         disabled={pending}
         error={state.fieldErrors?.display_name}
         onChange={(event) => onDisplayNameChange(event.currentTarget.value)}
-        hint="Compare nel tuo profilo pubblico quando lo pubblichi."
+        hint="Visibile nel profilo pubblico."
       />
       <FormField
         label="Indirizzo del profilo"
@@ -84,7 +84,7 @@ export function ProfileEditForm({ profile, contact }: Props) {
         name="bio"
         defaultValue={profile.bio ?? ""}
         disabled={pending}
-        hint="Questo testo appare nel tuo profilo pubblico."
+        hint="Visibile nel profilo pubblico."
       />
       <FormField
         label="Città"
@@ -131,7 +131,7 @@ export function ProfileEditForm({ profile, contact }: Props) {
           type="tel"
           defaultValue={contact?.phone ?? ""}
           disabled={pending}
-          hint="Opzionale. Non è il numero di accesso all&apos;account."
+          hint="Opzionale."
         />
         <label className="text-ink flex items-start gap-2 text-sm">
           <input

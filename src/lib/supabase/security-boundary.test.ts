@@ -46,7 +46,7 @@ describe("service-role boundary", () => {
       /createAdminClient|SERVICE_ROLE|service_role/,
     );
     assert.match(adminActions, /requireApplicationAdmin|assignRole/);
-    assert.match(adminActions, /self-elevate|auto-promozione/i);
+    assert.match(adminActions, /ruolo elevato/i);
   });
 
   it("P5 editorial data modules do not import admin client", () => {

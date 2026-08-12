@@ -26,11 +26,10 @@ export function LinkPersonForm({ accountId, disabled = false }: LinkPersonFormPr
         un profilo già associato a questo account.
       </p>
       <FormField
-        label="Identificativo profilo"
+        label="ID profilo"
         name="person_id"
         required
         disabled={pending || disabled}
-        hint="Identificativo tecnico del profilo (UUID)"
       />
       {state.message ? (
         <p

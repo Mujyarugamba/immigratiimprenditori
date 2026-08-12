@@ -192,13 +192,13 @@ export async function bootstrapGrantAction(
     return {
       ok: false,
       message:
-        "Solo un amministratore applicativo può abilitare la prima autorizzazione di gestione.",
+        "Solo un amministratore può abilitare la prima autorizzazione di gestione.",
     };
   }
 
   const membershipId = String(formData.get("membership_id") ?? "").trim();
   if (!membershipId) {
-    return { ok: false, message: "Identificativo del collegamento obbligatorio." };
+    return { ok: false, message: "ID del collegamento obbligatorio." };
   }
 
   const result = await bootstrapBusinessGrant(membershipId);

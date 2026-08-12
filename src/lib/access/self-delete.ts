@@ -36,12 +36,12 @@ export const SELF_DELETE_CONFIRM_PHRASE = "CANCELLA";
 export const SELF_DELETE_USER_COPY = {
   title: "Cancella account",
   summary:
-    "La cancellazione rimuove il tuo profilo personale dalla piattaforma e termina l’accesso. Imprese, organizzazioni e contenuti autonomi non vengono cancellati automaticamente. Alcuni dati strettamente necessari possono essere conservati solo se previsto dalla Privacy Policy.",
+    "Chiude l’account e rimuove il profilo dalla rete. Imprese, organizzazioni e altri contenuti autonomi non vengono cancellati automaticamente.",
   privacyHref: "/privacy",
   blockedLastAdmin:
-    "Non puoi cancellare l’account: sei l’unico amministratore applicativo rimasto. Nomina un altro amministratore prima di procedere.",
+    "Non puoi cancellare l’account: sei l’unico amministratore rimasto. Nomina un altro amministratore prima di procedere.",
   orphanInfo:
-    "Se sei l’unico gestore di un’impresa o titolare di un’organizzazione, la piattaforma registrerà internamente la necessità di riassegnare la gestione. Non ti viene chiesto di trovare un sostituto per cancellare l’account.",
+    "Se sei l’unico gestore di un’impresa o di un’organizzazione, la gestione potrà essere riassegnata in seguito. Puoi cancellare comunque.",
 } as const;
 
 export function parseSelfDeletePreflight(raw: unknown): SelfDeletePreflight | null {

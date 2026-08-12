@@ -29,8 +29,7 @@ export function AssignRoleForm({
   if (!allowAssign) {
     return (
       <p className="text-ink-muted text-sm">
-        Non puoi assegnare ruoli elevati al tuo account (auto-promozione
-        bloccata).
+        Non puoi assegnare ruoli elevati al tuo account.
       </p>
     );
   }
@@ -38,13 +37,12 @@ export function AssignRoleForm({
   return (
     <form action={action} className="flex flex-col gap-4">
       <FormField
-        label="Identificativo account"
+        label="ID account"
         name="account_id"
         required
         disabled={pending}
         defaultValue={defaultAccountId}
         readOnly={Boolean(defaultAccountId)}
-        hint="Identificativo tecnico dell'account (UUID)"
       />
       <FormField label="Ruolo" name="role_code" required disabled={pending}>
         <select

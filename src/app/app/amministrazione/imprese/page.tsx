@@ -14,8 +14,8 @@ export default function AdminImpresePage() {
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
         Abilita il <strong>primo</strong> permesso di gestione su un collegamento
-        attivo persona–impresa. Operazione riservata agli amministratori
-        applicativi; non sostituisce le assegnazioni ordinarie successive.
+        attivo persona–impresa. Riservato agli amministratori; non sostituisce
+        le assegnazioni successive.
       </p>
 
       <section className="border-line bg-surface-elevated mt-8 rounded-md border p-5 shadow-soft">

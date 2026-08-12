@@ -36,8 +36,8 @@ export default function RedazioneDashboardPage() {
       </p>
 
       <p className="border-line bg-surface-elevated text-ink mt-4 rounded-md border p-4 text-sm shadow-soft">
-        Questa area è riservata al ruolo redattore. L&apos;amministrazione
-        applicativa è separata e non sostituisce la redazione.
+        L&apos;amministrazione è un&apos;area separata e non sostituisce la
+        redazione.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

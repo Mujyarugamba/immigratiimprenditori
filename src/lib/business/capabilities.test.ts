@@ -171,7 +171,7 @@ describe("Grants error mapping", () => {
     );
     assert.match(
       mapPostgresError({ message: "business grant not bootstrapped" }).message,
-      /Amministratore/,
+      /amministratore/i,
     );
     assert.equal(
       mapPostgresError({ message: "not authorized", code: "42501" }).code,

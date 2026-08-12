@@ -14,8 +14,11 @@ describe("M3 self-delete contract", () => {
 
   it("exposes privacy link and human copy without DB jargon", () => {
     assert.equal(SELF_DELETE_USER_COPY.privacyHref, "/privacy");
-    assert.match(SELF_DELETE_USER_COPY.summary, /profilo personale/i);
-    assert.doesNotMatch(SELF_DELETE_USER_COPY.summary, /M2|subject_ref|RPC/i);
+    assert.match(SELF_DELETE_USER_COPY.summary, /profilo|account/i);
+    assert.doesNotMatch(
+      SELF_DELETE_USER_COPY.summary,
+      /M2|subject_ref|RPC|tombstone|soft-close/i,
+    );
   });
 
   it("after M4, orphan managers do not block self-delete", () => {
