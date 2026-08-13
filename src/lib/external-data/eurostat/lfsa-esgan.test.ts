@@ -159,4 +159,12 @@ describe("D1.2 Eurostat lfsa_esgan parser", () => {
       assert.match(o.periodEnd, /^\d{4}-12-31$/);
     }
   });
+
+  it("uses Italian citizenship labels (not birthplace / camerale)", () => {
+    const { observations } = parseLfsaEsganDataset(fixture);
+    const forObs = observations.find((o) => o.citizenshipCode === "FOR");
+    assert.equal(forObs?.citizenshipLabel, "Cittadini stranieri");
+    const natObs = observations.find((o) => o.citizenshipCode === "NAT");
+    assert.equal(natObs?.citizenshipLabel, "Cittadini del paese dichiarante");
+  });
 });

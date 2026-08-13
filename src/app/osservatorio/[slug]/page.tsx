@@ -100,6 +100,9 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
                       Territorio
                     </th>
                     <th className="border-line border px-3 py-2 font-medium">
+                      Cittadinanza
+                    </th>
+                    <th className="border-line border px-3 py-2 font-medium">
                       Fonte
                     </th>
                   </tr>
@@ -114,11 +117,18 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
                       </td>
                       <td className="border-line border px-3 py-2 font-medium">
                         {value.numeric_value}
+                        {indicator.methodology_summary.includes("THS_PER") ? (
+                          <span className="text-ink-muted font-normal">
+                            {" "}
+                            (migliaia)
+                          </span>
+                        ) : null}
                       </td>
                       <td className="border-line text-ink-muted border px-3 py-2">
-                        {value.territory_label ??
-                          value.country_label ??
-                          "—"}
+                        {value.territory_label ?? "—"}
+                      </td>
+                      <td className="border-line text-ink-muted border px-3 py-2">
+                        {value.country_label ?? "—"}
                       </td>
                       <td className="border-line text-ink-muted border px-3 py-2">
                         {value.source_name ?? "—"}

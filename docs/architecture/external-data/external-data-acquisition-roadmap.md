@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1.2 (2026-08-11; refresh 2026-08-13 dry-run scaffolding)
+**Stato:** aggiornato da D1.3A (2026-08-13) — Eurostat local ingest; UC blocked; Production write pending
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -18,7 +18,7 @@ source registry
   → publish (ACQUIRE ≠ PUBLISH)
 ```
 
-Contratti: **D1.2 COMPLETE**. Implementazione pilot: **D1.3** (non avviata).
+Contratti: **D1.2 COMPLETE**. Pilot D1.3A: **PARTIAL** (Eurostat local published; Unioncamere blocked; Production not written). Report: `d1.3a-observatory-first-ingestion-report.md`.
 
 ---
 
@@ -63,12 +63,13 @@ OpenCoesione selettivo; Org/Servizi defer.
 
 ## 5. Ordine tecnico
 
-1. ~~D1.2 contracts~~ **DONE** (+ Eurostat dry-run library/tests; no DB write)
-2. **D1.3** — Pilot Osservatorio (autorizzabile; non iniziato; richiede GO umano)
-3. D1.4 — Opportunità importer
-4. D1.5 — Mercati M1 WB
-5. D1.6 — Editorial/Lombardia bandi
-6. Scheduler — dopo stabilità
+1. ~~D1.2 contracts~~ **DONE**
+2. ~~D1.3A first ingest~~ **PARTIAL** — OBS-EU-SELF-CIT local; UC SOURCE INPUT REQUIRED; Production credentials/grants pending
+3. D1.3A-prod — Production write OBS-EU-SELF-CIT + UC when inputs ready (**GO umano**)
+4. D1.4 — Opportunità importer (**dopo review D1.3A**)
+5. D1.5 — Mercati M1 WB
+6. D1.6 — Editorial/Lombardia bandi
+7. Scheduler — dopo stabilità
 
 ---
 
@@ -82,9 +83,9 @@ OpenCoesione selettivo; Org/Servizi defer.
 
 ## 7. Stop line
 
-D1.2 termina con commit/push documentazione.
-**Non** iniziare D1.3 finché non autorizzato esplicitamente.
+D1.3A termina con report + commit importer/report.
+**Non** iniziare D1-B Opportunità / D1-C Mercati finché review del primo popolamento reale.
 
 ---
 
-*Roadmap aggiornata D1.2*
+*Roadmap aggiornata D1.3A*

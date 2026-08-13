@@ -37,6 +37,14 @@ export const EUROSTAT_LFSA_ESGAN = {
       "TOTAL",
     ] as const,
   },
+  /** UI/definition labels — citizenship, not birthplace / camerale. */
+  citizenLabelsIt: {
+    NAT: "Cittadini del paese dichiarante",
+    FOR: "Cittadini stranieri",
+    EU27_2020_FOR: "Cittadini UE27 (2020), esteri",
+    NEU27_2020_FOR: "Cittadini extra-UE27 (2020)",
+    TOTAL: "Totale",
+  } as Record<string, string>,
 };
 
 type JsonStatLike = {
@@ -225,7 +233,10 @@ export function parseLfsaEsganDataset(
       territoryCode: "IT",
       territoryLabel: "Italia",
       citizenshipCode: coords.citizen,
-      citizenshipLabel: dims.citizen.labels[coords.citizen] ?? coords.citizen,
+      citizenshipLabel:
+        EUROSTAT_LFSA_ESGAN.citizenLabelsIt[coords.citizen] ??
+        dims.citizen.labels[coords.citizen] ??
+        coords.citizen,
       unitNote: "THS_PER — thousands of persons (Eurostat)",
       qualityCode: "official" as const,
       sourceExternalIdentifier: EUROSTAT_LFSA_ESGAN.sourceExternalIdentifier,
