@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1-C.4 editorial publish (2026-08-13) — D1-B Opportunities **CLOSED**; **D1-C Mercati World Bank pilot CLOSED end-to-end** (15 READY published; redazione + editor SELECT RLS; refresh-safe; no auto-publish; ICE link-only); schema **CASE A**; **no scheduler**; Eurostat OBS-EU-SELF-CIT still live; UC blocked
+**Stato:** aggiornato da D1-D.2 Contenuti contract (2026-08-13) — D1-B Opportunities **CLOSED**; **D1-C Mercati World Bank pilot CLOSED end-to-end**; **D1-D.1** first vertical = **Contenuti**; **D1-D.2** acquisition contract + 4-source allowlist **DONE** (metadata/link only; no import of 20; no auto-publish; CASE A); Eventi/Cultura AR out; **no scheduler**; Eurostat OBS-EU-SELF-CIT still live; UC blocked
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -60,7 +60,8 @@ World Bank 5–8 indicatori via M1 support resources; ICE link-only.
 **D1-C.4 editorial + selective publish (2026-08-13):** PASS — migration `20260820130000` editor/admin SELECT; redazione `/app/redazione/mercati-internazionali`; **15 READY** published; refresh-safe; ICE=0. Report `d1-c4-international-markets-editorial-publication-validation.md`. **D1-C WB pilot CLOSED.** Next domain requires separate GO (not auto D1-D).
 
 ### WAVE D1-D — Cultura/Eventi/Contenuti
-SEMI-AUTO + review; no dump MiC.
+**D1-D.1 (2026-08-13):** determination — first executable vertical = **Contenuti** (CASE A E2E); Cultura = hub no AR; Eventi out (no editor RLS/UI/external id).
+**D1-D.2 (2026-08-13):** PASS — typed acquisition contract + closed allowlist (ISMU, MLPS, EMN, Futurae project); metadata/link only; auto-publish forbidden; **0/20 imported**. Code `src/lib/external-data/contents/`; report `d1-d2-contenuti-acquisition-contract.md`. **Next:** D1-D.3 review-only import of ≤20 (separate GO).
 
 ### WAVE D1-E — Altre
 OpenCoesione selettivo; Org/Servizi defer.
@@ -78,8 +79,11 @@ OpenCoesione selettivo; Org/Servizi defer.
 7. ~~D1-C.2~~ **DONE (local)** — WB review-only apply on local Supabase
 8. ~~D1-C.3~~ **DONE (Production review-only)** — 15 WB rows in Production; public=0; no publish
 9. ~~D1-C.4~~ **DONE (editorial + selective publish)** — 15 READY published; redazione+RLS; refresh-safe
-10. D1.6 — Editorial/Lombardia bandi + EU F&T curated (not D1-C)
-11. Scheduler — **authorizable** after ops GO (not enabled)
+10. ~~D1-D.1~~ **DONE (determination)** — Contenuti first
+11. ~~D1-D.2~~ **DONE (contract + allowlist)** — 4 sources; no import
+12. D1-D.3 — Contenuti metadata/link review-only import ≤20 (after human GO)
+13. D1.6 — Editorial/Lombardia bandi + EU F&T curated (not D1-C)
+14. Scheduler — **authorizable** after ops GO (not enabled)
 
 ---
 
@@ -95,8 +99,8 @@ OpenCoesione selettivo; Org/Servizi defer.
 
 D1.3A termina con report + commit importer/report.
 D1-B pilot **CLOSED**.
-D1-C World Bank pilot **CLOSED**. **Do not** start D1-D, enable scheduler, or expand WB/ICE/countries without explicit human GO. Hosting Next Production still separate GO (pre-existing).
+D1-C World Bank pilot **CLOSED**. D1-D.2 contract **DONE** — **do not** import the 20, enable scheduler, Eventi ingest, or Cultura AR without explicit human GO (D1-D.3). Hosting Next Production still separate GO (pre-existing).
 
 ---
 
-*Roadmap aggiornata D1-C.4 editorial publication — D1-C WB pilot closed*
+*Roadmap aggiornata D1-D.2 Contenuti acquisition contract*
