@@ -3,6 +3,7 @@
 **Date:** 2026-08-13  
 **Mode:** accelerata controllata  
 **Baseline git (pre):** `def961e` on `main` (ahead/behind `0/0`)  
+**Final git:** `90927c6` on `main` (ahead/behind `0/0` after push)  
 **AUTO-PUBLISH:** **NO**  
 **Scheduler / email / D1-C:** **NOT STARTED**
 
@@ -160,7 +161,14 @@ Sidecar: `artifacts/ingestion/d1b3-importer-regression-out.json`
 
 ## 11. Git
 
-Selective commit of D1-B.3 app/docs/migration (no `git add .`; pre-existing dirt preserved). Production content edits are data-only on linked Supabase.
+| Item | Result |
+|---|---|
+| Selective stage | YES (no `git add .`) |
+| Commit | `90927c6` — `feat(opportunities): selective editorial publication for Incentivi.gov pilot` |
+| Push | YES → `origin/main` |
+| Dirt preserved | `.gitignore`, legal drafts, `artifacts/`, unrelated app/legal untracked reports |
+
+Production content/editorial publish edits are data-only on linked Supabase (not in git).
 
 ---
 
