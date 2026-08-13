@@ -139,7 +139,18 @@ async function verify({ anon }) {
     naturalKeys,
   };
   console.log(JSON.stringify(out, null, 2));
-  if (
+  // D1-D.3 gate: reject any public/anon visibility on fresh review-only import.
+  // D1-D.4+: human-published READY rows are allowed; only duplicates / full-text
+  // suspects / covers must stay at zero, and anon may see published only.
+  const d1d4Mode = process.env.D1D4_VERIFY === "1" || publicCount > 0;
+  if (d1d4Mode) {
+    if (duplicates > 0 || coverSet > 0 || fullTextSuspect > 0) {
+      process.exit(1);
+    }
+    if ((anonVisible ?? 0) > publicCount) {
+      process.exit(1);
+    }
+  } else if (
     publicCount > 0 ||
     publishedAtSet > 0 ||
     duplicates > 0 ||

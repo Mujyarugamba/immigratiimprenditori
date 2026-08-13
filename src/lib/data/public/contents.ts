@@ -1,3 +1,4 @@
+import { stripContentsAcquisitionTrailer } from "@/lib/contents/strip-acquisition-trailer";
 import { createClient } from "@/lib/supabase/server";
 import {
   paginated,
@@ -85,7 +86,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     language_id: data.language_id as number,
     is_featured: data.is_featured as boolean,
     published_at: data.published_at as string | null,
-    body: data.body as string,
+    body: stripContentsAcquisitionTrailer(data.body as string),
     body_format: data.body_format as string,
     cover_url: data.cover_url as string | null,
     source_url: data.source_url as string | null,

@@ -6,7 +6,7 @@
 **Mode:** accelerata controllata  
 **Baseline git (pre-commit):** `d817c96` on `main` (ahead/behind `0/0`)  
 **AUTO-PUBLISH:** **NO**  
-**Editorial publish (D1-D.4):** **NOT STARTED**
+**Editorial publish (D1-D.4):** **DONE** — see `d1-d4-contenuti-editorial-publication-validation.md`
 
 ---
 
@@ -177,8 +177,7 @@ Not versioned: `artifacts/ingestion/*` sidecars/probes, downloaded pages, secret
 
 ## 14. GO/NO-GO next
 
-**D1-D.4 (editorial review/publish)** — **NO-GO** until separate human GO.  
-Pilot remains review-only in Redazione queue.
+**D1-D.4 (editorial review/publish)** — executed under separate human GO; report `d1-d4-contenuti-editorial-publication-validation.md`.
 
 ---
 

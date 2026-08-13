@@ -92,13 +92,25 @@ async function main() {
     console.error("GATE FAIL: autoPublish must remain false.");
     process.exit(1);
   }
+  // D1-D.3: fresh review-only import must leave public/published_at/scheduled at 0.
+  // D1-D.4+: human-published READY rows may remain public after idempotent refresh;
+  // only forbid importer-driven publication (autoPublish) and new inserts that are public.
   if (
+    result.mode === "apply" &&
+    (result.db?.inserted ?? 0) === 0 &&
+    (result.db?.updated ?? 0) === 0
+  ) {
+    // Idempotent refresh — publicCount may be > 0 from prior editorial publish.
+  } else if (
     result.mode === "apply" &&
     ((result.db?.publicCount ?? 0) > 0 ||
       (result.db?.publishedAtSet ?? 0) > 0 ||
-      (result.db?.scheduledCount ?? 0) > 0)
+      (result.db?.scheduledCount ?? 0) > 0) &&
+    (result.db?.inserted ?? 0) > 0
   ) {
-    console.error("GATE FAIL: public/scheduled/published_at must stay zero.");
+    console.error(
+      "GATE FAIL: new inserts must stay review-only (no importer public/published_at/scheduled).",
+    );
     process.exit(1);
   }
 }

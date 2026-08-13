@@ -62,7 +62,8 @@ World Bank 5–8 indicatori via M1 support resources; ICE link-only.
 ### WAVE D1-D — Cultura/Eventi/Contenuti
 **D1-D.1 (2026-08-13):** determination — first executable vertical = **Contenuti** (CASE A E2E); Cultura = hub no AR; Eventi out (no editor RLS/UI/external id).
 **D1-D.2 (2026-08-13):** PASS — typed acquisition contract + closed allowlist (ISMU, MLPS, EMN, Futurae project); metadata/link only; auto-publish forbidden; **0/20 imported**. Code `src/lib/external-data/contents/`; report `d1-d2-contenuti-acquisition-contract.md`.
-**D1-D.3 (2026-08-13):** PASS — Production review-only import **18** cards (Futurae 1/3 path-limited; no compensation); public=0; idempotent refresh; report `d1-d3-contenuti-production-pilot-validation.md`. **Next:** D1-D.4 editorial review/publish (**separate human GO**).
+**D1-D.3 (2026-08-13):** PASS — Production review-only import **18** cards (Futurae 1/3 path-limited; no compensation); public=0; idempotent refresh; report `d1-d3-contenuti-production-pilot-validation.md`.  
+**D1-D.4 (2026-08-13):** PASS — editorial review **17 READY published** / **1 QUESTIONABLE** review-only (MLPS hub); refresh-safe; no auto-publish; no new imports; report `d1-d4-contenuti-editorial-publication-validation.md`. **Contenuti pilot CLOSED** at data/editorial layer (hosting/deploy still separate GO).
 
 ### WAVE D1-E — Altre
 OpenCoesione selettivo; Org/Servizi defer.
@@ -83,7 +84,7 @@ OpenCoesione selettivo; Org/Servizi defer.
 10. ~~D1-D.1~~ **DONE (determination)** — Contenuti first
 11. ~~D1-D.2~~ **DONE (contract + allowlist)** — 4 sources; no import
 12. ~~D1-D.3~~ **DONE** — 18 Production review-only Contenuti; public=0
-13. D1-D.4 — editorial review/selective publish (after human GO)
+13. ~~D1-D.4~~ **DONE** — 17 READY published / 1 review-only; refresh-safe; hosting still separate
 14. D1.6 — Editorial/Lombardia bandi + EU F&T curated (not D1-C)
 15. Scheduler — **authorizable** after ops GO (not enabled)
 
