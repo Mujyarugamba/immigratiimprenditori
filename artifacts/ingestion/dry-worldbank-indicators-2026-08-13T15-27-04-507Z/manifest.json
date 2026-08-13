@@ -1,0 +1,69 @@
+{
+  "runId": "dry-worldbank-indicators-2026-08-13T15:27:04.507Z",
+  "mode": "dry-run",
+  "dbWrites": 0,
+  "autoPublish": false,
+  "source": "worldbank-indicators",
+  "dataset": "world-development-indicators",
+  "countries": [
+    "IT",
+    "DE",
+    "FR"
+  ],
+  "indicators": [
+    "SP.POP.TOTL",
+    "NY.GDP.MKTP.CD",
+    "NY.GDP.MKTP.KD.ZG",
+    "NY.GDP.PCAP.CD",
+    "NE.TRD.GNFS.ZS"
+  ],
+  "fetched": 45,
+  "validated": 15,
+  "rejected": 0,
+  "wouldInsert": 0,
+  "wouldUpdate": 0,
+  "unchanged": 15,
+  "marketCatalog": [
+    {
+      "iso2": "IT",
+      "marketId": "5dccd2d9-968c-4b54-9802-69b0b8e61e5f",
+      "code": "it",
+      "editorialStatus": "drafting"
+    },
+    {
+      "iso2": "DE",
+      "marketId": "1fa66eab-53a0-4530-ab66-1ef73cee88da",
+      "code": "de",
+      "editorialStatus": "drafting"
+    },
+    {
+      "iso2": "FR",
+      "marketId": "331b5d5b-e084-4aeb-9e8f-cbd7bbaa31a1",
+      "code": "fr",
+      "editorialStatus": "drafting"
+    }
+  ],
+  "ice": {
+    "policy": "LINK_ONLY",
+    "homeUrl": "https://www.ice.it/",
+    "note": "ICE is complementary link-only; no scrape/import in D1-C.1."
+  },
+  "provenanceClass": "P-D",
+  "selectedNaturalKeys": [
+    "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+    "worldbank:NE.TRD.GNFS.ZS:FR:2024",
+    "worldbank:NE.TRD.GNFS.ZS:IT:2024",
+    "worldbank:NY.GDP.MKTP.CD:DE:2024",
+    "worldbank:NY.GDP.MKTP.CD:FR:2024",
+    "worldbank:NY.GDP.MKTP.CD:IT:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:DE:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:FR:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:IT:2024",
+    "worldbank:NY.GDP.PCAP.CD:DE:2024",
+    "worldbank:NY.GDP.PCAP.CD:FR:2024",
+    "worldbank:NY.GDP.PCAP.CD:IT:2024",
+    "worldbank:SP.POP.TOTL:DE:2024",
+    "worldbank:SP.POP.TOTL:FR:2024",
+    "worldbank:SP.POP.TOTL:IT:2024"
+  ]
+}

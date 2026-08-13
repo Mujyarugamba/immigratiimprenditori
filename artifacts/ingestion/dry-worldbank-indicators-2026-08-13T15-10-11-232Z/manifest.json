@@ -1,0 +1,185 @@
+{
+  "mode": "dry-run",
+  "dbWrites": 0,
+  "autoPublish": false,
+  "source": "worldbank-indicators",
+  "dataset": "world-development-indicators",
+  "license": "CC BY 4.0",
+  "licenseClass": "REUSABLE_WITH_ATTRIBUTION",
+  "attribution": "World Bank",
+  "countries": [
+    "IT",
+    "DE",
+    "FR"
+  ],
+  "indicators": [
+    "SP.POP.TOTL",
+    "NY.GDP.MKTP.CD",
+    "NY.GDP.MKTP.KD.ZG",
+    "NY.GDP.PCAP.CD",
+    "NE.TRD.GNFS.ZS"
+  ],
+  "periods": "2022:2024 (map=latest non-null year)",
+  "timeStrategy": "Fetch 2022:2024 for history/update check; map one support_resource per country×indicator at latest non-null year (D1-C).",
+  "fetched": 45,
+  "validated": 15,
+  "rejected": 0,
+  "wouldInsert": 15,
+  "wouldUpdate": 0,
+  "unchanged": 0,
+  "reviewRequiredFutureApply": 15,
+  "futureEditorialState": {
+    "substantial_status": "signaled",
+    "verification_status": "in_review",
+    "visibility_status": "editorial",
+    "autoPublish": false
+  },
+  "errors": [],
+  "ice": {
+    "policy": "LINK_ONLY",
+    "homeUrl": "https://www.ice.it/",
+    "note": "ICE is complementary link-only; no scrape/import in D1-C.1."
+  },
+  "naturalKeyPattern": "worldbank:{indicator}:{iso2}:{year}",
+  "revisionSimulation": {
+    "naturalKey": "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+    "action": "UPDATE",
+    "dbWrites": 0
+  },
+  "manualQa": {
+    "checked": 8,
+    "pass": 8,
+    "fail": 0,
+    "sample": [
+      {
+        "naturalKey": "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+        "country": "DE",
+        "indicator": "NE.TRD.GNFS.ZS",
+        "year": 2024,
+        "value": 79.0907305894936,
+        "unit": "percent of GDP",
+        "vsSource": "PASS",
+        "note": "value/year/country/indicator match WB response"
+      },
+      {
+        "naturalKey": "worldbank:NE.TRD.GNFS.ZS:FR:2024",
+        "country": "FR",
+        "indicator": "NE.TRD.GNFS.ZS",
+        "year": 2024,
+        "value": 68.1081875443744,
+        "unit": "percent of GDP",
+        "vsSource": "PASS",
+        "note": "value/year/country/indicator match WB response"
+      },
+      {
+        "naturalKey": "worldbank:NE.TRD.GNFS.ZS:IT:2024",
+        "country": "IT",
+        "indicator": "NE.TRD.GNFS.ZS",
+        "year": 2024,
+        "value": 62.5926144915658,
+        "unit": "percent of GDP",
+        "vsSource": "PASS",
+        "note": "value/year/country/indicator match WB response"
+      },
+      {
+        "naturalKey": "worldbank:NY.GDP.MKTP.CD:DE:2024",
+        "country": "DE",
+        "indicator": "NY.GDP.MKTP.CD",
+        "year": 2024,
+        "value": 4685592577804.69,
+        "unit": "current US$",
+        "vsSource": "PASS",
+        "note": "value/year/country/indicator match WB response"
+      },
+      {
+        "naturalKey": "worldbank:NY.GDP.MKTP.CD:FR:2024",
+        "country": "FR",
+        "indicator": "NY.GDP.MKTP.CD",
+        "year": 2024,
+        "value": 3160442622465.08,
+        "unit": "current US$",
+        "vsSource": "PASS",
+        "note": "value/year/country/indicator match WB response"
+      }
+    ]
+  },
+  "diagnosticSample": [
+    {
+      "naturalKey": "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+      "name": "World Bank — Trade (% of GDP) (2024)",
+      "summary": "Commercio (% del PIL) (2024): 79.0907305894936 percent of GDP.",
+      "unit": "percent of GDP",
+      "marketCodeHint": "market:DE",
+      "websiteUrl": "https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS",
+      "verificationStatus": "in_review",
+      "visibilityStatus": "editorial"
+    },
+    {
+      "naturalKey": "worldbank:NE.TRD.GNFS.ZS:FR:2024",
+      "name": "World Bank — Trade (% of GDP) (2024)",
+      "summary": "Commercio (% del PIL) (2024): 68.1081875443744 percent of GDP.",
+      "unit": "percent of GDP",
+      "marketCodeHint": "market:FR",
+      "websiteUrl": "https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS",
+      "verificationStatus": "in_review",
+      "visibilityStatus": "editorial"
+    },
+    {
+      "naturalKey": "worldbank:NE.TRD.GNFS.ZS:IT:2024",
+      "name": "World Bank — Trade (% of GDP) (2024)",
+      "summary": "Commercio (% del PIL) (2024): 62.5926144915658 percent of GDP.",
+      "unit": "percent of GDP",
+      "marketCodeHint": "market:IT",
+      "websiteUrl": "https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS",
+      "verificationStatus": "in_review",
+      "visibilityStatus": "editorial"
+    },
+    {
+      "naturalKey": "worldbank:NY.GDP.MKTP.CD:DE:2024",
+      "name": "World Bank — GDP (current US$) (2024)",
+      "summary": "PIL (US$ correnti) (2024): 4685592577804.69 current US$.",
+      "unit": "current US$",
+      "marketCodeHint": "market:DE",
+      "websiteUrl": "https://data.worldbank.org/indicator/NY.GDP.MKTP.CD",
+      "verificationStatus": "in_review",
+      "visibilityStatus": "editorial"
+    },
+    {
+      "naturalKey": "worldbank:NY.GDP.MKTP.CD:FR:2024",
+      "name": "World Bank — GDP (current US$) (2024)",
+      "summary": "PIL (US$ correnti) (2024): 3160442622465.08 current US$.",
+      "unit": "current US$",
+      "marketCodeHint": "market:FR",
+      "websiteUrl": "https://data.worldbank.org/indicator/NY.GDP.MKTP.CD",
+      "verificationStatus": "in_review",
+      "visibilityStatus": "editorial"
+    }
+  ],
+  "endpoints": [
+    "https://api.worldbank.org/v2/country/IT;DE;FR/indicator/SP.POP.TOTL?format=json&per_page=200&date=2022%3A2024",
+    "https://api.worldbank.org/v2/country/IT;DE;FR/indicator/NY.GDP.MKTP.CD?format=json&per_page=200&date=2022%3A2024",
+    "https://api.worldbank.org/v2/country/IT;DE;FR/indicator/NY.GDP.MKTP.KD.ZG?format=json&per_page=200&date=2022%3A2024",
+    "https://api.worldbank.org/v2/country/IT;DE;FR/indicator/NY.GDP.PCAP.CD?format=json&per_page=200&date=2022%3A2024",
+    "https://api.worldbank.org/v2/country/IT;DE;FR/indicator/NE.TRD.GNFS.ZS?format=json&per_page=200&date=2022%3A2024"
+  ],
+  "retrievedAt": "2026-08-13T15:10:11.232Z",
+  "sidecarPath": "C:\\Users\\151702\\Desktop\\PROGETTI-WEB\\immigrati-imprenditori\\artifacts\\ingestion\\dry-worldbank-indicators-2026-08-13T15-10-11-232Z\\manifest.json",
+  "provenanceClass": "P-D",
+  "selectedNaturalKeys": [
+    "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+    "worldbank:NE.TRD.GNFS.ZS:FR:2024",
+    "worldbank:NE.TRD.GNFS.ZS:IT:2024",
+    "worldbank:NY.GDP.MKTP.CD:DE:2024",
+    "worldbank:NY.GDP.MKTP.CD:FR:2024",
+    "worldbank:NY.GDP.MKTP.CD:IT:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:DE:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:FR:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:IT:2024",
+    "worldbank:NY.GDP.PCAP.CD:DE:2024",
+    "worldbank:NY.GDP.PCAP.CD:FR:2024",
+    "worldbank:NY.GDP.PCAP.CD:IT:2024",
+    "worldbank:SP.POP.TOTL:DE:2024",
+    "worldbank:SP.POP.TOTL:FR:2024",
+    "worldbank:SP.POP.TOTL:IT:2024"
+  ]
+}

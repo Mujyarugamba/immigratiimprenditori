@@ -1,0 +1,76 @@
+{
+  "runId": "apply-worldbank-indicators-2026-08-13T15:28:37.799Z",
+  "mode": "apply",
+  "dbWrites": 0,
+  "autoPublish": false,
+  "targetUrl": "https://hvfvfatlaspcpszgizhg.supabase.co",
+  "isLocalTarget": false,
+  "allowProduction": true,
+  "source": "worldbank-indicators",
+  "dataset": "world-development-indicators",
+  "countries": [
+    "IT",
+    "DE",
+    "FR"
+  ],
+  "indicators": [
+    "SP.POP.TOTL",
+    "NY.GDP.MKTP.CD",
+    "NY.GDP.MKTP.KD.ZG",
+    "NY.GDP.PCAP.CD",
+    "NE.TRD.GNFS.ZS"
+  ],
+  "fetched": 45,
+  "validated": 15,
+  "rejected": 0,
+  "inserted": 0,
+  "updated": 0,
+  "unchanged": 15,
+  "reviewOnlyCount": 15,
+  "publishedCount": 0,
+  "duplicates": 0,
+  "marketCatalog": [
+    {
+      "iso2": "IT",
+      "marketId": "17842683-12a5-4380-8282-9baf9f36cfbe",
+      "code": "it",
+      "editorialStatus": "drafting"
+    },
+    {
+      "iso2": "DE",
+      "marketId": "e727867f-4251-42f8-be38-7322b44733a9",
+      "code": "de",
+      "editorialStatus": "drafting"
+    },
+    {
+      "iso2": "FR",
+      "marketId": "52cf7097-8ed3-473c-9d34-a0382d0ccd04",
+      "code": "fr",
+      "editorialStatus": "drafting"
+    }
+  ],
+  "ice": {
+    "policy": "LINK_ONLY",
+    "homeUrl": "https://www.ice.it/",
+    "note": "ICE is complementary link-only; no scrape/import in D1-C.1."
+  },
+  "provenanceClass": "P-D",
+  "selectedNaturalKeys": [
+    "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+    "worldbank:NE.TRD.GNFS.ZS:FR:2024",
+    "worldbank:NE.TRD.GNFS.ZS:IT:2024",
+    "worldbank:NY.GDP.MKTP.CD:DE:2024",
+    "worldbank:NY.GDP.MKTP.CD:FR:2024",
+    "worldbank:NY.GDP.MKTP.CD:IT:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:DE:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:FR:2024",
+    "worldbank:NY.GDP.MKTP.KD.ZG:IT:2024",
+    "worldbank:NY.GDP.PCAP.CD:DE:2024",
+    "worldbank:NY.GDP.PCAP.CD:FR:2024",
+    "worldbank:NY.GDP.PCAP.CD:IT:2024",
+    "worldbank:SP.POP.TOTL:DE:2024",
+    "worldbank:SP.POP.TOTL:FR:2024",
+    "worldbank:SP.POP.TOTL:IT:2024"
+  ],
+  "errors": []
+}
