@@ -211,7 +211,13 @@ Not versioned: `artifacts/ingestion/d1d4-*`, apply/dry sidecars, secrets.
 
 ## 21–23. Git / deploy
 
-See final commit message after selective stage. Deploy/CDN blocker remains a **separate GO**.
+| Item | Result |
+|---|---|
+| Commit | `0cd7317` — `feat(contents): selectively publish D1-D.4 Contenti pilot` |
+| Push | FF `origin/main` (`f2cd6d6..0cd7317`) |
+| Ahead/behind | `0 / 0` |
+| Dirt preserved | `.gitignore`, legal drafts, `artifacts/`, unrelated reports |
+| Deploy/CDN | **BLOCKED** — separate hosting GO |
 
 ---
 
