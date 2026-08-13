@@ -3,6 +3,7 @@
 **Date:** 2026-08-13  
 **Mode:** accelerata controllata  
 **Baseline git (pre):** `7254fe5` on `main` (ahead/behind `0/0`)  
+**Final git:** `ff097e3` on `main` (ahead/behind `0/0` after push)  
 **AUTO-PUBLISH:** **NO**  
 **Scheduler / email / D1-C:** **NOT STARTED**  
 **Scope:** only the 7 QUESTIONABLE from D1-B.3 (`132, 156, 170, 1843, 1856, 187, 2309`)
