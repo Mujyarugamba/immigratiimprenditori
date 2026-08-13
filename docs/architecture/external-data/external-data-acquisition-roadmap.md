@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1-D.5 Eventi enablement (2026-08-13) — D1-B Opportunities **CLOSED**; **D1-C Mercati World Bank pilot CLOSED end-to-end**; **D1-D.1–D1-D.4** Contenuti CLOSED (17 published / 1 review-only); **D1-D.5** Eventi **technically population-ready** (ownership+identity+RLS+redazione+public+contract; **0 real imports**; allowlist empty); Cultura = hub no AR; **no scheduler**; Eurostat OBS-EU-SELF-CIT still live; UC blocked
+**Stato:** aggiornato da D1-D.6 Eventi acquisition contract (2026-08-13) — D1-B Opportunities **CLOSED**; **D1-C Mercati World Bank pilot CLOSED end-to-end**; **D1-D.1–D1-D.4** Contenuti CLOSED (17 published / 1 review-only); **D1-D.5** Eventi enablement CLOSED; **D1-D.6** Eventi **contract + closed allowlist** (4 official sources; **0 imports**; D1-D.5 migrations still local-only); Cultura = hub no AR; **no scheduler**; Eurostat OBS-EU-SELF-CIT still live; UC blocked
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -64,7 +64,8 @@ World Bank 5–8 indicatori via M1 support resources; ICE link-only.
 **D1-D.2 (2026-08-13):** PASS — typed acquisition contract + closed allowlist (ISMU, MLPS, EMN, Futurae project); metadata/link only; auto-publish forbidden; **0/20 imported**. Code `src/lib/external-data/contents/`; report `d1-d2-contenuti-acquisition-contract.md`.
 **D1-D.3 (2026-08-13):** PASS — Production review-only import **18** cards (Futurae 1/3 path-limited; no compensation); public=0; idempotent refresh; report `d1-d3-contenuti-production-pilot-validation.md`.  
 **D1-D.4 (2026-08-13):** PASS — editorial review **17 READY published** / **1 QUESTIONABLE** review-only (MLPS hub); refresh-safe; no auto-publish; no new imports; report `d1-d4-contenuti-editorial-publication-validation.md`. **Contenuti pilot CLOSED** at data/editorial layer (hosting/deploy still separate GO).
-**D1-D.5 (2026-08-13):** PASS — Eventi enablement CASE A+ (ternary `owned_by_editorial`, identity/provenance columns, editorial RLS, `/app/redazione/eventi`, public `/eventi` polish, typed acquisition contract with **empty** allowlist). Migrations `20260820140000`…`20260820160000` applied **local only**. **0 real imports / 0 real publishes**. Reports `d1-d5-eventi-enablement-block-determination.md`, `d1-d5-eventi-enablement-validation.md`. Subsequent Eventi pilot steps (sources/allowlist · import · publish · remote apply) each need separate human GO.
+**D1-D.5 (2026-08-13):** PASS — Eventi enablement CASE A+ (ternary `owned_by_editorial`, identity/provenance columns, editorial RLS, `/app/redazione/eventi`, public `/eventi` polish, typed acquisition contract with **empty** allowlist). Migrations `20260820140000`…`20260820160000` applied **local only**. **0 real imports / 0 real publishes**. Reports `d1-d5-eventi-enablement-block-determination.md`, `d1-d5-eventi-enablement-validation.md`.
+**D1-D.6 (2026-08-13):** PASS — Eventi typed acquisition contract + **closed allowlist** (PIM, MLPS Eventi, Unioncamere Agenda relevance-gated, EMN/EC Home Affairs; ISMU excluded). Metadata/link only; cross-source merge; pilot proposal **16** (not imported). **0 imports / 0 publishes / 0 remote apply / 0 new migrations**. Code `src/lib/external-data/events/`; report `d1-d6-eventi-acquisition-contract.md`. Subsequent steps (remote apply D1-D.5 · import · publish) each need separate human GO.
 
 ### WAVE D1-E — Altre
 OpenCoesione selettivo; Org/Servizi defer.
@@ -86,9 +87,10 @@ OpenCoesione selettivo; Org/Servizi defer.
 11. ~~D1-D.2~~ **DONE (contract + allowlist)** — 4 sources; no import
 12. ~~D1-D.3~~ **DONE** — 18 Production review-only Contenuti; public=0
 13. ~~D1-D.4~~ **DONE** — 17 READY published / 1 review-only; refresh-safe; hosting still separate
-14. ~~D1-D.5~~ **DONE (enablement)** — Eventi population-ready locally; no real import; sources/import/publish/remote apply = separate GOs
-15. D1.6 — Editorial/Lombardia bandi + EU F&T curated (not D1-C)
-16. Scheduler — **authorizable** after ops GO (not enabled)
+14. ~~D1-D.5~~ **DONE (enablement)** — Eventi population-ready locally; no real import
+15. ~~D1-D.6~~ **DONE (contract + allowlist)** — 4 Eventi sources; 0 imported; remote apply + import + publish = separate GOs
+16. D1.6 — Editorial/Lombardia bandi + EU F&T curated (not D1-C)
+17. Scheduler — **authorizable** after ops GO (not enabled)
 
 ---
 
@@ -104,8 +106,8 @@ OpenCoesione selettivo; Org/Servizi defer.
 
 D1.3A termina con report + commit importer/report.
 D1-B pilot **CLOSED**.
-D1-C World Bank pilot **CLOSED**. D1-D Contenuti pilot **CLOSED** at data/editorial. D1-D.5 Eventi enablement **DONE** — **do not** add Eventi sources, import/publish real events, enable scheduler, remote-apply Eventi migrations, or create Cultura AR without explicit human GO. Hosting Next Production still separate GO (pre-existing).
+D1-C World Bank pilot **CLOSED**. D1-D Contenuti pilot **CLOSED** at data/editorial. D1-D.5 Eventi enablement **DONE**. D1-D.6 Eventi contract+allowlist **DONE** — **do not** import/publish real events, enable scheduler, remote-apply Eventi migrations, or create Cultura AR without explicit human GO. Hosting Next Production still separate GO (pre-existing).
 
 ---
 
-*Roadmap aggiornata D1-D.5 Eventi enablement*
+*Roadmap aggiornata D1-D.6 Eventi acquisition contract*

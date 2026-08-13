@@ -1,12 +1,13 @@
 /**
- * D1-D.5 — Authoritative Eventi acquisition contract (metadata/link only).
- * No real import in this GO. Allowlist is empty until a separate sources GO.
+ * D1-D.6 — Authoritative Eventi acquisition contract (metadata/link only).
+ * Reuses events / event_editions field names. No DB writes. No auto-publish.
  */
 
 import { checksumSha256 } from "@/lib/external-data/checksum";
 import {
   assertKnownEventsSource,
   EVENTI_ACQUISITION,
+  getEventsSource,
   type EventsSourceAllowlistEntry,
   type EventsSourceCode,
 } from "@/lib/external-data/events/allowlist";
@@ -33,6 +34,9 @@ const TRACKING_PARAMS = new Set([
 
 const IPV4_RE = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 const IPV6_RE = /^\[?[0-9a-f:]+\]?$/i;
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const INSTANT_RE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/;
 
 export type EventsIdentityMethod =
   | "external_id"
@@ -45,16 +49,24 @@ export type EventsProvenance = {
   externalId: string | null;
   originalTitle: string;
   organizerLabel: string | null;
+  publisherName: string;
   startsAt: string;
   endsAt: string | null;
   timezone: string;
+  allDay: boolean;
   deliveryMode: (typeof EVENTI_ACQUISITION.allowedDeliveryModes)[number];
   venueLabel: string | null;
+  addressText: string | null;
   cityText: string | null;
+  provinceText: string | null;
+  regionText: string | null;
   countryRef: string | null;
   onlineReference: string | null;
+  /** Accessory registration link — never primary identity. */
+  registrationUrl: string | null;
   language: string;
   retrievedAt: string;
+  sourcePublishedAt: string | null;
   sourceUpdatedAt: string | null;
   requiredAttribution: string;
 };
@@ -64,6 +76,7 @@ export type EventsEditorialMetadata = {
   platformSummaryIt: string;
   descriptionStub: string;
   typeCode: (typeof EVENTI_ACQUISITION.allowedTypeCodes)[number];
+  categoryLabels: readonly string[];
   territoryLabel: string | null;
   sourceLink: string;
 };
@@ -87,6 +100,8 @@ export type NormalizedExternalEvent = {
   naturalKey: string;
   identityMethod: EventsIdentityMethod;
   fingerprint: string;
+  /** Cross-source fingerprint (no sourceCode) for MLPS/PIM/UC merge. */
+  crossSourceFingerprint: string;
   provenance: EventsProvenance;
   editorial: EventsEditorialMetadata;
   ownedByEditorial: true;
@@ -107,21 +122,29 @@ export type EventsAcquisitionCandidate = {
   externalId?: string | null;
   originalTitle: string;
   organizerLabel?: string | null;
+  publisherName?: string | null;
   startsAt: string;
   endsAt?: string | null;
-  timezone: string;
+  timezone?: string | null;
+  allDay?: boolean;
   deliveryMode: (typeof EVENTI_ACQUISITION.allowedDeliveryModes)[number];
   venueLabel?: string | null;
+  addressText?: string | null;
   cityText?: string | null;
+  provinceText?: string | null;
+  regionText?: string | null;
   countryRef?: string | null;
   onlineReference?: string | null;
+  registrationUrl?: string | null;
   language?: string;
   retrievedAt?: string;
+  sourcePublishedAt?: string | null;
   sourceUpdatedAt?: string | null;
   titleIt: string;
   platformSummaryIt: string;
   descriptionStub: string;
   typeCode: (typeof EVENTI_ACQUISITION.allowedTypeCodes)[number];
+  categoryLabels?: readonly string[] | null;
   territoryLabel?: string | null;
   sourceFullHtml?: string | null;
   sourceAttachmentBase64?: string | null;
@@ -152,6 +175,21 @@ export type EventsRefreshPlan = {
     sourceUpdatedAt: string | null;
     canonicalUrl: string;
     acquisitionFingerprint: string;
+    startsAt: string;
+    endsAt: string | null;
+    timezone: string;
+    deliveryMode: string;
+    venueLabel: string | null;
+    addressText: string | null;
+    cityText: string | null;
+    countryRef: string | null;
+    onlineReference: string | null;
+    occurrenceHint:
+      | "scheduled"
+      | "postponed"
+      | "cancelled"
+      | "venue_changed"
+      | null;
   };
   preserved: {
     editorialStatus: ExistingEventsFingerprint["editorialStatus"];
@@ -175,6 +213,12 @@ export type UrlSecurityOk = {
 
 export type UrlSecurityErr = { ok: false; reason: string };
 export type UrlSecurityResult = UrlSecurityOk | UrlSecurityErr;
+
+export type CrossSourceEventGroup = {
+  crossSourceFingerprint: string;
+  primary: NormalizedExternalEvent;
+  linkedProvenances: EventsProvenance[];
+};
 
 function isLiteralIpHost(hostname: string): boolean {
   const h = hostname.replace(/^\[|\]$/g, "");
@@ -215,12 +259,20 @@ function pathAllowed(
   );
   if (rules.length === 0) return true;
   const path = pathname.toLowerCase() || "/";
-  return rules.some((rule) =>
-    rule.pathPrefixes.some((prefix) => {
+  return rules.some((rule) => {
+    if (
+      rule.pathExclusions?.some((ex) => {
+        const e = ex.toLowerCase().replace(/\/+$/, "") || "/";
+        return path === e || path.startsWith(`${e}/`);
+      })
+    ) {
+      return false;
+    }
+    return rule.pathPrefixes.some((prefix) => {
       const p = prefix.toLowerCase().replace(/\/+$/, "") || "/";
       return path === p || path.startsWith(`${p}/`) || path.startsWith(p);
-    }),
-  );
+    });
+  });
 }
 
 export function normalizeEventsUrl(raw: string): UrlSecurityResult {
@@ -316,11 +368,52 @@ export function assertEventsUrlAllowed(
   };
 }
 
+/** Final URL after redirects must still be on the same source allowlist. */
+export function assertEventsRedirectAllowed(
+  sourceCode: string,
+  finalUrl: string,
+): UrlSecurityOk {
+  return assertEventsUrlAllowed(sourceCode, finalUrl);
+}
+
+export function extractEventsExternalId(
+  sourceCode: string,
+  canonicalUrl: string,
+  provided?: string | null,
+): string | null {
+  const trimmed = provided?.trim() || null;
+  if (trimmed) return trimmed;
+  try {
+    const u = new URL(canonicalUrl);
+    const path = u.pathname;
+    if (sourceCode === "pim-ricerca-eventi") {
+      const m = path.match(/\/dettaglio-evento\/id\/(\d+)/i);
+      return m?.[1] ?? null;
+    }
+    if (sourceCode === "minlavoro-eventi") {
+      const m = path.match(/\/eventi\/pagine\/([^/]+)$/i);
+      return m?.[1] ?? null;
+    }
+    if (sourceCode === "unioncamere-agenda") {
+      const m = path.match(/\/agenda\/([^/]+)$/i);
+      return m?.[1] ?? null;
+    }
+    if (sourceCode === "emn-home-affairs-events") {
+      const m = path.match(/\/whats-new\/events\/([^/]+)$/i);
+      return m?.[1] ?? null;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 export function eventsFingerprint(input: {
   sourceCode: string;
   originalTitle: string;
   startsAt: string;
   organizerLabel?: string | null;
+  venueOrOnline?: string | null;
   deliveryMode: string;
 }): string {
   return checksumSha256({
@@ -328,8 +421,41 @@ export function eventsFingerprint(input: {
     originalTitle: input.originalTitle.trim().toLowerCase(),
     startsAt: input.startsAt.trim(),
     organizerLabel: input.organizerLabel?.trim().toLowerCase() || null,
+    venueOrOnline: input.venueOrOnline?.trim().toLowerCase() || null,
     deliveryMode: input.deliveryMode,
   });
+}
+
+/** Cross-source fingerprint: title + start + organizer + venue|online (no sourceCode). */
+export function eventsCrossSourceFingerprint(input: {
+  originalTitle: string;
+  startsAt: string;
+  organizerLabel?: string | null;
+  venueOrOnline?: string | null;
+}): string {
+  return checksumSha256({
+    originalTitle: input.originalTitle.trim().toLowerCase(),
+    startsAt: normalizeTemporalKey(input.startsAt),
+    organizerLabel: input.organizerLabel?.trim().toLowerCase() || null,
+    venueOrOnline: input.venueOrOnline?.trim().toLowerCase() || null,
+  });
+}
+
+function venueOrOnlineKey(candidate: {
+  deliveryMode: string;
+  venueLabel?: string | null;
+  onlineReference?: string | null;
+  cityText?: string | null;
+}): string | null {
+  if (candidate.deliveryMode === "online") {
+    return candidate.onlineReference?.trim() || "online";
+  }
+  return (
+    candidate.venueLabel?.trim() ||
+    candidate.cityText?.trim() ||
+    candidate.onlineReference?.trim() ||
+    null
+  );
 }
 
 /** Identity precedence: external id > canonical URL > fingerprint. */
@@ -384,18 +510,95 @@ export function assertMetadataOnlyEventPayload(candidate: {
   }
 }
 
+function normalizeTemporalKey(value: string): string {
+  const v = value.trim();
+  if (DATE_ONLY_RE.test(v)) return v;
+  const d = Date.parse(v);
+  if (Number.isNaN(d)) return v.toLowerCase();
+  return new Date(d).toISOString();
+}
+
+function assertTemporalRules(candidate: EventsAcquisitionCandidate): {
+  startsAt: string;
+  endsAt: string | null;
+  timezone: string;
+  allDay: boolean;
+} {
+  const startsRaw = candidate.startsAt?.trim();
+  if (!startsRaw) throw new Error("startsAt is required");
+
+  const dateOnly = DATE_ONLY_RE.test(startsRaw);
+  const instant = INSTANT_RE.test(startsRaw);
+  if (!dateOnly && !instant) {
+    throw new Error(
+      "startsAt must be YYYY-MM-DD or an ISO-8601 instant with timezone offset/Z",
+    );
+  }
+
+  const allDay = candidate.allDay === true || dateOnly;
+  if (!allDay && !instant) {
+    throw new Error("timed events require an ISO-8601 instant with timezone");
+  }
+
+  const timezone = candidate.timezone?.trim() || "";
+  if (!timezone) {
+    throw new Error(
+      "timezone is required (IANA label; required for editions even when all-day)",
+    );
+  }
+  if (instant && !/[Zz]|[+-]\d{2}:\d{2}$/.test(startsRaw)) {
+    throw new Error("timed startsAt must carry an explicit timezone offset or Z");
+  }
+
+  const endsRaw = candidate.endsAt?.trim() || null;
+  if (endsRaw) {
+    const endDateOnly = DATE_ONLY_RE.test(endsRaw);
+    const endInstant = INSTANT_RE.test(endsRaw);
+    if (!endDateOnly && !endInstant) {
+      throw new Error(
+        "endsAt must be YYYY-MM-DD or an ISO-8601 instant with timezone offset/Z",
+      );
+    }
+    if (allDay && !endDateOnly && endInstant) {
+      // allow; compare as instants
+    }
+    const startMs = Date.parse(
+      dateOnly ? `${startsRaw}T00:00:00Z` : startsRaw,
+    );
+    const endMs = Date.parse(endDateOnly ? `${endsRaw}T00:00:00Z` : endsRaw);
+    if (Number.isNaN(startMs) || Number.isNaN(endMs)) {
+      throw new Error("invalid startsAt/endsAt temporal value");
+    }
+    if (endMs < startMs) {
+      throw new Error("endsAt must not be before startsAt");
+    }
+  }
+
+  return {
+    startsAt: startsRaw,
+    endsAt: endsRaw,
+    timezone,
+    allDay,
+  };
+}
+
 function assertDeliveryCoherence(candidate: EventsAcquisitionCandidate): void {
   const mode = candidate.deliveryMode;
-  if (!EVENTI_ACQUISITION.allowedDeliveryModes.includes(mode)) {
+  if (
+    !(EVENTI_ACQUISITION.allowedDeliveryModes as readonly string[]).includes(
+      mode,
+    )
+  ) {
     throw new Error(`invalid delivery_mode: ${mode}`);
   }
   if (mode === "in_presence") {
     const hasPlace =
       Boolean(candidate.venueLabel?.trim()) ||
+      Boolean(candidate.addressText?.trim()) ||
       Boolean(candidate.cityText?.trim()) ||
       Boolean(candidate.countryRef?.trim());
     if (!hasPlace) {
-      throw new Error("in_presence requires venue/city/country declaration");
+      throw new Error("in_presence requires venue/address/city/country declaration");
     }
   }
   if (mode === "online" && !candidate.onlineReference?.trim()) {
@@ -404,12 +607,29 @@ function assertDeliveryCoherence(candidate: EventsAcquisitionCandidate): void {
   if (mode === "hybrid") {
     const hasPlace =
       Boolean(candidate.venueLabel?.trim()) ||
+      Boolean(candidate.addressText?.trim()) ||
       Boolean(candidate.cityText?.trim()) ||
       Boolean(candidate.countryRef?.trim()) ||
       Boolean(candidate.onlineReference?.trim());
     if (!hasPlace) {
       throw new Error("hybrid requires venue or online_reference");
     }
+  }
+}
+
+function normalizeAccessoryRegistrationUrl(
+  sourceCode: string,
+  raw?: string | null,
+): string | null {
+  if (!raw?.trim()) return null;
+  // Registration links may be on the same allowlisted host; off-allowlist
+  // registration hosts are rejected (accessory must not become rogue identity).
+  try {
+    return assertEventsUrlAllowed(sourceCode, raw).canonicalUrl;
+  } catch {
+    throw new Error(
+      "registrationUrl must stay on the same source allowlist (accessory, not primary identity)",
+    );
   }
 }
 
@@ -421,18 +641,23 @@ export function eventsPublishAuthorization(): {
 }
 
 /**
- * Normalize a candidate. Requires a known allowlisted source — with the
- * empty D1-D.5 allowlist this always rejects until a sources GO lands.
+ * Normalize a candidate against the closed D1-D.6 allowlist.
+ * Does not write to DB. Never sets published/public. autoPublish always false.
  */
 export function normalizeEventsAcquisition(
   candidate: EventsAcquisitionCandidate,
 ): NormalizedExternalEvent {
   assertMetadataOnlyEventPayload(candidate);
   const entry = assertKnownEventsSource(candidate.sourceCode);
-  if (!EVENTI_ACQUISITION.allowedTypeCodes.includes(candidate.typeCode)) {
+  if (
+    !(EVENTI_ACQUISITION.allowedTypeCodes as readonly string[]).includes(
+      candidate.typeCode,
+    )
+  ) {
     throw new Error(`invalid type_code: ${candidate.typeCode}`);
   }
   assertDeliveryCoherence(candidate);
+  const temporal = assertTemporalRules(candidate);
 
   const titleIt = candidate.titleIt.trim();
   const platformSummaryIt = candidate.platformSummaryIt.trim();
@@ -440,52 +665,76 @@ export function normalizeEventsAcquisition(
   if (!titleIt || !platformSummaryIt || !descriptionStub) {
     throw new Error("title, summary and description stub are required");
   }
-  if (!candidate.startsAt?.trim()) {
-    throw new Error("startsAt is required");
-  }
-  if (!candidate.timezone?.trim()) {
-    throw new Error("timezone is required");
+  if (!candidate.originalTitle.trim()) {
+    throw new Error("originalTitle required");
   }
 
   const urlOk = assertEventsUrlAllowed(candidate.sourceCode, candidate.eventUrl);
+  const externalId = extractEventsExternalId(
+    entry.sourceCode,
+    urlOk.canonicalUrl,
+    candidate.externalId,
+  );
+  const registrationUrl = normalizeAccessoryRegistrationUrl(
+    entry.sourceCode,
+    candidate.registrationUrl,
+  );
+  const venueKey = venueOrOnlineKey(candidate);
   const fingerprint = eventsFingerprint({
     sourceCode: entry.sourceCode,
     originalTitle: candidate.originalTitle,
-    startsAt: candidate.startsAt,
+    startsAt: temporal.startsAt,
     organizerLabel: candidate.organizerLabel,
+    venueOrOnline: venueKey,
     deliveryMode: candidate.deliveryMode,
+  });
+  const crossSourceFingerprint = eventsCrossSourceFingerprint({
+    originalTitle: candidate.originalTitle,
+    startsAt: temporal.startsAt,
+    organizerLabel: candidate.organizerLabel,
+    venueOrOnline: venueKey,
   });
   const identity = eventsNaturalKey({
     sourceCode: entry.sourceCode,
-    externalId: candidate.externalId,
+    externalId,
     canonicalUrl: urlOk.canonicalUrl,
     fingerprint,
   });
 
   const retrievedAt =
     candidate.retrievedAt?.trim() || new Date().toISOString();
-  const sourceLabel = entry.requiredAttribution;
+  const sourceLabel = entry.attribution;
+  const publisherName =
+    candidate.publisherName?.trim() || entry.responsiblePublisher;
 
   const normalized: NormalizedExternalEvent = {
     naturalKey: identity.naturalKey,
     identityMethod: identity.identityMethod,
     fingerprint: identity.fingerprint,
+    crossSourceFingerprint,
     provenance: {
       sourceCode: entry.sourceCode,
       canonicalUrl: urlOk.canonicalUrl,
       externalId: identity.externalId,
       originalTitle: candidate.originalTitle.trim(),
       organizerLabel: candidate.organizerLabel?.trim() || null,
-      startsAt: candidate.startsAt.trim(),
-      endsAt: candidate.endsAt?.trim() || null,
-      timezone: candidate.timezone.trim(),
+      publisherName,
+      startsAt: temporal.startsAt,
+      endsAt: temporal.endsAt,
+      timezone: temporal.timezone,
+      allDay: temporal.allDay,
       deliveryMode: candidate.deliveryMode,
       venueLabel: candidate.venueLabel?.trim() || null,
+      addressText: candidate.addressText?.trim() || null,
       cityText: candidate.cityText?.trim() || null,
+      provinceText: candidate.provinceText?.trim() || null,
+      regionText: candidate.regionText?.trim() || null,
       countryRef: candidate.countryRef?.trim() || null,
       onlineReference: candidate.onlineReference?.trim() || null,
-      language: (candidate.language ?? "it").trim() || "it",
+      registrationUrl,
+      language: (candidate.language ?? entry.language).trim() || entry.language,
       retrievedAt,
+      sourcePublishedAt: candidate.sourcePublishedAt?.trim() || null,
       sourceUpdatedAt: candidate.sourceUpdatedAt?.trim() || null,
       requiredAttribution: sourceLabel,
     },
@@ -494,13 +743,14 @@ export function normalizeEventsAcquisition(
       platformSummaryIt,
       descriptionStub,
       typeCode: candidate.typeCode,
+      categoryLabels: [...(candidate.categoryLabels ?? [])],
       territoryLabel: candidate.territoryLabel?.trim() || null,
       sourceLink: urlOk.canonicalUrl,
     },
     ownedByEditorial: true,
-    editorialStatus: "draft",
-    publicationStatus: "unpublished",
-    visibilityStatus: "private",
+    editorialStatus: EVENTI_ACQUISITION.ingestDefaults.editorialStatus,
+    publicationStatus: EVENTI_ACQUISITION.ingestDefaults.publicationStatus,
+    visibilityStatus: EVENTI_ACQUISITION.ingestDefaults.visibilityStatus,
     autoPublish: false,
     acquisitionMode: "METADATA_LINK_ONLY",
     storagePolicy: {
@@ -514,10 +764,12 @@ export function normalizeEventsAcquisition(
     checksumSha256: checksumSha256({
       naturalKey: identity.naturalKey,
       fingerprint: identity.fingerprint,
-      startsAt: candidate.startsAt.trim(),
+      startsAt: temporal.startsAt,
+      endsAt: temporal.endsAt,
       titleIt,
       platformSummaryIt,
       typeCode: candidate.typeCode,
+      deliveryMode: candidate.deliveryMode,
     }),
   };
 
@@ -535,6 +787,7 @@ export function dedupeEventsCandidates(
 } {
   const seenKeys = new Set<string>();
   const seenUrls = new Set<string>();
+  const seenFp = new Set<string>();
   const accepted: NormalizedExternalEvent[] = [];
   const rejected: { naturalKey: string; reason: string }[] = [];
 
@@ -554,20 +807,83 @@ export function dedupeEventsCandidates(
       });
       continue;
     }
+    if (seenFp.has(c.fingerprint)) {
+      rejected.push({
+        naturalKey: c.naturalKey,
+        reason: "duplicate acquisition fingerprint",
+      });
+      continue;
+    }
     seenKeys.add(c.naturalKey);
     if (url) seenUrls.add(url);
+    seenFp.add(c.fingerprint);
     accepted.push(c);
   }
   return { accepted, rejected };
 }
 
+/**
+ * Cross-source merge: same event on PIM/MLPS/Unioncamere/EMN → one primary
+ * editorial card + linked provenances (no second card).
+ */
+export function mergeCrossSourceEvents(
+  candidates: readonly NormalizedExternalEvent[],
+): {
+  groups: CrossSourceEventGroup[];
+  rejected: { naturalKey: string; reason: string }[];
+} {
+  const byCross = new Map<string, NormalizedExternalEvent[]>();
+  for (const c of candidates) {
+    const list = byCross.get(c.crossSourceFingerprint) ?? [];
+    list.push(c);
+    byCross.set(c.crossSourceFingerprint, list);
+  }
+
+  const groups: CrossSourceEventGroup[] = [];
+  const rejected: { naturalKey: string; reason: string }[] = [];
+
+  for (const [fp, list] of byCross) {
+    const ranked = [...list].sort((a, b) => {
+      const pa =
+        getEventsSource(a.provenance.sourceCode)?.crossSourcePriority ?? 99;
+      const pb =
+        getEventsSource(b.provenance.sourceCode)?.crossSourcePriority ?? 99;
+      return pa - pb;
+    });
+    const primary = ranked[0]!;
+    const linked = ranked.slice(1);
+    for (const extra of linked) {
+      rejected.push({
+        naturalKey: extra.naturalKey,
+        reason: `cross-source duplicate of ${primary.naturalKey}; linked as secondary provenance`,
+      });
+    }
+    groups.push({
+      crossSourceFingerprint: fp,
+      primary,
+      linkedProvenances: linked.map((x) => x.provenance),
+    });
+  }
+  return { groups, rejected };
+}
+
 export function planEventsRefresh(
   incoming: NormalizedExternalEvent,
   existing: ExistingEventsFingerprint | null,
+  options?: {
+    occurrenceHint?:
+      | "scheduled"
+      | "postponed"
+      | "cancelled"
+      | "venue_changed"
+      | null;
+  },
 ): EventsRefreshPlan {
   if (incoming.autoPublish !== false) {
     throw new Error("auto-publish is forbidden on refresh");
   }
+  const occurrenceHint = options?.occurrenceHint ?? null;
+
   if (!existing) {
     return {
       action: "CREATE",
@@ -580,6 +896,16 @@ export function planEventsRefresh(
         sourceUpdatedAt: incoming.provenance.sourceUpdatedAt,
         canonicalUrl: incoming.provenance.canonicalUrl,
         acquisitionFingerprint: incoming.fingerprint,
+        startsAt: incoming.provenance.startsAt,
+        endsAt: incoming.provenance.endsAt,
+        timezone: incoming.provenance.timezone,
+        deliveryMode: incoming.provenance.deliveryMode,
+        venueLabel: incoming.provenance.venueLabel,
+        addressText: incoming.provenance.addressText,
+        cityText: incoming.provenance.cityText,
+        countryRef: incoming.provenance.countryRef,
+        onlineReference: incoming.provenance.onlineReference,
+        occurrenceHint,
       },
       preserved: {
         editorialStatus: "draft",
@@ -593,6 +919,12 @@ export function planEventsRefresh(
       summaryFromSource: true,
       autoPublish: false,
     };
+  }
+
+  if (existing.naturalKey !== incoming.naturalKey) {
+    throw new Error(
+      `natural key mismatch on refresh: ${existing.naturalKey} vs ${incoming.naturalKey}`,
+    );
   }
 
   const titleFromSource =
@@ -617,14 +949,22 @@ export function planEventsRefresh(
       sourceUpdatedAt: incoming.provenance.sourceUpdatedAt,
       canonicalUrl: incoming.provenance.canonicalUrl,
       acquisitionFingerprint: incoming.fingerprint,
+      startsAt: incoming.provenance.startsAt,
+      endsAt: incoming.provenance.endsAt,
+      timezone: incoming.provenance.timezone,
+      deliveryMode: incoming.provenance.deliveryMode,
+      venueLabel: incoming.provenance.venueLabel,
+      addressText: incoming.provenance.addressText,
+      cityText: incoming.provenance.cityText,
+      countryRef: incoming.provenance.countryRef,
+      onlineReference: incoming.provenance.onlineReference,
+      occurrenceHint,
     },
     preserved: {
       editorialStatus: existing.editorialStatus,
       publicationStatus: existing.publicationStatus,
       visibilityStatus: existing.visibilityStatus,
-      title: titleFromSource
-        ? incoming.editorial.titleIt
-        : existing.title,
+      title: titleFromSource ? incoming.editorial.titleIt : existing.title,
       summary: summaryFromSource
         ? incoming.editorial.platformSummaryIt
         : existing.summary,
@@ -635,4 +975,3 @@ export function planEventsRefresh(
     autoPublish: false,
   };
 }
-
