@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1-C.3 Production review-only pilot (2026-08-13) — D1-B Opportunities **CLOSED** (15 published / 5 rejected); **D1-C = Mercati** (World Bank M1 + ICE link-only) **DETERMINATO**; **D1-C.1–C.2 PASS**; **D1-C.3 Production PASS** (IT/DE/FR × 5 → 15 review-only in Production; public=0; no auto-publish; no ICE); schema **CASE A**; **no scheduler**; Eurostat OBS-EU-SELF-CIT still live; UC blocked
+**Stato:** aggiornato da D1-C.4 editorial publish (2026-08-13) — D1-B Opportunities **CLOSED**; **D1-C Mercati World Bank pilot CLOSED end-to-end** (15 READY published; redazione + editor SELECT RLS; refresh-safe; no auto-publish; ICE link-only); schema **CASE A**; **no scheduler**; Eurostat OBS-EU-SELF-CIT still live; UC blocked
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -18,7 +18,7 @@ source registry
   → publish (ACQUIRE ≠ PUBLISH)
 ```
 
-Contratti: **D1.2 COMPLETE**. Pilot D1.3A-1: **Eurostat Production COMPLETE**; Unioncamere still blocked. D1-B Opportunities: **PILOT CLOSED** (ingest → editorial review → selective publish → QUESTIONABLE resolved → refresh-safe). D1-C Mercati: **DETERMINATION COMPLETE** + **D1-C.1–C.3 PASS** (dry-run → local → Production review-only) — reports `d1-c-markets-population-block-determination.md`, `d1-c1-…`, `d1-c2-…`, `d1-c3-world-bank-production-pilot-validation.md`, notes `source-notes/mercati-worldbank-ice.md`. Reports: `d1.3a-observatory-first-ingestion-report.md`, `d1.3a-1b-eurostat-production-ingestion-validation.md`, `d1-b-opportunities-*.md`, `d1-b3-…`, `d1-b4-…`, `d1-c-…`.
+Contratti: **D1.2 COMPLETE**. Pilot D1.3A-1: **Eurostat Production COMPLETE**; Unioncamere still blocked. D1-B Opportunities: **PILOT CLOSED**. D1-C Mercati: **CLOSED E2E** (determination → dry-run → local → Production review-only → editorial publish) — reports `d1-c-…`, `d1-c1-…`, `d1-c2-…`, `d1-c3-…`, `d1-c4-international-markets-editorial-publication-validation.md`, notes `source-notes/mercati-worldbank-ice.md`. Reports: `d1.3a-…`, `d1-b-…`, `d1-c-…`.
 
 ---
 
@@ -56,7 +56,8 @@ World Bank 5–8 indicatori via M1 support resources; ICE link-only.
 **D1-C determination (2026-08-13):** dominio/fonti/licenze/mapping/publication policy/pilot definiti; **CASE A** schema sufficiente.
 **D1-C.1 dry-run (2026-08-13):** PASS — live WB fetch IT/DE/FR × 5; wouldInsert=15; dbWrites=0. Report `d1-c1-…`.
 **D1-C.2 local review-only (2026-08-13):** PASS — 15 local review-only; idempotency/public-invisibility PASS. Report `d1-c2-…`.
-**D1-C.3 Production review-only (2026-08-13):** PASS — 15 Production review-only; public=0; idempotent; ICE=0; no migration; UI redazione Mercati GAP (editor SELECT RLS). Report `d1-c3-world-bank-production-pilot-validation.md`. **Next:** D1-C.4 editorial review + selective publication (separate GO; includes RLS editor SELECT).
+**D1-C.3 Production review-only (2026-08-13):** PASS — 15 Production review-only; public=0; UI GAP. Report `d1-c3-…`.
+**D1-C.4 editorial + selective publish (2026-08-13):** PASS — migration `20260820130000` editor/admin SELECT; redazione `/app/redazione/mercati-internazionali`; **15 READY** published; refresh-safe; ICE=0. Report `d1-c4-international-markets-editorial-publication-validation.md`. **D1-C WB pilot CLOSED.** Next domain requires separate GO (not auto D1-D).
 
 ### WAVE D1-D — Cultura/Eventi/Contenuti
 SEMI-AUTO + review; no dump MiC.
@@ -76,7 +77,7 @@ OpenCoesione selettivo; Org/Servizi defer.
 6. ~~D1-C.1~~ **DONE (dry-run)** — WB pilot max 3×5; dbWrites=0; D1-C.2 authorizable
 7. ~~D1-C.2~~ **DONE (local)** — WB review-only apply on local Supabase
 8. ~~D1-C.3~~ **DONE (Production review-only)** — 15 WB rows in Production; public=0; no publish
-9. D1-C.4 — Editorial review + selective publication (after human GO; RLS editor SELECT + UI)
+9. ~~D1-C.4~~ **DONE (editorial + selective publish)** — 15 READY published; redazione+RLS; refresh-safe
 10. D1.6 — Editorial/Lombardia bandi + EU F&T curated (not D1-C)
 11. Scheduler — **authorizable** after ops GO (not enabled)
 
@@ -94,8 +95,8 @@ OpenCoesione selettivo; Org/Servizi defer.
 
 D1.3A termina con report + commit importer/report.
 D1-B pilot **CLOSED**.
-D1-C.3 **Production review-only done** — **do not** publish the 15, start D1-D, enable scheduler, or expand WB/ICE without explicit human GO (D1-C.4).
+D1-C World Bank pilot **CLOSED**. **Do not** start D1-D, enable scheduler, or expand WB/ICE/countries without explicit human GO. Hosting Next Production still separate GO (pre-existing).
 
 ---
 
-*Roadmap aggiornata D1-C.3 Production review-only pilot*
+*Roadmap aggiornata D1-C.4 editorial publication — D1-C WB pilot closed*

@@ -596,6 +596,8 @@ export async function runWorldBankIngest(
     reviewOnlyCount: 0,
     duplicates: 0,
   };
+  /** Natural keys inserted in THIS run — must remain review-only (no auto-publish). */
+  const insertedKeys = new Set<string>();
 
   for (const obs of selected) {
     try {
@@ -611,10 +613,12 @@ export async function runWorldBankIngest(
         marketId,
         existing,
       );
-      if (action === "inserted") db.inserted += 1;
+      if (action === "inserted") {
+        db.inserted += 1;
+        insertedKeys.add(obs.naturalKey);
+      }
       if (action === "updated") db.updated += 1;
       if (action === "unchanged") db.unchanged += 1;
-      db.reviewOnlyCount += 1;
     } catch (err) {
       db.errors += 1;
       errors.push(
@@ -623,7 +627,8 @@ export async function runWorldBankIngest(
     }
   }
 
-  // Post-write duplicate / auto-publish guards.
+  // Post-write: duplicates forbidden; NEW inserts must not be auto-published.
+  // Human-published READY (D1-C.4+) may remain public — UPDATE preserves axes.
   const { data: written, error: wErr } = await supabase
     .from("international_market_support_resources")
     .select("id, contact_note, visibility_status, verification_status")
@@ -635,11 +640,14 @@ export async function runWorldBankIngest(
     const key = parseNaturalKey(row.contact_note as string | null);
     if (!key) continue;
     keys.set(key, (keys.get(key) ?? 0) + 1);
-    if (row.visibility_status === "public") {
-      throw new Error(`BLOCKING: auto/public visibility on ${key}`);
-    }
-    if (row.verification_status === "confirmed") {
-      throw new Error(`BLOCKING: confirmed verification on ${key}`);
+    if (
+      insertedKeys.has(key) &&
+      (row.visibility_status === "public" ||
+        row.verification_status === "confirmed")
+    ) {
+      throw new Error(
+        `BLOCKING: auto-publish on newly inserted ${key} (visibility=${row.visibility_status}, verification=${row.verification_status})`,
+      );
     }
   }
   for (const [key, n] of keys) {
@@ -650,6 +658,11 @@ export async function runWorldBankIngest(
   }
   db.publishedCount = (written ?? []).filter(
     (r) => r.visibility_status === "public",
+  ).length;
+  db.reviewOnlyCount = (written ?? []).filter(
+    (r) =>
+      r.visibility_status === "editorial" &&
+      r.verification_status === "in_review",
   ).length;
 
   result.db = db;
@@ -682,9 +695,6 @@ export async function runWorldBankIngest(
     errors,
   });
 
-  if (db.publishedCount > 0) {
-    throw new Error("BLOCKING: publishedCount > 0 after apply");
-  }
   if (db.duplicates > 0) {
     throw new Error("BLOCKING: duplicate natural keys after apply");
   }

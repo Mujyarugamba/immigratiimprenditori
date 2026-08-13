@@ -444,7 +444,12 @@ Report: `d1-c2-world-bank-local-pilot-validation.md`.
 ## Addendum post D1-C.3 (2026-08-13)
 
 D1-C.3 ha portato lo stesso pilot in **Production** (15 review-only; public=0; no migration; `service_role` SIU già presente).  
-UI redazione Mercati ancora **GAP** (manca editor SELECT RLS). Report: `d1-c3-world-bank-production-pilot-validation.md`.  
-**Next:** D1-C.4 editorial review + selective publication.
+UI redazione Mercati ancora **GAP** (manca editor SELECT RLS). Report: `d1-c3-world-bank-production-pilot-validation.md`.
 
-*Fine determination D1-C — analysis/planning only (+ D1-C.2 / D1-C.3 addenda).*
+## Addendum post D1-C.4 (2026-08-13)
+
+D1-C.4: migration `20260820130000` editor/admin SELECT; redazione Mercati; **15 READY** pubblicate; refresh preserva decisioni; ICE=0.
+Report: `d1-c4-international-markets-editorial-publication-validation.md`.
+**D1-C World Bank pilot CLOSED end-to-end.**
+
+*Fine determination D1-C — analysis/planning only (+ D1-C.2 / D1-C.3 / D1-C.4 addenda).*

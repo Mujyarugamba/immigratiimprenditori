@@ -19,6 +19,12 @@ const sections = [
       "Coda di revisione per bandi e misure da fonti ufficiali e dalla rete.",
   },
   {
+    href: "/app/redazione/mercati-internazionali",
+    title: "Mercati internazionali",
+    description:
+      "Revisione e pubblicazione selettiva di indicatori World Bank (M1).",
+  },
+  {
     href: "/app/redazione/osservatorio",
     title: "Osservatorio",
     description: "Indicatori, fonti statistiche e valori aggregati.",

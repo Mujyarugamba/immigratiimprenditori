@@ -1,0 +1,26 @@
+{
+  "total": 15,
+  "published": 15,
+  "questionable": 0,
+  "rejected": 0,
+  "anonPublic": 15,
+  "anonNonPublicLeak": 0,
+  "marketsAnon": [
+    {
+      "code": "de",
+      "editorial_status": "published",
+      "name": "Germania"
+    },
+    {
+      "code": "fr",
+      "editorial_status": "published",
+      "name": "Francia"
+    },
+    {
+      "code": "it",
+      "editorial_status": "published",
+      "name": "Italia"
+    }
+  ],
+  "humanLabelsOk": true
+}

@@ -1,0 +1,140 @@
+{
+  "count": 15,
+  "rows": [
+    {
+      "id": "c1ee9f27-8026-47ba-83de-ebba7e4f0f69",
+      "naturalKey": "worldbank:NE.TRD.GNFS.ZS:DE:2024",
+      "market": "de",
+      "summary": "Commercio (% del PIL) (2024): 79.0907305894936 percent of GDP.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "f2bc32c7-7dc2-4d16-a39f-67520c26fac7",
+      "naturalKey": "worldbank:NE.TRD.GNFS.ZS:FR:2024",
+      "market": "fr",
+      "summary": "Commercio (% del PIL) (2024): 68.1081875443744 percent of GDP.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "146f6953-672a-4f3b-9a7f-88d44e3d80be",
+      "naturalKey": "worldbank:NE.TRD.GNFS.ZS:IT:2024",
+      "market": "it",
+      "summary": "Commercio (% del PIL) (2024): 62.5926144915658 percent of GDP.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "3166f95f-66df-4770-982e-862ad80c072b",
+      "naturalKey": "worldbank:NY.GDP.MKTP.CD:DE:2024",
+      "market": "de",
+      "summary": "PIL (US$ correnti) (2024): 4685592577804.69 current US$.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "007acce5-9b54-4685-8816-6edd459e5bc6",
+      "naturalKey": "worldbank:NY.GDP.MKTP.CD:FR:2024",
+      "market": "fr",
+      "summary": "PIL (US$ correnti) (2024): 3160442622465.08 current US$.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "0556ad13-47de-41b4-a27d-5df2f17c6b7b",
+      "naturalKey": "worldbank:NY.GDP.MKTP.CD:IT:2024",
+      "market": "it",
+      "summary": "PIL (US$ correnti) (2024): 2383435562458.12 current US$.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "e391d9ce-24d3-48c1-b6c0-3778dcea530e",
+      "naturalKey": "worldbank:NY.GDP.MKTP.KD.ZG:DE:2024",
+      "market": "de",
+      "summary": "Crescita PIL (variazione % annua) (2024): -0.495851897260366 percent (annual growth).",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "793927e5-9a50-43b4-afad-439fceefbcb7",
+      "naturalKey": "worldbank:NY.GDP.MKTP.KD.ZG:FR:2024",
+      "market": "fr",
+      "summary": "Crescita PIL (variazione % annua) (2024): 1.19046798275883 percent (annual growth).",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "5e446212-a732-4042-8ca2-cee12dc5f235",
+      "naturalKey": "worldbank:NY.GDP.MKTP.KD.ZG:IT:2024",
+      "market": "it",
+      "summary": "Crescita PIL (variazione % annua) (2024): 0.783039135276795 percent (annual growth).",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "f587fe68-685e-4afc-8a54-f0fbc636c62a",
+      "naturalKey": "worldbank:NY.GDP.PCAP.CD:DE:2024",
+      "market": "de",
+      "summary": "PIL pro capite (US$ correnti) (2024): 56103.7323182554 current US$ per person.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "175988da-3fa0-45b5-99df-4c2e69636f39",
+      "naturalKey": "worldbank:NY.GDP.PCAP.CD:FR:2024",
+      "market": "fr",
+      "summary": "PIL pro capite (US$ correnti) (2024): 46103.0840855884 current US$ per person.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "34c799cb-ab83-4dc1-92c2-94631f2cb199",
+      "naturalKey": "worldbank:NY.GDP.PCAP.CD:IT:2024",
+      "market": "it",
+      "summary": "PIL pro capite (US$ correnti) (2024): 40429.6224047352 current US$ per person.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "feb147c2-cfb5-452e-8482-06e3e9e0088b",
+      "naturalKey": "worldbank:SP.POP.TOTL:DE:2024",
+      "market": "de",
+      "summary": "Popolazione totale (2024): 83516593 persons.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "3d7d15af-968a-4759-ab53-d065e4b61afb",
+      "naturalKey": "worldbank:SP.POP.TOTL:FR:2024",
+      "market": "fr",
+      "summary": "Popolazione totale (2024): 68551653 persons.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    },
+    {
+      "id": "ad5cf6f7-baec-45e0-b143-dd11c73ede46",
+      "naturalKey": "worldbank:SP.POP.TOTL:IT:2024",
+      "market": "it",
+      "summary": "Popolazione totale (2024): 58952704 persons.",
+      "visibility": "editorial",
+      "verification": "in_review",
+      "class": "READY"
+    }
+  ]
+}

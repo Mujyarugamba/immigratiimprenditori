@@ -31,6 +31,12 @@ import {
   updateEditorialOpportunity,
   withdrawEditorialOpportunity,
 } from "@/lib/data/editorial/opportunities";
+import {
+  markQuestionableEditorialMarketResource,
+  publishEditorialMarketResource,
+  rejectEditorialMarketResource,
+  withdrawEditorialMarketResource,
+} from "@/lib/data/editorial/markets";
 import { getDefaultLanguageId } from "@/lib/data/editorial/catalogs";
 import { slugify } from "@/lib/editorial/slug";
 import { toUserMessage, type AppError } from "@/lib/errors/app-error";
@@ -635,4 +641,85 @@ export async function rejectEditorialOpportunityAction(
   revalidatePath("/app/redazione/opportunita");
   revalidatePath(`/app/redazione/opportunita/${id}`);
   return { ok: true, message: "Opportunità esclusa dalla coda attiva." };
+}
+
+// ---------------------------------------------------------------------------
+// Mercati internazionali (D1-C.4 World Bank M1)
+// ---------------------------------------------------------------------------
+
+export async function publishEditorialMarketResourceAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Risorsa mercato non valida." };
+
+  const result = await publishEditorialMarketResource(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/mercati-internazionali");
+  revalidatePath(`/app/redazione/mercati-internazionali/${id}`);
+  revalidatePath("/mercati");
+  return { ok: true, message: "Risorsa pubblicata (READY)." };
+}
+
+export async function markQuestionableEditorialMarketResourceAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Risorsa mercato non valida." };
+
+  const result = await markQuestionableEditorialMarketResource(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/mercati-internazionali");
+  revalidatePath(`/app/redazione/mercati-internazionali/${id}`);
+  return {
+    ok: true,
+    message: "Risorsa mantenuta in revisione (QUESTIONABLE, non pubblica).",
+  };
+}
+
+export async function rejectEditorialMarketResourceAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Risorsa mercato non valida." };
+
+  const result = await rejectEditorialMarketResource(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/mercati-internazionali");
+  revalidatePath(`/app/redazione/mercati-internazionali/${id}`);
+  return { ok: true, message: "Risorsa esclusa (REJECT, non pubblica)." };
+}
+
+export async function withdrawEditorialMarketResourceAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Risorsa mercato non valida." };
+
+  const result = await withdrawEditorialMarketResource(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/mercati-internazionali");
+  revalidatePath(`/app/redazione/mercati-internazionali/${id}`);
+  revalidatePath("/mercati");
+  return { ok: true, message: "Risorsa ritirata dalla pubblicazione." };
 }

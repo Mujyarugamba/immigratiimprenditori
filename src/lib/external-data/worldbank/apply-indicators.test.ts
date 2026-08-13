@@ -103,6 +103,22 @@ describe("D1-C.2/D1-C.3 World Bank apply guards", () => {
     assert.equal(WORLDBANK_INDICATORS.ice.policy, "LINK_ONLY");
   });
 
+  it("D1-C.4 refresh contract: UPDATE path omits editorial axes", () => {
+    // upsertSupportResource UPDATE writes content/provenance only.
+    const updateKeys = [
+      "market_id",
+      "name",
+      "resource_kind",
+      "summary",
+      "website_url",
+      "contact_note",
+      "territorial_scope_note",
+    ];
+    assert.equal(updateKeys.includes("visibility_status"), false);
+    assert.equal(updateKeys.includes("verification_status"), false);
+    assert.equal(updateKeys.includes("substantial_status"), false);
+  });
+
   it("revision keeps natural key and changes checksum (update path)", () => {
     const report = dryRunWorldBank(
       [

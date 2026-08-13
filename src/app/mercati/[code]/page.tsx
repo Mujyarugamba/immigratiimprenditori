@@ -5,7 +5,10 @@ import { RelatedLinks } from "@/components/public/RelatedLinks";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { getPublicMarketByCode } from "@/lib/data/public/markets";
+import {
+  getPublicMarketByCode,
+  listPublicMarketSupportResources,
+} from "@/lib/data/public/markets";
 import { relatedForMarket } from "@/lib/data/public/related";
 import {
   label,
@@ -37,7 +40,10 @@ export default async function MercatoDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const related = await relatedForMarket(market.id).catch(() => []);
+  const [related, supportResources] = await Promise.all([
+    relatedForMarket(market.id).catch(() => []),
+    listPublicMarketSupportResources(market.id).catch(() => []),
+  ]);
 
   return (
     <Section>
@@ -70,6 +76,53 @@ export default async function MercatoDetailPage({ params }: PageProps) {
             <p className="text-ink-muted whitespace-pre-wrap text-sm leading-7">
               {market.description}
             </p>
+          </section>
+        ) : null}
+
+        {supportResources.length > 0 ? (
+          <section className="space-y-4">
+            <h2 className="text-ink text-xl font-semibold">
+              Indicatori di contesto
+            </h2>
+            <p className="text-ink-muted text-sm leading-6">
+              Dati World Bank (CC BY 4.0). Valori annuali selezionati dalla
+              redazione.
+            </p>
+            <ul className="space-y-4">
+              {supportResources.map((res) => (
+                <li key={res.id} className="border-line border-t pt-4">
+                  <h3 className="text-ink text-base font-semibold">
+                    {res.indicatorLabel}
+                  </h3>
+                  <p className="text-ink mt-1 text-sm tabular-nums">
+                    {res.periodYear ? `${res.periodYear}: ` : null}
+                    {res.valueDisplay}
+                    {res.unit ? (
+                      <span className="text-ink-muted"> · {res.unit}</span>
+                    ) : null}
+                  </p>
+                  <p className="text-ink-muted mt-1 text-xs">
+                    Fonte: {res.sourceLabel}
+                    {res.indicatorCode ? (
+                      <span className="font-mono"> · {res.indicatorCode}</span>
+                    ) : null}
+                    {res.websiteUrl ? (
+                      <>
+                        {" · "}
+                        <a
+                          href={res.websiteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-brand hover:underline"
+                        >
+                          dati ufficiali
+                        </a>
+                      </>
+                    ) : null}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </section>
         ) : null}
 
