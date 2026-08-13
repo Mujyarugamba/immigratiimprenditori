@@ -182,7 +182,7 @@ None at STOP.
 
 - Public source CTA required new least-privilege SELECT policy on `opportunity_sources`.
 - Ingest CLI gate from D1-B.2 had to be relaxed so human-published rows do not fail apply exit.
-- 7 QUESTIONABLE remain intentional human backlog.
+- 7 QUESTIONABLE remained intentional human backlog after D1-B.3; **resolved in D1-B.4** (report: `d1-b4-questionable-opportunities-resolution.md`).
 
 ### Non-blocking
 
