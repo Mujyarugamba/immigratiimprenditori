@@ -27,6 +27,7 @@ import {
 } from "@/lib/data/editorial/organizations";
 import {
   publishEditorialOpportunity,
+  rejectEditorialOpportunity,
   updateEditorialOpportunity,
   withdrawEditorialOpportunity,
 } from "@/lib/data/editorial/opportunities";
@@ -616,4 +617,22 @@ export async function withdrawEditorialOpportunityAction(
   revalidatePath(`/app/redazione/opportunita/${id}`);
   revalidatePath("/opportunita");
   return { ok: true, message: "Opportunità ritirata." };
+}
+
+export async function rejectEditorialOpportunityAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Opportunità non valida." };
+
+  const result = await rejectEditorialOpportunity(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/opportunita");
+  revalidatePath(`/app/redazione/opportunita/${id}`);
+  return { ok: true, message: "Opportunità esclusa dalla coda attiva." };
 }

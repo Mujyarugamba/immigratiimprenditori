@@ -106,6 +106,8 @@ export async function listEditorialOpportunities(
     query = query.eq("publication_status", "published");
   } else if (stato === "withdrawn") {
     query = query.eq("publication_status", "withdrawn");
+  } else if (stato === "excluded") {
+    query = query.eq("editorial_status", "rejected");
   }
 
   const origine = searchParams.origine?.trim();
@@ -275,6 +277,48 @@ export async function publishEditorialOpportunity(
       platform_published_at: new Date().toISOString(),
       platform_scheduled_for: null,
       platform_withdrawn_at: null,
+    })
+    .eq("id", id)
+    .is("deleted_at", null);
+
+  if (error) return { ok: false, error: mapPostgresError(error) };
+  return { ok: true };
+}
+
+export async function rejectEditorialOpportunity(
+  id: string,
+): Promise<{ ok: true } | { ok: false; error: AppError }> {
+  const supabase = await createClient();
+  const { data: current, error: loadErr } = await supabase
+    .from("opportunities")
+    .select("publication_status")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (loadErr) return { ok: false, error: mapPostgresError(loadErr) };
+  if (!current) {
+    return {
+      ok: false,
+      error: { code: "not_found", message: "Opportunità non trovata." },
+    };
+  }
+  if (current.publication_status === "published") {
+    return {
+      ok: false,
+      error: {
+        code: "validation",
+        message: "Ritira prima l’opportunità pubblicata, poi escludila.",
+      },
+    };
+  }
+
+  const { error } = await supabase
+    .from("opportunities")
+    .update({
+      editorial_status: "rejected",
+      publication_status: "unpublished",
+      visibility_level: "private",
+      platform_scheduled_for: null,
     })
     .eq("id", id)
     .is("deleted_at", null);

@@ -44,6 +44,12 @@ export default async function OpportunitaDetailPage({ params }: PageProps) {
     opportunityQualifiesForCultureHub(opportunity.id).catch(() => false),
   ]);
 
+  const deadlineLabel = opportunity.openEnded
+    ? "Senza scadenza indicata"
+    : opportunity.closesAt
+      ? formatItalianDate(opportunity.closesAt)
+      : "Non indicata";
+
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
@@ -72,6 +78,7 @@ export default async function OpportunitaDetailPage({ params }: PageProps) {
             <Badge tone="soft">
               {label(OPPORTUNITY_STATUSES, opportunity.substantial_status)}
             </Badge>
+            <Badge tone="soft">{opportunity.temporalLabel}</Badge>
           </div>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             {opportunity.title}
@@ -79,12 +86,52 @@ export default async function OpportunitaDetailPage({ params }: PageProps) {
           {opportunity.summary ? (
             <p className="text-ink-muted text-lg leading-7">{opportunity.summary}</p>
           ) : null}
-          {opportunity.platform_published_at ? (
-            <p className="text-ink-muted text-sm">
-              Pubblicata il {formatItalianDate(opportunity.platform_published_at)}
-            </p>
-          ) : null}
         </header>
+
+        <dl className="border-line grid gap-4 border-y py-5 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-ink-muted">Ente</dt>
+            <dd className="text-ink mt-1">{opportunity.authority ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-muted">Territorio</dt>
+            <dd className="text-ink mt-1">{opportunity.territory ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-muted">Scadenza / sportello</dt>
+            <dd className="text-ink mt-1">
+              {deadlineLabel}
+              {opportunity.temporalCode !== "open_ended" &&
+              opportunity.temporalCode !== "unknown" ? (
+                <span className="text-ink-muted"> · {opportunity.temporalLabel}</span>
+              ) : null}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-ink-muted">Fonte</dt>
+            <dd className="text-ink mt-1">
+              {opportunity.sourceLabel ?? "Fonte ufficiale"}
+              {opportunity.attribution ? (
+                <span className="text-ink-muted block text-xs leading-5">
+                  {opportunity.attribution}
+                </span>
+              ) : null}
+            </dd>
+          </div>
+        </dl>
+
+        {opportunity.officialUrl ? (
+          <p>
+            <a
+              href={opportunity.officialUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-brand text-brand-fg inline-flex rounded-md px-4 py-2 text-sm font-medium hover:opacity-95"
+            >
+              Vai alla pagina ufficiale
+            </a>
+          </p>
+        ) : null}
 
         {opportunity.description ? (
           <section className="space-y-3">
@@ -102,6 +149,13 @@ export default async function OpportunitaDetailPage({ params }: PageProps) {
               {opportunity.purpose}
             </p>
           </section>
+        ) : null}
+
+        {opportunity.platform_published_at ? (
+          <p className="text-ink-muted text-sm">
+            Pubblicata sul portale il{" "}
+            {formatItalianDate(opportunity.platform_published_at)}
+          </p>
         ) : null}
 
         <RelatedLinks groups={related} />

@@ -71,6 +71,7 @@ export default async function OpportunitaRedazionePage({ searchParams }: Props) 
           >
             <option value="review">Da revisionare</option>
             <option value="published">Pubblicate</option>
+            <option value="excluded">Escluse / respinte</option>
             <option value="withdrawn">Ritirate</option>
             <option value="">Tutte</option>
           </select>

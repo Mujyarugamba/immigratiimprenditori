@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import {
   publishEditorialOpportunityAction,
+  rejectEditorialOpportunityAction,
   updateEditorialOpportunityAction,
   withdrawEditorialOpportunityAction,
   type FormActionState,
@@ -29,9 +30,18 @@ export function EditorialOpportunityEditForm({
     withdrawEditorialOpportunityAction,
     initial,
   );
+  const [rejectState, rejectAction, rejectPending] = useActionState(
+    rejectEditorialOpportunityAction,
+    initial,
+  );
 
-  const canPublish = opportunity.publication_status === "unpublished";
+  const canPublish =
+    opportunity.publication_status === "unpublished" &&
+    opportunity.editorial_status !== "rejected";
   const canWithdraw = opportunity.publication_status === "published";
+  const canReject =
+    opportunity.publication_status !== "published" &&
+    opportunity.editorial_status !== "rejected";
 
   return (
     <div className="mt-6 space-y-8">
@@ -86,8 +96,9 @@ export function EditorialOpportunityEditForm({
       <div className="border-line space-y-3 border-t pt-6">
         <h2 className="text-ink text-lg font-semibold">Pubblicazione</h2>
         <p className="text-ink-muted text-sm">
-          Usa Pubblica solo dopo revisione completa. In D1-B.2 i record pilota
-          Incentivi.gov restano review-only finché non autorizzati.
+          Pubblica solo record READY dopo verifica fonte, scadenze e sintesi.
+          Le schede QUESTIONABLE restano da revisionare; le REJECT vanno
+          escluse senza cancellazione.
         </p>
         {canPublish ? (
           <form action={publishAction}>
@@ -115,6 +126,19 @@ export function EditorialOpportunityEditForm({
             </Button>
           </form>
         ) : null}
+        {canReject ? (
+          <form action={rejectAction}>
+            <input type="hidden" name="id" value={opportunity.id} />
+            <Button
+              type="submit"
+              size="sm"
+              disabled={rejectPending}
+              variant="secondary"
+            >
+              {rejectPending ? "Esclusione…" : "Escludi dalla coda"}
+            </Button>
+          </form>
+        ) : null}
         {publishState.message ? (
           <p
             className={
@@ -133,6 +157,15 @@ export function EditorialOpportunityEditForm({
             }
           >
             {withdrawState.message}
+          </p>
+        ) : null}
+        {rejectState.message ? (
+          <p
+            className={
+              rejectState.ok ? "text-sm text-green-700" : "text-sm text-red-700"
+            }
+          >
+            {rejectState.message}
           </p>
         ) : null}
       </div>

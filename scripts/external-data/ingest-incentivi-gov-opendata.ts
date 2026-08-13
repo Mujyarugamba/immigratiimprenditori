@@ -61,8 +61,11 @@ async function main() {
   console.log(JSON.stringify(summary, null, 2));
 
   if (result.dryRun.errors.length || result.errors.length) process.exit(1);
-  if (result.mode === "apply" && (result.db?.publishedCount ?? 0) > 0) {
-    console.error("GATE FAIL: imported opportunities must not be published.");
+  // D1-B.3: humans may publish after review. Importer never auto-publishes
+  // (autoPublish is hard-coded false; inserts always enter review-only).
+  // publishedCount > 0 after apply is expected once editorial publication exists.
+  if (result.autoPublish) {
+    console.error("GATE FAIL: autoPublish must remain false.");
     process.exit(1);
   }
 }

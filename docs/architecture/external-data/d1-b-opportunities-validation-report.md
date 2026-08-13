@@ -147,4 +147,4 @@ Public list/detail can already show title, summary, origin, substantial status.
 
 `D1-B OPPORTUNITIES INGESTION CONTRACT COMPLETATO — DB GAP IDENTIFICATO — PRIMA MIGRATION CREATA E MICRO-REVIEWATA — APPLY NON ESEGUITO — IMPORT NON ESEGUITO`
 
-Superseded locally by **D1-B.1** (see `d1-b1-opportunities-local-ingestion-validation.md`): migration applied **local only**; 20 review-only rows imported; remote/Production still untouched.
+Superseded by **D1-B.1 → D1-B.2 → D1-B.3**: see `d1-b1-opportunities-local-ingestion-validation.md`, `d1-b2-opportunities-production-pilot-validation.md`, `d1-b3-opportunities-editorial-publication-validation.md`. D1-B E2E closed with selective Production publication (12 READY); scheduler still not enabled.

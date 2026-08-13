@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1-B.1 (2026-08-13) — Opportunities prepare migration applied **local only**; 20 Incentivi.gov review-only rows in local DB; remote/Production untouched; Eurostat OBS-EU-SELF-CIT Production still live; UC blocked
+**Stato:** aggiornato da D1-B.3 (2026-08-13) — Opportunities E2E validated: 20 Incentivi.gov revised; **12 published** selectively; 7 QUESTIONABLE review-only; 1 REJECT excluded; importer refresh preserves editorial state; **no scheduler yet**; Eurostat OBS-EU-SELF-CIT Production still live; UC blocked
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -18,7 +18,7 @@ source registry
   → publish (ACQUIRE ≠ PUBLISH)
 ```
 
-Contratti: **D1.2 COMPLETE**. Pilot D1.3A-1: **Eurostat Production COMPLETE**; Unioncamere still blocked. D1-B Opportunities: **contract + migration prepare COMPLETE** (apply/import STOP). Reports: `d1.3a-observatory-first-ingestion-report.md`, `d1.3a-1b-eurostat-production-ingestion-validation.md`, `d1-b-opportunities-*.md`.
+Contratti: **D1.2 COMPLETE**. Pilot D1.3A-1: **Eurostat Production COMPLETE**; Unioncamere still blocked. D1-B Opportunities: **E2E COMPLETE** (ingest → editorial review → selective publish → refresh-safe). Reports: `d1.3a-observatory-first-ingestion-report.md`, `d1.3a-1b-eurostat-production-ingestion-validation.md`, `d1-b-opportunities-*.md`, `d1-b3-opportunities-editorial-publication-validation.md`.
 
 ---
 
@@ -49,7 +49,7 @@ Catalogo 11 famiglie in `observatory-initial-indicator-catalog.md`.
 
 ### WAVE D1-B — Opportunità
 incentivi.gov (IODL) + EU F&T curated; review obbligatoria; dopo E2E Osservatorio.
-**D1-B.1 (2026-08-13):** local apply `20260820100000` + 20 review-only imports — **REMOTE APPLY NO / PRODUCTION WRITE NO / AUTO-PUBLISH NO**. Report: `d1-b1-opportunities-local-ingestion-validation.md`.
+**D1-B.1 → D1-B.2 → D1-B.3 (2026-08-13):** local+remote migrations through `20260820120000`; 20 pilot imported; editorial selective publish **12 READY**; QUESTIONABLE/REJECT managed; public CTA/fonte/scadenze; importer refresh safe. Report: `d1-b3-opportunities-editorial-publication-validation.md`. **Scheduler NOT enabled** (authorizable later).
 
 ### WAVE D1-C — Mercati
 World Bank 5–8 indicatori via M1 support resources; ICE link-only.
@@ -67,10 +67,10 @@ OpenCoesione selettivo; Org/Servizi defer.
 1. ~~D1.2 contracts~~ **DONE**
 2. ~~D1.3A / D1.3A-1b~~ **DONE** — OBS-EU-SELF-CIT Production published; writer migration `20260819100000`
 3. D1.3A-2 — Unioncamere P0 when Futurae+allowlist ready (**GO umano**)
-4. ~~D1-B.1 local apply + review-only import~~ **DONE** → ~~**D1-B.2** remote apply + Production review-only pilot + redazione queue~~ **DONE** (AUTO-PUBLISH=NO; **20 unpublished**; editorial publish of the 20 still requires human GO)
-5. D1.5 — Mercati M1 WB (only after D1-B human GO / separate auth)
+4. ~~D1-B.1 / D1-B.2 / D1-B.3~~ **DONE** — selective Production publish; refresh-safe; **no scheduler**
+5. D1.5 — Mercati M1 WB (D1-C; separate auth)
 6. D1.6 — Editorial/Lombardia bandi + EU F&T curated
-7. Scheduler — dopo stabilità
+7. Scheduler — **authorizable** after ops GO (not enabled in D1-B.3)
 
 ---
 

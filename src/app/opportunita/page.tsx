@@ -73,11 +73,18 @@ export default async function OpportunitaPage({ searchParams }: PageProps) {
         description: item.summary,
         badges: [
           label(OPPORTUNITY_ORIGINS, item.origin),
-          label(OPPORTUNITY_STATUSES, item.substantial_status),
-        ],
-        meta: item.platform_published_at
-          ? [`Pubblicata il ${formatItalianDate(item.platform_published_at)}`]
-          : undefined,
+          item.temporalLabel,
+          item.sourceLabel ?? undefined,
+        ].filter(Boolean) as string[],
+        meta: [
+          item.authority ? `Ente: ${item.authority}` : null,
+          item.territory ? `Territorio: ${item.territory}` : null,
+          item.openEnded
+            ? "Senza scadenza indicata"
+            : item.closesAt
+              ? `Scadenza: ${formatItalianDate(item.closesAt)}`
+              : null,
+        ].filter(Boolean) as string[],
       })}
       emptyTitle="Nessuna opportunità trovata."
       emptyDescription="Nessuna opportunità corrisponde ai filtri selezionati."

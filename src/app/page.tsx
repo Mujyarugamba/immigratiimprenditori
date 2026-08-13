@@ -25,7 +25,6 @@ import {
   MARKET_KINDS,
   MARKET_STATUSES,
   OPPORTUNITY_ORIGINS,
-  OPPORTUNITY_STATUSES,
   ORGANIZATION_FORMS,
   PRACTICE_MODES,
   SERVICE_CATEGORIES,
@@ -138,11 +137,14 @@ export default async function HomePage({
             href: `/opportunita/${o.id}`,
             title: o.title,
             description: o.summary,
-            badges: ["Opportunità"],
+            badges: ["Opportunità", o.sourceLabel ?? undefined].filter(
+              Boolean,
+            ) as string[],
             meta: [
+              o.territory,
+              o.temporalLabel,
               label(OPPORTUNITY_ORIGINS, o.origin),
-              label(OPPORTUNITY_STATUSES, o.substantial_status),
-            ].filter(Boolean),
+            ].filter(Boolean) as string[],
           })),
           ...collaborations.slice(0, Math.max(0, 3 - opportunities.length)).map(
             (c) => ({

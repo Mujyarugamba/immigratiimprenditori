@@ -110,8 +110,8 @@ test.describe("Redazione opportunità (D1-B.2)", () => {
   }) => {
     const env = loadStatusEnv();
     const stamp = Date.now();
-    const email = `d1b2-pub-${stamp}@gmail.com`;
-    const fixtureTitle = `D1B2 Publish Fixture ${stamp}`;
+    const email = `d1b3-pub-${stamp}@gmail.com`;
+    const fixtureTitle = `D1B3 Publish Fixture ${stamp}`;
 
     const uid = await createConfirmedUser(env, email, PASS);
     users.push(uid);
@@ -136,9 +136,48 @@ test.describe("Redazione opportunità (D1-B.2)", () => {
     await page.goto("/opportunita");
     await expect(page.getByText(fixtureTitle)).toBeVisible();
 
+    await page.goto(`/opportunita/${oppId}`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      fixtureTitle,
+    );
+
     await page.goto(`/app/redazione/opportunita/${oppId}`);
     await page.getByRole("button", { name: /Ritira/i }).click();
     await expect(page.getByText(/ritirat/i)).toBeVisible({ timeout: 30_000 });
+
+    await page.goto("/opportunita");
+    await expect(page.getByText(fixtureTitle)).toHaveCount(0);
+  });
+
+  test("editor can exclude fixture; public still hides review-only", async ({
+    page,
+  }) => {
+    const env = loadStatusEnv();
+    const stamp = Date.now();
+    const email = `d1b3-rej-${stamp}@gmail.com`;
+    const fixtureTitle = `D1B3 Reject Fixture ${stamp}`;
+
+    const uid = await createConfirmedUser(env, email, PASS);
+    users.push(uid);
+    const { accountId } = await provisionActiveAccount(env, uid, email, PASS);
+    await rpcService(env, "assign_application_role", {
+      p_account_id: accountId,
+      p_role_code: "redattore",
+    });
+
+    const oppId = insertFixtureOpportunity(fixtureTitle);
+    opportunities.push(oppId);
+
+    await loginViaUi(page, email, PASS);
+    await page.goto(`/app/redazione/opportunita/${oppId}`);
+    await page.getByRole("button", { name: /Escludi dalla coda/i }).click();
+    await expect(page.getByText(/esclusa/i)).toBeVisible({ timeout: 30_000 });
+
+    await page.goto("/app/redazione/opportunita?stato=excluded");
+    await expect(page.getByText(fixtureTitle)).toBeVisible();
+
+    await page.goto("/app/redazione/opportunita?stato=review");
+    await expect(page.getByText(fixtureTitle)).toHaveCount(0);
 
     await page.goto("/opportunita");
     await expect(page.getByText(fixtureTitle)).toHaveCount(0);
