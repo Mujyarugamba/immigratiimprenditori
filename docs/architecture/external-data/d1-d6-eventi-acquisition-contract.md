@@ -234,10 +234,10 @@ JWT credential-pattern scan on `src`/`docs`/`supabase`/`scripts`: **empty** (no 
 
 | Check | Result |
 |---|---|
-| Commit | see push confirmation |
-| Push | FF `origin/main` |
+| Commit | `a0c1845` — `feat(events): add D1-D.6 Eventi acquisition contract and closed allowlist` |
+| Push | FF `a002307..a0c1845` → `origin/main` |
 | HEAD ahead/behind | `0/0` |
-| Working tree | pre-existing dirt preserved |
+| Working tree | pre-existing dirt preserved (not staged) |
 
 ---
 
