@@ -141,5 +141,12 @@ Editorial/data-only Production changes; **no app source changes**. Full suite sk
 
 ## 11. Git
 
-Repo changes: this closeout + roadmap note (+ optional artifact scripts under `artifacts/`, typically untracked).  
-Selective stage only docs; no `git add .`; dirt preserved.
+| Item | Result |
+|---|---|
+| Selective stage | YES (docs only; no `git add .`) |
+| Content commit | `ff097e3` |
+| Hash-note commit | `d77313d` |
+| Push | YES → `origin/main` |
+| Dirt preserved | `.gitignore`, legal drafts, `artifacts/`, unrelated reports |
+
+Production editorial state is data-only on linked Supabase (not in git).
