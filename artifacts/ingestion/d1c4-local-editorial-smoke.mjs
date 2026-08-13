@@ -1,20 +1,84 @@
 /**
  * D1-C.4 local editorial + refresh smoke (service_role for axis updates;
  * mirrors canonical lifecycle mapping used by redazione UI).
+ *
+ * Local-only: requires SUPABASE_SERVICE_ROLE_KEY and
+ * NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY).
+ * Refuses non-localhost URLs. Never logs key values.
  */
 import { createClient } from "@supabase/supabase-js";
 import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
-const URL = "http://127.0.0.1:54321";
-const KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU";
-const ANON =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+function loadEnvLocal() {
+  const file = join(process.cwd(), ".env.local");
+  if (!existsSync(file)) return;
+  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+    if (!line || line.startsWith("#") || !line.includes("=")) continue;
+    const i = line.indexOf("=");
+    const k = line.slice(0, i).trim();
+    const v = line.slice(i + 1).trim();
+    if (!process.env[k]) process.env[k] = v;
+  }
+}
 
-const sb = createClient(URL, KEY, {
+function isLocalUrl(url) {
+  try {
+    const host = new URL(url).hostname;
+    return host === "127.0.0.1" || host === "localhost";
+  } catch {
+    return false;
+  }
+}
+
+function requireLocalConfig() {
+  loadEnvLocal();
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321";
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anon =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!service) {
+    console.error(
+      "Missing SUPABASE_SERVICE_ROLE_KEY. Set it for local Supabase (e.g. via .env.local or `supabase status -o env`).",
+    );
+    process.exit(1);
+  }
+  if (!anon) {
+    console.error(
+      "Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY). Set it for local Supabase.",
+    );
+    process.exit(1);
+  }
+  if (!isLocalUrl(url)) {
+    console.error(
+      `Refusing non-local Supabase URL (host must be localhost or 127.0.0.1). Got host: ${(() => {
+        try {
+          return new URL(url).hostname;
+        } catch {
+          return "(unparseable)";
+        }
+      })()}`,
+    );
+    process.exit(1);
+  }
+
+  return { url, service, anon };
+}
+
+const {
+  url: supabaseUrl,
+  service: serviceKey,
+  anon: anonKey,
+} = requireLocalConfig();
+
+const sb = createClient(supabaseUrl, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
-const anon = createClient(URL, ANON, {
+const anon = createClient(supabaseUrl, anonKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
@@ -124,7 +188,7 @@ const refresh = spawnSync(
   {
     encoding: "utf8",
     shell: true,
-    env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: URL },
+    env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: supabaseUrl },
     cwd: process.cwd(),
   },
 );
