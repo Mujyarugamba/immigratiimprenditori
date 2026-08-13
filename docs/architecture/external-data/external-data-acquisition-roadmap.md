@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1.3A (2026-08-13) — Eurostat local ingest; UC blocked; Production write pending
+**Stato:** aggiornato da D1.3A-1b (2026-08-13) — Eurostat OBS-EU-SELF-CIT in Production; UC blocked; writer SIU applied
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -18,7 +18,7 @@ source registry
   → publish (ACQUIRE ≠ PUBLISH)
 ```
 
-Contratti: **D1.2 COMPLETE**. Pilot D1.3A: **PARTIAL** (Eurostat local published; Unioncamere blocked; Production not written). Report: `d1.3a-observatory-first-ingestion-report.md`.
+Contratti: **D1.2 COMPLETE**. Pilot D1.3A-1: **Eurostat Production COMPLETE**; Unioncamere still blocked. Reports: `d1.3a-observatory-first-ingestion-report.md`, `d1.3a-1b-eurostat-production-ingestion-validation.md`.
 
 ---
 
@@ -64,9 +64,9 @@ OpenCoesione selettivo; Org/Servizi defer.
 ## 5. Ordine tecnico
 
 1. ~~D1.2 contracts~~ **DONE**
-2. ~~D1.3A first ingest~~ **PARTIAL** — OBS-EU-SELF-CIT local; UC SOURCE INPUT REQUIRED; Production credentials/grants pending
-3. D1.3A-prod — Production write OBS-EU-SELF-CIT + UC when inputs ready (**GO umano**)
-4. D1.4 — Opportunità importer (**dopo review D1.3A**)
+2. ~~D1.3A / D1.3A-1b~~ **DONE** — OBS-EU-SELF-CIT Production published; writer migration `20260819100000`
+3. D1.3A-2 — Unioncamere P0 when Futurae+allowlist ready (**GO umano**)
+4. D1.4 — Opportunità importer (**dopo review Production Eurostat**)
 5. D1.5 — Mercati M1 WB
 6. D1.6 — Editorial/Lombardia bandi
 7. Scheduler — dopo stabilità
