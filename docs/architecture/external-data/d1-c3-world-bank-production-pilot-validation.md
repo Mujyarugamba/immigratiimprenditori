@@ -379,10 +379,19 @@ Ingestion ICE = **0**. Policy LINK_ONLY (`https://www.ice.it/` contract note onl
 | 66 | Roadmap / notes aggiornati | SÌ |
 | 67 | `git diff --check` | PASS (closeout) |
 | 68 | Selective stage (no `git add .`) | SÌ |
-| 69 | Commit | see git closeout below |
-| 70 | Push origin/main | see git closeout below |
-| 71 | Ahead/behind post-push | see git closeout below |
+| 69 | Commit | `21e1efbc810afa3bfe22a751a83fca9ad4f517f1` |
+| 70 | Push origin/main | **YES** |
+| 71 | Ahead/behind post-push | `0 / 0` |
 | 72 | Next gate | **D1-C.4** editorial review + selective publication (incl. RLS editor SELECT GO) |
+
+### Git closeout
+
+| Voce | Valore |
+|---|---|
+| Commit | `21e1efbc810afa3bfe22a751a83fca9ad4f517f1` |
+| Message | `data(markets): add World Bank review-only pilot` |
+| Push | `origin/main` |
+| Ahead/behind | `0 / 0` |
 
 ---
 
