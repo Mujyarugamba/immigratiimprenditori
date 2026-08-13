@@ -25,6 +25,11 @@ import {
   updateEditorialOrganization,
   withdrawEditorialOrganization,
 } from "@/lib/data/editorial/organizations";
+import {
+  publishEditorialOpportunity,
+  updateEditorialOpportunity,
+  withdrawEditorialOpportunity,
+} from "@/lib/data/editorial/opportunities";
 import { getDefaultLanguageId } from "@/lib/data/editorial/catalogs";
 import { slugify } from "@/lib/editorial/slug";
 import { toUserMessage, type AppError } from "@/lib/errors/app-error";
@@ -41,7 +46,7 @@ async function requireEditorSession() {
   if (!session) {
     return { ok: false as const, message: "Sessione scaduta. Accedi di nuovo." };
   }
-  if (!session.isEditor) {
+  if (!session.isEditor && !session.isApplicationAdmin) {
     return { ok: false as const, message: "Accesso riservato ai redattori." };
   }
   if (!session.isActiveAccount || !session.personId) {
@@ -547,4 +552,68 @@ export async function addOrganizationOfficialAction(
   if (!result.ok) return fail(result.error);
   revalidatePath(`/app/redazione/organizzazioni/${organization_id}`);
   return { ok: true, message: "Referente aggiunto." };
+}
+
+// ---------------------------------------------------------------------------
+// Opportunities (D1-B.2 editorial queue)
+// ---------------------------------------------------------------------------
+
+export async function updateEditorialOpportunityAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Opportunità non valida." };
+
+  const result = await updateEditorialOpportunity(id, {
+    summary: optionalStr(formData, "summary"),
+    description: optionalStr(formData, "description"),
+    purpose: optionalStr(formData, "purpose"),
+  });
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/opportunita");
+  revalidatePath(`/app/redazione/opportunita/${id}`);
+  return { ok: true, message: "Opportunità aggiornata (campi editoriali)." };
+}
+
+export async function publishEditorialOpportunityAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Opportunità non valida." };
+
+  const result = await publishEditorialOpportunity(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/opportunita");
+  revalidatePath(`/app/redazione/opportunita/${id}`);
+  revalidatePath("/opportunita");
+  return { ok: true, message: "Opportunità pubblicata." };
+}
+
+export async function withdrawEditorialOpportunityAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Opportunità non valida." };
+
+  const result = await withdrawEditorialOpportunity(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/opportunita");
+  revalidatePath(`/app/redazione/opportunita/${id}`);
+  revalidatePath("/opportunita");
+  return { ok: true, message: "Opportunità ritirata." };
 }

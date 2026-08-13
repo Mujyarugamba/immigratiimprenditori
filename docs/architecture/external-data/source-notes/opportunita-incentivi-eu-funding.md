@@ -1,6 +1,6 @@
 # Source notes — Opportunità (incentivi.gov + EU Funding)
 
-**Verifica:** 2026-08-11
+**Verifica:** 2026-08-11; re-verified 2026-08-13 (D1-B)
 **Scope:** compatibilità dominio Opportunity per Wave D1-B
 
 ---
@@ -10,7 +10,9 @@
 - Open data: https://www.incentivi.gov.it/it/open-data → HTTP **200**
 - Formati: CSV + JSON ufficiali
 - Licenza: **IODL 2.0**
-- Preferire download ufficiale a scraping di indici non documentati
+- Endpoint export: portal `solrEndpoint` = `/solr/coredrupal/select` (`opendata-export`) — stesso canale dei pulsanti Scarica JSON/CSV
+- External ID: `zs_nid` → `incentivi-gov:<nid>`
+- D1-B: dry-run module ready; DB prepare migration not applied; AUTO-PUBLISH=NO
 
 ### Campi concettuali da mappare (D1.2)
 

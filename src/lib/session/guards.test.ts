@@ -129,13 +129,13 @@ describe("Adm ≠ Red", () => {
     );
   });
 
-  it("10. Adm-only → Adm allowed, Red denied", () => {
+  it("10. Adm-only → Adm allowed; Redazione queue also allowed (D1-B.2)", () => {
     const flags = navFlags(
       session({ isEditor: false, isApplicationAdmin: true }),
     );
-    assert.equal(flags.showEditor, false);
+    assert.equal(flags.showEditor, true);
     assert.equal(flags.showAdmin, true);
-    assert.equal(requireEditor(session({ isApplicationAdmin: true })).ok, false);
+    assert.equal(requireEditor(session({ isApplicationAdmin: true })).ok, true);
     assert.equal(
       requireApplicationAdmin(session({ isApplicationAdmin: true })).ok,
       true,

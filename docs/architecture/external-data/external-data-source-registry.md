@@ -452,7 +452,7 @@
 | Paese/territorio | Italia |
 | URL principale | https://www.incentivi.gov.it/ |
 | Dataset/resource URL | https://www.incentivi.gov.it/it/open-data |
-| API URL | Download ufficiali CSV/JSON (preferire a scraping Solr non ufficiale) |
+| API URL | Open-data export ufficiale via portal Solr select `/solr/coredrupal/select` (config `solrEndpoint` / `opendata-export` sulla pagina open-data; equivale a Scarica JSON/CSV) |
 | Tipo fonte | P0 |
 | Dominio destinazione | Opportunità |
 | Descrizione | Catalogo misure/incentivi con metadati su amministrazione, territori, settori, finestre temporali, stato. |
@@ -462,7 +462,7 @@
 | Aggiornamento | EVENT-DRIVEN / DAILY-ish refresh portale |
 | Formato | CSV · JSON |
 | Machine-readable? | Sì |
-| Stable external ID? | Sì (id misura portale — da fissare in contract D1.2) |
+| Stable external ID? | Sì — `zs_nid` → natural key `incentivi-gov:<nid>` (D1-B) |
 | Licenza | **IODL 2.0** (dichiarata open data) |
 | Attribuzione | Secondo IODL 2.0 |
 | Automatizzabile? | AUTO → pubblicazione SEMI-AUTO (review) |
@@ -471,7 +471,7 @@
 | Rischio duplicazione | Medio vs bandi regionali / Invitalia ripubblicati |
 | Rischio metodologico | Non ogni incentivo = Opportunity pubblicabile; mappare status/finestre |
 | Privacy/PII | Metadati misure; evitare microdati beneficiari nominativi se presenti |
-| Note | Pagina open-data HTTP 200 (2026-08-11). Compatibile con `opportunities` + `opportunity_sources`. |
+| Note | Pagina open-data HTTP 200 (2026-08-11 / re-verified 2026-08-13). Compatibile con `opportunities` + `opportunity_sources`. D1-B: prepare migration `20260820100000` (not applied); AUTO-PUBLISH=NO. |
 | Quality score | 5+5+5+4+5+3 = **27/30** |
 | Decisione D1.1 | **PILOT** |
 

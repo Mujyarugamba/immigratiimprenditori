@@ -13,6 +13,12 @@ const sections = [
     description: "Articoli, guide e materiali editoriali di piattaforma.",
   },
   {
+    href: "/app/redazione/opportunita",
+    title: "Opportunità",
+    description:
+      "Coda di revisione per bandi e misure da fonti ufficiali e dalla rete.",
+  },
+  {
     href: "/app/redazione/osservatorio",
     title: "Osservatorio",
     description: "Indicatori, fonti statistiche e valori aggregati.",

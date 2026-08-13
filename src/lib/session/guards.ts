@@ -141,7 +141,8 @@ export function requireEditor(session: ApplicationSession | null): GuardResult {
   if (!base.ok || !session) {
     return base;
   }
-  if (!session.isEditor) {
+  // Redazione + application admin (D1-B.2 editorial queue access).
+  if (!session.isEditor && !session.isApplicationAdmin) {
     return { ok: false, redirectTo: "/app/forbidden", reason: "not_editor" };
   }
   return { ok: true };
@@ -189,7 +190,8 @@ export function navFlags(session: ApplicationSession | null) {
     showApp: session != null,
     showOnboarding: needsInitialOnboarding(session),
     showBusinesses: Boolean(session?.personId && !contested),
-    showEditor: Boolean(session?.isEditor),
+    // Redazione nav: editors + application admins (D1-B.2 queue access).
+    showEditor: Boolean(session?.isEditor || session?.isApplicationAdmin),
     showAdmin: Boolean(session?.isApplicationAdmin),
   };
 }

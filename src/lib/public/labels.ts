@@ -68,8 +68,8 @@ export const PRACTICE_MODES: Record<string, string> = {
 };
 
 export const OPPORTUNITY_ORIGINS: Record<string, string> = {
-  external: "Esterna",
-  internal: "Interna",
+  external: "Da fonte esterna",
+  internal: "Creata nella rete",
 };
 
 export const OPPORTUNITY_STATUSES: Record<string, string> = {
