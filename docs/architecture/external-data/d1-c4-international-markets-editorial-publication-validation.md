@@ -241,7 +241,7 @@ Importer UPDATE still writes content/provenance only (axes preserved). Post-writ
 | 67 | Roadmap / D1-C closeout updated | **SÌ** |
 | 68 | `git diff --check` | PASS (staged) |
 | 69 | Selective stage (no `git add .`) | **SÌ** |
-| 70 | Commit | `feat(markets): add editorial review and publish World Bank pilot` |
+| 70 | Commit | `bd97d8a` — `feat(markets): add editorial review and publish World Bank pilot` |
 | 71 | Push origin/main | **SÌ** |
 | 72 | Ahead/behind final | `0 / 0` |
 | 73 | D1-C WB pilot E2E closed | **SÌ** |
