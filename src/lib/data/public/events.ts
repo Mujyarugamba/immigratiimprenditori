@@ -7,18 +7,22 @@ import {
 } from "@/lib/data/public/paging";
 
 const LIST_SELECT =
-  "id, title, summary, type_code, delivery_mode, audience_kind, economic_kind";
+  "id, title, summary, type_code, delivery_mode, audience_kind, economic_kind, external_organization_label, source_url";
 
 const EDITION_SELECT =
-  "id, starts_at, ends_at, occurrence_status, city_text, country_ref";
+  "id, starts_at, ends_at, timezone, delivery_mode, occurrence_status, venue_label, city_text, country_ref, online_reference";
 
 export type PublicEventEdition = {
   id: string;
   starts_at: string;
   ends_at: string | null;
+  timezone: string;
+  delivery_mode: string;
   occurrence_status: string;
+  venue_label: string | null;
   city_text: string | null;
   country_ref: string | null;
+  online_reference: string | null;
 };
 
 export type PublicEventListItem = {
@@ -29,6 +33,7 @@ export type PublicEventListItem = {
   delivery_mode: string;
   audience_kind: string;
   economic_kind: string;
+  external_organization_label: string | null;
   next_edition: PublicEventEdition | null;
 };
 
@@ -47,6 +52,9 @@ export type PublicEventDetail = {
   context_opportunity_id: string | null;
   context_service_offer_id: string | null;
   owner_business_id: string | null;
+  external_organization_label: string | null;
+  source_url: string | null;
+  source_label: string | null;
   editions: PublicEventEdition[];
 };
 
@@ -81,11 +89,7 @@ function pickNextEdition(
 }
 
 function mapEditionRows(
-  rows:
-    | PublicEventEdition[]
-    | PublicEventEdition
-    | null
-    | undefined,
+  rows: PublicEventEdition[] | PublicEventEdition | null | undefined,
 ): PublicEventEdition[] {
   if (!rows) return [];
   const list = Array.isArray(rows) ? rows : [rows];
@@ -94,10 +98,15 @@ function mapEditionRows(
       id: e.id,
       starts_at: e.starts_at,
       ends_at: e.ends_at,
+      timezone: e.timezone,
+      delivery_mode: e.delivery_mode,
       occurrence_status: e.occurrence_status,
+      venue_label: e.venue_label,
       city_text: e.city_text,
       country_ref: e.country_ref,
+      online_reference: e.online_reference,
     }))
+    .filter((e) => e.occurrence_status !== "cancelled")
     .sort(
       (a, b) =>
         new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
@@ -146,6 +155,7 @@ export async function listPublicEvents(
       delivery_mode: row.delivery_mode,
       audience_kind: row.audience_kind,
       economic_kind: row.economic_kind,
+      external_organization_label: row.external_organization_label ?? null,
       next_edition: pickNextEdition(editions),
     };
   });
@@ -164,6 +174,7 @@ export async function getPublicEventById(
       id, title, summary, type_code, delivery_mode, audience_kind, economic_kind,
       description, editorial_status, publication_status, visibility_status,
       context_opportunity_id, context_service_offer_id, owner_business_id,
+      external_organization_label, source_url, source_label,
       event_editions ( ${EDITION_SELECT} )
     `,
     )
@@ -188,6 +199,9 @@ export async function getPublicEventById(
     context_opportunity_id: data.context_opportunity_id,
     context_service_offer_id: data.context_service_offer_id,
     owner_business_id: data.owner_business_id,
+    external_organization_label: data.external_organization_label ?? null,
+    source_url: data.source_url ?? null,
+    source_label: data.source_label ?? null,
     editions: mapEditionRows(
       data.event_editions as PublicEventEdition[] | null,
     ),
@@ -215,6 +229,7 @@ export async function listHomeEvents(limit = 3) {
       delivery_mode: row.delivery_mode,
       audience_kind: row.audience_kind,
       economic_kind: row.economic_kind,
+      external_organization_label: row.external_organization_label ?? null,
       next_edition: pickNextEdition(editions),
     };
   }) as PublicEventListItem[];

@@ -68,3 +68,13 @@ export async function listActiveOrganizationScopes(): Promise<CatalogOption[]> {
     .order("sort_order");
   return (data ?? []).map((r) => ({ code: r.code, label: r.name_it }));
 }
+
+export async function listActiveEventTypes(): Promise<CatalogOption[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("event_types")
+    .select("code, name_it")
+    .eq("is_active", true)
+    .order("sort_order");
+  return (data ?? []).map((r) => ({ code: r.code, label: r.name_it }));
+}

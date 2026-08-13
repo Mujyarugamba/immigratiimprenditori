@@ -767,3 +767,19 @@ Nessun file `.sql` creato da questo documento.
 - [x] Confini ticketing/RRULE/FEV/Storage/Org/Identità
 - [x] Modalità accelerata cumulativa
 - [x] Sufficiente per creare tutte le migration in un unico ciclo senza nuove decisioni
+
+---
+
+## Addendum D1-D.5 — Population enablement units (2026-08-13)
+
+Head migration pre-addendum: `20260820130000`.  
+Ciclo 1 M1–M5 **già applicato**. Queste unità sono **additive** (no rewrite history).
+
+| Codice | Timestamp | File | Responsabilità |
+|---|---|---|---|
+| E5.1 | `20260820140000` | `20260820140000_events_editorial_ownership.sql` | `owned_by_editorial` + CHECK ternario |
+| E5.2 | `20260820150000` | `20260820150000_events_external_identity_provenance.sql` | Colonne identity/provenance + indici dedupe |
+| E5.3 | `20260820160000` | `20260820160000_prepare_events_external_ingestion_rls.sql` | Editor RLS + service_role SIU + immutability |
+
+**Apply:** locale only in D1-D.5. Remote apply = GO separato.  
+**Seed demo / import reale / publish reale:** vietati in questo blocco.

@@ -689,3 +689,37 @@ Il Logical è accettabile per il Physical se e solo se:
 **Logical Eventi chiuso per il passaggio al Physical del ciclo 1**, con Aggregate Root unico **Evento**, composizione owned **EdizioneEvento** e **SessioneEvento**, titolarità Persona|Impresa, lifecycle a assi separati, iscrizione e capienza dichiarative, e confini espliciti verso Servizi (post-chiusura), Opportunità, Contenuti e domini futuri.
 
 Physical mapping, Migration Plan e SQL **non** sono parte di questo documento e restano fasi successive autorizzate solo dopo accettazione di questo Logical.
+
+---
+
+## 46. Addendum D1-D.5 — Titolarità Redazione e acquisizione esterna (2026-08-13)
+
+> Addendum **non distruttivo** al Logical ciclo 1. Non introduce un secondo Aggregate Root. Non crea un dominio Cultura. Non autorizza import/publish reali (GO separati).
+
+### 46.1 Titolarità ternaria
+
+Il titolare di piattaforma di un Evento è esattamente uno tra:
+
+1. Persona;
+2. Impresa;
+3. **Redazione** (custodia editoriale di piattaforma per schede acquisite o curate centralmente).
+
+La titolarità Redazione è un asse di ownership di piattaforma, distinto dall’organizzatore sostanziale dichiarato (etichetta / ruoli). Non autorizza auto-publish.
+
+### 46.2 Acquisizione esterna (rappresentazione minima)
+
+Un Evento acquisito da fonte esterna (futuro pilota) deve poter rappresentare almeno: codice fonte; identificativo esterno; URL fonte; URL canonico; organizzatore/editore responsabile dichiarato; titolo; descrizione o sintesi editoriale; tipologia; data-ora inizio; data-ora fine se disponibile; fuso; sede fisica **oppure** modalità online; territorio; lingua; istante di acquisizione; istante di aggiornamento fonte; attribuzione; fingerprint deterministico.
+
+**Dedupe (precedenza):** (1) codice fonte + id esterno; (2) URL canonico; (3) fingerprint.
+
+**Refresh:** preserva decisioni editoriali, titolo/sintesi editati in redazione, tipologia, stato di pubblicazione/visibilità/ritiro.
+
+**Vietato in acquisizione:** corpi integrali, HTML, allegati, immagini non autorizzate.
+
+### 46.3 Cultura
+
+Cultura resta hub trasversale (filtro tipologico `culturale` / navigazione). **Nessun** Aggregate Root Cultura; nessun dominio persistente aggiuntivo in questo addendum.
+
+### 46.4 Workflow editoriale
+
+Assi esistenti (§15–§16) restano vincolanti. Acquisizione entra in revisione non pubblica; decisione esplicita per Evento; publish/withdraw/leave-in-review; nessun mini-CMS; nessun auto-publish.

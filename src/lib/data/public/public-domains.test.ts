@@ -203,6 +203,7 @@ describe("exported public list item types (visibility contract)", () => {
       delivery_mode: "in_presence",
       audience_kind: "both",
       economic_kind: "free",
+      external_organization_label: null,
       next_edition: null,
     };
     assert.equal(sample.next_edition, null);

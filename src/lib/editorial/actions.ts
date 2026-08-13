@@ -37,6 +37,12 @@ import {
   rejectEditorialMarketResource,
   withdrawEditorialMarketResource,
 } from "@/lib/data/editorial/markets";
+import {
+  publishEditorialEvent,
+  updateEditorialEvent,
+  updateEditorialEventEdition,
+  withdrawEditorialEvent,
+} from "@/lib/data/editorial/events";
 import { getDefaultLanguageId } from "@/lib/data/editorial/catalogs";
 import { slugify } from "@/lib/editorial/slug";
 import { toUserMessage, type AppError } from "@/lib/errors/app-error";
@@ -722,4 +728,130 @@ export async function withdrawEditorialMarketResourceAction(
   revalidatePath(`/app/redazione/mercati-internazionali/${id}`);
   revalidatePath("/mercati");
   return { ok: true, message: "Risorsa ritirata dalla pubblicazione." };
+}
+
+// ---------------------------------------------------------------------------
+// Eventi
+// ---------------------------------------------------------------------------
+
+export async function updateEditorialEventAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Evento non valido." };
+
+  const editorialStatus = str(formData, "editorial_status");
+  if (editorialStatus && editorialStatus !== "draft" && editorialStatus !== "ready") {
+    return { ok: false, message: "Stato redazionale non valido." };
+  }
+
+  const result = await updateEditorialEvent(id, {
+    title: str(formData, "title") || undefined,
+    summary: optionalStr(formData, "summary"),
+    description: str(formData, "description") || undefined,
+    type_code: str(formData, "type_code") || undefined,
+    delivery_mode: str(formData, "delivery_mode") || undefined,
+    audience_kind: str(formData, "audience_kind") || undefined,
+    economic_kind: str(formData, "economic_kind") || undefined,
+    external_organization_label: optionalStr(
+      formData,
+      "external_organization_label",
+    ),
+    source_url: optionalStr(formData, "source_url"),
+    source_label: optionalStr(formData, "source_label"),
+    editorial_status: editorialStatus
+      ? (editorialStatus as "draft" | "ready")
+      : undefined,
+    editorial_internal_notes: optionalStr(formData, "editorial_internal_notes"),
+  });
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/eventi");
+  revalidatePath(`/app/redazione/eventi/${id}`);
+  return { ok: true, message: "Evento aggiornato." };
+}
+
+function toIsoOrNull(raw: string | null): string | null {
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return raw;
+  return d.toISOString();
+}
+
+export async function updateEditorialEventEditionAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const eventId = str(formData, "event_id");
+  const editionId = str(formData, "edition_id");
+  if (!eventId || !editionId) {
+    return { ok: false, message: "Edizione non valida." };
+  }
+
+  const startsRaw = str(formData, "starts_at");
+  const endsRaw = optionalStr(formData, "ends_at");
+
+  const result = await updateEditorialEventEdition(eventId, editionId, {
+    starts_at: startsRaw ? (toIsoOrNull(startsRaw) ?? startsRaw) : undefined,
+    ends_at: endsRaw === null ? null : toIsoOrNull(endsRaw),
+    timezone: str(formData, "timezone") || undefined,
+    delivery_mode: str(formData, "delivery_mode") || undefined,
+    venue_label: optionalStr(formData, "venue_label"),
+    address_text: optionalStr(formData, "address_text"),
+    city_text: optionalStr(formData, "city_text"),
+    country_ref: optionalStr(formData, "country_ref"),
+    online_reference: optionalStr(formData, "online_reference"),
+    occurrence_status: str(formData, "occurrence_status") || undefined,
+  });
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath(`/app/redazione/eventi/${eventId}`);
+  return { ok: true, message: "Edizione aggiornata." };
+}
+
+export async function publishEditorialEventAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Evento non valido." };
+
+  const result = await publishEditorialEvent(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/eventi");
+  revalidatePath(`/app/redazione/eventi/${id}`);
+  revalidatePath("/eventi");
+  revalidatePath(`/eventi/${id}`);
+  return { ok: true, message: "Evento pubblicato." };
+}
+
+export async function withdrawEditorialEventAction(
+  _prev: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const gate = await requireEditorSession();
+  if (!gate.ok) return { ok: false, message: gate.message };
+
+  const id = str(formData, "id");
+  if (!id) return { ok: false, message: "Evento non valido." };
+
+  const result = await withdrawEditorialEvent(id);
+  if (!result.ok) return fail(result.error);
+
+  revalidatePath("/app/redazione/eventi");
+  revalidatePath(`/app/redazione/eventi/${id}`);
+  revalidatePath("/eventi");
+  revalidatePath(`/eventi/${id}`);
+  return { ok: true, message: "Evento ritirato dalla pubblicazione." };
 }

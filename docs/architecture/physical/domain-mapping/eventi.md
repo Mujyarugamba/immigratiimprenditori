@@ -823,3 +823,53 @@ Physical accettabile se: inventario 9 tabelle chiuso; AR unica; owned corretti; 
 Nove tabelle (`event_types` … `event_registrations`), AR `events`, composizione Edizione→Sessione, iscrizioni base, ruoli e lingue/mercati facoltativi, pattern RLS deny-by-default.
 
 Migration Plan e SQL restano fasi successive.
+
+---
+
+## 42. Addendum D1-D.5 — Ownership editoriale, identity, RLS (2026-08-13)
+
+> Addendum DDL-ready **additivo**. Non crea nuove tabelle AR. Non modifica migration pubblicate. Timestamp operativi: Migration Plan addendum.
+
+### 42.1 Colonne additive su `events`
+
+| Colonna | Tipo | Null | Default | Note |
+|---|---|---|---|---|
+| `owned_by_editorial` | `boolean` | NO | `false` | Ternary ownership con Persona\|Impresa |
+| `source_url` | `text` | SÌ | — | URL fonte / link ufficiale |
+| `source_label` | `text` | SÌ | — | Attribuzione umana |
+| `external_source_code` | `text` | SÌ | — | Codice fonte allowlist (futuro) |
+| `external_id` | `text` | SÌ | — | Id stabile lato fonte |
+| `canonical_url` | `text` | SÌ | — | URL canonico normalizzato |
+| `external_natural_key` | `text` | SÌ | — | Chiave naturale deterministica |
+| `acquisition_fingerprint` | `text` | SÌ | — | Fingerprint SHA-256 |
+| `acquired_at` | `timestamptz` | SÌ | — | Istante acquisizione |
+| `source_updated_at` | `timestamptz` | SÌ | — | Aggiornamento dichiarato dalla fonte |
+| `editorial_internal_notes` | `text` | SÌ | — | Note redazione; **non** esposte al pubblico |
+
+Blank-guards su testi nullable. Ownership CHECK ternario (come `contents`):
+
+```
+(person NOT NULL ∧ business NULL ∧ editorial=false)
+∨ (person NULL ∧ business NOT NULL ∧ editorial=false)
+∨ (person NULL ∧ business NULL ∧ editorial=true)
+```
+
+### 42.2 Indici dedupe (parziali, solo editorial)
+
+1. UNIQUE `(external_source_code, external_id)` WHERE `owned_by_editorial` AND `external_id IS NOT NULL`
+2. UNIQUE `(canonical_url)` WHERE `owned_by_editorial` AND `canonical_url IS NOT NULL`
+3. UNIQUE `(acquisition_fingerprint)` WHERE `owned_by_editorial` AND `acquisition_fingerprint IS NOT NULL`
+4. UNIQUE `(external_natural_key)` WHERE `owned_by_editorial` AND `external_natural_key IS NOT NULL`
+
+### 42.3 RLS / privilegi additivi
+
+- Policy SELECT/INSERT/UPDATE editor su `events` e owned rilevanti quando `owned_by_editorial` + `access_is_editor()`.
+- Public SELECT invariato: `publication_status='published' AND visibility_status='public'`.
+- Non-editor admin **non** eredita poteri Redazione.
+- `service_role`: REVOKE ALL poi GRANT SELECT,INSERT,UPDATE su `events`, `event_editions`, `event_languages` (no DELETE).
+- Ownership immutability: estendere `access_reject_owner_cols_mutation` a `owned_by_editorial` su `events`.
+- Colonne provenance/internal notes: non selezionate dalle query pubbliche applicative.
+
+### 42.4 Fuori addendum
+
+Nuove fonti/allowlist; import reale; publish reale; scheduler; Cultura AR; remote apply; CDN.

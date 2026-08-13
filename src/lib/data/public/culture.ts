@@ -64,9 +64,9 @@ export const CULTURE_CONTENT_CATEGORY_CODE = "culture" as const;
 export const CULTURE_SERVICE_CATEGORY_CODE = "cultural_creative" as const;
 
 const EVENT_LIST_SELECT =
-  "id, title, summary, type_code, delivery_mode, audience_kind, economic_kind";
+  "id, title, summary, type_code, delivery_mode, audience_kind, economic_kind, external_organization_label";
 const EDITION_SELECT =
-  "id, starts_at, ends_at, occurrence_status, city_text, country_ref";
+  "id, starts_at, ends_at, timezone, delivery_mode, occurrence_status, venue_label, city_text, country_ref, online_reference";
 const OPP_LIST_SELECT =
   "id, title, summary, origin, substantial_status, platform_published_at";
 const CONTENT_LIST_SELECT =
@@ -235,10 +235,15 @@ function mapEditionRows(
       id: e.id,
       starts_at: e.starts_at,
       ends_at: e.ends_at,
+      timezone: e.timezone,
+      delivery_mode: e.delivery_mode,
       occurrence_status: e.occurrence_status,
+      venue_label: e.venue_label ?? null,
       city_text: e.city_text,
       country_ref: e.country_ref,
+      online_reference: e.online_reference ?? null,
     }))
+    .filter((e) => e.occurrence_status !== "cancelled")
     .sort(
       (a, b) =>
         new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
@@ -280,6 +285,7 @@ function mapEventRow(row: {
   delivery_mode: string;
   audience_kind: string;
   economic_kind: string;
+  external_organization_label?: string | null;
   event_editions?: PublicEventEdition[] | null;
 }): PublicEventListItem {
   const editions = mapEditionRows(row.event_editions);
@@ -291,6 +297,7 @@ function mapEventRow(row: {
     delivery_mode: row.delivery_mode,
     audience_kind: row.audience_kind,
     economic_kind: row.economic_kind,
+    external_organization_label: row.external_organization_label ?? null,
     next_edition: pickNextEdition(editions),
   };
 }

@@ -69,9 +69,17 @@ export default async function EventiPage({ searchParams }: PageProps) {
         meta: item.next_edition
           ? [
               formatItalianDateTime(item.next_edition.starts_at),
-              item.next_edition.city_text ?? undefined,
+              item.next_edition.timezone,
+              item.next_edition.city_text ??
+                item.next_edition.venue_label ??
+                (item.next_edition.delivery_mode === "online"
+                  ? "Online"
+                  : undefined),
+              item.external_organization_label ?? undefined,
             ].filter(Boolean) as string[]
-          : undefined,
+          : item.external_organization_label
+            ? [item.external_organization_label]
+            : undefined,
       })}
       emptyTitle="Nessun evento trovato."
       emptyDescription="Nessun evento corrisponde ai filtri selezionati."

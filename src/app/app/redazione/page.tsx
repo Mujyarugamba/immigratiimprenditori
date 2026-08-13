@@ -13,6 +13,12 @@ const sections = [
     description: "Articoli, guide e materiali editoriali di piattaforma.",
   },
   {
+    href: "/app/redazione/eventi",
+    title: "Eventi",
+    description:
+      "Coda di revisione per eventi acquisiti o curati dalla redazione.",
+  },
+  {
     href: "/app/redazione/opportunita",
     title: "Opportunità",
     description:
