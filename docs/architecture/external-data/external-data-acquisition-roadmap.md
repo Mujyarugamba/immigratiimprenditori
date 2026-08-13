@@ -1,6 +1,6 @@
 # External Data Acquisition Roadmap — D1.1 → D1.x
 
-**Stato:** aggiornato da D1.2 (2026-08-11)
+**Stato:** aggiornato da D1.2 (2026-08-11; refresh 2026-08-13 dry-run scaffolding)
 **Priorità prodotto:** Osservatorio → Opportunità → Mercati → Cultura/Eventi/Contenuti → altre fonti.
 
 ---
@@ -63,8 +63,8 @@ OpenCoesione selettivo; Org/Servizi defer.
 
 ## 5. Ordine tecnico
 
-1. ~~D1.2 contracts~~ **DONE**
-2. **D1.3** — Pilot Osservatorio (autorizzabile; non iniziato)
+1. ~~D1.2 contracts~~ **DONE** (+ Eurostat dry-run library/tests; no DB write)
+2. **D1.3** — Pilot Osservatorio (autorizzabile; non iniziato; richiede GO umano)
 3. D1.4 — Opportunità importer
 4. D1.5 — Mercati M1 WB
 5. D1.6 — Editorial/Lombardia bandi
