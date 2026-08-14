@@ -2,18 +2,27 @@
  * D1-D.3 Production harness — Contenti metadata/link-only review-only pilot.
  * Loads service_role via `supabase projects api-keys` (never prints keys).
  *
- *   node scripts/external-data/prod-ingest-contenuti.mjs dry-run
- *   node scripts/external-data/prod-ingest-contenuti.mjs apply
- *   node scripts/external-data/prod-ingest-contenuti.mjs verify
+ *   node scripts/external-data/prod-ingest-contenuti.mjs --mode dry-run
+ *   node scripts/external-data/prod-ingest-contenuti.mjs --mode verify
+ *   Apply additionally requires --apply --yes --project-ref <Production ref>.
  */
 
 import { spawnSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
+import { parseGuardedCommand, productionUsage } from "../../artifacts/ingestion/production-write-guard.mjs";
 
 const REF = "hvfvfatlaspcpszgizhg";
-const modeArg = process.argv[2] ?? "dry-run";
-const mode =
-  modeArg === "apply" ? "apply" : modeArg === "verify" ? "verify" : "dry-run";
+const command = parseGuardedCommand(process.argv.slice(2), {
+  operation: "Content Production ingest",
+  modes: ["dry-run", "verify", "apply"],
+  writeModes: ["apply"],
+  defaultMode: "dry-run",
+});
+if (command.help) {
+  console.log(productionUsage({ script: "scripts/external-data/prod-ingest-contenuti.mjs", modes: ["dry-run", "verify", "apply"] }));
+  process.exit(0);
+}
+const mode = command.mode;
 
 function loadKeys() {
   const r = spawnSync(
@@ -166,15 +175,11 @@ await withProdEnv(async ({ anon }) => {
     return;
   }
 
-  const flag = mode === "apply" ? "--apply" : "--dry-run";
+  const args = ["tsx", "scripts/external-data/ingest-contenuti-pilot.ts", "--mode", mode];
+  if (mode === "apply") args.push("--apply", "--yes", "--project-ref", REF);
   const r = spawnSync(
     "npx",
-    [
-      "tsx",
-      "scripts/external-data/ingest-contenuti-pilot.ts",
-      flag,
-      "--allow-production",
-    ],
+    args,
     { encoding: "utf8", shell: true, env: process.env },
   );
   process.stdout.write(r.stdout || "");

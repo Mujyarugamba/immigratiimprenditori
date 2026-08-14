@@ -17,11 +17,22 @@
 import { spawnSync } from "node:child_process";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { parseGuardedCommand, productionUsage } from "../../artifacts/ingestion/production-write-guard.mjs";
 
 const REF = "hvfvfatlaspcpszgizhg";
 const URL = `https://${REF}.supabase.co`;
 const OUT_DIR = "artifacts/ingestion";
-const mode = process.argv[2] ?? "inventory";
+const command = parseGuardedCommand(process.argv.slice(2), {
+  operation: "Content Production editorial mutation",
+  modes: ["inventory", "probe-urls", "prepare", "publish", "validate", "rls"],
+  writeModes: ["prepare", "publish"],
+  defaultMode: "inventory",
+});
+if (command.help) {
+  console.log(productionUsage({ script: "scripts/external-data/d1d4-editorial-publish.mjs", modes: ["inventory", "probe-urls", "prepare", "publish", "validate", "rls"] }));
+  process.exit(0);
+}
+const mode = command.mode;
 
 /** Per-card editorial decisions (naturalKey → decision). */
 const DECISIONS = {

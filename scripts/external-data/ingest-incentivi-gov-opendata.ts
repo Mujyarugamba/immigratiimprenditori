@@ -11,15 +11,14 @@
 
 import { runIncentiviGovIngest } from "@/lib/external-data/incentivi-gov/apply-opendata";
 import { INCENTIVI_GOV_OPENDATA } from "@/lib/external-data/incentivi-gov/opendata";
+import { parseGuardedCommand, productionUsage } from "../../artifacts/ingestion/production-write-guard.mjs";
 
 async function main() {
-  const apply = process.argv.includes("--apply");
-  if (apply && process.argv.includes("--dry-run")) {
-    console.error("Pass either --dry-run or --apply, not both.");
-    process.exit(2);
-  }
-
-  const mode = apply ? "apply" : "dry-run";
+  const command = parseGuardedCommand(process.argv.slice(2), {
+    operation: "Incentivi.gov ingest", modes: ["dry-run", "apply"], writeModes: ["apply"], defaultMode: "dry-run",
+  });
+  if (command.help) { console.log(productionUsage({ script: "scripts/external-data/ingest-incentivi-gov-opendata.ts", modes: ["dry-run", "apply"] })); return; }
+  const mode = command.mode as "dry-run" | "apply";
   const result = await runIncentiviGovIngest(mode);
 
   const summary = {

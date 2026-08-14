@@ -23,6 +23,7 @@ test("help is side-effect free", () => {
     authorizedWrite: false,
     mode: null,
     projectRef: null,
+    flags: {},
   });
 });
 test("apply alone is refused", () => refused(["--mode", "publish", "--apply"]));
@@ -65,6 +66,14 @@ test("every Production-capable script guards before credentials or downstream", 
     "artifacts/ingestion/d1b3-importer-regression.mjs",
     "artifacts/ingestion/d1b3-editorial-publish.mjs",
     "artifacts/ingestion/d1b4-resolve-questionable.mjs",
+    "artifacts/ingestion/d1c3-prod-ingest.mjs",
+    "artifacts/ingestion/d1c4-prod-editorial.mjs",
+    "scripts/external-data/prod-ingest-contenuti.mjs",
+    "scripts/external-data/d1d4-editorial-publish.mjs",
+    "scripts/external-data/ingest-worldbank-indicators.ts",
+    "scripts/external-data/ingest-contenuti-pilot.ts",
+    "scripts/external-data/ingest-eurostat-lfsa-esgan.ts",
+    "scripts/external-data/ingest-incentivi-gov-opendata.ts",
   ];
   for (const path of scripts) {
     const source = readFileSync(path, "utf8");
@@ -79,4 +88,15 @@ test("every Production-capable script guards before credentials or downstream", 
       assert.ok(guardIndex < downstreamApply, `${path} must guard before downstream --apply`);
     }
   }
+});
+
+test("legacy production bypass flags are rejected", () => {
+  refused(["--mode", "publish", "--allow-production"]);
+});
+
+test("extra operational flags are explicit, unique, and cannot authorize writes", () => {
+  const extended = { ...options, extraBooleanFlags: ["--skip-check"] };
+  assert.equal(parseGuardedCommand(["--mode", "verify", "--skip-check"], extended).flags["--skip-check"], true);
+  assert.throws(() => parseGuardedCommand(["--mode", "verify", "--skip-check", "--skip-check"], extended), /duplicate/);
+  assert.throws(() => parseGuardedCommand(["--mode", "publish", "--skip-check"], extended), /requires --apply --yes/);
 });

@@ -1,34 +1,28 @@
 /**
  * D1-C.2 / D1-C.3 — World Bank Indicators ingest (Mercati M1).
  *
- *   npx tsx scripts/external-data/ingest-worldbank-indicators.ts --dry-run
- *   npx tsx scripts/external-data/ingest-worldbank-indicators.ts --apply --ensure-local-catalog
- *   npx tsx scripts/external-data/ingest-worldbank-indicators.ts --dry-run --allow-production
- *   npx tsx scripts/external-data/ingest-worldbank-indicators.ts --apply --allow-production --ensure-local-catalog
+ *   npx tsx scripts/external-data/ingest-worldbank-indicators.ts --mode dry-run
+ *   Apply additionally requires --apply --yes --project-ref <Production ref>.
  *
  * Hard rules:
- * - --apply against Production requires --allow-production
+ * - --apply requires the shared Production write authorization
  * - NO auto-publish
  * - ICE remains LINK_ONLY (no ICE import)
  */
 
 import { runWorldBankIngest } from "@/lib/external-data/worldbank/apply-indicators";
+import { parseGuardedCommand, productionUsage } from "../../artifacts/ingestion/production-write-guard.mjs";
 
 async function main() {
-  const apply = process.argv.includes("--apply");
-  const dry = process.argv.includes("--dry-run");
-  if (apply && dry) {
-    console.error("Pass either --dry-run or --apply, not both.");
-    process.exit(2);
-  }
-  if (!apply && !dry) {
-    console.error("Pass --dry-run or --apply.");
-    process.exit(2);
-  }
-
-  const ensureLocalCatalog = process.argv.includes("--ensure-local-catalog");
-  const allowProduction = process.argv.includes("--allow-production");
-  const mode = apply ? "apply" : "dry-run";
+  const command = parseGuardedCommand(process.argv.slice(2), {
+    operation: "World Bank ingest",
+    modes: ["dry-run", "apply"], writeModes: ["apply"], defaultMode: "dry-run",
+    extraBooleanFlags: ["--ensure-local-catalog"],
+  });
+  if (command.help) { console.log(productionUsage({ script: "scripts/external-data/ingest-worldbank-indicators.ts", modes: ["dry-run", "apply"] })); return; }
+  const ensureLocalCatalog = command.flags["--ensure-local-catalog"];
+  const allowProduction = command.authorizedWrite;
+  const mode = command.mode as "dry-run" | "apply";
 
   const result = await runWorldBankIngest({
     mode,

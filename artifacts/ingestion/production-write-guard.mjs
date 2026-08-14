@@ -17,27 +17,35 @@ function takeValue(argv, index, name) {
   return { value, consumed: 2 };
 }
 
+/**
+ * @param {string[]} argv
+ * @param {{operation: string, modes?: string[], writeModes: string[], extraBooleanFlags?: string[], defaultMode?: string|null, expectedProjectRef?: string}} options
+ * @returns {{help: boolean, authorizedWrite: boolean, mode: string|null, projectRef: string|null, flags: Record<string, boolean>}}
+ */
 export function parseGuardedCommand(
   argv,
-  {
+  options,
+) {
+  const {
     operation,
     modes,
     writeModes,
+    extraBooleanFlags = [],
     defaultMode = null,
     expectedProjectRef = PRODUCTION_PROJECT_REF,
-  },
-) {
+  } = options;
   const seen = new Set();
   let apply = false;
   let yes = false;
   let help = false;
   let projectRef = null;
   let mode = defaultMode;
+  const flags = Object.fromEntries(extraBooleanFlags.map((name) => [name, false]));
 
   for (let i = 0; i < argv.length; ) {
     const token = argv[i];
     const name = token.split("=", 1)[0];
-    if (!["--apply", "--yes", "--help", "--project-ref", "--mode"].includes(name)) {
+    if (!["--apply", "--yes", "--help", "--project-ref", "--mode", ...extraBooleanFlags].includes(name)) {
       fail(`unknown argument: ${token}`);
     }
     if (seen.has(name)) fail(`duplicate argument: ${name}`);
@@ -52,6 +60,9 @@ export function parseGuardedCommand(
     } else if (name === "--help") {
       help = true;
       i += 1;
+    } else if (extraBooleanFlags.includes(name)) {
+      flags[name] = true;
+      i += 1;
     } else {
       const parsed = takeValue(argv, i, name);
       if (name === "--project-ref") projectRef = parsed.value;
@@ -62,7 +73,7 @@ export function parseGuardedCommand(
 
   if (help) {
     if (argv.length !== 1) fail("--help cannot be combined with other arguments");
-    return { help: true, authorizedWrite: false, mode: null, projectRef: null };
+    return { help: true, authorizedWrite: false, mode: null, projectRef: null, flags };
   }
 
   if (modes && (!mode || !modes.includes(mode))) {
@@ -72,7 +83,7 @@ export function parseGuardedCommand(
   const isWrite = writeModes.includes(mode) || (!modes && apply);
   if (!isWrite) {
     if (apply || yes || projectRef) fail("write authorization flags are invalid for a read-only mode");
-    return { help: false, authorizedWrite: false, mode, projectRef: null };
+    return { help: false, authorizedWrite: false, mode, projectRef: null, flags };
   }
 
   if (!apply || !yes || !projectRef) {
@@ -80,9 +91,10 @@ export function parseGuardedCommand(
   }
   if (projectRef !== expectedProjectRef) fail("project ref does not match the authoritative target");
 
-  return { help: false, authorizedWrite: true, mode, projectRef };
+  return { help: false, authorizedWrite: true, mode, projectRef, flags };
 }
 
+/** @param {{script: string, modes?: string[]}} options */
 export function productionUsage({ script, modes = [] }) {
   const modePart = modes.length ? ` --mode <${modes.join("|")}>` : "";
   return [

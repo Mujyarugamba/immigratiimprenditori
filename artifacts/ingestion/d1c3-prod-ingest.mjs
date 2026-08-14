@@ -2,21 +2,26 @@
  * D1-C.3 Production review-only World Bank ingest harness.
  * Loads service_role via `supabase projects api-keys` (no key printed).
  *
- *   node artifacts/ingestion/d1c3-prod-ingest.mjs dry-run
- *   node artifacts/ingestion/d1c3-prod-ingest.mjs apply
- *   node artifacts/ingestion/d1c3-prod-ingest.mjs validate
+ *   node artifacts/ingestion/d1c3-prod-ingest.mjs --mode dry-run
+ *   node artifacts/ingestion/d1c3-prod-ingest.mjs --mode validate
+ *   Apply additionally requires --apply --yes --project-ref <Production ref>.
  */
 import { spawnSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
+import { parseGuardedCommand, productionUsage } from "./production-write-guard.mjs";
 
 const REF = "hvfvfatlaspcpszgizhg";
-const modeArg = process.argv[2] ?? "dry-run";
-const mode =
-  modeArg === "apply"
-    ? "apply"
-    : modeArg === "validate"
-      ? "validate"
-      : "dry-run";
+const command = parseGuardedCommand(process.argv.slice(2), {
+  operation: "World Bank Production ingest",
+  modes: ["dry-run", "validate", "apply"],
+  writeModes: ["apply"],
+  defaultMode: "dry-run",
+});
+if (command.help) {
+  console.log(productionUsage({ script: "artifacts/ingestion/d1c3-prod-ingest.mjs", modes: ["dry-run", "validate", "apply"] }));
+  process.exit(0);
+}
+const mode = command.mode;
 
 function loadKeys() {
   const r = spawnSync(
@@ -168,11 +173,11 @@ try {
     const args = [
       "tsx",
       "scripts/external-data/ingest-worldbank-indicators.ts",
-      mode === "apply" ? "--apply" : "--dry-run",
-      "--allow-production",
+      "--mode",
+      mode,
     ];
     // Catalog seed only on apply (drafting IT/DE/FR). Never seed during dry-run.
-    if (mode === "apply") args.push("--ensure-local-catalog");
+    if (mode === "apply") args.push("--apply", "--yes", "--project-ref", REF, "--ensure-local-catalog");
     const r = spawnSync("npx", args, {
       encoding: "utf8",
       shell: true,

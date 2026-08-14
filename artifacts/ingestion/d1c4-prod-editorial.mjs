@@ -3,19 +3,28 @@
  * Uses service_role via linked project api-keys (never printed).
  * Applies the SAME lifecycle axes as /app/redazione/mercati-internazionali UI.
  *
- *   node artifacts/ingestion/d1c4-prod-editorial.mjs inventory
- *   node artifacts/ingestion/d1c4-prod-editorial.mjs classify-publish
- *   node artifacts/ingestion/d1c4-prod-editorial.mjs validate
- *   node artifacts/ingestion/d1c4-prod-editorial.mjs refresh-dry
- *   node artifacts/ingestion/d1c4-prod-editorial.mjs refresh-apply
+ *   node artifacts/ingestion/d1c4-prod-editorial.mjs --mode inventory
+ *   node artifacts/ingestion/d1c4-prod-editorial.mjs --mode validate
+ *   Write modes additionally require --apply --yes --project-ref <Production ref>.
  */
 import { spawnSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 import { writeFileSync } from "node:fs";
+import { parseGuardedCommand, productionUsage } from "./production-write-guard.mjs";
 
 const REF = "hvfvfatlaspcpszgizhg";
 const URL = `https://${REF}.supabase.co`;
-const mode = process.argv[2] ?? "inventory";
+const command = parseGuardedCommand(process.argv.slice(2), {
+  operation: "World Bank Production editorial mutation",
+  modes: ["inventory", "classify-publish", "validate", "refresh-dry", "refresh-apply"],
+  writeModes: ["classify-publish", "refresh-apply"],
+  defaultMode: "inventory",
+});
+if (command.help) {
+  console.log(productionUsage({ script: "artifacts/ingestion/d1c4-prod-editorial.mjs", modes: ["inventory", "classify-publish", "validate", "refresh-dry", "refresh-apply"] }));
+  process.exit(0);
+}
+const mode = command.mode;
 
 function loadKeys() {
   const r = spawnSync(
@@ -228,9 +237,10 @@ function refresh(apply) {
   const args = [
     "tsx",
     "scripts/external-data/ingest-worldbank-indicators.ts",
-    apply ? "--apply" : "--dry-run",
-    "--allow-production",
+    "--mode",
+    apply ? "apply" : "dry-run",
   ];
+  if (apply) args.push("--apply", "--yes", "--project-ref", REF);
   // Catalog already present from D1-C.3; do not re-seed on refresh.
   const r = spawnSync("npx", args, {
     encoding: "utf8",

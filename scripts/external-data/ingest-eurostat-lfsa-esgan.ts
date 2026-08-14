@@ -6,15 +6,14 @@
  */
 
 import { runEurostatIngest } from "@/lib/external-data/eurostat/apply-lfsa-esgan";
+import { parseGuardedCommand, productionUsage } from "../../artifacts/ingestion/production-write-guard.mjs";
 
 async function main() {
-  const apply = process.argv.includes("--apply");
-  if (apply && process.argv.includes("--dry-run")) {
-    console.error("Pass either --dry-run or --apply, not both.");
-    process.exit(2);
-  }
-
-  const mode = apply ? "apply" : "dry-run";
+  const command = parseGuardedCommand(process.argv.slice(2), {
+    operation: "Eurostat ingest", modes: ["dry-run", "apply"], writeModes: ["apply"], defaultMode: "dry-run",
+  });
+  if (command.help) { console.log(productionUsage({ script: "scripts/external-data/ingest-eurostat-lfsa-esgan.ts", modes: ["dry-run", "apply"] })); return; }
+  const mode = command.mode as "dry-run" | "apply";
   const result = await runEurostatIngest(mode);
 
   const summary = {

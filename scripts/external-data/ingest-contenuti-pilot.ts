@@ -1,36 +1,30 @@
 /**
  * D1-D.3 — Contenuti metadata/link-only controlled pilot ingest.
  *
- *   npx tsx scripts/external-data/ingest-contenuti-pilot.ts --dry-run
- *   npx tsx scripts/external-data/ingest-contenuti-pilot.ts --apply
- *   npx tsx scripts/external-data/ingest-contenuti-pilot.ts --dry-run --allow-production
- *   npx tsx scripts/external-data/ingest-contenuti-pilot.ts --apply --allow-production
+ *   npx tsx scripts/external-data/ingest-contenuti-pilot.ts --mode dry-run
+ *   Apply additionally requires --apply --yes --project-ref <Production ref>.
  *
  * Hard rules:
  * - max 20 curated cards; metadata/link only
  * - review-only: draft + unpublished + private; published_at null
  * - NO auto-publish
- * - Production apply requires --allow-production
+ * - Production apply requires the shared Production write authorization
  * - Do not start D1-D.4 (editorial publish)
  */
 
 import { runContentsPilotIngest } from "@/lib/external-data/contents/apply-contents";
+import { parseGuardedCommand, productionUsage } from "../../artifacts/ingestion/production-write-guard.mjs";
 
 async function main() {
-  const apply = process.argv.includes("--apply");
-  const dry = process.argv.includes("--dry-run");
-  if (apply && dry) {
-    console.error("Pass either --dry-run or --apply, not both.");
-    process.exit(2);
-  }
-  if (!apply && !dry) {
-    console.error("Pass --dry-run or --apply.");
-    process.exit(2);
-  }
-
-  const allowProduction = process.argv.includes("--allow-production");
-  const skipRedirectCheck = process.argv.includes("--skip-redirect-check");
-  const mode = apply ? "apply" : "dry-run";
+  const command = parseGuardedCommand(process.argv.slice(2), {
+    operation: "Content ingest",
+    modes: ["dry-run", "apply"], writeModes: ["apply"], defaultMode: "dry-run",
+    extraBooleanFlags: ["--skip-redirect-check"],
+  });
+  if (command.help) { console.log(productionUsage({ script: "scripts/external-data/ingest-contenuti-pilot.ts", modes: ["dry-run", "apply"] })); return; }
+  const allowProduction = command.authorizedWrite;
+  const skipRedirectCheck = command.flags["--skip-redirect-check"];
+  const mode = command.mode as "dry-run" | "apply";
 
   const result = await runContentsPilotIngest({
     mode,
