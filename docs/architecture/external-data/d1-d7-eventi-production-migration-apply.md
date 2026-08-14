@@ -223,9 +223,7 @@ Auto-publish: **0** (no importer run; no published events; application contract 
 |---|---|
 | Report path | `docs/architecture/external-data/d1-d7-eventi-production-migration-apply.md` |
 | Staged files | **only** this report |
-| Suggested commit | `chore(events): record production migration apply` |
-
-(Filled after commit/push in §15.)
+| Commit | `d248286` — `chore(events): record production migration apply` |
 
 ---
 
@@ -248,6 +246,7 @@ Schema D1-D.5 is now in Production. Import remains **blocked** until a separate 
 |---|---|
 | Verdict | **PASS** |
 | Initial commit | `c8d25cd42175b45602e9a6ca4b4ea3542bd3691e` |
+| Report commit | `d2482865c96990ebbf9790999d0cb5c9e461b4e7` |
 | Applied migrations | three D1-D.5 files, hashes in §3 |
 | Project ref | `hvfvfatlaspcpszgizhg` (no secrets) |
 | Counts | events 0→0; imported 0; published/scheduled 0; Contenuti 18 unchanged; Mercati WB 15 unchanged |
