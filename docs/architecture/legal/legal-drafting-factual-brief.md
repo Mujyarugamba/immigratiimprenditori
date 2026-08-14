@@ -1,19 +1,25 @@
-# Legal Drafting Factual Brief — L1.1 (+ L1.1b)
+# Legal Drafting Factual Brief — L1.1 / L1.1b / L1.2 decisions
 
-**Purpose:** Allow L1.2 drafters to write Privacy / Cookie / Terms / External Data disclaimer **without reading the full repository**.
-**Contains:** technical facts + open decisions.
-**Does not contain:** legal bases, final policy text, invented controllers.
+**Purpose:** Fatti tecnici + decisioni del Gestore già chiuse, per mantenere allineati i testi di policy.
+**Non contiene:** parere di conformità assoluta.
 
-**Baseline:** L1.1 audit + **L1.1b Contact & Visibility Model** (see `l1.1b-contact-visibility-model.md`).
+**Baseline tecnica:** L1.1 audit + L1.1b contact model.
+**Decisioni Gestore:** 11 agosto 2026 (recepite in Privacy / Cookie / Termini / Disclaimer / Legal Review Report).
+
 Site https://www.immigratiimprenditori.it · Stack Next.js + Vercel + Supabase Auth + PostgreSQL.
 
 ---
 
-## 1. Controller
+## 1. Controller / Gestore — CHIUSO
 
-- **Known:** product name Immigrati Imprenditori; domain immigratiimprenditori.it; contact email info@immigratiimprenditori.it (mailto).
-- **Missing:** legal entity, address, CF/PIVA, PEC, representative, privacy@, DPO.
-→ Must be supplied by client before publishing Privacy Policy.
+- **Denominazione:** Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia
+- **Sigla:** AIPEL
+- **Forma:** Associazione
+- **Sede:** Viale Molise n. 54, Milano
+- **C.F.:** 97342380157
+- **P.IVA:** 04222160964
+- **Contatto privacy / diritti:** info@immigratiimprenditori.it (nessuna privacy@ separata)
+- **Contatto generale:** info@immigratiimprenditori.it
 
 ---
 
@@ -21,7 +27,8 @@ Site https://www.immigratiimprenditori.it · Stack Next.js + Vercel + Supabase A
 
 - Public directory/network: Persone, Imprese, Professionisti, Opportunità, Collaborazioni, Servizi, Eventi, Organizzazioni, Contenuti (Notizie e guide), Mercati, Osservatorio, Cultura (hub/filter), Chi siamo, Contatti.
 - Authenticated workspace: profile, onboarding, imprese create/edit, redazione (contenuti/org/osservatorio), amministrazione account.
-- **No** payment, **no** newsletter product, **no** in-app chat, **no** file upload UI, **no** analytics SDK, **no** cookie banner, **no** `/privacy` `/cookie` `/termini` routes.
+- **No** payment, **no** newsletter product, **no** in-app chat, **no** file upload UI, **no** analytics SDK, **no** cookie banner.
+- Routes `/privacy` `/cookie` `/termini`: **not yet in app** (testi in `docs/architecture/legal/`).
 
 ---
 
@@ -29,114 +36,77 @@ Site https://www.immigratiimprenditori.it · Stack Next.js + Vercel + Supabase A
 
 - Email + password only (no OAuth in app).
 - Signup fields: optional display name metadata (`full_name`), email, password (≥8).
-- **No** Privacy/Terms checkbox or links on signup form.
-- Session via Supabase Auth + `@supabase/ssr` cookies; middleware/proxy refreshes session.
-- Local config: email confirmations disabled — **production hosted setting must be verified**.
-- Password reset UI in app: **not found**.
-- Auth emails sent by Supabase (SMTP provider in production: verify outside repo).
+- **No** Privacy/Terms checkbox or links on signup form today.
+- Session via Supabase Auth + `@supabase/ssr` cookies.
+- **Minimum age (policy decision):** 18 — CHIUSO.
+- Self-service account deletion UI: **NOT IMPLEMENTED** (policy model adopted; technical task open).
 
 ---
 
 ## 4. Persona / public profile & contacts (L1.1b)
 
-- Table `profiles`; default `is_public=false`.
-- User can toggle public and edit presentation: name, slug, bio, territory, website, is_public.
-- **Professional contacts** live in `person_contact_channels` (phone, `contact_email`) with explicit share-to-network checkboxes (**default off**).
-- **Auth / login email** stays on `auth.users` and is **never** used as the professional contact email.
-- Public page `/persone/[slug]`:
-  - anonymous: discovery fields + website; if contacts are shared, CTA “Accedi per vedere i contatti” (**no values** in HTML);
-  - registered active: tel/mailto for contacts the owner chose to share (RPC-masked).
-- Legacy `profiles.phone` retired (forced NULL). Anon cannot SELECT `person_contact_channels`.
-- **No in-app messaging / chat.**
-- Sitemap lists `/persone` hub; individual slugs not listed but robots do not disallow them; metadata from public presentation fields only.
-- Account close: **admin-only**; does not delete Auth/profile. No self-service erasure UI.
-
-**L1.2 may declare:** network publicly explorable for discovery; some profile fields intended for publication; optional professional contacts shared only with registered users under user control; Auth data private; purpose = professional/entrepreneurial visibility and contact.
+- Public discovery fields when `is_public`.
+- Professional contacts in `person_contact_channels` with share flags default false; network-only via RPC.
+- Auth email never auto-used as contact email.
+- No internal messaging.
 
 ---
 
-## 5. Businesses
+## 5. Legal bases — CHIUSO
 
-- Authenticated users with Persona can create Impresa (unpublished by default) and managers can publish.
-- Public fields: names, summary, description, founding year, statuses per public queries.
-- No CF/P.IVA fields in forms.
+Vedi tabella in Privacy Policy §5 (contratto / LI / obbligo legale; cookie tecnici; no consenso universale).
 
 ---
 
-## 6. Other domains
+## 6. Retention & deletion — CHIUSO (principio)
 
-- Professionals, Opportunities, Collaborations, Services, Events, Markets: **public read** if published; **no create UI** in app today.
-- Organizations & Contents & Observatory: created/published by **redattore**.
-- Org public pages do not show org email/phone or official emails (UI select).
-- Cultura: aggregation hub, not a separate content store.
-- Report abuse: **not implemented**.
+- Retention per finalità; no durata universale arbitraria.
+- Account deletion model A/B/C + minimizzazione + backup tecnico; distinto da art. 17 GDPR.
+- Self-service: da implementare; richieste via info@ nel frattempo.
 
 ---
 
-## 7. Cookies / trackers
+## 7. Cookies — CHIUSO (Case A)
 
-- App cookie `ii_selected_business_id` (HttpOnly, Lax, Secure in prod, 90 days) — UI business switcher only.
-- Auth session cookies via Supabase SSR.
-- No GA/GTM/Meta/Vercel Analytics/Hotjar/etc. in codebase.
-- No localStorage/sessionStorage usage in app.
-- Technical cookie case: **A** (no non-necessary analytics found).
-- CMP: not implemented.
+- Auth session + `ii_selected_business_id` (90 giorni).
+- No analytics/advertising/CMP.
+- No formal consent banner for current technical state.
 
 ---
 
-## 8. Contact
+## 8. Processors — VERIFICA NECESSARIA
 
-- Contatti page and footer: `mailto:info@immigratiimprenditori.it` only — no server-side contact form.
-
----
-
-## 9. Fonts
-
-- Geist / Geist Mono via `next/font/google` in root layout (Next typically self-hosts at build).
+- Vercel, Supabase — DPA/region/transfers **EXTERNAL CONTRACT REVIEW**.
 
 ---
 
-## 10. Processors (runtime)
+## 9. External data (D1)
 
-- **Vercel** — hosting Next.js.
-- **Supabase** — Auth + PostgreSQL (+ Storage enabled in config but unused by app uploads).
-- DPA/region/transfers: **not in repo** — contractual review required.
-
----
-
-## 11. External data (D1)
-
-- Discovery + ingestion contracts documented (D1.1/D1.2).
-- **No import executed.** Future: aggregate open data, reviewed opportunities; **no** scraping of personal/business profiles into community identities.
-- Needs: External Data & Sources disclaimer; Opportunity “official source prevails” disclaimer; Observatory stats ≠ personal data.
+- Contracts documented; **no import executed** yet.
+- Disclaimer document: `informativa-disclaimer-dati-fonti-esterne.md`.
 
 ---
 
-## 12. Documents recommended for L1.2
-
-1. Privacy Policy
-2. Cookie Policy (even if Case A)
-3. Terms of Use
-4. External Data & Sources Disclaimer (can be section of Terms or Privacy annex)
-5. Community/Content Rules — **recommend integrated section in Terms** unless counsel prefers separate short page
-
----
-
-## 13. Open decisions checklist (must fill)
-
-See `legal-open-decisions.md` — especially titolare, retention, deletion, minors, UGC licence, governing law, signup acceptance UX.
-Persona phone/contact hardening for L1.1 gap: **resolved in L1.1b** (network opt-in; not internet-public).
-
----
-
-## 14. Explicit non-facts
+## 10. Explicit non-facts
 
 - Do **not** claim Google Analytics, Meta Pixel, or cookie “accept all” banner.
-- Do **not** invent CF/PIVA or association name.
-- Do **not** invent retention periods.
-- Do **not** claim users can self-delete accounts today.
+- Do **not** invent retention periods (10y etc.).
+- Do **not** claim self-delete button exists today.
 - Do **not** claim file uploads exist.
 - Do **not** claim external datasets are already in the DB.
+- Do **not** claim absolute legal compliance.
+
+---
+
+## 11. Policy document set
+
+| Doc | Path |
+|---|---|
+| Legal Review Report | `l1.2-legal-review-report.md` |
+| Privacy Policy | `privacy-policy.md` |
+| Cookie Policy | `cookie-policy.md` |
+| Termini d’uso | `termini-duso.md` |
+| Disclaimer fonti | `informativa-disclaimer-dati-fonti-esterne.md` |
 
 ---
 
