@@ -1,0 +1,429 @@
+{
+  "beforeCount": 20,
+  "afterCount": 20,
+  "uniqueBefore": 20,
+  "uniqueAfter": 20,
+  "apply": {
+    "inserted": 0,
+    "updated": 0,
+    "unchanged": 20,
+    "publishedCount": 15,
+    "reviewOnlyCount": 0,
+    "duplicates": 0,
+    "dbWrites": 0,
+    "errors": []
+  },
+  "gates": {
+    "noDuplicates": true,
+    "countStable": true,
+    "allIdsStable": true,
+    "allSummariesPreserved": true,
+    "allPublicationPreserved": true,
+    "allEditorialPreserved": true,
+    "publishedStillPublic": 15,
+    "rejectedStillRejected": 5,
+    "reviewOnlyStill": 0
+  },
+  "comparisons": [
+    {
+      "externalId": "incentivi-gov:1007",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Agevolazioni MIMIT (Green New Deal / Fondo crescita sostenib"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Agevolazioni MIMIT (Green New Deal / Fondo crescita sostenib"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:118",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Fondo Nazionale Innovazione: intervento di venture capital p"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Fondo Nazionale Innovazione: intervento di venture capital p"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:132",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Strumento agevolativo dedicato al sostegno di programm"
+      },
+      "after": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Strumento agevolativo dedicato al sostegno di programm"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:1426",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Avviso MiC (PNRR) per ecoefficienza e riduzione consumi ener"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Avviso MiC (PNRR) per ecoefficienza e riduzione consumi ener"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:143",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Credito d’imposta nazionale per investimenti in ricerca e sv"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Credito d’imposta nazionale per investimenti in ricerca e sv"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:1468",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Contributo regionale Lombardia (PR FESR 2021-2027) per raffo"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Contributo regionale Lombardia (PR FESR 2021-2027) per raffo"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:148",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Garanzia pubblica per facilitare l’accesso al credito delle "
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Garanzia pubblica per facilitare l’accesso al credito delle "
+      }
+    },
+    {
+      "externalId": "incentivi-gov:1523",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Sportello Contratti di sviluppo dedicato alla filiera dei se"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Sportello Contratti di sviluppo dedicato alla filiera dei se"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:156",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Lo strumento agevolativo è volto a sostenere la realiz"
+      },
+      "after": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Lo strumento agevolativo è volto a sostenere la realiz"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:170",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Strumento agevolativo volto a sostenere la realizzazio"
+      },
+      "after": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Strumento agevolativo volto a sostenere la realizzazio"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:181",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Bonus Export Digitale ICE: contributo a fondo perduto per so"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Bonus Export Digitale ICE: contributo a fondo perduto per so"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:1843",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Contributo in conto interessi (Istituto per il Credito Sport"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Contributo in conto interessi (Istituto per il Credito Sport"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:1856",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Fondo di garanzia ICSC per finanziamenti relativi a impianti"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Fondo di garanzia ICSC per finanziamenti relativi a impianti"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:1857",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Garanzia pubblica (Istituto per il Credito Sportivo) su fina"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Garanzia pubblica (Istituto per il Credito Sportivo) su fina"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:187",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Credito d’imposta (legge Smuraglia 193/2000) per imprese e c"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Credito d’imposta (legge Smuraglia 193/2000) per imprese e c"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:2195",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Incentivo MUR (PNRR) per l’assunzione di ricercatori da part"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Incentivo MUR (PNRR) per l’assunzione di ricercatori da part"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:225",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Si tratta della misura promossa dal Dipartimento per g"
+      },
+      "after": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Si tratta della misura promossa dal Dipartimento per g"
+      }
+    },
+    {
+      "externalId": "incentivi-gov:2309",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Il bando è finalizzato a supportare le micro, piccole "
+      },
+      "after": {
+        "editorial": "rejected",
+        "publication": "unpublished",
+        "summaryHead": "Cos'è Il bando è finalizzato a supportare le micro, piccole "
+      }
+    },
+    {
+      "externalId": "incentivi-gov:2350",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Contributo Unioncamere Lombardia per partecipazione a fiere "
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Contributo Unioncamere Lombardia per partecipazione a fiere "
+      }
+    },
+    {
+      "externalId": "incentivi-gov:2512",
+      "idStable": true,
+      "summaryPreserved": true,
+      "purposePreserved": true,
+      "publicationPreserved": true,
+      "editorialPreserved": true,
+      "visibilityPreserved": true,
+      "urlPreserved": true,
+      "before": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Finanziamento agevolato SIMEST/MAECI per rafforzare presenza"
+      },
+      "after": {
+        "editorial": "approved",
+        "publication": "published",
+        "summaryHead": "Finanziamento agevolato SIMEST/MAECI per rafforzare presenza"
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "checks": [
+    {
+      "name": "editor.access_is_editor",
+      "pass": true,
+      "value": true
+    },
+    {
+      "name": "admin.access_is_editor",
+      "pass": true,
+      "value": false
+    },
+    {
+      "name": "ordinary.access_is_editor",
+      "pass": true,
+      "value": false
+    },
+    {
+      "name": "editor.read_review_only",
+      "pass": true,
+      "value": 1,
+      "expected": 1
+    },
+    {
+      "name": "admin.read_review_only",
+      "pass": true,
+      "value": 0,
+      "note": "admin without redattore has no contents_select_editorial"
+    },
+    {
+      "name": "ordinary.read_review_only",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "anon.read_review_only",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "anon.read_published",
+      "pass": true,
+      "value": 17,
+      "expected": 17
+    },
+    {
+      "name": "editor.read_published",
+      "pass": true,
+      "value": 17
+    },
+    {
+      "name": "admin.update_no_effect",
+      "pass": true,
+      "value": "Hub istituzionale MLPS sul tema immigrazione",
+      "expected": "Hub istituzionale MLPS sul tema immigrazione",
+      "http": {
+        "status": 204,
+        "ok": true,
+        "text": ""
+      }
+    },
+    {
+      "name": "ordinary.update_no_effect",
+      "pass": true,
+      "value": "Hub istituzionale MLPS sul tema immigrazione",
+      "expected": "Hub istituzionale MLPS sul tema immigrazione",
+      "http": {
+        "status": 204,
+        "ok": true,
+        "text": ""
+      }
+    },
+    {
+      "name": "editor.can_update_editorial",
+      "pass": true,
+      "value": true,
+      "http": {
+        "status": 200,
+        "ok": true,
+        "rows": 1
+      }
+    },
+    {
+      "name": "anon_published_has_source_url",
+      "pass": true,
+      "value": "https"
+    },
+    {
+      "name": "anon_body_contains_trailer_rest_residual",
+      "pass": true,
+      "value": true,
+      "note": "CASE A residual: trailer remains in REST body; Next public layer strips it"
+    }
+  ],
+  "cleanup": [
+    {
+      "uid": "473fc9e8-b623-40aa-b2f9-a772e3096595",
+      "status": 200
+    },
+    {
+      "uid": "ba50f185-4526-4414-9d6a-56f357793e07",
+      "status": 200
+    },
+    {
+      "uid": "1052c80c-4864-460c-bf7d-63ab44d22ae6",
+      "status": 200
+    }
+  ],
+  "failed": 0
+}
