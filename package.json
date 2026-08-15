@@ -2,6 +2,10 @@
   "name": "immigrati-imprenditori",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,7 +20,13 @@
     "test:p5-smoke": "node scripts/p5-local-smoke.mjs",
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:mobile": "playwright test --project=mobile",
-    "d1:d8a:dry-run": "tsx scripts/external-data/d1-d8a-events-dry-run.ts"
+    "d1:d8a:dry-run": "tsx scripts/external-data/d1-d8a-events-dry-run.ts",
+    "dev:ponteimprese": "npm --prefix apps/ponteimprese run dev",
+    "build:ponteimprese": "npm --prefix apps/ponteimprese run build",
+    "typecheck:ponteimprese": "npm --prefix apps/ponteimprese run typecheck",
+    "dev:centro-studi": "npm --prefix apps/centro-studi run dev",
+    "build:centro-studi": "npm --prefix apps/centro-studi run build",
+    "typecheck:centro-studi": "npm --prefix apps/centro-studi run typecheck"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
