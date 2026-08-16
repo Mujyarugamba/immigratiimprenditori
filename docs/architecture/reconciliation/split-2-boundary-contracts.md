@@ -67,25 +67,27 @@ Gate esplicito `S2-GATE-SAFE-REDIRECT` (onda `S2-COND-UTIL-01`): originale root 
 
 Gate esplicito `S2-GATE-APP-ERROR` (onda `S2-COND-UTIL-01`): originale root resta `CONDIVISO`. **Risolto lato Ponte** in `S2-PI-CORE-01`: modulo completo copiato in `apps/ponteimprese` (mapping PostgreSQL/membership/grant/impresa). `packages/core` non creato.
 
-Gate esplicito `S2-GATE-SUPABASE-CLIENT` (onda `S2-COND-LIB-01`, closeout `S2-PI-CORE-01`): **risolto lato Ponte**. Copie `client.ts` / `server.ts` in `apps/ponteimprese`. Nessun `.env*`, nessun segreto, nessuna chiamata DB. Originale root preservato. Copia Centro Studi non in questa unità.
+Gate esplicito `S2-GATE-SUPABASE-CLIENT` (onda `S2-COND-LIB-01`): **risolto lato Ponte e Centro Studi**. Copie `client.ts` / `server.ts` in entrambe le app. Nessun `.env*`, nessun segreto, nessuna chiamata DB. Originale root preservato.
 
 Gate esplicito `S2-GATE-ORG-LOADING` (onda `S2-COND-LIB-01`, closeout `S2-PI-CORE-01`): **chiuso lato PI**. `apps/ponteimprese/src/app/organizzazioni/loading.tsx` duplicato perché le page PI `/organizzazioni` e `/organizzazioni/[slug]` lo richiedono. Inventario SPLIT-1 resta `CONDIVISO`. Non inferito dallo `[slug]` da solo: la verifica è la presenza delle page PI del catalogo organizzazioni.
 
-`S2-GATE-EVENTI-LOADING`: `src/app/eventi/loading.tsx` è nel set PI-APP (67) ed è stato copiato. Le page pubbliche `/eventi` restano Centro Studi. Decisione finale sul loading rinviata al Prompt CS. Non risolto artificialmente.
+`S2-GATE-EVENTI-LOADING`: **chiuso lato CS** in `S2-CS-CORE-01`. Variante locale con `LoadingState`. Il file inventario `src/app/eventi/loading.tsx` resta `PONTE_IMPRESE` (copia PI esistente). Non inferito dalle page CS.
 
-`S2-GATE-LINGUE-MERCATI`: non copiato. Non indispensabile al core PI (le page `/mercati` PI usano `sections["lingue-e-mercati"]` come copy di sezione, non la route). Gate aperto.
+`S2-GATE-LINGUE-MERCATI`: non copiato. Gate aperto.
 
-`S2-GATE-PI-EDITORIAL-SUPPORT`: moduli inventario `CENTRO_STUDI` duplicati in PI (form/data editoriali mercati/opportunità/organizzazioni, `editorial/actions.ts`, `slug.ts`, `public/contents.ts`, `public/observatory.ts`) perché richiesti dalle route PI e dalla home attuale. Nessun import `apps/ponteimprese` → `apps/centro-studi`. Pipeline World Bank/Eurostat **non** copiate.
+`S2-GATE-PI-EDITORIAL-SUPPORT`: invariato. Originali CS ora anche in `apps/centro-studi`; copie PI restano.
 
 `S2-GATE-PI-LEGAL-DOCS`: **chiuso** in `S2-PI-FINAL-01`. I quattro markdown runtime (privacy, cookie, termini, dati/fonti) vivono in `apps/ponteimprese/docs/architecture/legal`. `loadPublicLegalMarkdown` risolve la directory dall’app (`ponteImpreseLegalDocsDir`), non dalla root. `PI_RUNTIME_LEGAL_ROOT_DEPENDENCY = 0`.
 
 `S2-PI-CORE-01`: 159 file PI copiati in `apps/ponteimprese` (root intatta). Dipendenze TypeScript verso root `src/` = 0. Package: `@immigrati/ui-foundation`, `@immigrati/product-config`.
 
-`S2-PI-FINAL-01`: `PONTEIMPRESE_AUTONOMOUS = YES`. Docs 77, test 28, migration 126 copiati. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. Navigazione verso sezioni CS: `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER` (non è import di codice). `S2-GATE-PI-EDITORIAL-SUPPORT` resta aperto come supporto transitorio PI fino al Prompt CS. Typecheck PI/CS/root = 0. Test unitari PI: 198 pass, 0 fail, 3 skip (pagine CS `cultura`/`osservatorio`). E2E e script DB/rete: `NOT_RUN_EXTERNAL_DEPENDENCY`. Residui script-only (non typecheck): ingest `artifacts/ingestion/production-write-guard.mjs`; `d1-d8a-events-dry-run` → motore Eventi (`S2-GATE-EVENTI-LOADING`). `PI_EXTERNAL_APP_FILE_DEPENDENCIES = 0` sul perimetro `src/` typechecked. `package.json` PI dichiara `@supabase/ssr` e `@supabase/supabase-js` alle versioni root; lock non aggiornato (niente `npm install`).
+`S2-PI-FINAL-01`: `PONTEIMPRESE_AUTONOMOUS = YES`. Docs 77, test 28, migration 126 copiati. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. Navigazione verso sezioni CS: `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER` (non è import di codice). `S2-GATE-PI-EDITORIAL-SUPPORT` resta aperto come supporto transitorio PI fino al Prompt CS.
+
+`S2-CS-CORE-01`: 62 file CS copiati in `apps/centro-studi` (root intatta; Ponte invariato). `CS_TO_PI_IMPORTS = 0`. `CS_EXTERNAL_APP_FILE_DEPENDENCIES = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL`. Legal CS-DOCS placeholder. Client Supabase copiati in CS. Session/guards copiati come supporto redazione (redirect `/accedi` = SSO/cut-over). Type stub per hub cultura verso domini PI. Motore Eventi CONDIVISO non copiato (`S2-GATE-EVENTI`).
 
 Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): root `env.example` resta `CONDIVISO`. Non duplicato in questa unità.
 
-Gate esplicito `S2-GATE-HOME-LAYOUT` / `S2-GATE-APP-COMPONENTS` / `S2-GATE-PUBLIC-LEGAL-COMP` (onda `S2-COND-COMP-01`): originali restano `CONDIVISO` in root. **Duplicati lato PI** in `S2-PI-CORE-01` i file effettivamente importati dal core Ponte (`Header`/`Footer`/`home/**`, `app/**` usati, `AuthForm`, `public/**` usati, `legal/**`). `SectionPage` non copiato (non importato). Copia CS non in questa unità.
+Gate esplicito `S2-GATE-HOME-LAYOUT` / `S2-GATE-APP-COMPONENTS` / `S2-GATE-PUBLIC-LEGAL-COMP` (onda `S2-COND-COMP-01`): originali restano `CONDIVISO` in root. **Duplicati lato PI** in `S2-PI-CORE-01`. **Lato CS** in `S2-CS-CORE-01`: Header/Footer minimi propri (non copia PI); public list e renderer legal copiati; `AuthForm`/home PI non copiati.
 
 `src/lib/data/README.md` resta root (baseline del data layer misto del monorepo). `src/lib/data/public/organizations.ts` resta in sede sotto `S2-GATE-ORG` (letture pubbliche organizzazioni + join `organization_officials`/`profiles`; non package). Il cluster Eventi `allowlist.ts` / `acquisition.ts` / `dry-run.ts` (+ test) resta in sede sotto `S2-GATE-EVENTI`: l’allowlist è specifica di prodotto (fonti PIM/MinLavoro/Unioncamere/EMN); il motore importa l’allowlist e non è estraibile senza split. Nessun `packages/core` creato per uno o due file.
 
@@ -240,4 +242,4 @@ Precondizioni (SPLIT-1 §20–22, piano W3):
 7. Database fisicamente separati solo in SPLIT-3, dopo le baseline.
 8. DNS e secret già distinti (`S2-CUTOVER-01` / `S2-GATE-CUTOVER`).
 
-Fine documento. Closeout `S2-PI-FINAL-01`: PonteImprese autonomo per lo sviluppo applicativo. Residui: SPLIT-3 DB, cut-over, brand, navigazione cross-product, supporto editoriale inventario-CS. Nessuna onda CS/ARCH/CUTOVER.
+Fine documento. Closeout `S2-CS-CORE-01`: core Centro Studi in `apps/centro-studi`; PonteImprese invariato; residui CS-DOCS/TEST/MIG, legal, brand/SSO, SPLIT-3. Nessuna onda ARCH/CUTOVER.

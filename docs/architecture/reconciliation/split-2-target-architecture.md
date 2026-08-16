@@ -339,7 +339,7 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-PERSONE-AUTORI` | Autori/speaker (SPLIT-1 §17.3) | Record editoriali minimi CS |
 | `S2-GATE-ORG` | Organizzazioni ibride (SPLIT-1 §17.4) | Owner per record |
 | `S2-GATE-ORG-LOADING` | Originale `CONDIVISO`; copia PI in `apps/ponteimprese` | **Chiuso lato PI** (`S2-PI-CORE-01`). Inventario SPLIT-1 invariato |
-| `S2-GATE-EVENTI-LOADING` | `src/app/eventi/loading.tsx` file `PONTE_IMPRESE`, oggetto `EventiLoading` `CONDIVISO` | Dopo verifica route/layout e coerenza file/oggetto: allineare a Centro Studi, restare Ponte, duplicare, o altra soluzione dimostrata; non inferire dalle `page.tsx` |
+| `S2-GATE-EVENTI-LOADING` | `src/app/eventi/loading.tsx` file `PONTE_IMPRESE`, oggetto `EventiLoading` `CONDIVISO` | **Chiuso lato CS** (`S2-CS-CORE-01`): variante locale `apps/centro-studi/src/app/eventi/loading.tsx` con `LoadingState`. File inventario PI non copiato. SPLIT-1 invariato |
 | `S2-GATE-MERCATI` | Schede vs indicatori (SPLIT-1 §17.5) | Discriminante |
 | `S2-GATE-RUOLI-CS` | Identità editoriali autonome (SPLIT-1 §17.6) | SPLIT-3 / auth CS |
 | `S2-GATE-DATI-ACQUISITI` | Trasferimento riga per riga (SPLIT-1 §17.7) | Approvazione editoriale |
@@ -351,7 +351,7 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-HOME-LAYOUT` | Header, Footer e `src/components/home/**` | **Duplicato lato PI** in `S2-PI-CORE-01`. Originale CONDIVISO. Copia CS e specializzazione brand restano |
 | `S2-GATE-APP-COMPONENTS` | `src/components/app/**` e `AuthForm` | **Duplicato lato PI** (componenti importati dal core PI). Originale CONDIVISO. Kernel editoriale inventario-CS: `S2-GATE-PI-EDITORIAL-SUPPORT` |
 | `S2-GATE-PUBLIC-LEGAL-COMP` | `public/**`, `legal/**`, `SectionPage` | **Duplicato lato PI** i public/legal importati. `SectionPage` non necessario al set PI (non copiato). Originale CONDIVISO |
-| `S2-GATE-SUPABASE-CLIENT` | `client.ts` / `server.ts` | **Risolto lato PI**: copie in `apps/ponteimprese` (solo codice; nessun `.env*`, nessun secret). Originale root. Copia CS non in questa unità |
+| `S2-GATE-SUPABASE-CLIENT` | `client.ts` / `server.ts` | **Risolto lato PI e CS**: copie in entrambe le app (solo codice; nessun `.env*`, nessun secret). Originale root |
 | `S2-GATE-PI-EDITORIAL-SUPPORT` | Moduli inventario `CENTRO_STUDI` duplicati in PI perché richiesti dalle route PI redazione mercati/opportunità/organizzazioni e dal kernel `editorial/actions.ts` | Non riclassificare SPLIT-1. Prompt CS possiede gli originali. Non è import `apps/ponteimprese` → `apps/centro-studi` |
 | `S2-GATE-PI-LEGAL-DOCS` | Markdown legali runtime in `apps/ponteimprese/docs/architecture/legal` | **Chiuso** (`S2-PI-FINAL-01`). `PI_RUNTIME_LEGAL_ROOT_DEPENDENCY = 0` |
 
@@ -372,3 +372,7 @@ Questa unità **non** esegue l’onda.
 `S2-PI-FINAL-01` (`S2-PI-DOCS-01` + `S2-PI-TEST-01` + `S2-PI-MIG-01`): 77 docs + 28 test/script/public + 126 supabase copiati in `apps/ponteimprese`. `PONTEIMPRESE_AUTONOMOUS = YES`. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `S2-GATE-PI-LEGAL-DOCS` chiuso. E2E/script DB-rete `NOT_RUN_EXTERNAL_DEPENDENCY`. Navigazione `/eventi` `/cultura` `/contenuti` `/osservatorio` = `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER`. `S2-GATE-PI-EDITORIAL-SUPPORT` resta aperto (supporto transitorio PI). `S2-GATE-BRAND` aperto, non bloccante.
 
 Fine documento. Closeout `S2-PI-FINAL-01`: PonteImprese autonomo per lo sviluppo applicativo; DB fisico e cut-over rinviati.
+
+`S2-CS-CORE-01` (`S2-CS-APP-01` + `S2-CS-SRC-01`): copia non distruttiva 24+38=62 in `apps/centro-studi`. Root intatta. `apps/ponteimprese` invariato. Typecheck CS=0. `CS_TO_PI_IMPORTS = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL` (CS-DOCS legal, CS-TEST/MIG, brand/SSO/cut-over, SPLIT-3). `S2-GATE-EVENTI-LOADING` chiuso lato CS. Motore Eventi CONDIVISO non copiato. Header/Footer CS minimi (non copia PI).
+
+Fine documento. Closeout `S2-CS-CORE-01`: core applicativo Centro Studi duplicato in app; originali root preservati; residui Prompt 5/8.
