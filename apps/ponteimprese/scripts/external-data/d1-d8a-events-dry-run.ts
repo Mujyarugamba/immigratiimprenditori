@@ -1,3 +1,10 @@
+/**
+ * Historical mixed-repo Events dry-run.
+ * The events acquisition engine lives under CONDIVISO / Centro Studi
+ * (`EVENTI_APP_OWNERSHIP = CENTRO_STUDI`). It is not copied into PonteImprese
+ * and this script must not import `apps/centro-studi`.
+ * Residual: PI_EXTERNAL_SCRIPT_FILE_DEPENDENCIES (Prompt 7 / S2-GATE-EVENTI).
+ */
 import {
   eventsDryRunUsage,
   parseEventsDryRunArgs,

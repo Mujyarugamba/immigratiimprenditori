@@ -328,32 +328,35 @@ Questa unità **non** esegue l’onda.
 
 ## 22. Decisioni rinviate e gate
 
-| Gate | Motivo | Sblocco |
-|---|---|---|
-| `S2-GATE-BRAND` | Brand/copy in `product-config` | Spostare token e navigazione nelle app |
-| `S2-GATE-SSO` | SSO non definito dalle fonti | Decisione umana esplicita |
-| `S2-GATE-LEGAL-CS` | Documenti legali CS non in inventario come set autonomo | Resta aperto: CS-DOCS 23 non includono legal; markdown dati/fonti è `PONTE_IMPRESE`. Placeholder locale su `/dati-e-fonti`. Redazione testi CS a cut-over |
-| `S2-GATE-ANALYTICS` | Vendor non censito | Scelta per-app |
-| `S2-GATE-EVENTI` | Tassonomia ibrida (SPLIT-1 §17.1) | Owner e regole ibridi |
-| `S2-GATE-CONTENUTI-GUIDE` | Guide commerciali vs API (SPLIT-1 §17.2) | Decisione umana |
-| `S2-GATE-PERSONE-AUTORI` | Autori/speaker (SPLIT-1 §17.3) | Record editoriali minimi CS |
-| `S2-GATE-ORG` | Organizzazioni ibride (SPLIT-1 §17.4) | Owner per record |
-| `S2-GATE-ORG-LOADING` | Originale `CONDIVISO`; copia PI in `apps/ponteimprese` | **Chiuso lato PI** (`S2-PI-CORE-01`). Inventario SPLIT-1 invariato |
-| `S2-GATE-EVENTI-LOADING` | `src/app/eventi/loading.tsx` file `PONTE_IMPRESE`, oggetto `EventiLoading` `CONDIVISO` | **Chiuso lato CS** (`S2-CS-CORE-01`): variante locale `apps/centro-studi/src/app/eventi/loading.tsx` con `LoadingState`. File inventario PI non copiato. SPLIT-1 invariato |
-| `S2-GATE-MERCATI` | Schede vs indicatori (SPLIT-1 §17.5) | Discriminante |
-| `S2-GATE-RUOLI-CS` | Identità editoriali autonome (SPLIT-1 §17.6) | SPLIT-3 / auth CS |
-| `S2-GATE-DATI-ACQUISITI` | Trasferimento riga per riga (SPLIT-1 §17.7) | Approvazione editoriale |
-| `S2-GATE-LINGUE-MERCATI` | Pagina `CONDIVISO` `/lingue-e-mercati` | Duplicare o contratto |
-| `S2-GATE-CUTOVER` | DNS/deploy | GO per dominio |
-| `S2-GATE-SAFE-REDIRECT` | `safe-redirect.ts`: fallback `"/app"` policy Ponte | **Risolto lato PI** (`S2-PI-CORE-01`): copia in `apps/ponteimprese` con semantica esistente. Originale root CONDIVISO. Estrazione neutra in `packages/core` non necessaria per autonomia PI |
-| `S2-GATE-APP-ERROR` | `app-error.ts`: nucleo vs `mapPostgresError` dominio PI | **Risolto lato PI**: modulo completo copiato in `apps/ponteimprese`. `packages/core` non creato. Originale root CONDIVISO |
-| `S2-GATE-ENV-EXAMPLE` | Root `env.example`: nomi Supabase condivisibili vs HMAC/retention/`access_provision_account` (PonteImprese) e cenni Vercel | Esempi per-app distinti; oppure restare solo root fino al cut-over; oppure altra soluzione dimostrata. Non duplicare il file verso Centro Studi. Non scegliere in questa unità |
-| `S2-GATE-HOME-LAYOUT` | Header, Footer e `src/components/home/**` | **Duplicato lato PI** in `S2-PI-CORE-01`. Originale CONDIVISO. Copia CS e specializzazione brand restano |
-| `S2-GATE-APP-COMPONENTS` | `src/components/app/**` e `AuthForm` | **Duplicato lato PI** (componenti importati dal core PI). Originale CONDIVISO. Kernel editoriale inventario-CS: `S2-GATE-PI-EDITORIAL-SUPPORT` |
-| `S2-GATE-PUBLIC-LEGAL-COMP` | `public/**`, `legal/**`, `SectionPage` | **Duplicato lato PI** i public/legal importati. `SectionPage` non necessario al set PI (non copiato). Originale CONDIVISO |
-| `S2-GATE-SUPABASE-CLIENT` | `client.ts` / `server.ts` | **Risolto lato PI e CS**: copie in entrambe le app (solo codice; nessun `.env*`, nessun secret). Originale root |
-| `S2-GATE-PI-EDITORIAL-SUPPORT` | Moduli inventario `CENTRO_STUDI` duplicati in PI perché richiesti dalle route PI redazione mercati/opportunità/organizzazioni e dal kernel `editorial/actions.ts` | Non riclassificare SPLIT-1. Prompt CS possiede gli originali. Non è import `apps/ponteimprese` → `apps/centro-studi` |
-| `S2-GATE-PI-LEGAL-DOCS` | Markdown legali runtime in `apps/ponteimprese/docs/architecture/legal` | **Chiuso** (`S2-PI-FINAL-01`). `PI_RUNTIME_LEGAL_ROOT_DEPENDENCY = 0` |
+Classificazione `S2-CLEANUP-ARCH-01` (workspace di prodotto). Root legacy resta fino al cut-over.
+
+| GATE | STATO | MOTIVO | OWNER FUTURO |
+|---|---|---|---|
+| `S2-GATE-BRAND` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Identità distinta via `product-config`; PI `siteConfig.name` = PonteImprese; CS usa `centroStudiConfig`. | Cut-over: `BRAND_DOMAIN_CUTOVER = PENDING` |
+| `S2-GATE-SSO` | `CUTOVER_PENDING` | Nessun SSO nuovo. Redirect CS `/accedi` transitorio. `CS_SSO_CUTOVER = PENDING`. | Cut-over / decisione umana |
+| `S2-GATE-LEGAL-CS` | `CUTOVER_PENDING` | `CS_LEGAL_CONTENT = CUTOVER_BLOCKER`. Placeholder locale, non testo giuridico. | Cut-over (redazione testi CS) |
+| `S2-GATE-ANALYTICS` | `CUTOVER_PENDING` | Vendor non censito. | Cut-over / scelta per-app |
+| `S2-GATE-EVENTI` | `SPLIT_3_PENDING` | `EVENTI_APP_OWNERSHIP = CENTRO_STUDI`. Motore CONDIVISO e schema: `EVENTI_DATABASE_SPLIT = SPLIT_3_PENDING`. Script PI `d1-d8a` non porta il motore in PI. | SPLIT-3 + Prompt 7 (script PI) |
+| `S2-GATE-CONTENUTI-GUIDE` | `PROMPT_7_PENDING` | Route `/notizie-e-guide` è CS (`redirect /contenuti`). Policy guide commerciali vs API (SPLIT-1 §17.2) non documentata. | Prompt 7 / decisione umana |
+| `S2-GATE-PERSONE-AUTORI` | `SPLIT_3_PENDING` | Record autori/speaker ibridi. | SPLIT-3 |
+| `S2-GATE-ORG` | `SPLIT_3_PENDING` | PI: catalogo pubblico/redazione. CS: form editoriali inventario CS. Schema misto. `ORG_DATABASE_BOUNDARY = SPLIT_3_PENDING`. | SPLIT-3 |
+| `S2-GATE-ORG-LOADING` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Copia PI in app; originale CONDIVISO. | — |
+| `S2-GATE-EVENTI-LOADING` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Variante CS locale; file inventario PI non copiato in CS. | — |
+| `S2-GATE-MERCATI` | `SPLIT_3_PENDING` | Schede PI vs indicatori CS. Discriminante dati. | SPLIT-3 |
+| `S2-GATE-RUOLI-CS` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | `CS_ROLE_CODE_BOUNDARY = RESOLVED` (guards/session locali). `CS_SSO_CUTOVER = PENDING`. | Cut-over SSO |
+| `S2-GATE-DATI-ACQUISITI` | `SPLIT_3_PENDING` | Trasferimento riga per riga. | SPLIT-3 |
+| `S2-GATE-LINGUE-MERCATI` | `PROMPT_7_PENDING` | Pagina CONDIVISO = solo `redirect("/mercati")`. Non inferire ownership. Non copiata. | Prompt 7 |
+| `S2-GATE-CUTOVER` | `CUTOVER_PENDING` | DNS/deploy. | Prompt 8 / GO dominio |
+| `S2-GATE-SAFE-REDIRECT` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Copia PI; originale CONDIVISO. CS non usa `/app` fallback PI. | — |
+| `S2-GATE-APP-ERROR` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Copie per-app; originale CONDIVISO. | — |
+| `S2-GATE-ENV-EXAMPLE` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | `apps/ponteimprese/env.example` e `apps/centro-studi/env.example` (solo placeholder). Root `env.example` legacy. | Cut-over: rimozione root |
+| `S2-GATE-HOME-LAYOUT` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Header/Footer PI e CS in-app. Originali CONDIVISO. | — |
+| `S2-GATE-APP-COMPONENTS` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Componenti app usati copiati per prodotto. | — |
+| `S2-GATE-PUBLIC-LEGAL-COMP` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Public/legal copiati per prodotto. | — |
+| `S2-GATE-SUPABASE-CLIENT` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Client in entrambe le app. | — |
+| `S2-GATE-PI-EDITORIAL-SUPPORT` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | `PI_LOCAL_EDITORIAL_SUPPORT = INTENTIONAL_DUPLICATION`. Copie PI usate da redazione mercati/opportunità/organizzazioni. SPLIT-1 invariato. | SPLIT-3 se scissione dati |
+| `S2-GATE-PI-LEGAL-DOCS` | `RESOLVED` | Markdown runtime in app PI. | — |
+| `states.tsx` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Copie per-app; originale CONDIVISO. | — |
 
 `S2-COND-UTIL-01` (eseguita, closeout documentale): i quattro file restano `CONDIVISO` nei path originali; non riclassificati; `packages/core` non esiste. Il mancato trasferimento è un **gate documentato**, non un fallimento dell’onda. Completamento implementativo rinviato alla risoluzione dei due gate.
 
@@ -378,3 +381,7 @@ Fine documento. Closeout `S2-PI-FINAL-01`: PonteImprese autonomo per lo sviluppo
 `S2-CS-FINAL-01` (`S2-CS-DOCS-01` + `S2-CS-TEST-01` + `S2-CS-MIG-01`): 23 docs + 9 test/script + 21 supabase copiati in `apps/centro-studi`. `CENTRO_STUDI_AUTONOMOUS = YES`. `CS_MIGRATION_OWNERSHIP = COPIED`. `CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `CS_RUNTIME_ROOT_DOCUMENT_DEPENDENCIES = 0`. `S2-GATE-LEGAL-CS` aperto (nessun set legal CS in inventario; non copiare markdown PI). E2E/script DB-rete `NOT_RUN_EXTERNAL_DEPENDENCY`. `CS_SSO_CUTOVER = PENDING`. `S2-GATE-BRAND` / `S2-GATE-EVENTI` / `S2-GATE-ORG` / `S2-GATE-LINGUE-MERCATI` / `S2-GATE-PI-EDITORIAL-SUPPORT` aperti, non bloccanti per l’autonomia di workspace. Lockfile workspace non riallineato (niente `npm install`).
 
 Fine documento. Closeout `S2-CS-FINAL-01`: Centro Studi autonomo per lo sviluppo applicativo; DB fisico, SSO e cut-over rinviati.
+
+`S2-CLEANUP-ARCH-01` (`S2-ARCH-01` + cleanup workspace): 85/85 ARCHIVIO classificati e conservati in root (zero delete). `production-write-guard.mjs` copiato in PI (già in CS). `PI_ARCHIVE_RUNTIME_DEPENDENCIES = 0`. `CS_ARCHIVE_RUNTIME_DEPENDENCIES = 0`. `CS_ARCHIVE_SCRIPT_DEPENDENCIES = 0`. `PI_EXTERNAL_SCRIPT_GUARD_DEPENDENCY = 0`. Script PI `d1-d8a-events-dry-run` non porta il motore Eventi in PI (`PI_EXTERNAL_SCRIPT_FILE_DEPENDENCIES = 1`, Prompt 7). Env example per-app. Lock workspace allineato alle dichiarazioni `package.json` (nessun `npm install`, nessun hash inventato). `PONTEIMPRESE_AUTONOMOUS = YES`. `CENTRO_STUDI_AUTONOMOUS = YES`. `WORKSPACE_LOCK_CONSISTENT = YES`.
+
+Fine documento. Closeout `S2-CLEANUP-ARCH-01`: ARCHIVIO riconciliato; gate workspace chiusi o assegnati a Prompt 7 / SPLIT-3 / CUTOVER.

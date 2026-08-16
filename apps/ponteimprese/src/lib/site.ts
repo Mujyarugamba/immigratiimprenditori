@@ -1,6 +1,12 @@
+import { ponteImpreseConfig } from "@immigrati/product-config";
+
+/**
+ * Product identity for PonteImprese (code-level brand).
+ * `domain` remains the current public contact host until BRAND_DOMAIN_CUTOVER.
+ * Do not treat plannedDomain as a live DNS change.
+ */
 export const siteConfig = {
-  name: "Immigrati Imprenditori",
+  name: ponteImpreseConfig.name,
   domain: "immigratiimprenditori.it",
-  description:
-    "Piattaforma nazionale dedicata agli imprenditori di origine immigrata che operano in Italia.",
+  description: ponteImpreseConfig.description,
 } as const;

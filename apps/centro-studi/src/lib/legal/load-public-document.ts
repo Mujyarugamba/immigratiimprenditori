@@ -12,7 +12,7 @@ function centroStudiLegalDocsDir(): string {
 }
 
 const CS_LEGAL_PENDING =
-  "Documento legale Centro Studi in attesa di redazione autonoma (S2-GATE-LEGAL-CS). Il testo giuridico non è caricato dalla root del monorepo né da PonteImprese.";
+  "Documento legale Centro Studi in attesa di redazione autonoma (S2-GATE-LEGAL-CS; CS_LEGAL_CONTENT = CUTOVER_BLOCKER). Placeholder, non testo giuridico definitivo. Il testo non è caricato dalla root del monorepo né da PonteImprese.";
 
 /**
  * Loads CS-local legal markdown from apps/centro-studi/docs/architecture/legal

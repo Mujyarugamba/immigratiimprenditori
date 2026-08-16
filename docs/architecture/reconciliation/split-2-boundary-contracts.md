@@ -81,13 +81,15 @@ Gate esplicito `S2-GATE-ORG-LOADING` (onda `S2-COND-LIB-01`, closeout `S2-PI-COR
 
 `S2-PI-CORE-01`: 159 file PI copiati in `apps/ponteimprese` (root intatta). Dipendenze TypeScript verso root `src/` = 0. Package: `@immigrati/ui-foundation`, `@immigrati/product-config`.
 
-`S2-PI-FINAL-01`: `PONTEIMPRESE_AUTONOMOUS = YES`. Docs 77, test 28, migration 126 copiati. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. Navigazione verso sezioni CS: `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER` (non è import di codice). `S2-GATE-PI-EDITORIAL-SUPPORT` resta aperto come supporto transitorio PI fino al Prompt CS.
+`S2-PI-FINAL-01`: `PONTEIMPRESE_AUTONOMOUS = YES`. Docs 77, test 28, migration 126 copiati. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. Navigazione verso sezioni CS: `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER` (non è import di codice). `PI_LOCAL_EDITORIAL_SUPPORT = INTENTIONAL_DUPLICATION` (chiuso applicativamente in `S2-CLEANUP-ARCH-01`).
 
 `S2-CS-CORE-01`: 62 file CS copiati in `apps/centro-studi` (root intatta; Ponte invariato). `CS_TO_PI_IMPORTS = 0`. `CS_EXTERNAL_APP_FILE_DEPENDENCIES = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL` (superato da `S2-CS-FINAL-01`).
 
-`S2-CS-FINAL-01`: `CENTRO_STUDI_AUTONOMOUS = YES`. Docs 23, test 9, migration 21 copiati. `CS_MIGRATION_OWNERSHIP = COPIED`. `CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `CS_RUNTIME_ROOT_DOCUMENT_DEPENDENCIES = 0`. Legal CS: `S2-GATE-LEGAL-CS` aperto (placeholder locale; nessun markdown PI). Helper e2e PI e guard ingest ARCHIVIO copiati come supporto script/test. `CS_SSO_CUTOVER = PENDING`. Typecheck CS/PI/root = 0. Lock non aggiornato (niente `npm install`). `PONTEIMPRESE_AUTONOMOUS = YES` invariato.
+`S2-CS-FINAL-01`: `CENTRO_STUDI_AUTONOMOUS = YES`. Docs 23, test 9, migration 21 copiati. `CS_MIGRATION_OWNERSHIP = COPIED`. `CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `CS_RUNTIME_ROOT_DOCUMENT_DEPENDENCIES = 0`. Legal CS: `S2-GATE-LEGAL-CS` aperto (placeholder locale; nessun markdown PI). Helper e2e PI e guard ingest ARCHIVIO copiati come supporto script/test. `CS_SSO_CUTOVER = PENDING`. Typecheck CS/PI/root = 0. `PONTEIMPRESE_AUTONOMOUS = YES` invariato.
 
-Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): root `env.example` resta `CONDIVISO`. Non duplicato in questa unità.
+`S2-CLEANUP-ARCH-01`: 85/85 ARCHIVIO in root (classificati; zero delete). Guard ingest copiata in PI e CS. `PI_LOCAL_EDITORIAL_SUPPORT = INTENTIONAL_DUPLICATION`. Env example per-app. `WORKSPACE_LOCK_CONSISTENT = YES`. `EVENTI_APP_OWNERSHIP = CENTRO_STUDI`. `CS_LEGAL_CONTENT = CUTOVER_BLOCKER`. `BRAND_DOMAIN_CUTOVER = PENDING`. Script PI eventi: non duplicato il motore CS.
+
+Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): **RESOLVED_FOR_PRODUCT_WORKSPACES**. Esempi in `apps/ponteimprese/env.example` e `apps/centro-studi/env.example` (solo placeholder). Root `env.example` resta legacy.
 
 Gate esplicito `S2-GATE-HOME-LAYOUT` / `S2-GATE-APP-COMPONENTS` / `S2-GATE-PUBLIC-LEGAL-COMP` (onda `S2-COND-COMP-01`): originali restano `CONDIVISO` in root. **Duplicati lato PI** in `S2-PI-CORE-01`. **Lato CS** in `S2-CS-CORE-01`: Header/Footer minimi propri (non copia PI); public list e renderer legal copiati; `AuthForm`/home PI non copiati.
 
