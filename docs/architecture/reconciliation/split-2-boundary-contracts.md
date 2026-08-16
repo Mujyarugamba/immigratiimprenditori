@@ -1,0 +1,206 @@
+# SPLIT-2A — Contratti di confine tra PonteImprese e Centro Studi
+
+Documento ricostruito in SPLIT-2A-RECOVERY. Complemento di `split-2-target-architecture.md` e `split-2-migration-waves.csv`. Solo documentale.
+
+Le etichette `G1`–`G5`, `G4=15` e `W2.1=18` non sono contratti e non vincolano i confini.
+
+## 1. Responsabilità PonteImprese
+
+Ownership definitiva da SPLIT-1 §8 e mapping route §7:
+
+- Account, autenticazione, ruoli operativi, profili operativi, onboarding.
+- Imprese, membership, autorizzazioni, riassegnazioni, chiusura/sospensione account.
+- Professionisti, servizi (richieste/offerte), opportunità, collaborazioni, matching.
+- Organizzazioni **commerciali** / operatori B2B.
+- Mercati e internazionalizzazione commerciale.
+- Contatti, consensi, privacy, termini, cookie, retention, cancellazione self-service (finché non esiste set legale autonomo CS).
+- Pipeline opportunità / Incentivi.gov.
+- Route pubbliche e riservate classificate `PONTE_IMPRESE` (inventario file + tabella route).
+- Deploy, SEO, analytics, identità grafica e dominio `ponteimprese.com`.
+
+PonteImprese deve funzionare senza moduli interni del Centro Studi.
+
+## 2. Responsabilità Centro Studi
+
+- Contenuti editoriali, cultura, notizie e guide di ricerca, dati e fonti, storie e pubblicazioni.
+- Eventi scientifici/editoriali/attuali classificati `CENTRO_STUDI`.
+- Osservatorio: indicatori, valori, fonti statistiche, serie, dati territoriali/comparativi (sottodominio interno, non prodotto).
+- Fonti e metodologia; allowlist ISMU/PIM/MLPS/EMN/Futurae/Unioncamere e dati acquisiti relativi.
+- Pipeline World Bank / Eurostat.
+- Sotto-aree redazionali classificate `CENTRO_STUDI` nell’inventario SPLIT-1 (non l’intero albero `redazione/**`), incluse in particolare `src/app/app/redazione/contenuti/**`, `src/app/app/redazione/eventi/**`, `src/app/app/redazione/osservatorio/**` e la pagina indice redazione se allocate CS.
+- Route pubbliche allocate `CENTRO_STUDI`.
+- Deploy, SEO, analytics, identità grafica e dominio attuale.
+
+Non è una regola generale `src/app/app/redazione/** → CENTRO_STUDI`. Restano `PONTE_IMPRESE` (SPLIT-1 §7):
+
+- `src/app/app/redazione/mercati-internazionali/**`
+- `src/app/app/redazione/opportunita/**`
+- `src/app/app/redazione/organizzazioni/**`
+
+Ogni altro path redazione segue la riga inventario; nessuna riclassificazione in questo documento.
+
+Route pubbliche organizzazioni (SPLIT-1 definitivo): `src/app/organizzazioni/page.tsx` e `src/app/organizzazioni/[slug]/page.tsx` sono `PONTE_IMPRESE`. `src/app/organizzazioni/loading.tsx` resta `CONDIVISO` (residuo con gate `S2-GATE-ORG-LOADING`). Una futura decisione potrà mantenerlo condiviso, duplicarlo o assegnarlo a PonteImprese solo dopo verifica del comportamento route/layout. Non inferirlo dallo `[slug]`.
+
+Route pubbliche eventi (SPLIT-1 definitivo, §7): `src/app/eventi/page.tsx` e `src/app/eventi/[id]/page.tsx` sono `CENTRO_STUDI`. `src/app/eventi/loading.tsx` resta `PONTE_IMPRESE` (file) con oggetto `EventiLoading` ancora `CONDIVISO` (residuo preesistente, gate `S2-GATE-EVENTI-LOADING`). Non inferire il loading dalle `page.tsx`. Esiti futuri possibili, senza deciderli ora: allineamento a Centro Studi, permanenza Ponte, duplicazione, o altra soluzione dimostrata dopo verifica route/layout e coerenza file/oggetto.
+
+Il Centro Studi deve funzionare senza matching, membership, richieste/offerte o funzioni commerciali di PonteImprese.
+
+## 3. Responsabilità condivise
+
+Limitate a quanto classificato `CONDIVISO` nell’inventario, con modalità esplicita:
+
+| Modalità inventario | Significato di confine |
+|---|---|
+| `DUPLICAZIONE_CONTROLLATA` | Copia specializzabile; non è un runtime condiviso |
+| `SCHEMA_TEMPLATE_DUPLICATO` | Schema da copiare; dati separati; in SPLIT-2 non si tocca SQL |
+| `PACKAGE_VERSIONATO` | Candidato a package solo se neutro e senza migration |
+
+Cataloghi strutturali (paesi, lingue, territori, settori): template o export versionato, non database operativo comune (SPLIT-1 §15).
+
+`CONDIVISO` non autorizza stessa grafica, stessi cookie, stessa SEO o stesso comportamento applicativo.
+
+Gate esplicito sul residuo `src/app/organizzazioni/loading.tsx` (`S2-GATE-ORG-LOADING`, onda `S2-COND-LIB-01`): file ancora `CONDIVISO`; ownership di prodotto non assegnata in questa unità.
+
+Gate esplicito sul residuo `src/app/eventi/loading.tsx` (`S2-GATE-EVENTI-LOADING`, onda `S2-PI-APP-01`): file `PONTE_IMPRESE`, oggetto `EventiLoading` `CONDIVISO`; incoerenza preesistente non risolta per inferenza.
+
+## 4. Dipendenze ammesse
+
+1. `apps/*` → `packages/*` (API pubblica del package).
+2. Contratto versionato, identificatore esterno non sensibile, snapshot approvato, API read-only tollerante all’indisponibilità.
+3. Duplicazione di configurazione toolchain e client Supabase (istanze separate).
+4. Lettura di URL pubblici dell’altro prodotto, senza sessione condivisa.
+
+## 5. Dipendenze vietate
+
+1. Import runtime `apps/ponteimprese` ↔ `apps/centro-studi`.
+2. `packages/*` → `apps/*`.
+3. Deep import nei package.
+4. Package dipendenti da route, server action, secret, branding, copy, client Supabase proprietario (salvo UI primitive dichiarate e senza brand).
+5. FK, sessioni, ruoli o oggetti runtime assunti comuni fra le due app.
+6. Replica di account, contatti, membership, autorizzazioni, richieste, offerte, dati commerciali verso il Centro Studi.
+7. Un ruolo editoriale CS che erediti privilegi commerciali Ponte.
+8. Allowlist, credenziali pipeline o artefatti di ingestion condivisi fra owner diversi.
+9. Cancellazione di `ARCHIVIO` senza GO umano.
+
+## 6. Contratti API
+
+Fino a SPLIT-3 non si implementano API nuove in questa unità. I contratti previsti, da versionare in `packages/contracts` quando un’onda lo richiederà, sono:
+
+| Contratto | Direzione | Payload minimo | Indisponibilità |
+|---|---|---|---|
+| `cs.read.public_content` | CS → consumatori esterni / eventuale Ponte | ID esterno, titolo, URL canonico, data, tipo | Tollerare 404/vuoto |
+| `pi.read.public_org_ref` | Ponte → CS (solo se gate `S2-GATE-ORG`) | ID esterno non personale, nome pubblico, URL | Non esporre membership |
+| `catalog.export.geo` | template/export | Codici paese/lingua/territorio/settore | Snapshot versionato |
+| `events.ref` | per prodotto, non misto | ID esterno evento, tipo, owner | Nessun join cross-DB |
+
+Nessun contratto implica accesso service-role dell’altro prodotto. Semantic versioning obbligatorio. Nessun import runtime dell’altro app.
+
+Riferimenti editoriali a entità commerciali: `API_READ_ONLY` (SPLIT-1 §15), non FK.
+
+## 7. Confini dati
+
+| Classe | Restano su Ponte | Restano su Centro Studi | Template/export |
+|---|---|---|---|
+| Identità e consensi | account, profili operativi, contatti, consensi, retention | record editoriali minimi autori/speaker solo dopo `S2-GATE-PERSONE-AUTORI` | no |
+| Commerciale | imprese, membership, servizi, opportunità, matching | no | no |
+| Editoriale/statistico | no (salvo link pubblici) | contenuti, fonti, Osservatorio, eventi CS | no |
+| Cataloghi | istanza Ponte | istanza CS | sì |
+| Eventi | eventi B2B se discriminati | eventi CS | schema tecnico duplicabile |
+| Organizzazioni | operatori B2B | università/centri ricerca se discriminati | schema tecnico duplicabile |
+
+## 8. Record che devono restare separati
+
+Non trasferire e non replicare di default:
+
+- account, sessioni, ruoli operativi, membership, grant;
+- contatti e dati personali;
+- richieste/offerte, opportunità commerciali, matching;
+- consensi e log di cancellazione/riassegnazione;
+- dati acquisiti da allowlist CS (non condividerli con Ponte);
+- artefatti `ARCHIVIO`.
+
+Eventi e contenuti già acquisiti: trasferimento solo con approvazione editoriale riga per riga (`S2-GATE-DATI-ACQUISITI`).
+
+## 9. Autenticazione
+
+- Transitorio: stesso progetto Supabase, configurazioni app separate; cookie e host destinati a divergere al cut-over.
+- Target: identità CS autonome; eventuale SSO solo con `S2-GATE-SSO` e senza fusione privilegi.
+- Sessioni non condivise fra prodotti dopo il cut-over dei domini.
+- Cancellazione self-service e retention restano flussi Ponte finché CS non ha policy proprie.
+- Retention, cancellazione self-service, anonimizzazione/minimizzazione e eventuale conservazione per obblighi legali o tutela dei diritti sono operazioni fisiche di **SPLIT-3**, non di SPLIT-2.
+
+## 10. Autorizzazioni
+
+| Ruolo | Può | Non può |
+|---|---|---|
+| Admin / ruoli operativi Ponte | amministrare account, imprese, matching Ponte | pubblicare o moderare come redazione CS per il solo fatto di essere admin Ponte |
+| Editor / redazione CS | contenuti, eventi CS, Osservatorio secondo policy esistenti | membership, offerte, opportunità, dati commerciali Ponte |
+| Utente autenticato Ponte | perimetro B2B | area redazione CS |
+| Anonimo | solo pubblicato secondo RLS esistenti | review-only, dati personali, service-role |
+
+Ogni eccezione richiede gate umano e aggiornamento inventario.
+
+## 11. Privacy
+
+- Finalità distinte: operativa/commerciale vs ricerca/divulgazione.
+- Consensi non si considerano trasferibili fra prodotti.
+- Documenti legali, cookie configuration e retention: distinti a target; transitorio: testi attuali restano delle route `PONTE_IMPRESE` finché `S2-GATE-LEGAL-CS` non produce l’equivalente CS.
+- Retention, cancellazione self-service, anonimizzazione/minimizzazione e eventuale conservazione per obblighi legali o tutela dei diritti: disciplina fisica in SPLIT-3, senza implementazione in SPLIT-2.
+- DPIA/valutazione legale rinviata come mitigazione SPLIT-1 §23, non eseguita qui.
+- Nessuna lettura di `.env*` in questa unità.
+
+## 12. Pipeline
+
+Un solo owner operativo per ciascuna pipeline (vedi architettura target §16).
+
+Regole:
+
+- importer, publisher, scheduler, dry-run e credenziali seguono l’owner;
+- allowlist non si mescolano;
+- motore generico (normalizzazione, checksum, deduplica) può stare in `packages/core` solo se privo di allowlist e di dati;
+- evidenze e manifest finiscono in `ARCHIVIO` o in docs di dominio, mai come dipendenza runtime dell’altra app.
+
+## 13. Migration ownership
+
+- Catena `supabase/migrations/**` immutabile in SPLIT-2.
+- Ownership documentale per categoria file inventario (`PONTE_IMPRESE` / `CENTRO_STUDI` / `CONDIVISO` / `ARCHIVIO`).
+- Oggetti SQL (1.959 occorrenze) restano legati al database proprietario: RLS, grant, revoke, trigger, indici, vincoli non si “condividono” operativamente.
+- Baseline nuove: solo SPLIT-3, senza riscrivere la storia.
+- `SCHEMA_TEMPLATE_DUPLICATO` e `PACKAGE_VERSIONATO` su file `migration_sql` non autorizzano `git mv` delle migration in SPLIT-2.
+
+## 14. Package condivisi
+
+Contratto di package:
+
+1. API pubblica minima ed esportata.
+2. Nessun deep import.
+3. Nessun secret.
+4. Test contrattuale quando il package lascia lo stato scaffold.
+5. Owner tecnico dichiarato nell’onda che lo popola.
+6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app).
+7. `product-config`: dopo `S2-GATE-BRAND` solo chiavi non grafiche (id prodotto, dominio previsto).
+
+## 15. Regole anti-accoppiamento
+
+1. Direzione unica `apps → packages`.
+2. Un’app non importa l’altra.
+3. Link incrociati = URL o ID esterni, non tabelle condivise.
+4. Tolleranza all’indisponibilità dell’altro prodotto.
+5. Navigation, layout e branding non sono package.
+6. Client Supabase duplicati, env distinti.
+7. Eccezioni: gate + riga inventario aggiornata **prima** del trasferimento.
+
+## 16. Regole per future estrazioni in repository separati
+
+Precondizioni (SPLIT-1 §20–22, piano W3):
+
+1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`.
+2. Nessun import app-to-app.
+3. Tag di split sul monorepo.
+4. Derivazione dei due repository conservando la storia.
+5. Rimozione del perimetro non di competenza solo con GO dedicato e manifest di provenienza.
+6. Non cancellare `ARCHIVIO` né la catena Supabase originale in quell’atto.
+7. Database fisicamente separati solo in SPLIT-3, dopo le baseline.
+8. DNS e secret già distinti (`S2-CUTOVER-01` / `S2-GATE-CUTOVER`).
+
+Fine documento. Nessuna implementazione eseguita.

@@ -37,9 +37,9 @@ Lettura limitata ai tre deliverable SPLIT-1 e ai riferimenti direttamente indisp
 
 | Categoria | Conteggio |
 |---|---:|
-| PONTE_IMPRESE | 386 |
-| CENTRO_STUDI | 118 |
-| CONDIVISO | 124 |
+| PONTE_IMPRESE | 390 |
+| CENTRO_STUDI | 115 |
+| CONDIVISO | 123 |
 | ARCHIVIO | 85 |
 | **Totale** | **713** |
 
@@ -49,9 +49,9 @@ Tipi principali: 180 migration SQL, 154 documenti Markdown, 161 file TS/TSX appl
 
 | Categoria | Conteggio |
 |---|---:|
-| PONTE_IMPRESE | 475 |
-| CENTRO_STUDI | 496 |
-| CONDIVISO | 984 |
+| PONTE_IMPRESE | 499 |
+| CENTRO_STUDI | 487 |
+| CONDIVISO | 969 |
 | ARCHIVIO | 4 |
 | **Totale** | **1.959** |
 
