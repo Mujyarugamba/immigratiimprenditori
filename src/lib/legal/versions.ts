@@ -1,6 +1,7 @@
 /**
- * CS public legal identifiers. Full markdown lives in CS-DOCS (Prompt 5/8).
- * Do not load PonteImprese legal documents from the monorepo root.
+ * CS public legal identifiers. Markdown is CS-local when present.
+ * Root informativa dati/fonti is PONTE_IMPRESE (S2-GATE-LEGAL-CS).
+ * Do not load PonteImprese legal documents.
  */
 export const LEGAL_ROUTES = {
   datiEFonti: "/dati-e-fonti",
