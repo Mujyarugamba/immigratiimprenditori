@@ -69,6 +69,12 @@ Gate esplicito `S2-GATE-APP-ERROR` (onda `S2-COND-UTIL-01`): `src/lib/errors/app
 
 Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): root `env.example` resta `CONDIVISO` nel path originale. Documenta nomi di variabili, non valori segreti. Parte potenzialmente comune: URL/chiavi pubbliche Supabase locali. Parte PonteImprese: `SUPABASE_SERVICE_ROLE_KEY` per `access_provision_account`, `LEGAL_SUBJECT_HMAC_SECRET` / `legal_retention_records`, checklist Vercel. Non duplicato verso le app. Decisioni future ammesse, senza sceglierle ora: (1) esempi per-app distinti; (2) restare solo root fino al cut-over; (3) altra soluzione dimostrata. Non copiare il file così com’è in Centro Studi.
 
+Gate esplicito `S2-GATE-HOME-LAYOUT` (onda `S2-COND-COMP-01`): `src/components/layout/Header.tsx`, `Footer.tsx` e i sette file `src/components/home/**` restano `CONDIVISO` in sede. Brand «Immigrati Imprenditori», copy ecosistemi, route `/imprese` `/registrati` `/app` `/accedi`. Non estratti in package. Decisioni future: duplicare e specializzare per app nelle onde PI/CS; non package condiviso.
+
+Gate esplicito `S2-GATE-APP-COMPONENTS` (onda `S2-COND-COMP-01`): i 15 file `src/components/app/**` e `src/components/auth/AuthForm.tsx` restano in sede. Area riservata, imprese, membership, admin, redazione mista, server actions. Non package. Decisioni future: duplicare per app dopo il trasferimento delle route; la redazione mista segue i gate già aperti.
+
+Gate esplicito `S2-GATE-PUBLIC-LEGAL-COMP` (onda `S2-COND-COMP-01`): `src/components/public/**` (9 file), `legal/**` (2 file) e `src/components/sections/SectionPage.tsx` restano in sede. Catalogo pubblico del sito misto; `PersonNetworkContact` usa `/accedi`; `LegalDocumentPage` carica documenti legali PI. Non package. Decisioni future: duplicare con le page pubbliche; equivalenti CS dopo `S2-GATE-LEGAL-CS`.
+
 ## 4. Dipendenze ammesse
 
 1. `apps/*` → `packages/*` (API pubblica del package).
@@ -183,7 +189,7 @@ Contratto di package:
 3. Nessun secret.
 4. Test contrattuale quando il package lascia lo stato scaffold.
 5. Owner tecnico dichiarato nell’onda che lo popola.
-6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app).
+6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app). Include `FormField` da `S2-COND-COMP-01`. Header/Footer/home/app/admin **non** entrano nel package.
 7. `product-config`: dopo `S2-GATE-BRAND` solo chiavi non grafiche (id prodotto, dominio previsto).
 8. `core`: non creato da `S2-COND-UTIL-01` (4 file inventario, 0 estratti). Nessuna policy di prodotto (`"/app"`, mapping dominio/DB) nel package. Popolamento ammesso solo dopo `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`.
 9. `tooling-config`: non creato da `S2-COND-TOOL-01` (14 file inventario, 0 duplicati). Il tooling monorepo resta a root finché `src/` legacy lo richiede. `env.example` solo dopo `S2-GATE-ENV-EXAMPLE`.
@@ -202,7 +208,7 @@ Contratto di package:
 
 Precondizioni (SPLIT-1 §20–22, piano W3):
 
-1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. Un’onda con gate aperti (oggi `S2-COND-UTIL-01` / `S2-GATE-SAFE-REDIRECT` / `S2-GATE-APP-ERROR` e `S2-COND-TOOL-01` / `S2-GATE-ENV-EXAMPLE`) **non** soddisfa la propria condizione di completamento finale. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`, né mentre quei gate restano irrisolti. L’insieme delle 18 dipendenze W2 è invariato.
+1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. Un’onda con gate aperti (oggi `S2-COND-UTIL-01` / `S2-GATE-SAFE-REDIRECT` / `S2-GATE-APP-ERROR`, `S2-COND-TOOL-01` / `S2-GATE-ENV-EXAMPLE` e `S2-COND-COMP-01` / `S2-GATE-HOME-LAYOUT` / `S2-GATE-APP-COMPONENTS` / `S2-GATE-PUBLIC-LEGAL-COMP`) **non** soddisfa la propria condizione di completamento finale. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`, né mentre quei gate restano irrisolti. L’insieme delle 18 dipendenze W2 è invariato.
 2. Nessun import app-to-app.
 3. Tag di split sul monorepo.
 4. Derivazione dei due repository conservando la storia.

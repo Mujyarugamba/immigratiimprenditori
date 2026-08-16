@@ -10,6 +10,7 @@ export { ButtonLink } from "./ButtonLink";
 export { Card } from "./Card";
 export { Container } from "./Container";
 export { EmptyState } from "./EmptyState";
+export { FormField } from "./FormField";
 export { Icon, type IconName } from "./Icon";
 export { Section } from "./Section";
 export { SectionIntro } from "./SectionIntro";
