@@ -67,6 +67,8 @@ Gate esplicito `S2-GATE-SAFE-REDIRECT` (onda `S2-COND-UTIL-01`): `src/lib/auth/s
 
 Gate esplicito `S2-GATE-APP-ERROR` (onda `S2-COND-UTIL-01`): `src/lib/errors/app-error.ts` e `src/lib/errors/app-error.test.ts` restano `CONDIVISO` nei path originali. Nucleo potenzialmente neutro: tipi errore, `appError`, `toUserMessage`. Parte non neutra: `mapPostgresError`, SQLSTATE/schema, `profiles_slug_key`, mapping membership/grant/impresa/bootstrap (dominio PonteImprese). File misto: nessun trasferimento integrale in `packages/core` e nessuno split in questa unità. Decisioni future ammesse, senza sceglierle ora: (1) estrarre solo il nucleo neutro in `packages/core` e lasciare mapping PostgreSQL/dominio a PonteImprese; (2) ownership integrale PonteImprese; (3) altra soluzione dimostrata.
 
+Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): root `env.example` resta `CONDIVISO` nel path originale. Documenta nomi di variabili, non valori segreti. Parte potenzialmente comune: URL/chiavi pubbliche Supabase locali. Parte PonteImprese: `SUPABASE_SERVICE_ROLE_KEY` per `access_provision_account`, `LEGAL_SUBJECT_HMAC_SECRET` / `legal_retention_records`, checklist Vercel. Non duplicato verso le app. Decisioni future ammesse, senza sceglierle ora: (1) esempi per-app distinti; (2) restare solo root fino al cut-over; (3) altra soluzione dimostrata. Non copiare il file così com’è in Centro Studi.
+
 ## 4. Dipendenze ammesse
 
 1. `apps/*` → `packages/*` (API pubblica del package).
@@ -184,6 +186,7 @@ Contratto di package:
 6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app).
 7. `product-config`: dopo `S2-GATE-BRAND` solo chiavi non grafiche (id prodotto, dominio previsto).
 8. `core`: non creato da `S2-COND-UTIL-01` (4 file inventario, 0 estratti). Nessuna policy di prodotto (`"/app"`, mapping dominio/DB) nel package. Popolamento ammesso solo dopo `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`.
+9. `tooling-config`: non creato da `S2-COND-TOOL-01` (14 file inventario, 0 duplicati). Il tooling monorepo resta a root finché `src/` legacy lo richiede. `env.example` solo dopo `S2-GATE-ENV-EXAMPLE`.
 
 ## 15. Regole anti-accoppiamento
 
@@ -199,7 +202,7 @@ Contratto di package:
 
 Precondizioni (SPLIT-1 §20–22, piano W3):
 
-1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. Un’onda con gate aperti (oggi `S2-COND-UTIL-01` / `S2-GATE-SAFE-REDIRECT` / `S2-GATE-APP-ERROR`) **non** soddisfa la propria condizione di completamento finale. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`, né mentre quei gate restano irrisolti. L’insieme delle 18 dipendenze W2 è invariato.
+1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. Un’onda con gate aperti (oggi `S2-COND-UTIL-01` / `S2-GATE-SAFE-REDIRECT` / `S2-GATE-APP-ERROR` e `S2-COND-TOOL-01` / `S2-GATE-ENV-EXAMPLE`) **non** soddisfa la propria condizione di completamento finale. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`, né mentre quei gate restano irrisolti. L’insieme delle 18 dipendenze W2 è invariato.
 2. Nessun import app-to-app.
 3. Tag di split sul monorepo.
 4. Derivazione dei due repository conservando la storia.

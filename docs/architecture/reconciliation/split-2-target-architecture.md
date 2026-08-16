@@ -86,7 +86,7 @@ Allineata al piano esecutivo e allo scaffold esistente. I nomi package dello sca
 │   ├── ui-foundation/         # già scaffoldata; destinazione primitive UI
 │   ├── core/                  # target; non creato da S2-COND-UTIL-01 (0/4 estratti; due gate)
 │   ├── contracts/             # da creare per tipi/contratti versionati
-│   └── tooling-config/        # da creare o assorbire in duplicazione toolchain
+│   └── tooling-config/        # target; non creato da S2-COND-TOOL-01 (13 restano root; env.example in gate)
 ├── docs/
 │   ├── architecture/
 │   ├── reconciliation/
@@ -129,7 +129,7 @@ Ammessi solo elementi realmente neutrali: primitive UI, accessibilità, utility 
 | `ui-foundation` | Primitive senza brand | Onda `S2-COND-UI-01` (10 file inventario) + shell già presente |
 | `core` | Utility/errori/redirect sicuri | Onda `S2-COND-UTIL-01`: 4 file inventario, **0 estratti**, package **non creato**; gate `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR` |
 | `contracts` | Tipi e contratti versionati | Onde successive, se i file risultano neutri al gate |
-| `tooling-config` | Toolchain senza secret | Onda `S2-COND-TOOL-01` (14 file root) in duplicazione controllata |
+| `tooling-config` | Toolchain senza secret | Onda `S2-COND-TOOL-01`: 14 file inventario, **0 estratti/duplicati**, package **non creato**; 13 `SHARED_ROOT_TOOLING`; gate `S2-GATE-ENV-EXAMPLE` |
 | `product-config` | Solo identità non grafica dopo `S2-GATE-BRAND` | Scaffold; non è nel censimento 713 |
 
 Client Supabase, route, server action, allowlist, copy e token visivi restano nelle app.
@@ -231,7 +231,7 @@ Nomenclatura nuova, tracciabile, distinta dal piano W1/W2/W3:
 
 `S2-CUTOVER-01` dipende da ciascuna di queste 18 onde. Non dipende soltanto da `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`. Le onde `*-MIG-01` restano documentali (nessuna modifica SQL); il cut-over attende comunque la loro chiusura documentale di ownership.
 
-Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`: `S2-CUTOVER-01` non è eseguibile finché quei gate restano irrisolti. L’insieme delle 18 dipendenze non cambia.
+Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`; `S2-COND-TOOL-01` è stata eseguita senza duplicazione (set=14, restano root=13) e lascia aperto `S2-GATE-ENV-EXAMPLE`: `S2-CUTOVER-01` non è eseguibile finché quei gate restano irrisolti. L’insieme delle 18 dipendenze non cambia.
 
 Somma dei filtri inventario (`ordine` 1–18), ricalcolata su `split-1-file-inventory.csv` dopo SPLIT-1-ERRATA e SPLIT-1-ERRATA-2:
 
@@ -342,7 +342,10 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-CUTOVER` | DNS/deploy | GO per dominio |
 | `S2-GATE-SAFE-REDIRECT` | `safe-redirect.ts` / test: validazione relativa neutra, fallback `"/app"` policy PonteImprese | Separare validazione neutra e lasciare fallback a Ponte; oppure ownership integrale Ponte; oppure altra soluzione dimostrata. Non scegliere in questa unità |
 | `S2-GATE-APP-ERROR` | `app-error.ts` / test: nucleo tipi/`appError`/`toUserMessage` vs `mapPostgresError` (SQLSTATE, `profiles_slug_key`, membership/grant/impresa/bootstrap) | Estrarre solo il nucleo neutro in `packages/core` e lasciare mapping a Ponte; oppure ownership integrale Ponte; oppure altra soluzione dimostrata. Nessuno split del file in questa unità |
+| `S2-GATE-ENV-EXAMPLE` | Root `env.example`: nomi Supabase condivisibili vs HMAC/retention/`access_provision_account` (PonteImprese) e cenni Vercel | Esempi per-app distinti; oppure restare solo root fino al cut-over; oppure altra soluzione dimostrata. Non duplicare il file verso Centro Studi. Non scegliere in questa unità |
 
 `S2-COND-UTIL-01` (eseguita, closeout documentale): i quattro file restano `CONDIVISO` nei path originali; non riclassificati; `packages/core` non esiste. Il mancato trasferimento è un **gate documentato**, non un fallimento dell’onda. Completamento implementativo rinviato alla risoluzione dei due gate.
 
-Fine documento. Closeout `S2-COND-UTIL-01` solo documentale: nessun trasferimento di codice.
+`S2-COND-TOOL-01` (eseguita): i 14 file restano a root. Tredici sono `SHARED_ROOT_TOOLING` (gitignore, prettier, AGENTS, CLAUDE, README, eslint, next.config, package.json, package-lock.json, playwright, postcss, tsconfig) e restano necessari al legacy `src/`. `env.example` è in `S2-GATE-ENV-EXAMPLE`. `packages/tooling-config` non esiste. Le app hanno già `package.json` / `next.config.ts` / `tsconfig.json` propri dallo scaffold: non coincidono con i 14 path inventario.
+
+Fine documento. Closeout `S2-COND-TOOL-01` solo documentale sui 14 file: nessuna duplicazione di tooling, nessun trasferimento di codice.
