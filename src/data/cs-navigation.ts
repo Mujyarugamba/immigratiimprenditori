@@ -1,8 +1,9 @@
 import { centroStudiConfig } from "@immigrati/product-config";
 
 /**
- * Transitory CS public navigation (S2-GATE-BRAND still open).
- * Hrefs are in-app routes from CS-APP; no unapproved final domain.
+ * Transitory CS public navigation.
+ * Product name/description come from product-config (code-level brand).
+ * Final domain/DNS remains BRAND_DOMAIN_CUTOVER = PENDING.
  */
 export const csPrimaryNav = [
   { label: "Eventi", href: "/eventi" },
