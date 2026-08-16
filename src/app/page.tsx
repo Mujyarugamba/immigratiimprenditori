@@ -1,28 +1,30 @@
 import { PageFrame } from "@immigrati/ui-foundation";
 import { centroStudiConfig } from "@immigrati/product-config";
+import { csPrimaryNav } from "@/data/cs-navigation";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
     <PageFrame>
-      <header className="site-header">
-        <a className="wordmark" href="#contenuto">
+      <main id="contenuto" className="mx-auto max-w-3xl py-16">
+        <p className="text-accent text-xs font-semibold tracking-[0.14em] uppercase">
+          Ricerca e divulgazione
+        </p>
+        <h1 className="text-brand mt-3 text-4xl font-medium tracking-tight">
           {centroStudiConfig.name}
-        </a>
-        <nav aria-label="Navigazione principale">
-          <ul>
-            {centroStudiConfig.navigation.map((item) => (
-              <li key={item.label}>
-                <a href={item.href}>{item.label}</a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </header>
-      <main id="contenuto" className="hero">
-        <p className="eyebrow">Ricerca e divulgazione</p>
-        <h1>{centroStudiConfig.name}</h1>
-        <p>{centroStudiConfig.description}</p>
-        <p className="observatory">L&apos;Osservatorio sarà una futura sezione interna del Centro Studi.</p>
+        </h1>
+        <p className="text-ink-muted mt-4 text-lg leading-7">
+          {centroStudiConfig.description}
+        </p>
+        <ul className="mt-8 flex flex-wrap gap-4 text-sm">
+          {csPrimaryNav.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="text-brand underline-offset-2 hover:underline">
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </main>
     </PageFrame>
   );
