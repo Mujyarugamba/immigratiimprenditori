@@ -236,7 +236,7 @@ Nomenclatura nuova, tracciabile, distinta dal piano W1/W2/W3:
 
 `S2-CUTOVER-01` dipende da ciascuna di queste 18 onde. Non dipende soltanto da `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`. Le onde `*-MIG-01` restano documentali (nessuna modifica SQL); il cut-over attende comunque la loro chiusura documentale di ownership.
 
-Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`; `S2-COND-TOOL-01` è stata eseguita senza duplicazione (set=14, restano root=13) e lascia aperto `S2-GATE-ENV-EXAMPLE`; `S2-COND-COMP-01` ha estratto solo `FormField` e lascia aperti `S2-GATE-HOME-LAYOUT`, `S2-GATE-APP-COMPONENTS` e `S2-GATE-PUBLIC-LEGAL-COMP`; `S2-COND-LIB-01` è stata eseguita senza trasferimento (set=11, trasferiti=0) e lascia aperti `S2-GATE-LINGUE-MERCATI`, `S2-GATE-ORG`, `S2-GATE-EVENTI`, `S2-GATE-ORG-LOADING` e `S2-GATE-SUPABASE-CLIENT`. `S2-COND-DOCS-01` ha dichiarato la collocazione dei 12 documenti a root (nessuna duplicazione nelle app). `S2-COND-MIG-01` ha registrato l’ownership futura dei 34 SQL senza toccare la catena. `S2-CUTOVER-01` non è eseguibile finché i gate residui restano irrisolti. L’insieme delle 18 dipendenze non cambia.
+Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR` **sulla root** (copie PI in `apps/ponteimprese` da `S2-PI-CORE-01`); `S2-COND-TOOL-01` lascia aperto `S2-GATE-ENV-EXAMPLE`; `S2-COND-COMP-01` lascia aperti i gate componenti sulla root (duplicati PI in `S2-PI-CORE-01`); `S2-COND-LIB-01` lascia aperti `S2-GATE-LINGUE-MERCATI`, `S2-GATE-ORG`, `S2-GATE-EVENTI` (ORG-LOADING e SUPABASE-CLIENT risolti **lato PI**). `S2-PI-APP-01` / `S2-PI-SRC-01` sono eseguite per copia non distruttiva (159 file); residui Prompt 3/8: DOCS/TEST/MIG. `S2-CUTOVER-01` non è eseguibile finché i gate residui restano irrisolti. L’insieme delle 18 dipendenze non cambia.
 
 Somma dei filtri inventario (`ordine` 1–18), ricalcolata su `split-1-file-inventory.csv` dopo SPLIT-1-ERRATA e SPLIT-1-ERRATA-2:
 
@@ -338,20 +338,22 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-CONTENUTI-GUIDE` | Guide commerciali vs API (SPLIT-1 §17.2) | Decisione umana |
 | `S2-GATE-PERSONE-AUTORI` | Autori/speaker (SPLIT-1 §17.3) | Record editoriali minimi CS |
 | `S2-GATE-ORG` | Organizzazioni ibride (SPLIT-1 §17.4) | Owner per record |
-| `S2-GATE-ORG-LOADING` | `src/app/organizzazioni/loading.tsx` resta `CONDIVISO` | Dopo verifica route/layout: mantenere condiviso, duplicare, o assegnare a PonteImprese; non inferire dallo `[slug]` |
+| `S2-GATE-ORG-LOADING` | Originale `CONDIVISO`; copia PI in `apps/ponteimprese` | **Chiuso lato PI** (`S2-PI-CORE-01`). Inventario SPLIT-1 invariato |
 | `S2-GATE-EVENTI-LOADING` | `src/app/eventi/loading.tsx` file `PONTE_IMPRESE`, oggetto `EventiLoading` `CONDIVISO` | Dopo verifica route/layout e coerenza file/oggetto: allineare a Centro Studi, restare Ponte, duplicare, o altra soluzione dimostrata; non inferire dalle `page.tsx` |
 | `S2-GATE-MERCATI` | Schede vs indicatori (SPLIT-1 §17.5) | Discriminante |
 | `S2-GATE-RUOLI-CS` | Identità editoriali autonome (SPLIT-1 §17.6) | SPLIT-3 / auth CS |
 | `S2-GATE-DATI-ACQUISITI` | Trasferimento riga per riga (SPLIT-1 §17.7) | Approvazione editoriale |
 | `S2-GATE-LINGUE-MERCATI` | Pagina `CONDIVISO` `/lingue-e-mercati` | Duplicare o contratto |
 | `S2-GATE-CUTOVER` | DNS/deploy | GO per dominio |
-| `S2-GATE-SAFE-REDIRECT` | `safe-redirect.ts` / test: validazione relativa neutra, fallback `"/app"` policy PonteImprese | Separare validazione neutra e lasciare fallback a Ponte; oppure ownership integrale Ponte; oppure altra soluzione dimostrata. Non scegliere in questa unità |
-| `S2-GATE-APP-ERROR` | `app-error.ts` / test: nucleo tipi/`appError`/`toUserMessage` vs `mapPostgresError` (SQLSTATE, `profiles_slug_key`, membership/grant/impresa/bootstrap) | Estrarre solo il nucleo neutro in `packages/core` e lasciare mapping a Ponte; oppure ownership integrale Ponte; oppure altra soluzione dimostrata. Nessuno split del file in questa unità |
+| `S2-GATE-SAFE-REDIRECT` | `safe-redirect.ts`: fallback `"/app"` policy Ponte | **Risolto lato PI** (`S2-PI-CORE-01`): copia in `apps/ponteimprese` con semantica esistente. Originale root CONDIVISO. Estrazione neutra in `packages/core` non necessaria per autonomia PI |
+| `S2-GATE-APP-ERROR` | `app-error.ts`: nucleo vs `mapPostgresError` dominio PI | **Risolto lato PI**: modulo completo copiato in `apps/ponteimprese`. `packages/core` non creato. Originale root CONDIVISO |
 | `S2-GATE-ENV-EXAMPLE` | Root `env.example`: nomi Supabase condivisibili vs HMAC/retention/`access_provision_account` (PonteImprese) e cenni Vercel | Esempi per-app distinti; oppure restare solo root fino al cut-over; oppure altra soluzione dimostrata. Non duplicare il file verso Centro Studi. Non scegliere in questa unità |
-| `S2-GATE-HOME-LAYOUT` | Header, Footer e `src/components/home/**` (brand «Immigrati Imprenditori», ecosistemi, route `/imprese` `/registrati` `/app`) | Duplicare e specializzare per app nelle onde PI/CS; non package condiviso. Non scegliere ownership ora |
-| `S2-GATE-APP-COMPONENTS` | `src/components/app/**` (15 file) e `AuthForm`: area riservata, imprese, membership, admin, redazione mista | Duplicare per app dopo le onde route; non package. Editorial CS vs PI da risolvere con i gate già aperti su redazione |
-| `S2-GATE-PUBLIC-LEGAL-COMP` | `src/components/public/**`, `legal/**`, `SectionPage`: catalogo pubblico misto e documenti legali PI | Duplicare con le page pubbliche; legal CS dopo `S2-GATE-LEGAL-CS`. Non package |
-| `S2-GATE-SUPABASE-CLIENT` | `src/lib/supabase/client.ts` e `server.ts`: factory `@supabase/ssr` + `@/lib/env`, stessi cookie/env del monorepo | Duplicare i client nelle app (onde PI/CS) con env distinti; restano root legacy finché `src/` è autoritativo. Non package. Non copiare ora |
+| `S2-GATE-HOME-LAYOUT` | Header, Footer e `src/components/home/**` | **Duplicato lato PI** in `S2-PI-CORE-01`. Originale CONDIVISO. Copia CS e specializzazione brand restano |
+| `S2-GATE-APP-COMPONENTS` | `src/components/app/**` e `AuthForm` | **Duplicato lato PI** (componenti importati dal core PI). Originale CONDIVISO. Kernel editoriale inventario-CS: `S2-GATE-PI-EDITORIAL-SUPPORT` |
+| `S2-GATE-PUBLIC-LEGAL-COMP` | `public/**`, `legal/**`, `SectionPage` | **Duplicato lato PI** i public/legal importati. `SectionPage` non necessario al set PI (non copiato). Originale CONDIVISO |
+| `S2-GATE-SUPABASE-CLIENT` | `client.ts` / `server.ts` | **Risolto lato PI**: copie in `apps/ponteimprese` (solo codice; nessun `.env*`, nessun secret). Originale root. Copia CS non in questa unità |
+| `S2-GATE-PI-EDITORIAL-SUPPORT` | Moduli inventario `CENTRO_STUDI` duplicati in PI perché richiesti dalle route PI redazione mercati/opportunità/organizzazioni e dal kernel `editorial/actions.ts` | Non riclassificare SPLIT-1. Prompt CS possiede gli originali. Non è import `apps/ponteimprese` → `apps/centro-studi` |
+| `S2-GATE-PI-LEGAL-DOCS` | `loadPublicLegalMarkdown` legge `docs/architecture/legal` da `process.cwd()` | Prompt 3/8 `S2-PI-DOCS-01`: collocare i markdown o adattare il path. Nessuna cancellazione root |
 
 `S2-COND-UTIL-01` (eseguita, closeout documentale): i quattro file restano `CONDIVISO` nei path originali; non riclassificati; `packages/core` non esiste. Il mancato trasferimento è un **gate documentato**, non un fallimento dell’onda. Completamento implementativo rinviato alla risoluzione dei due gate.
 
@@ -365,4 +367,6 @@ Questa unità **non** esegue l’onda.
 
 `S2-COND-MIG-01` (eseguita documentale, closeout `S2-COND-FINAL-01`): set 34, SQL immutati, `git diff supabase/` vuoto. Ownership futura in §9. Nessun albero migration duplicato, nessun rinumeramento, nessun progetto Supabase nuovo.
 
-Fine documento. Closeout `S2-COND-FINAL-01`: CONDIVISO residuo (11+12+34) classificato; 0 file mossi; gate residui assegnati.
+`S2-PI-CORE-01` (`S2-PI-APP-01` + `S2-PI-SRC-01`): copia non distruttiva 67+92=159 in `apps/ponteimprese`. Root `src/` intatta. Typecheck PI=0. Import `apps/centro-studi`=0. `states.tsx` copiato come versione PI. Primitive UI via `@immigrati/ui-foundation`. `PI_CORE_AUTONOMOUS = PARTIAL`: residui Prompt 3/8 (docs legali su filesystem root, test wave, migration SQL). `S2-GATE-ORG-LOADING` chiuso lato PI (loading duplicato). `S2-GATE-EVENTI-LOADING` e `S2-GATE-LINGUE-MERCATI` aperti. tsconfig root esclude `apps/` (gli 8 errori alias di shell non si applicano più al typecheck root).
+
+Fine documento. Closeout `S2-PI-CORE-01`: core applicativo Ponte duplicato in app; originali root preservati; gate PI parzialmente risolti.
