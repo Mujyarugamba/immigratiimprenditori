@@ -236,7 +236,7 @@ Nomenclatura nuova, tracciabile, distinta dal piano W1/W2/W3:
 
 `S2-CUTOVER-01` dipende da ciascuna di queste 18 onde. Non dipende soltanto da `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`. Le onde `*-MIG-01` restano documentali (nessuna modifica SQL); il cut-over attende comunque la loro chiusura documentale di ownership.
 
-Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. Dopo `S2-EXTRACT-01` i gate di workspace (SAFE-REDIRECT, APP-ERROR, ENV-EXAMPLE, HOME-LAYOUT, APP-COMPONENTS, PUBLIC-LEGAL-COMP, LINGUE-MERCATI, ORG-LOADING, SUPABASE-CLIENT, CONTENUTI-GUIDE) sono `RESOLVED_FOR_PRODUCT_WORKSPACES`. Restano `SPLIT_3_PENDING` (`S2-GATE-ORG`, `S2-GATE-EVENTI`, `S2-GATE-MERCATI`, `S2-GATE-PERSONE-AUTORI`, `S2-GATE-DATI-ACQUISITI`) e `CUTOVER_PENDING` (`S2-GATE-SSO`, `S2-GATE-LEGAL-CS`, `S2-GATE-ANALYTICS`, `S2-GATE-CUTOVER`). `S2-PI-APP-01` / `S2-PI-SRC-01` sono eseguite per copia non distruttiva (159 file). `S2-CUTOVER-01` è Prompt 8 (DNS/deploy). L’insieme delle 18 dipendenze non cambia.
+Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. Dopo `S2-EXTRACT-01` / `S2-STANDALONE-CLOSEOUT-01` i gate di workspace sono `RESOLVED_FOR_PRODUCT_WORKSPACES`. Restano `SPLIT_3_PENDING` (`S2-GATE-ORG`, `S2-GATE-EVENTI`, `S2-GATE-MERCATI`, `S2-GATE-PERSONE-AUTORI`, `S2-GATE-DATI-ACQUISITI`) e `CUTOVER_PENDING` (`S2-GATE-SSO`, `S2-GATE-LEGAL-CS`, `S2-GATE-ANALYTICS`, `S2-GATE-CUTOVER`). `CODE_SEPARATION = COMPLETE`. `PRODUCTION_CUTOVER = PENDING`. `S2-CUTOVER-01` resta `non_iniziata` (DNS/deploy produzione). L’insieme delle 18 dipendenze non cambia.
 
 Somma dei filtri inventario (`ordine` 1–18), ricalcolata su `split-1-file-inventory.csv` dopo SPLIT-1-ERRATA e SPLIT-1-ERRATA-2:
 
@@ -328,7 +328,7 @@ Questa unità **non** esegue l’onda.
 
 ## 22. Decisioni rinviate e gate
 
-Classificazione `S2-CLEANUP-ARCH-01` (workspace di prodotto). Root legacy resta fino al cut-over.
+Classificazione `S2-STANDALONE-CLOSEOUT-01` (separazione codice). Root legacy resta fino al cut-over produzione.
 
 | GATE | STATO | MOTIVO | OWNER FUTURO |
 |---|---|---|---|
@@ -346,7 +346,7 @@ Classificazione `S2-CLEANUP-ARCH-01` (workspace di prodotto). Root legacy resta 
 | `S2-GATE-RUOLI-CS` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | `CS_ROLE_CODE_BOUNDARY = RESOLVED` (guards/session locali). `CS_SSO_CUTOVER = PENDING`. | Cut-over SSO |
 | `S2-GATE-DATI-ACQUISITI` | `SPLIT_3_PENDING` | Trasferimento riga per riga. | SPLIT-3 |
 | `S2-GATE-LINGUE-MERCATI` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | `LINGUE_MERCATI_APP_OWNERSHIP = PONTEIMPRESE`. Redirect copiato in PI; `/mercati` è PonteImprese. Originale CONDIVISO in root. | — |
-| `S2-GATE-CUTOVER` | `CUTOVER_PENDING` | DNS/deploy. | Prompt 8 / GO dominio |
+| `S2-GATE-CUTOVER` | `CUTOVER_PENDING` | DNS/deploy produzione. `CODE_SEPARATION = COMPLETE`. `PRODUCTION_CUTOVER = PENDING`. | Cut-over produzione / GO dominio |
 | `S2-GATE-SAFE-REDIRECT` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Copia PI; originale CONDIVISO. CS non usa `/app` fallback PI. | — |
 | `S2-GATE-APP-ERROR` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | Copie per-app; originale CONDIVISO. | — |
 | `S2-GATE-ENV-EXAMPLE` | `RESOLVED_FOR_PRODUCT_WORKSPACES` | `apps/ponteimprese/env.example` e `apps/centro-studi/env.example` (solo placeholder). Root `env.example` legacy. | Cut-over: rimozione root |
@@ -388,4 +388,8 @@ Fine documento. Closeout `S2-CLEANUP-ARCH-01`: ARCHIVIO riconciliato; gate works
 
 `S2-EXTRACT-01`: `ui-foundation` duplicato in entrambe le app; `product-config` specializzato per prodotto (PI senza config CS; CS senza config PI). `file:./packages/*` + paths tsconfig intra-app. README e `.gitignore` per-app. Redirect `/lingue-e-mercati` in PI. Copia script Eventi PI rimossa. `PI_ROOT_PACKAGE_DEPENDENCIES = 0`. `CS_ROOT_PACKAGE_DEPENDENCIES = 0`. `PI_STANDALONE_EXTERNAL_FILE_DEPENDENCIES = 0`. `CS_STANDALONE_EXTERNAL_FILE_DEPENDENCIES = 0`. `PONTEIMPRESE_REPO_READY = YES`. `CENTRO_STUDI_REPO_READY = YES`. `PI_CODE_BRAND_ISOLATED = YES`. `CS_CODE_BRAND_ISOLATED = YES`. Nessun SPLIT-3, nessun DNS, nessun npm install. Root `packages/*` e `src/` preservati.
 
-Fine documento. Closeout `S2-EXTRACT-01`: i due workspace sono estraibili come repository indipendenti; cut-over DNS/deploy e bootstrap DB restano Prompt 8 / SPLIT-3. I branch `git subtree split` e gli eventuali clone locali sono creati dopo questo commit; gli hash sono nel rapporto Prompt 7.
+Fine documento. Closeout `S2-EXTRACT-01`: i due workspace sono estraibili come repository indipendenti; cut-over DNS/deploy e bootstrap DB restano produzione / SPLIT-3. I branch `git subtree split` e i clone locali sono stati creati dopo il commit di estrazione.
+
+`S2-STANDALONE-CLOSEOUT-01`: cold-start nei repository locali indipendenti. `PONTEIMPRESE_STANDALONE_VERIFIED = YES`. `CENTRO_STUDI_STANDALONE_VERIFIED = YES`. `SPLIT_2_CODE_SEPARATION = COMPLETE`. `CODE_SEPARATION = COMPLETE`. `PRODUCTION_CUTOVER = PENDING`. HEAD locali: PI `8329149f754ee753435d1da9389ebbbd42d1cda5`; CS `3b16bc9d47319f36cd6b439acf85095aa8bf62f5`. Split originari: PI `8fb8687ac3f8d03619562306e66dc530c443de9f`; CS `f814943a31d6fb48dce733fdf3da2bf5a4a8a157`. Path: `C:\Users\151702\Desktop\PROGETTI-WEB\ponteimprese-standalone` e `...\centro-studi-standalone`. Nessun push dei repository standalone. Nessun SPLIT-3, DNS, deploy, SSO, legal CS.
+
+Fine documento. Closeout `S2-STANDALONE-CLOSEOUT-01`: separazione del codice verificata fuori dal monorepo; `S2-CUTOVER-01` resta produzione.
