@@ -142,6 +142,11 @@ Client Supabase, route, server action, allowlist, copy e token visivi restano ne
 - Due configurazioni applicative distinte (env per app); stesso project ref solo come fatto transitorio.
 - `supabase/config.toml` è `PONTE_IMPRESE` nell’inventario: duplicazione controllata in SPLIT-3, non in questa unità.
 - 180 migration storiche immutabili (SPLIT-1 §10). Ripartizione file SQL per categoria (filtro inventario): Ponte 125 `migration_sql` + `supabase/config.toml`; Centro Studi 21; Condiviso 34; Archivio 2 sql. Totale file `supabase/`+sql da inventario da non riscrivere in SPLIT-2.
+- Ownership **futura** dei 34 `CONDIVISO` (`S2-COND-MIG-01`, solo documentale; SQL immutato; categoria SPLIT-1 invariata):
+  - **TEMPLATE_COMUNE** (duplicare schema in SPLIT-3): `languages`, `language_service_types`, `language_service_specializations`, `business_sectors`, `international_market_countries`, seed `creative_cultural_business_sectors`; nucleo eventi (`event_types`, `events`, `event_editions`, `event_sessions`, `event_languages`, `event_markets`).
+  - **PI_OWNER** (destinazione futura DB Ponte, join su identità/operatività PI): `profile_languages`, `profile_language_services`, `profile_language_service_specializations`, `training_offer_languages`, `training_request_languages`, `business_sector_declarations`, `business_operational_language_declarations`, `professional_served_territories`, `professional_operational_languages`, `service_offer_territories`, `service_offer_languages`, `service_request_territories`, `service_request_languages`.
+  - **MISTO_GATE** (schema eventi/organizzazioni con FK a `profiles`/`businesses`): `event_organizers`, `event_speakers`, `event_registrations`; `organization_officials`. In SPLIT-3 le FK verso identità Ponte non si copiano come tabelle condivise.
+  - **OWNERSHIP_GATE** (`S2-GATE-ORG`): `organization_types`, `organization_activity_scopes`, `organizations`, RLS `access_organizzazioni`, seed `cultural_organization_activity_scopes`.
 
 ### Target (SPLIT-3)
 
@@ -231,7 +236,7 @@ Nomenclatura nuova, tracciabile, distinta dal piano W1/W2/W3:
 
 `S2-CUTOVER-01` dipende da ciascuna di queste 18 onde. Non dipende soltanto da `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`. Le onde `*-MIG-01` restano documentali (nessuna modifica SQL); il cut-over attende comunque la loro chiusura documentale di ownership.
 
-Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`; `S2-COND-TOOL-01` è stata eseguita senza duplicazione (set=14, restano root=13) e lascia aperto `S2-GATE-ENV-EXAMPLE`; `S2-COND-COMP-01` ha estratto solo `FormField` e lascia aperti `S2-GATE-HOME-LAYOUT`, `S2-GATE-APP-COMPONENTS` e `S2-GATE-PUBLIC-LEGAL-COMP`: `S2-CUTOVER-01` non è eseguibile finché quei gate restano irrisolti. L’insieme delle 18 dipendenze non cambia.
+Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`; `S2-COND-TOOL-01` è stata eseguita senza duplicazione (set=14, restano root=13) e lascia aperto `S2-GATE-ENV-EXAMPLE`; `S2-COND-COMP-01` ha estratto solo `FormField` e lascia aperti `S2-GATE-HOME-LAYOUT`, `S2-GATE-APP-COMPONENTS` e `S2-GATE-PUBLIC-LEGAL-COMP`; `S2-COND-LIB-01` è stata eseguita senza trasferimento (set=11, trasferiti=0) e lascia aperti `S2-GATE-LINGUE-MERCATI`, `S2-GATE-ORG`, `S2-GATE-EVENTI`, `S2-GATE-ORG-LOADING` e `S2-GATE-SUPABASE-CLIENT`. `S2-COND-DOCS-01` ha dichiarato la collocazione dei 12 documenti a root (nessuna duplicazione nelle app). `S2-COND-MIG-01` ha registrato l’ownership futura dei 34 SQL senza toccare la catena. `S2-CUTOVER-01` non è eseguibile finché i gate residui restano irrisolti. L’insieme delle 18 dipendenze non cambia.
 
 Somma dei filtri inventario (`ordine` 1–18), ricalcolata su `split-1-file-inventory.csv` dopo SPLIT-1-ERRATA e SPLIT-1-ERRATA-2:
 
@@ -346,6 +351,7 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-HOME-LAYOUT` | Header, Footer e `src/components/home/**` (brand «Immigrati Imprenditori», ecosistemi, route `/imprese` `/registrati` `/app`) | Duplicare e specializzare per app nelle onde PI/CS; non package condiviso. Non scegliere ownership ora |
 | `S2-GATE-APP-COMPONENTS` | `src/components/app/**` (15 file) e `AuthForm`: area riservata, imprese, membership, admin, redazione mista | Duplicare per app dopo le onde route; non package. Editorial CS vs PI da risolvere con i gate già aperti su redazione |
 | `S2-GATE-PUBLIC-LEGAL-COMP` | `src/components/public/**`, `legal/**`, `SectionPage`: catalogo pubblico misto e documenti legali PI | Duplicare con le page pubbliche; legal CS dopo `S2-GATE-LEGAL-CS`. Non package |
+| `S2-GATE-SUPABASE-CLIENT` | `src/lib/supabase/client.ts` e `server.ts`: factory `@supabase/ssr` + `@/lib/env`, stessi cookie/env del monorepo | Duplicare i client nelle app (onde PI/CS) con env distinti; restano root legacy finché `src/` è autoritativo. Non package. Non copiare ora |
 
 `S2-COND-UTIL-01` (eseguita, closeout documentale): i quattro file restano `CONDIVISO` nei path originali; non riclassificati; `packages/core` non esiste. Il mancato trasferimento è un **gate documentato**, non un fallimento dell’onda. Completamento implementativo rinviato alla risoluzione dei due gate.
 
@@ -353,4 +359,10 @@ Questa unità **non** esegue l’onda.
 
 `S2-COND-COMP-01` (eseguita): set 38. `FormField` estratto in `ui-foundation` (shim in `src/components/forms/FormField.tsx`). I restanti 37 restano `CONDIVISO` in sede. Header/Footer/home/app/admin **non** sono package. `states.tsx` non toccato.
 
-Fine documento. Closeout `S2-COND-COMP-01`: una primitiva form in `ui-foundation`; confini non neutri registrati.
+`S2-COND-LIB-01` (eseguita con gate, closeout `S2-COND-FINAL-01`): set 11, trasferiti=0. Nessun package nuovo. `packages/core` non creato. `lingue-e-mercati/page.tsx` resta sotto `S2-GATE-LINGUE-MERCATI` (solo `redirect("/mercati")`; non inferire ownership dalle page mercati). `organizzazioni/loading.tsx` resta sotto `S2-GATE-ORG-LOADING` (non inferire da `[slug]/page.tsx`). Motore/allowlist/dry-run Eventi non estratti (`S2-GATE-EVENTI`). `organizations.ts` resta con `S2-GATE-ORG`. Client Supabase restano root (`S2-GATE-SUPABASE-CLIENT`).
+
+`S2-COND-DOCS-01` (eseguita, closeout `S2-COND-FINAL-01`): set 12, trasferiti=0. I documenti restano root del monorepo (fonte autoritativa). Nessuna duplicazione fisica nelle due app. Baseline comune: `architecture-baseline.md`, `costituzione-piattaforma.md`, `domain-model.md`, `platform-data-specification.md`. Docs D1 opportunità: destinazione futura Ponte, restano root. Docs D1 eventi: template/gate `S2-GATE-EVENTI`. Docs organizzazioni: `S2-GATE-ORG`.
+
+`S2-COND-MIG-01` (eseguita documentale, closeout `S2-COND-FINAL-01`): set 34, SQL immutati, `git diff supabase/` vuoto. Ownership futura in §9. Nessun albero migration duplicato, nessun rinumeramento, nessun progetto Supabase nuovo.
+
+Fine documento. Closeout `S2-COND-FINAL-01`: CONDIVISO residuo (11+12+34) classificato; 0 file mossi; gate residui assegnati.
