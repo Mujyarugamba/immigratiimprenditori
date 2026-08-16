@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -12,14 +16,36 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": false,
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@immigrati/product-config": ["./packages/product-config/src/index.ts"],
-      "@immigrati/ui-foundation": ["./packages/ui-foundation/src/index.tsx"]
-    }
+      "@/*": [
+        "./src/*"
+      ],
+      "@immigrati/product-config": [
+        "./packages/product-config/src/index.ts"
+      ],
+      "@immigrati/ui-foundation": [
+        "./packages/ui-foundation/src/index.tsx"
+      ]
+    },
+    "allowJs": true
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "e2e", "scripts", "playwright.config.ts"]
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "e2e",
+    "scripts",
+    "playwright.config.ts"
+  ]
 }
