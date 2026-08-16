@@ -84,7 +84,7 @@ Allineata al piano esecutivo e allo scaffold esistente. I nomi package dello sca
 ├── packages/
 │   ├── product-config/        # già scaffoldata; brand da rimuovere (gate)
 │   ├── ui-foundation/         # già scaffoldata; destinazione primitive UI
-│   ├── core/                  # da creare in onda utility, se servono file neutri
+│   ├── core/                  # target; non creato da S2-COND-UTIL-01 (0/4 estratti; due gate)
 │   ├── contracts/             # da creare per tipi/contratti versionati
 │   └── tooling-config/        # da creare o assorbire in duplicazione toolchain
 ├── docs/
@@ -127,7 +127,7 @@ Ammessi solo elementi realmente neutrali: primitive UI, accessibilità, utility 
 | Package | Ruolo | Provenienza |
 |---|---|---|
 | `ui-foundation` | Primitive senza brand | Onda `S2-COND-UI-01` (10 file inventario) + shell già presente |
-| `core` | Utility/errori/redirect sicuri | Onda `S2-COND-UTIL-01` (4 file) |
+| `core` | Utility/errori/redirect sicuri | Onda `S2-COND-UTIL-01`: 4 file inventario, **0 estratti**, package **non creato**; gate `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR` |
 | `contracts` | Tipi e contratti versionati | Onde successive, se i file risultano neutri al gate |
 | `tooling-config` | Toolchain senza secret | Onda `S2-COND-TOOL-01` (14 file root) in duplicazione controllata |
 | `product-config` | Solo identità non grafica dopo `S2-GATE-BRAND` | Scaffold; non è nel censimento 713 |
@@ -230,6 +230,8 @@ Nomenclatura nuova, tracciabile, distinta dal piano W1/W2/W3:
 `S2-COND-UI-01`, `S2-COND-UTIL-01`, `S2-COND-TOOL-01`, `S2-COND-COMP-01`, `S2-COND-LIB-01`, `S2-COND-DOCS-01`, `S2-COND-MIG-01`, `S2-PI-APP-01`, `S2-PI-SRC-01`, `S2-PI-DOCS-01`, `S2-PI-TEST-01`, `S2-PI-MIG-01`, `S2-CS-APP-01`, `S2-CS-SRC-01`, `S2-CS-DOCS-01`, `S2-CS-TEST-01`, `S2-CS-MIG-01`, `S2-ARCH-01`.
 
 `S2-CUTOVER-01` dipende da ciascuna di queste 18 onde. Non dipende soltanto da `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`. Le onde `*-MIG-01` restano documentali (nessuna modifica SQL); il cut-over attende comunque la loro chiusura documentale di ownership.
+
+Un’onda W2 con gate aperti **non** soddisfa la propria condizione di completamento finale. In particolare `S2-COND-UTIL-01` è stata eseguita senza trasferimento (set=4, trasferiti=0) e lascia aperti `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`: `S2-CUTOVER-01` non è eseguibile finché quei gate restano irrisolti. L’insieme delle 18 dipendenze non cambia.
 
 Somma dei filtri inventario (`ordine` 1–18), ricalcolata su `split-1-file-inventory.csv` dopo SPLIT-1-ERRATA e SPLIT-1-ERRATA-2:
 
@@ -338,5 +340,9 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-DATI-ACQUISITI` | Trasferimento riga per riga (SPLIT-1 §17.7) | Approvazione editoriale |
 | `S2-GATE-LINGUE-MERCATI` | Pagina `CONDIVISO` `/lingue-e-mercati` | Duplicare o contratto |
 | `S2-GATE-CUTOVER` | DNS/deploy | GO per dominio |
+| `S2-GATE-SAFE-REDIRECT` | `safe-redirect.ts` / test: validazione relativa neutra, fallback `"/app"` policy PonteImprese | Separare validazione neutra e lasciare fallback a Ponte; oppure ownership integrale Ponte; oppure altra soluzione dimostrata. Non scegliere in questa unità |
+| `S2-GATE-APP-ERROR` | `app-error.ts` / test: nucleo tipi/`appError`/`toUserMessage` vs `mapPostgresError` (SQLSTATE, `profiles_slug_key`, membership/grant/impresa/bootstrap) | Estrarre solo il nucleo neutro in `packages/core` e lasciare mapping a Ponte; oppure ownership integrale Ponte; oppure altra soluzione dimostrata. Nessuno split del file in questa unità |
 
-Fine documento. Nessuna implementazione eseguita.
+`S2-COND-UTIL-01` (eseguita, closeout documentale): i quattro file restano `CONDIVISO` nei path originali; non riclassificati; `packages/core` non esiste. Il mancato trasferimento è un **gate documentato**, non un fallimento dell’onda. Completamento implementativo rinviato alla risoluzione dei due gate.
+
+Fine documento. Closeout `S2-COND-UTIL-01` solo documentale: nessun trasferimento di codice.

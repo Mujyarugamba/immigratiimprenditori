@@ -63,6 +63,10 @@ Gate esplicito sul residuo `src/app/organizzazioni/loading.tsx` (`S2-GATE-ORG-LO
 
 Gate esplicito sul residuo `src/app/eventi/loading.tsx` (`S2-GATE-EVENTI-LOADING`, onda `S2-PI-APP-01`): file `PONTE_IMPRESE`, oggetto `EventiLoading` `CONDIVISO`; incoerenza preesistente non risolta per inferenza.
 
+Gate esplicito `S2-GATE-SAFE-REDIRECT` (onda `S2-COND-UTIL-01`): `src/lib/auth/safe-redirect.ts` e `src/lib/auth/safe-redirect.test.ts` restano `CONDIVISO` nei path originali. La validazione di redirect relativo è tecnicamente neutra; il default/fallback `"/app"` (e i test su `/app`, `/app/profilo`) è policy applicativa PonteImprese. Non estratti in `packages/core`. Decisioni future ammesse, senza sceglierle ora: (1) separare una funzione neutra di validazione/normalizzazione e lasciare il fallback a PonteImprese; (2) ownership integrale PonteImprese; (3) altra soluzione dimostrata che non introduca policy di prodotto nel package condiviso.
+
+Gate esplicito `S2-GATE-APP-ERROR` (onda `S2-COND-UTIL-01`): `src/lib/errors/app-error.ts` e `src/lib/errors/app-error.test.ts` restano `CONDIVISO` nei path originali. Nucleo potenzialmente neutro: tipi errore, `appError`, `toUserMessage`. Parte non neutra: `mapPostgresError`, SQLSTATE/schema, `profiles_slug_key`, mapping membership/grant/impresa/bootstrap (dominio PonteImprese). File misto: nessun trasferimento integrale in `packages/core` e nessuno split in questa unità. Decisioni future ammesse, senza sceglierle ora: (1) estrarre solo il nucleo neutro in `packages/core` e lasciare mapping PostgreSQL/dominio a PonteImprese; (2) ownership integrale PonteImprese; (3) altra soluzione dimostrata.
+
 ## 4. Dipendenze ammesse
 
 1. `apps/*` → `packages/*` (API pubblica del package).
@@ -179,6 +183,7 @@ Contratto di package:
 5. Owner tecnico dichiarato nell’onda che lo popola.
 6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app).
 7. `product-config`: dopo `S2-GATE-BRAND` solo chiavi non grafiche (id prodotto, dominio previsto).
+8. `core`: non creato da `S2-COND-UTIL-01` (4 file inventario, 0 estratti). Nessuna policy di prodotto (`"/app"`, mapping dominio/DB) nel package. Popolamento ammesso solo dopo `S2-GATE-SAFE-REDIRECT` e `S2-GATE-APP-ERROR`.
 
 ## 15. Regole anti-accoppiamento
 
@@ -194,7 +199,7 @@ Contratto di package:
 
 Precondizioni (SPLIT-1 §20–22, piano W3):
 
-1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`.
+1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. Un’onda con gate aperti (oggi `S2-COND-UTIL-01` / `S2-GATE-SAFE-REDIRECT` / `S2-GATE-APP-ERROR`) **non** soddisfa la propria condizione di completamento finale. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`, né mentre quei gate restano irrisolti. L’insieme delle 18 dipendenze W2 è invariato.
 2. Nessun import app-to-app.
 3. Tag di split sul monorepo.
 4. Derivazione dei due repository conservando la storia.
