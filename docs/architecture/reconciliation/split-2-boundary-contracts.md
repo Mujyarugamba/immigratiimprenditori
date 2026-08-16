@@ -83,7 +83,9 @@ Gate esplicito `S2-GATE-ORG-LOADING` (onda `S2-COND-LIB-01`, closeout `S2-PI-COR
 
 `S2-PI-FINAL-01`: `PONTEIMPRESE_AUTONOMOUS = YES`. Docs 77, test 28, migration 126 copiati. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. Navigazione verso sezioni CS: `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER` (non è import di codice). `S2-GATE-PI-EDITORIAL-SUPPORT` resta aperto come supporto transitorio PI fino al Prompt CS.
 
-`S2-CS-CORE-01`: 62 file CS copiati in `apps/centro-studi` (root intatta; Ponte invariato). `CS_TO_PI_IMPORTS = 0`. `CS_EXTERNAL_APP_FILE_DEPENDENCIES = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL`. Legal CS-DOCS placeholder. Client Supabase copiati in CS. Session/guards copiati come supporto redazione (redirect `/accedi` = SSO/cut-over). Type stub per hub cultura verso domini PI. Motore Eventi CONDIVISO non copiato (`S2-GATE-EVENTI`).
+`S2-CS-CORE-01`: 62 file CS copiati in `apps/centro-studi` (root intatta; Ponte invariato). `CS_TO_PI_IMPORTS = 0`. `CS_EXTERNAL_APP_FILE_DEPENDENCIES = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL` (superato da `S2-CS-FINAL-01`).
+
+`S2-CS-FINAL-01`: `CENTRO_STUDI_AUTONOMOUS = YES`. Docs 23, test 9, migration 21 copiati. `CS_MIGRATION_OWNERSHIP = COPIED`. `CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `CS_RUNTIME_ROOT_DOCUMENT_DEPENDENCIES = 0`. Legal CS: `S2-GATE-LEGAL-CS` aperto (placeholder locale; nessun markdown PI). Helper e2e PI e guard ingest ARCHIVIO copiati come supporto script/test. `CS_SSO_CUTOVER = PENDING`. Typecheck CS/PI/root = 0. Lock non aggiornato (niente `npm install`). `PONTEIMPRESE_AUTONOMOUS = YES` invariato.
 
 Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): root `env.example` resta `CONDIVISO`. Non duplicato in questa unità.
 

@@ -332,7 +332,7 @@ Questa unità **non** esegue l’onda.
 |---|---|---|
 | `S2-GATE-BRAND` | Brand/copy in `product-config` | Spostare token e navigazione nelle app |
 | `S2-GATE-SSO` | SSO non definito dalle fonti | Decisione umana esplicita |
-| `S2-GATE-LEGAL-CS` | Documenti legali CS non in inventario come set autonomo | Redazione testi e route CS |
+| `S2-GATE-LEGAL-CS` | Documenti legali CS non in inventario come set autonomo | Resta aperto: CS-DOCS 23 non includono legal; markdown dati/fonti è `PONTE_IMPRESE`. Placeholder locale su `/dati-e-fonti`. Redazione testi CS a cut-over |
 | `S2-GATE-ANALYTICS` | Vendor non censito | Scelta per-app |
 | `S2-GATE-EVENTI` | Tassonomia ibrida (SPLIT-1 §17.1) | Owner e regole ibridi |
 | `S2-GATE-CONTENUTI-GUIDE` | Guide commerciali vs API (SPLIT-1 §17.2) | Decisione umana |
@@ -373,6 +373,8 @@ Questa unità **non** esegue l’onda.
 
 Fine documento. Closeout `S2-PI-FINAL-01`: PonteImprese autonomo per lo sviluppo applicativo; DB fisico e cut-over rinviati.
 
-`S2-CS-CORE-01` (`S2-CS-APP-01` + `S2-CS-SRC-01`): copia non distruttiva 24+38=62 in `apps/centro-studi`. Root intatta. `apps/ponteimprese` invariato. Typecheck CS=0. `CS_TO_PI_IMPORTS = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL` (CS-DOCS legal, CS-TEST/MIG, brand/SSO/cut-over, SPLIT-3). `S2-GATE-EVENTI-LOADING` chiuso lato CS. Motore Eventi CONDIVISO non copiato. Header/Footer CS minimi (non copia PI).
+`S2-CS-CORE-01` (`S2-CS-APP-01` + `S2-CS-SRC-01`): copia non distruttiva 24+38=62 in `apps/centro-studi`. Root intatta. `apps/ponteimprese` invariato. Typecheck CS=0. `CS_TO_PI_IMPORTS = 0`. `CENTRO_STUDI_CORE_AUTONOMOUS = PARTIAL` (superato da `S2-CS-FINAL-01`). `S2-GATE-EVENTI-LOADING` chiuso lato CS. Motore Eventi CONDIVISO non copiato. Header/Footer CS minimi (non copia PI).
 
-Fine documento. Closeout `S2-CS-CORE-01`: core applicativo Centro Studi duplicato in app; originali root preservati; residui Prompt 5/8.
+`S2-CS-FINAL-01` (`S2-CS-DOCS-01` + `S2-CS-TEST-01` + `S2-CS-MIG-01`): 23 docs + 9 test/script + 21 supabase copiati in `apps/centro-studi`. `CENTRO_STUDI_AUTONOMOUS = YES`. `CS_MIGRATION_OWNERSHIP = COPIED`. `CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `CS_RUNTIME_ROOT_DOCUMENT_DEPENDENCIES = 0`. `S2-GATE-LEGAL-CS` aperto (nessun set legal CS in inventario; non copiare markdown PI). E2E/script DB-rete `NOT_RUN_EXTERNAL_DEPENDENCY`. `CS_SSO_CUTOVER = PENDING`. `S2-GATE-BRAND` / `S2-GATE-EVENTI` / `S2-GATE-ORG` / `S2-GATE-LINGUE-MERCATI` / `S2-GATE-PI-EDITORIAL-SUPPORT` aperti, non bloccanti per l’autonomia di workspace. Lockfile workspace non riallineato (niente `npm install`).
+
+Fine documento. Closeout `S2-CS-FINAL-01`: Centro Studi autonomo per lo sviluppo applicativo; DB fisico, SSO e cut-over rinviati.
