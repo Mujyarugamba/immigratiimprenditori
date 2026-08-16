@@ -353,7 +353,7 @@ Questa unità **non** esegue l’onda.
 | `S2-GATE-PUBLIC-LEGAL-COMP` | `public/**`, `legal/**`, `SectionPage` | **Duplicato lato PI** i public/legal importati. `SectionPage` non necessario al set PI (non copiato). Originale CONDIVISO |
 | `S2-GATE-SUPABASE-CLIENT` | `client.ts` / `server.ts` | **Risolto lato PI**: copie in `apps/ponteimprese` (solo codice; nessun `.env*`, nessun secret). Originale root. Copia CS non in questa unità |
 | `S2-GATE-PI-EDITORIAL-SUPPORT` | Moduli inventario `CENTRO_STUDI` duplicati in PI perché richiesti dalle route PI redazione mercati/opportunità/organizzazioni e dal kernel `editorial/actions.ts` | Non riclassificare SPLIT-1. Prompt CS possiede gli originali. Non è import `apps/ponteimprese` → `apps/centro-studi` |
-| `S2-GATE-PI-LEGAL-DOCS` | `loadPublicLegalMarkdown` legge `docs/architecture/legal` da `process.cwd()` | Prompt 3/8 `S2-PI-DOCS-01`: collocare i markdown o adattare il path. Nessuna cancellazione root |
+| `S2-GATE-PI-LEGAL-DOCS` | Markdown legali runtime in `apps/ponteimprese/docs/architecture/legal` | **Chiuso** (`S2-PI-FINAL-01`). `PI_RUNTIME_LEGAL_ROOT_DEPENDENCY = 0` |
 
 `S2-COND-UTIL-01` (eseguita, closeout documentale): i quattro file restano `CONDIVISO` nei path originali; non riclassificati; `packages/core` non esiste. Il mancato trasferimento è un **gate documentato**, non un fallimento dell’onda. Completamento implementativo rinviato alla risoluzione dei due gate.
 
@@ -367,6 +367,8 @@ Questa unità **non** esegue l’onda.
 
 `S2-COND-MIG-01` (eseguita documentale, closeout `S2-COND-FINAL-01`): set 34, SQL immutati, `git diff supabase/` vuoto. Ownership futura in §9. Nessun albero migration duplicato, nessun rinumeramento, nessun progetto Supabase nuovo.
 
-`S2-PI-CORE-01` (`S2-PI-APP-01` + `S2-PI-SRC-01`): copia non distruttiva 67+92=159 in `apps/ponteimprese`. Root `src/` intatta. Typecheck PI=0. Import `apps/centro-studi`=0. `states.tsx` copiato come versione PI. Primitive UI via `@immigrati/ui-foundation`. `PI_CORE_AUTONOMOUS = PARTIAL`: residui Prompt 3/8 (docs legali su filesystem root, test wave, migration SQL). `S2-GATE-ORG-LOADING` chiuso lato PI (loading duplicato). `S2-GATE-EVENTI-LOADING` e `S2-GATE-LINGUE-MERCATI` aperti. tsconfig root esclude `apps/` (gli 8 errori alias di shell non si applicano più al typecheck root).
+`S2-PI-CORE-01` (`S2-PI-APP-01` + `S2-PI-SRC-01`): copia non distruttiva 67+92=159 in `apps/ponteimprese`. Root `src/` intatta. Typecheck PI=0. Import `apps/centro-studi`=0. `states.tsx` copiato come versione PI. Primitive UI via `@immigrati/ui-foundation`. `S2-GATE-ORG-LOADING` chiuso lato PI. `S2-GATE-EVENTI-LOADING` e `S2-GATE-LINGUE-MERCATI` aperti.
 
-Fine documento. Closeout `S2-PI-CORE-01`: core applicativo Ponte duplicato in app; originali root preservati; gate PI parzialmente risolti.
+`S2-PI-FINAL-01` (`S2-PI-DOCS-01` + `S2-PI-TEST-01` + `S2-PI-MIG-01`): 77 docs + 28 test/script/public + 126 supabase copiati in `apps/ponteimprese`. `PONTEIMPRESE_AUTONOMOUS = YES`. `PI_MIGRATION_OWNERSHIP = COPIED`. `PI_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `S2-GATE-PI-LEGAL-DOCS` chiuso. E2E/script DB-rete `NOT_RUN_EXTERNAL_DEPENDENCY`. Navigazione `/eventi` `/cultura` `/contenuti` `/osservatorio` = `CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER`. `S2-GATE-PI-EDITORIAL-SUPPORT` resta aperto (supporto transitorio PI). `S2-GATE-BRAND` aperto, non bloccante.
+
+Fine documento. Closeout `S2-PI-FINAL-01`: PonteImprese autonomo per lo sviluppo applicativo; DB fisico e cut-over rinviati.

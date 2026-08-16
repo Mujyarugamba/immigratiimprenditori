@@ -3,6 +3,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import {
+  ponteImpreseAppRoot,
+  ponteImpreseLegalDocsDir,
+  ponteImpreseMigrationsDir,
+} from "@/lib/app-paths";
+import {
   assertNoInternalLegalMarkers,
   loadPublicLegalMarkdown,
 } from "@/lib/legal/load-public-document";
@@ -51,10 +56,7 @@ describe("L1.4 legal public surfaces", () => {
       "termini-duso.md",
       "informativa-disclaimer-dati-fonti-esterne.md",
     ]) {
-      const raw = readFileSync(
-        join(process.cwd(), "docs", "architecture", "legal", file),
-        "utf8",
-      );
+      const raw = readFileSync(join(ponteImpreseLegalDocsDir(), file), "utf8");
       assert.equal(/\[TASK TECNICO/i.test(raw), false, file);
       assert.equal(/\[VERIFICA TECNICA RICHIESTA/i.test(raw), false, file);
       assert.equal(/DOCUMENTO DA REVISIONARE/i.test(raw), false, file);
@@ -121,10 +123,7 @@ describe("L1.4 legal public surfaces", () => {
 
   it("terms acceptance migration remains present and scoped", () => {
     const sql = readFileSync(
-      join(
-        process.cwd(),
-        "supabase/migrations/20260815100000_create_terms_acceptances.sql",
-      ),
+      join(ponteImpreseMigrationsDir(), "20260815100000_create_terms_acceptances.sql"),
       "utf8",
     );
     assert.match(sql, /create table public\.terms_acceptances/);
@@ -145,7 +144,7 @@ describe("L1.4 legal public surfaces", () => {
 
   it("footer exposes four legal links", () => {
     const footer = readFileSync(
-      join(process.cwd(), "src/components/layout/Footer.tsx"),
+      join(ponteImpreseAppRoot(), "src/components/layout/Footer.tsx"),
       "utf8",
     );
     assert.match(footer, /href="\/privacy"/);
@@ -157,7 +156,7 @@ describe("L1.4 legal public surfaces", () => {
 
   it("no analytics packages in package.json dependencies", () => {
     const pkg = JSON.parse(
-      readFileSync(join(process.cwd(), "package.json"), "utf8"),
+      readFileSync(join(ponteImpreseAppRoot(), "package.json"), "utf8"),
     );
     const deps = {
       ...(pkg.dependencies ?? {}),

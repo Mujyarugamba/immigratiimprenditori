@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { describe, it } from "node:test";
 import { join } from "node:path";
+import { describe, it } from "node:test";
+import { ponteImpreseMigrationsDir } from "@/lib/app-paths";
 import { PROFILE_SELF_EDITABLE_FIELDS } from "@/types/business";
 import { PUBLIC_PERSON_SELECT } from "@/lib/data/public/people";
 
@@ -21,8 +22,8 @@ describe("L1.1b person contact contract", () => {
   it("migration creates network RPC and clears legacy phone", () => {
     const sql = readFileSync(
       join(
-        process.cwd(),
-        "supabase/migrations/20260814100000_create_person_contact_channels.sql",
+        ponteImpreseMigrationsDir(),
+        "20260814100000_create_person_contact_channels.sql",
       ),
       "utf8",
     );
@@ -36,8 +37,8 @@ describe("L1.1b person contact contract", () => {
   it("follow-up migration forces legacy profiles.phone null", () => {
     const sql = readFileSync(
       join(
-        process.cwd(),
-        "supabase/migrations/20260814110000_harden_legacy_profiles_phone.sql",
+        ponteImpreseMigrationsDir(),
+        "20260814110000_harden_legacy_profiles_phone.sql",
       ),
       "utf8",
     );

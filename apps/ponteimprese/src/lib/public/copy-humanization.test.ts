@@ -12,12 +12,25 @@ import {
 
 const here = join(import.meta.dirname);
 
+/** CENTRO_STUDI inventory pages: linked from PI nav, not present in this app. */
+const CROSS_PRODUCT_APP_PAGES = new Set([
+  "cultura/page.tsx",
+  "osservatorio/page.tsx",
+  "osservatorio/[slug]/page.tsx",
+  "eventi/page.tsx",
+  "contenuti/page.tsx",
+]);
+
 function readApp(rel: string): string {
   return readFileSync(join(here, "../../app", rel), "utf8");
 }
 
 function readSrc(rel: string): string {
   return readFileSync(join(here, "../..", rel), "utf8");
+}
+
+function piOwnedAppPages(rels: readonly string[]): string[] {
+  return rels.filter((rel) => !CROSS_PRODUCT_APP_PAGES.has(rel));
 }
 
 /** Patterns that must not appear as user-facing copy in key UI files. */
@@ -49,14 +62,18 @@ describe("P7.4 / P7.5 frontend copy humanization", () => {
     );
   });
 
-  it("cultura hub avoids architecture jargon", () => {
+  it(
+    "cultura hub avoids architecture jargon",
+    { skip: "CS-owned page; CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER" },
+    () => {
     const page = readApp("cultura/page.tsx");
     assert.doesNotMatch(page, FORBIDDEN_UI);
     assert.doesNotMatch(page, FORBIDDEN_DEMO);
     assert.doesNotMatch(page, /aggrega fatti|domini della rete|cultural_creative\./i);
     assert.match(page, /Cultura, incontri, relazioni/);
     assert.match(page, /industrie creative/);
-  });
+  },
+  );
 
   it("home and pubblica avoid architecture and demo jargon", () => {
     const home = readApp("page.tsx");
@@ -129,13 +146,17 @@ describe("P7.4 / P7.5 frontend copy humanization", () => {
     assert.doesNotMatch(nav, /\(CTX\)|\(ACT\)/);
   });
 
-  it("osservatorio public UI uses Italian labels for units and periodicity", () => {
+  it(
+    "osservatorio public UI uses Italian labels for units and periodicity",
+    { skip: "CS-owned pages; CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER" },
+    () => {
     const list = readApp("osservatorio/page.tsx");
     const detail = readApp("osservatorio/[slug]/page.tsx");
     assert.match(list, /OBSERVATORY_PERIODICITY_LABELS|OBSERVATORY_UNIT_LABELS/);
     assert.doesNotMatch(detail, /indicator\.code/);
     assert.match(detail, /OBSERVATORY_UNIT_LABELS/);
-  });
+  },
+  );
 });
 
 /** User-facing “new / waiting platform” patterns — not legitimate grammar of “quando”. */
@@ -167,7 +188,7 @@ describe("P7.6 established platform voice", () => {
   ];
 
   it("public and private surfaces avoid waiting / new-site empty copy", () => {
-    for (const rel of surfaces) {
+    for (const rel of piOwnedAppPages(surfaces)) {
       const src = readApp(rel);
       assert.doesNotMatch(
         src,
@@ -222,7 +243,10 @@ const FORBIDDEN_META =
   /Immigrati Imprenditori resta|già presenti nella rete|I servizi linguistici restano|Cultura collega ciò che già esiste|Osservatorio\s*·\s*Chi siamo|classificazione strutturata|una sola volta|elenchi isolati|record reali|Nessun dato dimostrativo|in fase di sviluppo/i;
 
 describe("P7.7 final human UX editorial polish", () => {
-  it("cultura hub shows product, not architecture or taxonomy rules", () => {
+  it(
+    "cultura hub shows product, not architecture or taxonomy rules",
+    { skip: "CS-owned page; CROSS_PRODUCT_NAVIGATION_PENDING_CUTOVER" },
+    () => {
     const page = readApp("cultura/page.tsx");
     assert.doesNotMatch(page, FORBIDDEN_META);
     assert.doesNotMatch(page, /PLATFORM_IDENTITY|pubblic[oi] con competenze|Imprese pubbliche|elenco dedicato|oppure collegati a un evento/i);
@@ -233,7 +257,8 @@ describe("P7.7 final human UX editorial polish", () => {
     assert.match(page, /Notizie, guide, esperienze e racconti/);
     assert.match(page, /Presenta ciò che fai/);
     assert.doesNotMatch(page, /Nella rete/);
-  });
+  },
+  );
 
   it("footer has no isolated Osservatorio · Chi siamo bar", () => {
     const footer = readSrc("components/layout/Footer.tsx");
@@ -258,7 +283,7 @@ describe("P7.7 final human UX editorial polish", () => {
   });
 
   it("key surfaces avoid known meta-copy regressions", () => {
-    for (const rel of [
+    for (const rel of piOwnedAppPages([
       "page.tsx",
       "persone/page.tsx",
       "cultura/page.tsx",
@@ -267,7 +292,7 @@ describe("P7.7 final human UX editorial polish", () => {
       "opportunita/page.tsx",
       "collaborazioni/page.tsx",
       "chi-siamo/page.tsx",
-    ]) {
+    ])) {
       assert.doesNotMatch(readApp(rel), FORBIDDEN_META, rel);
     }
     assert.doesNotMatch(readSrc("components/layout/Footer.tsx"), FORBIDDEN_META);
@@ -298,14 +323,14 @@ describe("P7.7 final human UX editorial polish", () => {
   });
 
   it("user pages avoid primary technical acronyms in copy", () => {
-    for (const rel of [
+    for (const rel of piOwnedAppPages([
       "registrati/page.tsx",
       "accedi/page.tsx",
       "app/page.tsx",
       "app/profilo/page.tsx",
       "cultura/page.tsx",
       "osservatorio/page.tsx",
-    ]) {
+    ])) {
       assert.doesNotMatch(
         readApp(rel),
         /\bUUID\b|\bRPC\b|\bRLS\b|\bCTX\b|\bACT\b|source of truth|SQLSTATE/i,

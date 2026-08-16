@@ -2,13 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+import { ponteImpreseMigrationsDir } from "@/lib/app-paths";
 
 describe("L1.3-M2 legal_retention_records migration (unapplied design)", () => {
   const sql = readFileSync(
-    join(
-      process.cwd(),
-      "supabase/migrations/20260816100000_create_legal_retention_records.sql",
-    ),
+    join(ponteImpreseMigrationsDir(), "20260816100000_create_legal_retention_records.sql"),
     "utf8",
   );
 
