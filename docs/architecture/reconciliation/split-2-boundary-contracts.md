@@ -73,7 +73,9 @@ Gate esplicito `S2-GATE-ORG-LOADING` (onda `S2-COND-LIB-01`, closeout `S2-PI-COR
 
 `S2-GATE-EVENTI-LOADING`: **chiuso lato CS** in `S2-CS-CORE-01`. Variante locale con `LoadingState`. Il file inventario `src/app/eventi/loading.tsx` resta `PONTE_IMPRESE` (copia PI esistente). Non inferito dalle page CS.
 
-`S2-GATE-LINGUE-MERCATI`: non copiato. Gate aperto.
+`S2-GATE-LINGUE-MERCATI`: **RESOLVED_FOR_PRODUCT_WORKSPACES**. `LINGUE_MERCATI_APP_OWNERSHIP = PONTEIMPRESE`. Redirect `/lingue-e-mercati` → `/mercati` copiato in `apps/ponteimprese`. `/mercati` è PonteImprese. Originale CONDIVISO in root. Non copiato in Centro Studi.
+
+`S2-GATE-CONTENUTI-GUIDE`: **RESOLVED_FOR_PRODUCT_WORKSPACES**. `CONTENUTI_GUIDE_APP_OWNERSHIP = CENTRO_STUDI`. `/notizie-e-guide` è CS e redirect a `/contenuti` (CS). Nessuna modifica database.
 
 `S2-GATE-PI-EDITORIAL-SUPPORT`: invariato. Originali CS ora anche in `apps/centro-studi`; copie PI restano.
 
@@ -88,6 +90,8 @@ Gate esplicito `S2-GATE-ORG-LOADING` (onda `S2-COND-LIB-01`, closeout `S2-PI-COR
 `S2-CS-FINAL-01`: `CENTRO_STUDI_AUTONOMOUS = YES`. Docs 23, test 9, migration 21 copiati. `CS_MIGRATION_OWNERSHIP = COPIED`. `CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`. `CS_RUNTIME_ROOT_DOCUMENT_DEPENDENCIES = 0`. Legal CS: `S2-GATE-LEGAL-CS` aperto (placeholder locale; nessun markdown PI). Helper e2e PI e guard ingest ARCHIVIO copiati come supporto script/test. `CS_SSO_CUTOVER = PENDING`. Typecheck CS/PI/root = 0. `PONTEIMPRESE_AUTONOMOUS = YES` invariato.
 
 `S2-CLEANUP-ARCH-01`: 85/85 ARCHIVIO in root (classificati; zero delete). Guard ingest copiata in PI e CS. `PI_LOCAL_EDITORIAL_SUPPORT = INTENTIONAL_DUPLICATION`. Env example per-app. `WORKSPACE_LOCK_CONSISTENT = YES`. `EVENTI_APP_OWNERSHIP = CENTRO_STUDI`. `CS_LEGAL_CONTENT = CUTOVER_BLOCKER`. `BRAND_DOMAIN_CUTOVER = PENDING`. Script PI eventi: non duplicato il motore CS.
+
+`S2-EXTRACT-01`: package workspace localizzati in ciascuna app (`packages/ui-foundation` neutro duplicato; `packages/product-config` variante per prodotto). Import `@immigrati/*` risolti sotto `apps/<prodotto>/`. `PI_EVENT_SCRIPT_STANDALONE = EXCLUDED_LEGACY_CROSS_PRODUCT` (copia `d1-d8a-events-dry-run` rimossa da PI; originale root intatto). `PI_STANDALONE_EXTERNAL_FILE_DEPENDENCIES = 0`. `CS_STANDALONE_EXTERNAL_FILE_DEPENDENCIES = 0`. `PONTEIMPRESE_REPO_READY = YES`. `CENTRO_STUDI_REPO_READY = YES`. Root `packages/*` preservati. Nessun npm install. Nessun SPLIT-3.
 
 Gate esplicito `S2-GATE-ENV-EXAMPLE` (onda `S2-COND-TOOL-01`): **RESOLVED_FOR_PRODUCT_WORKSPACES**. Esempi in `apps/ponteimprese/env.example` e `apps/centro-studi/env.example` (solo placeholder). Root `env.example` resta legacy.
 
@@ -218,10 +222,11 @@ Contratto di package:
 3. Nessun secret.
 4. Test contrattuale quando il package lascia lo stato scaffold.
 5. Owner tecnico dichiarato nell’onda che lo popola.
-6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app). Include `FormField` da `S2-COND-COMP-01`. Header/Footer/home/app/admin **non** entrano nel package.
-7. `product-config`: dopo `S2-GATE-BRAND` solo chiavi non grafiche (id prodotto, dominio previsto).
+6. `ui-foundation`: zero copy di prodotto, zero token di brand (i token restano nei CSS di app). Include `FormField` da `S2-COND-COMP-01`. Header/Footer/home/app/admin **non** entrano nel package. In `S2-EXTRACT-01` duplicato in `apps/ponteimprese/packages/ui-foundation` e `apps/centro-studi/packages/ui-foundation`. Root `packages/ui-foundation` preservato.
+7. `product-config`: dopo `S2-GATE-BRAND` solo chiavi non grafiche (id prodotto, dominio previsto). In `S2-EXTRACT-01` ciascuna app ha una variante locale: PI esporta solo `ponteImpreseConfig`; CS esporta solo `centroStudiConfig`. Nessun dominio produzione inventato. Root `packages/product-config` (misto) preservato.
 8. `core`: non creato. Copie PI di `safe-redirect` e `app-error` vivono in `apps/ponteimprese` (`S2-PI-CORE-01`). Originale root CONDIVISO. Client Supabase: copie PI in app; originale root.
 9. `tooling-config`: non creato da `S2-COND-TOOL-01` (14 file inventario, 0 duplicati). Il tooling monorepo resta a root finché `src/` legacy lo richiede. `env.example` solo dopo `S2-GATE-ENV-EXAMPLE`.
+10. Dopo `S2-EXTRACT-01` le app **non** dipendono dai package root per lo sviluppo standalone: `file:./packages/*` + `tsconfig` paths intra-app. `PI_ROOT_PACKAGE_DEPENDENCIES = 0`. `CS_ROOT_PACKAGE_DEPENDENCIES = 0`.
 
 ## 15. Regole anti-accoppiamento
 
@@ -237,7 +242,7 @@ Contratto di package:
 
 Precondizioni (SPLIT-1 §20–22, piano W3):
 
-1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. Un’onda con gate aperti (oggi `S2-COND-UTIL-01` / `S2-GATE-SAFE-REDIRECT` / `S2-GATE-APP-ERROR`, `S2-COND-TOOL-01` / `S2-GATE-ENV-EXAMPLE`, `S2-COND-COMP-01` / `S2-GATE-HOME-LAYOUT` / `S2-GATE-APP-COMPONENTS` / `S2-GATE-PUBLIC-LEGAL-COMP`, `S2-COND-LIB-01` / `S2-GATE-LINGUE-MERCATI` / `S2-GATE-ORG` / `S2-GATE-EVENTI` / `S2-GATE-ORG-LOADING` / `S2-GATE-SUPABASE-CLIENT`) **non** soddisfa la propria condizione di completamento finale. `S2-CUTOVER-01` non può partire dopo sole `S2-PI-APP-01`, `S2-CS-APP-01` e `S2-ARCH-01`, né mentre quei gate restano irrisolti. L’insieme delle 18 dipendenze W2 è invariato. `S2-COND-DOCS-01` e `S2-COND-MIG-01` sono chiuse in sede documentale (12 docs a root; 34 SQL immutati con ownership futura registrata); non sbloccano il cut-over da sole.
+1. Aggregato **W2 completa** chiuso: tutte le onde `S2-COND-*`, `S2-PI-*`, `S2-CS-*` e `S2-ARCH-01` (`ordine` 1–18) completate o esplicitamente rinviate con GO. I gate applicativi di workspace sono `RESOLVED_FOR_PRODUCT_WORKSPACES` (inclusi `S2-GATE-LINGUE-MERCATI` e `S2-GATE-CONTENUTI-GUIDE` in `S2-EXTRACT-01`). Restano aperti solo `SPLIT_3_PENDING` (`S2-GATE-ORG`, `S2-GATE-EVENTI`, `S2-GATE-MERCATI`, `S2-GATE-PERSONE-AUTORI`, `S2-GATE-DATI-ACQUISITI`) e `CUTOVER_PENDING` (`S2-GATE-SSO`, `S2-GATE-LEGAL-CS`, `S2-GATE-ANALYTICS`, `S2-GATE-CUTOVER`). `S2-CUTOVER-01` resta Prompt 8: DNS/deploy, non estrazione repository. L’insieme delle 18 dipendenze W2 è invariato. `S2-COND-DOCS-01` e `S2-COND-MIG-01` sono chiuse in sede documentale (12 docs a root; 34 SQL immutati con ownership futura registrata); non sbloccano il cut-over da sole.
 2. Nessun import app-to-app.
 3. Tag di split sul monorepo.
 4. Derivazione dei due repository conservando la storia.

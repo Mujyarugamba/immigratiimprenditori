@@ -1,0 +1,12 @@
+{
+  "name": "@immigrati/ui-foundation",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "peerDependencies": {
+    "next": "16.2.10",
+    "react": "^19.0.0"
+  }
+}

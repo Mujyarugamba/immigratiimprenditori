@@ -16,8 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@immigrati/product-config": ["../../packages/product-config/src/index.ts"],
-      "@immigrati/ui-foundation": ["../../packages/ui-foundation/src/index.tsx"]
+      "@immigrati/product-config": ["./packages/product-config/src/index.ts"],
+      "@immigrati/ui-foundation": ["./packages/ui-foundation/src/index.tsx"]
     }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
