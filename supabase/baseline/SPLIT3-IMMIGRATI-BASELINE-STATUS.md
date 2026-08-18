@@ -4,112 +4,124 @@ Checkpoint 2026-08-18.
 
 ## Scope
 
-ImmigratiImprenditori is the Centro Studi product after the split. Its executable baseline owns editorial/content, events and observatory domains plus the minimum local identity compatibility layer required by the application runtime.
+ImmigratiImprenditori is the Centro Studi product after the split. It owns editorial/content, events and observatory domains plus the minimum local identity compatibility layer required by its own redazione.
 
-The baseline intentionally does not import the PonteImprese business/professional/service/opportunity/international operational graph.
+PonteImprese business/professional/service/opportunity/international operational tables are not part of this database. Cross-product UUIDs may remain as opaque external references only; there are no PostgreSQL foreign keys or runtime joins to Ponte.
 
-Cross-product identifiers such as opportunity, service and market UUIDs are opaque external references only. There are no PostgreSQL foreign keys from ImmigratiImprenditori to PonteImprese.
+## Database baseline
 
-## Executable database baseline
+Executable migrations:
 
-- `00000000000000_baseline_immigratiimprenditori.sql`
-- `00000000000001_runtime_link_compatibility.sql`
-- `00000000000002_seed_immigrati_public_data.sql`
-- `00000000000003_auth_identity_gate.sql`
+- `00_baseline_immigratiimprenditori`
+- `01_runtime_link_compatibility`
+- `02_seed_immigrati_public_data`
+- `03_auth_identity_gate`
 
-Migrations `00..02` already completed an isolated local cold start from zero. Migration `03` is the prepared Auth/editorial identity gate and now requires the final isolated cold-start validation.
+Migrations `00..02` previously completed an isolated cold start. The final `00..03` gate is pending after the Auth/runtime separation work.
 
-## Hosted-source data inventory
+## Hosted-source snapshot
 
-The hosted source project `hvfvfatlaspcpszgizhg` was re-queried read-only on 2026-08-18.
+Source was re-queried read-only on 2026-08-18.
 
-Current Centro Studi data:
+Centro Studi data:
 
-- content types: 11
-- content categories: 9
-- content tags: 0
-- contents: 18
-  - published: 17
-  - not published: 1
-  - rows with `owner_person_id`: 0
-- event types: 10
-- events: 0
-- observatory indicators: 1
-- observatory statistical sources: 1
-- observatory indicator values: 6
+- content types 11
+- content categories 9
+- content tags 0
+- contents 18: 17 published/public, 1 not published, 0 with `owner_person_id`
+- event types 10
+- events 0
+- observatory indicators 1 published
+- observatory statistical sources 1 active
+- observatory indicator values 6 public final/revised values
+- current content/event cross-link and event-operational tables 0 rows
 
-All currently populated content/event cross-link and event-operational tables are empty in the hosted source, including content authors/relations/tag/subject links, content-to-event/opportunity/service/market links, event editions/languages/markets/organizers/registrations/sessions/speakers.
+Shared copied catalogs used locally are languages 30 and business sectors 21.
 
-## Auth / editorial gate — PREPARED
+## Auth/editorial gate — PREPARED
 
-The hosted source currently contains:
+Hosted source currently has one Auth user, one profile, one active linked account and zero application-role assignments. The checked Ponte user-owned operational tables are empty, so there is no populated personal operational graph to remap into Centro Studi.
 
-- auth users: 1
-- profiles: 1
-- accounts: 1
-- account role assignments: 0
+Migration `03_auth_identity_gate` rebuilds only the minimum local mechanics:
 
-The account is active with a declared person association. In the current source row, the Auth user UUID, profile UUID and account `person_id` all refer to the same person identity.
+- `handle_new_user()`
+- `access_provision_account()`
+- `access_link_person()`
+- `assign_application_role()`
+- `on_auth_user_created` trigger
 
-All checked Ponte user-owned operational tables are empty (memberships, professional profile, services, organizations, collaborations, international user activity, training, terms/legal/reassignment records and person contact/profile extension tables). The 18 Centro Studi contents have no `owner_person_id`.
+No Auth user row, email, password, credential, session or application role is seeded.
 
-Migration `03_auth_identity_gate` rebuilds only the minimum supported local identity mechanics:
+The standalone Centro Studi now has a deliberately closed editorial login:
 
-- `handle_new_user()` creates the local profile after an Auth user is created;
-- `access_provision_account()` creates the local registered account under service-role control;
-- `access_link_person()` attaches the account to the local profile and activates it;
-- `assign_application_role()` grants `redattore` or `amministratore_applicativo` explicitly;
-- `on_auth_user_created` wires `auth.users` to `handle_new_user()`.
+- `/accedi` supports email/password only for an already provisioned user;
+- there is no public `/registrati` flow;
+- login requires an active local account and either `redattore` or `amministratore_applicativo`;
+- unauthorized or unprovisioned users are signed out;
+- `/app/redazione` uses its own standalone role gate and logout flow rather than Ponte onboarding redirects.
 
-No Auth user row, email, password, session, credential or application role is stored in the repository or seeded automatically. The hosted `auth` schema is not copied and no user is auto-promoted to an editorial role.
+Final hosted cutover must recreate/invite/reset the intended Auth user through supported Supabase Auth, then provision/link the local account and explicitly assign the required editorial role.
 
-The final hosted cutover must use a supported recreation/invite/reset of the intended user in the final Immigrati Auth project, then provision/link the local account and explicitly assign the required editorial role.
+## Application/runtime separation — PREPARED
 
-## RLS independence
+The active Centro Studi runtime has been separated from Ponte:
 
-The separated RLS policies use only local `profiles`, `accounts`, `account_role_assignments`, Auth helpers, and Centro Studi-owned relations. Cross-product opportunity/service/market UUIDs are opaque references; policy evaluation does not query PonteImprese.
+- `/cultura` reads local Centro Studi events/contents only;
+- Ponte-owned sections in the culture bundle are typed empty collections until an explicit service/API boundary exists;
+- related-data helpers may use opaque external UUIDs only to find local Centro Studi rows, never to query Ponte tables;
+- public content/event/observatory paths query Centro Studi tables only;
+- no Ponte public route is exposed locally.
 
-## Application/runtime boundary — PREPARED, LOCAL TYPECHECK PENDING
+The reserved editorial area contains only:
 
-The active Centro Studi runtime was audited after the database split. The inherited `/cultura` aggregation and related-data helpers still contained direct queries to Ponte-owned tables. These active cross-database assumptions have now been removed.
+- contenuti
+- eventi
+- osservatorio
 
-Current runtime rules:
+Old Ponte editorial links to opportunities, markets and organizations were removed from the dashboard and editorial navigation.
 
-- `/cultura` reads local Centro Studi events and contents only;
-- Ponte-owned culture sections (opportunities, professionals, businesses, organizations, collaborations, services and markets) remain typed empty collections until an explicit cross-product API/service boundary is introduced;
-- CS-related helpers may use opaque external UUIDs to find local CS rows that reference the same Ponte object, but never query Ponte tables to resolve that object;
-- content/event/observatory public and editorial paths continue to query only Centro Studi-owned tables;
-- no local public route is provided for Ponte-owned product domains.
+`scripts/split3/validate-runtime-boundary.mjs` follows the reachable Next.js import graph and fails on Ponte-owned routes, modules, DB queries or editorial routes. It also requires the closed `/accedi` route/auth actions and forbids a public `/registrati` route.
 
-`scripts/split3/validate-runtime-boundary.mjs` is a fail-closed static guard for the active Centro Studi runtime. It fails if a Ponte route or direct query to a Ponte-owned core table is reintroduced.
+## Public RLS smoke — PREPARED
 
-## Automated local gate
+The local validator now switches to role `anon` and verifies exact public visibility after grants/RLS. Expected counts were confirmed against the hosted source:
 
-`scripts/split3/run-immigrati-local-cold-start.ps1` is fail-closed to the `split-3b-executable-baseline` branch and the isolated `split3-local\immigratiimprenditori` laboratory.
+- contents 17
+- content types 11
+- content categories 9
+- event types 10
+- events 0
+- observatory indicators 1
+- observatory statistical sources 1
+- observatory indicator values 6
+- languages 30
+- business sectors 21
 
-It now performs, in order:
+Success marker: `SPLIT3_IMMIGRATI_ANON_PUBLIC_READS = PASS`.
 
-1. application runtime boundary validation;
-2. TypeScript typecheck;
-3. refresh of exactly four baseline migrations (`00..03`) into the isolated laboratory;
-4. local-only `supabase db reset --local --no-seed`;
-5. deterministic read-only database validation.
+## Automated local gate — PENDING
 
-The final success markers are:
+`scripts/split3/run-immigrati-local-cold-start.ps1` is fail-closed to branch `split-3b-executable-baseline` and laboratory:
+
+`C:\Users\151702\Desktop\PROGETTI-WEB\split3-local\immigratiimprenditori`
+
+It checks runtime boundary, runs TypeScript typecheck, refreshes exactly four baseline migrations, starts only the isolated local Supabase stack, performs `supabase db reset --local --no-seed`, then runs deterministic structural/data/RLS validation.
+
+Expected final markers:
 
 - `SPLIT3_IMMIGRATI_RUNTIME_BOUNDARY = PASS`
 - `SPLIT3_IMMIGRATI_TYPECHECK = PASS`
 - `SPLIT3_IMMIGRATI_LOCAL_00_03 = PASS`
+- `SPLIT3_IMMIGRATI_ANON_PUBLIC_READS = PASS`
 
-This full gate has not yet been executed after the runtime-boundary and Auth-gate changes.
+Ponte's `scripts/split3/run-all-local-gates.ps1` orchestrates both products sequentially and stops only the two SPLIT-3 local stacks to avoid port conflicts.
+
+## Production cutover — PENDING
+
+The existing hosted source remains source/backup. All source checks used here were read-only. No hosted schema/data mutation has been performed.
 
 ## Current gate
 
-1. Run the full isolated Immigrati application/database gate through migration `03`.
-2. Run the full isolated Ponte application/database gate through migration `44`.
-3. After both pass, validate representative public reads and Auth/editorial runtime against the separated local databases.
-4. Only after both products pass, plan supported Auth-user recreation and the hosted production cutover.
-
-## Safety
-
-The existing hosted source remains the source/backup during SPLIT-3. The source inventory above was obtained with read-only `SELECT` queries. No hosted schema or data mutation is part of this baseline work.
+1. Run the combined isolated local gate for both products.
+2. If runtime/typecheck/DB/RLS gates pass, perform local Auth functional smoke for Centro Studi and Ponte.
+3. Only then plan supported hosted Auth recreation and the Production split/cutover.
