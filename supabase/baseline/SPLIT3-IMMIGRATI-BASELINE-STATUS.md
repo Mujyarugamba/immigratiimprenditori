@@ -15,8 +15,9 @@ Cross-product identifiers such as opportunity, service and market UUIDs are opaq
 - `00000000000000_baseline_immigratiimprenditori.sql`
 - `00000000000001_runtime_link_compatibility.sql`
 - `00000000000002_seed_immigrati_public_data.sql`
+- `00000000000003_auth_identity_gate.sql`
 
-The baseline has already completed an isolated local cold-start validation from zero. Auth/redazione remains a separate gate.
+Migrations `00..02` already completed an isolated local cold start from zero. Migration `03` is the prepared Auth/editorial identity gate and now requires the final isolated cold-start validation.
 
 ## Hosted-source data inventory
 
@@ -39,7 +40,7 @@ Current Centro Studi data:
 
 All currently populated content/event cross-link and event-operational tables are empty in the hosted source, including content authors/relations/tag/subject links, content-to-event/opportunity/service/market links, event editions/languages/markets/organizers/registrations/sessions/speakers.
 
-## Auth / editorial gate
+## Auth / editorial gate — PREPARED
 
 The hosted source currently contains:
 
@@ -50,16 +51,36 @@ The hosted source currently contains:
 
 The account is active with a declared person association. In the current source row, the Auth user UUID, profile UUID and account `person_id` all refer to the same person identity.
 
-All checked Ponte user-owned operational tables are empty (memberships, professional profile, services, organizations, collaborations, international user activity, training, terms/legal/reassignment records and person contact/profile extension tables).
+All checked Ponte user-owned operational tables are empty (memberships, professional profile, services, organizations, collaborations, international user activity, training, terms/legal/reassignment records and person contact/profile extension tables). The 18 Centro Studi contents have no `owner_person_id`.
 
-Therefore the split does not need to preserve a populated downstream person-data graph. The remaining Auth work is a supported recreation/invite/reset of the user in each final Supabase Auth project, followed by attachment of the local `profiles` / `accounts` compatibility rows and explicit editorial-role setup where required. Do not blindly copy the hosted `auth` schema.
+Migration `03_auth_identity_gate` rebuilds only the minimum supported local identity mechanics:
+
+- `handle_new_user()` creates the local profile after an Auth user is created;
+- `access_provision_account()` creates the local registered account under service-role control;
+- `access_link_person()` attaches the account to the local profile and activates it;
+- `assign_application_role()` grants `redattore` or `amministratore_applicativo` explicitly;
+- `on_auth_user_created` wires `auth.users` to `handle_new_user()`.
+
+No Auth user row, email, password, session, credential or application role is stored in the repository or seeded automatically. The hosted `auth` schema is not copied and no user is auto-promoted to an editorial role.
+
+The final hosted cutover must use a supported recreation/invite/reset of the intended user in the final Immigrati Auth project, then provision/link the local account and explicitly assign the required editorial role.
+
+## RLS independence
+
+The separated RLS policies use only local `profiles`, `accounts`, `account_role_assignments`, Auth helpers, and Centro Studi-owned relations. Cross-product opportunity/service/market UUIDs are opaque references; policy evaluation does not query PonteImprese.
+
+## Automated local gate
+
+`scripts/split3/run-immigrati-local-cold-start.ps1` is fail-closed to the isolated `split3-local\immigratiimprenditori` directory. It refreshes the baseline copies, cold-starts migrations `00..03`, and runs `scripts/split3/validate-immigrati-local-baseline.sql`.
+
+The validator checks the 29-table/RLS closure, current public-data counts, absence of unexpected cross-schema FKs, the four Auth-gate functions, and the `auth.users -> public.handle_new_user` trigger.
 
 ## Current gate
 
-1. Keep the already-built Immigrati structural/public-data baseline isolated from Ponte.
-2. Complete and test the Immigrati Auth/editorial login gate.
-3. Validate public reads and editor/admin writes against the separated Auth identity.
-4. Only after both products pass their Auth gates, plan the hosted production cutover.
+1. Run the isolated automated Immigrati cold-start/validator through migration `03`.
+2. Run the isolated Ponte cold-start/validator through migration `44`.
+3. Validate public reads and editor/admin application runtime against separated local databases.
+4. Only after both products pass, plan supported Auth-user recreation and the hosted production cutover.
 
 ## Safety
 
