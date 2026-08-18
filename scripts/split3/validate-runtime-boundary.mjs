@@ -16,6 +16,7 @@ const forbiddenRouteDirs = new Set([
   "servizi",
   "collaborazioni",
   "organizzazioni",
+  "registrati",
 ]);
 const allowedEditorialRouteDirs = new Set([
   "contenuti",
@@ -32,6 +33,7 @@ const forbiddenHrefFragments = [
   'href="/servizi',
   'href="/collaborazioni',
   'href="/organizzazioni',
+  'href="/registrati',
   'href: "/persone',
   'href: "/imprese',
   'href: "/professionisti',
@@ -40,6 +42,7 @@ const forbiddenHrefFragments = [
   'href: "/servizi',
   'href: "/collaborazioni',
   'href: "/organizzazioni',
+  'href: "/registrati',
   'href="/app/redazione/opportunita',
   'href="/app/redazione/mercati-internazionali',
   'href="/app/redazione/organizzazioni',
@@ -131,19 +134,16 @@ function runtimeImportSpecifiers(text) {
   )) {
     if (match[1]) specs.push(match[1]);
   }
-
   for (const match of runtimeText.matchAll(
     /(?:^|\n)\s*import\s*["']([^"']+)["'];?/gm,
   )) {
     if (match[1]) specs.push(match[1]);
   }
-
   for (const match of runtimeText.matchAll(
     /\bimport\(\s*["']([^"']+)["']\s*\)/g,
   )) {
     if (match[1]) specs.push(match[1]);
   }
-
   for (const match of runtimeText.matchAll(
     /\brequire\(\s*["']([^"']+)["']\s*\)/g,
   )) {
@@ -155,10 +155,15 @@ function runtimeImportSpecifiers(text) {
 
 for (const entry of fs.readdirSync(appRoot, { withFileTypes: true })) {
   if (entry.isDirectory() && forbiddenRouteDirs.has(entry.name)) {
-    failures.push(
-      `forbidden Ponte route directory in Immigrati: src/app/${entry.name}`,
-    );
+    failures.push(`forbidden route in Immigrati: src/app/${entry.name}`);
   }
+}
+
+if (!fs.existsSync(path.join(appRoot, "accedi", "page.tsx"))) {
+  failures.push("missing closed editorial login route: src/app/accedi/page.tsx");
+}
+if (!fs.existsSync(path.join(srcRoot, "lib", "auth", "actions.ts"))) {
+  failures.push("missing closed editorial auth actions: src/lib/auth/actions.ts");
 }
 
 const editorialRoot = path.join(appRoot, "app", "redazione");
@@ -182,6 +187,8 @@ if (fs.existsSync(editorialRoot)) {
       failures.push(`missing Immigrati editorial ${requiredFile}`);
     }
   }
+} else {
+  failures.push("missing Immigrati editorial root: src/app/app/redazione");
 }
 
 const reachable = new Set();
@@ -212,7 +219,7 @@ for (const file of reachable) {
 
   for (const fragment of forbiddenHrefFragments) {
     if (text.includes(fragment)) {
-      failures.push(`${rel}: local Ponte href remains (${fragment})`);
+      failures.push(`${rel}: forbidden local href remains (${fragment})`);
     }
   }
 
