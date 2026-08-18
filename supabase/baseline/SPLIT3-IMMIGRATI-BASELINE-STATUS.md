@@ -8,7 +8,7 @@ ImmigratiImprenditori is the Centro Studi product after the split. It owns edito
 
 PonteImprese business/professional/service/opportunity/international operational tables are not part of this database. Cross-product UUIDs may remain as opaque external references only; there are no PostgreSQL foreign keys or runtime joins to Ponte.
 
-## Database baseline
+## Database baseline — PASS
 
 Executable migrations:
 
@@ -17,7 +17,20 @@ Executable migrations:
 - `02_seed_immigrati_public_data`
 - `03_auth_identity_gate`
 
-Migrations `00..02` previously completed an isolated cold start. The final `00..03` gate is pending after the Auth/runtime separation work.
+The isolated cold start `00..03` completed successfully on 2026-08-18.
+
+Verified local state:
+
+- public tables 29
+- RLS policies 57
+- contents 18
+- event types 10
+- events 0
+- observatory indicators 1
+- observatory statistical sources 1
+- observatory indicator values 6
+
+Success marker: `SPLIT3_IMMIGRATI_LOCAL_00_03 = PASS`.
 
 ## Hosted-source snapshot
 
@@ -38,7 +51,7 @@ Centro Studi data:
 
 Shared copied catalogs used locally are languages 30 and business sectors 21.
 
-## Auth/editorial gate — PREPARED
+## Auth structural/editorial gate — PASS
 
 Hosted source currently has one Auth user, one profile, one active linked account and zero application-role assignments. The checked Ponte user-owned operational tables are empty, so there is no populated personal operational graph to remap into Centro Studi.
 
@@ -50,9 +63,9 @@ Migration `03_auth_identity_gate` rebuilds only the minimum local mechanics:
 - `assign_application_role()`
 - `on_auth_user_created` trigger
 
-No Auth user row, email, password, credential, session or application role is seeded.
+Migration `03` cold-starts successfully. No Auth user row, email, password, credential, session or application role is seeded.
 
-The standalone Centro Studi now has a deliberately closed editorial login:
+The standalone Centro Studi has a deliberately closed editorial login:
 
 - `/accedi` supports email/password only for an already provisioned user;
 - there is no public `/registrati` flow;
@@ -62,29 +75,28 @@ The standalone Centro Studi now has a deliberately closed editorial login:
 
 Final hosted cutover must recreate/invite/reset the intended Auth user through supported Supabase Auth, then provision/link the local account and explicitly assign the required editorial role.
 
-## Application/runtime separation — PREPARED
+## Application/runtime separation — PASS
 
-The active Centro Studi runtime has been separated from Ponte:
+The active Centro Studi runtime is separated from Ponte:
 
 - `/cultura` reads local Centro Studi events/contents only;
-- Ponte-owned sections in the culture bundle are typed empty collections until an explicit service/API boundary exists;
+- Ponte-owned sections in compatibility bundles are typed empty collections until an explicit service/API boundary exists;
 - related-data helpers may use opaque external UUIDs only to find local Centro Studi rows, never to query Ponte tables;
 - public content/event/observatory paths query Centro Studi tables only;
-- no Ponte public route is exposed locally.
+- no Ponte public route is exposed locally;
+- old Ponte editorial modules retained for compatibility are database-free;
+- reserved `/app/redazione` contains only contenuti, eventi and osservatorio.
 
-The reserved editorial area contains only:
+`scripts/split3/validate-runtime-boundary.mjs` follows the reachable Next.js import graph and fails on Ponte-owned routes, DB queries or forbidden editorial routes. It also requires the closed `/accedi` route/auth actions and forbids a public `/registrati` route.
 
-- contenuti
-- eventi
-- osservatorio
+Observed markers:
 
-Old Ponte editorial links to opportunities, markets and organizations were removed from the dashboard and editorial navigation.
+- `SPLIT3_IMMIGRATI_RUNTIME_BOUNDARY = PASS`
+- `SPLIT3_IMMIGRATI_TYPECHECK = PASS`
 
-`scripts/split3/validate-runtime-boundary.mjs` follows the reachable Next.js import graph and fails on Ponte-owned routes, modules, DB queries or editorial routes. It also requires the closed `/accedi` route/auth actions and forbids a public `/registrati` route.
+## Public RLS smoke — PASS
 
-## Public RLS smoke — PREPARED
-
-The local validator now switches to role `anon` and verifies exact public visibility after grants/RLS. Expected counts were confirmed against the hosted source:
+The local validator switches to role `anon` and verifies exact public visibility after grants/RLS:
 
 - contents 17
 - content types 11
@@ -99,22 +111,30 @@ The local validator now switches to role `anon` and verifies exact public visibi
 
 Success marker: `SPLIT3_IMMIGRATI_ANON_PUBLIC_READS = PASS`.
 
-## Automated local gate — PENDING
+## Automated local separation gate — PASS
 
 `scripts/split3/run-immigrati-local-cold-start.ps1` is fail-closed to branch `split-3b-executable-baseline` and laboratory:
 
 `C:\Users\151702\Desktop\PROGETTI-WEB\split3-local\immigratiimprenditori`
 
-It checks runtime boundary, runs TypeScript typecheck, refreshes exactly four baseline migrations, starts only the isolated local Supabase stack, performs `supabase db reset --local --no-seed`, then runs deterministic structural/data/RLS validation.
+It validates runtime boundary, TypeScript, exactly four baseline migrations, isolated Supabase cold-start and deterministic structural/data/RLS checks. The complete gate passed on 2026-08-18.
 
-Expected final markers:
+## Local Auth identity smoke — PREPARED
 
-- `SPLIT3_IMMIGRATI_RUNTIME_BOUNDARY = PASS`
-- `SPLIT3_IMMIGRATI_TYPECHECK = PASS`
-- `SPLIT3_IMMIGRATI_LOCAL_00_03 = PASS`
-- `SPLIT3_IMMIGRATI_ANON_PUBLIC_READS = PASS`
+The next local gate is transactional and leaves no test identity behind:
 
-Ponte's `scripts/split3/run-all-local-gates.ps1` orchestrates both products sequentially and stops only the two SPLIT-3 local stacks to avoid port conflicts.
+- `scripts/split3/validate-immigrati-local-auth.sql`
+- `scripts/split3/run-immigrati-local-auth-smoke.ps1`
+- combined orchestrator lives in Ponte: `scripts/split3/run-all-local-auth-smoke.ps1`
+
+It creates a synthetic local `auth.users` row inside a transaction, verifies the Auth trigger creates the profile, provisions an account, performs authenticated self-link, assigns `redattore`, verifies account/person/editor access helpers, then rolls everything back and confirms no test rows remain.
+
+Expected markers:
+
+- `SPLIT3_IMMIGRATI_AUTH_IDENTITY_FLOW = PASS`
+- `SPLIT3_IMMIGRATI_AUTH_ROLLBACK = PASS`
+
+This is an identity/database functional smoke only; password/session recreation for hosted cutover remains separate and must use supported Supabase Auth mechanisms.
 
 ## Production cutover — PENDING
 
@@ -122,6 +142,6 @@ The existing hosted source remains source/backup. All source checks used here we
 
 ## Current gate
 
-1. Run the combined isolated local gate for both products.
-2. If runtime/typecheck/DB/RLS gates pass, perform local Auth functional smoke for Centro Studi and Ponte.
-3. Only then plan supported hosted Auth recreation and the Production split/cutover.
+1. Run the combined transactional local Auth identity smoke for Ponte and Immigrati.
+2. If both pass, freeze SPLIT-3 local separation as complete.
+3. Plan supported hosted Auth recreation and the Production split/cutover.
