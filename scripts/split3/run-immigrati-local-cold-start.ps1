@@ -26,11 +26,11 @@ if (-not (Test-Path $migrationsPath)) { throw "Missing local migrations director
 if (-not (Test-Path $validatorPath)) { throw "Missing validator: $validatorPath" }
 
 $baselineFiles = @(Get-ChildItem $baselinePath -File -Filter '000000000000*.sql' | Sort-Object Name)
-if ($baselineFiles.Count -ne 3) {
-  throw "Expected exactly 3 Immigrati baseline migrations (00..02), found $($baselineFiles.Count)"
+if ($baselineFiles.Count -ne 4) {
+  throw "Expected exactly 4 Immigrati baseline migrations (00..03), found $($baselineFiles.Count)"
 }
-if ($baselineFiles[0].Name -notlike '00000000000000_*' -or $baselineFiles[-1].Name -notlike '00000000000002_*') {
-  throw 'Immigrati baseline migration range is not exactly 00..02'
+if ($baselineFiles[0].Name -notlike '00000000000000_*' -or $baselineFiles[-1].Name -notlike '00000000000003_*') {
+  throw 'Immigrati baseline migration range is not exactly 00..03'
 }
 
 Write-Host "Immigrati SPLIT-3 isolated lab: $lab"
@@ -39,11 +39,11 @@ Get-ChildItem $migrationsPath -File -Filter '000000000000*.sql' -ErrorAction Sil
 Copy-Item $baselineFiles.FullName -Destination $migrationsPath -Force
 
 $copied = @(Get-ChildItem $migrationsPath -File -Filter '000000000000*.sql' | Sort-Object Name)
-if ($copied.Count -ne 3) { throw "Expected 3 copied migrations, found $($copied.Count)" }
+if ($copied.Count -ne 4) { throw "Expected 4 copied migrations, found $($copied.Count)" }
 
 Push-Location $lab
 try {
-  Write-Host 'Running local-only cold start 00..02...'
+  Write-Host 'Running local-only cold start 00..03...'
   & supabase db reset --local --no-seed
   if ($LASTEXITCODE -ne 0) { throw "supabase db reset failed with exit code $LASTEXITCODE" }
 }
@@ -61,4 +61,4 @@ Get-Content $validatorPath -Raw | docker exec -i $container psql -U postgres -d 
 if ($LASTEXITCODE -ne 0) { throw "Immigrati validator failed with exit code $LASTEXITCODE" }
 
 Write-Host ''
-Write-Host 'SPLIT3_IMMIGRATI_LOCAL_00_02 = PASS'
+Write-Host 'SPLIT3_IMMIGRATI_LOCAL_00_03 = PASS'
