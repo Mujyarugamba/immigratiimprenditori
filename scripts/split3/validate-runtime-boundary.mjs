@@ -103,27 +103,41 @@ function resolveModule(specifier, fromFile) {
     ...extensions.map((ext) => `${base}${ext}`),
     ...extensions.map((ext) => path.join(base, `index${ext}`)),
   ];
-  return candidates.find((candidate) => fs.existsSync(candidate) && fs.statSync(candidate).isFile()) ?? null;
+  return candidates.find(
+    (candidate) =>
+      fs.existsSync(candidate) && fs.statSync(candidate).isFile(),
+  ) ?? null;
 }
 
 function runtimeImportSpecifiers(text) {
   const specs = [];
-  const lines = text.split(/\r?\n/);
+  const runtimeText = text.replace(
+    /(^|\n)\s*import\s+type\b[\s\S]*?;\s*/g,
+    "$1",
+  );
 
-  for (const line of lines) {
-    if (/^\s*import\s+type\b/.test(line)) continue;
+  for (const match of runtimeText.matchAll(
+    /(?:^|\n)\s*(?:import|export)\s+(?!type\b)[^;]*?\bfrom\s*["']([^"']+)["'];?/gm,
+  )) {
+    if (match[1]) specs.push(match[1]);
+  }
 
-    const staticMatch = line.match(
-      /^\s*(?:import|export)\b(?:[^"']*?\bfrom\s*)?["']([^"']+)["']/,
-    );
-    if (staticMatch?.[1]) specs.push(staticMatch[1]);
+  for (const match of runtimeText.matchAll(
+    /(?:^|\n)\s*import\s*["']([^"']+)["'];?/gm,
+  )) {
+    if (match[1]) specs.push(match[1]);
+  }
 
-    for (const match of line.matchAll(/\bimport\(\s*["']([^"']+)["']\s*\)/g)) {
-      specs.push(match[1]);
-    }
-    for (const match of line.matchAll(/\brequire\(\s*["']([^"']+)["']\s*\)/g)) {
-      specs.push(match[1]);
-    }
+  for (const match of runtimeText.matchAll(
+    /\bimport\(\s*["']([^"']+)["']\s*\)/g,
+  )) {
+    if (match[1]) specs.push(match[1]);
+  }
+
+  for (const match of runtimeText.matchAll(
+    /\brequire\(\s*["']([^"']+)["']\s*\)/g,
+  )) {
+    if (match[1]) specs.push(match[1]);
   }
 
   return specs;
@@ -131,7 +145,9 @@ function runtimeImportSpecifiers(text) {
 
 for (const entry of fs.readdirSync(appRoot, { withFileTypes: true })) {
   if (entry.isDirectory() && forbiddenRouteDirs.has(entry.name)) {
-    failures.push(`forbidden Ponte route directory in Immigrati: src/app/${entry.name}`);
+    failures.push(
+      `forbidden Ponte route directory in Immigrati: src/app/${entry.name}`,
+    );
   }
 }
 
