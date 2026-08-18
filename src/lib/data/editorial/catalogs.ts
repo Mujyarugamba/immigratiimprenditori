@@ -49,6 +49,16 @@ export async function getDefaultLanguageId(): Promise<number | null> {
   return data ? Number(data.id) : null;
 }
 
+/** Ponte-owned after SPLIT-3; retained only for compile-time compatibility. */
+export async function listActiveOrganizationTypes(): Promise<CatalogOption[]> {
+  return [];
+}
+
+/** Ponte-owned after SPLIT-3; retained only for compile-time compatibility. */
+export async function listActiveOrganizationScopes(): Promise<CatalogOption[]> {
+  return [];
+}
+
 export async function listActiveEventTypes(): Promise<CatalogOption[]> {
   const supabase = await createClient();
   const { data } = await supabase
