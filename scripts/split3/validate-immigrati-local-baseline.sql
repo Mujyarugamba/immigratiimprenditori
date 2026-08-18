@@ -141,3 +141,41 @@ UNION ALL SELECT 'observatory_indicators', count(*)::text FROM public.observator
 UNION ALL SELECT 'observatory_statistical_sources', count(*)::text FROM public.observatory_statistical_sources
 UNION ALL SELECT 'observatory_indicator_values', count(*)::text FROM public.observatory_indicator_values
 ORDER BY metric;
+
+-- Anonymous public-read smoke: verifies grants + RLS from the public role.
+BEGIN;
+SET LOCAL ROLE anon;
+
+SELECT 1 / CASE WHEN count(*) = 17 THEN 1 ELSE 0 END AS contents_public_gate
+FROM public.contents;
+
+SELECT 1 / CASE WHEN count(*) = 11 THEN 1 ELSE 0 END AS content_types_public_gate
+FROM public.content_types;
+
+SELECT 1 / CASE WHEN count(*) = 9 THEN 1 ELSE 0 END AS content_categories_public_gate
+FROM public.content_categories;
+
+SELECT 1 / CASE WHEN count(*) = 10 THEN 1 ELSE 0 END AS event_types_public_gate
+FROM public.event_types;
+
+SELECT 1 / CASE WHEN count(*) = 0 THEN 1 ELSE 0 END AS events_public_gate
+FROM public.events;
+
+SELECT 1 / CASE WHEN count(*) = 1 THEN 1 ELSE 0 END AS observatory_indicators_public_gate
+FROM public.observatory_indicators;
+
+SELECT 1 / CASE WHEN count(*) = 1 THEN 1 ELSE 0 END AS observatory_sources_public_gate
+FROM public.observatory_statistical_sources;
+
+SELECT 1 / CASE WHEN count(*) = 6 THEN 1 ELSE 0 END AS observatory_values_public_gate
+FROM public.observatory_indicator_values;
+
+SELECT 1 / CASE WHEN count(*) = 30 THEN 1 ELSE 0 END AS languages_public_gate
+FROM public.languages;
+
+SELECT 1 / CASE WHEN count(*) = 21 THEN 1 ELSE 0 END AS sectors_public_gate
+FROM public.business_sectors;
+
+ROLLBACK;
+
+SELECT 'SPLIT3_IMMIGRATI_ANON_PUBLIC_READS' AS check_name, 'PASS' AS result;
