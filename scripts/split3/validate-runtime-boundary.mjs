@@ -80,9 +80,12 @@ const forbiddenDbPatterns = [
   /\.from\(["']profile_competencies["']\)/,
 ];
 
+// Public Ponte data modules still contain real Ponte data access and therefore
+// must never become reachable from Centro Studi routes. Legacy editorial
+// compatibility files are allowed only when database-free; forbiddenDbPatterns
+// below remains authoritative for them.
 const forbiddenReachableModules = [
   /\/src\/lib\/data\/public\/(?:people|businesses|professionals|opportunities|markets|services|organizations|collaborations)\.(?:ts|tsx|js|jsx|mjs)$/,
-  /\/src\/lib\/data\/editorial\/(?:markets|opportunities|organizations)\.(?:ts|tsx|js|jsx|mjs)$/,
 ];
 
 const failures = [];
@@ -154,7 +157,11 @@ function runtimeImportSpecifiers(text) {
 }
 
 for (const entry of fs.readdirSync(appRoot, { withFileTypes: true })) {
-  if (entry.isDirectory() && forbiddenRouteDirs.has(entry.name)) {
+  if (
+    entry.isDirectory() &&
+    forbiddenRouteDirs.has(entry.name) &&
+    walk(path.join(appRoot, entry.name)).length > 0
+  ) {
     failures.push(`forbidden route in Immigrati: src/app/${entry.name}`);
   }
 }
@@ -169,7 +176,11 @@ if (!fs.existsSync(path.join(srcRoot, "lib", "auth", "actions.ts"))) {
 const editorialRoot = path.join(appRoot, "app", "redazione");
 if (fs.existsSync(editorialRoot)) {
   for (const entry of fs.readdirSync(editorialRoot, { withFileTypes: true })) {
-    if (entry.isDirectory() && !allowedEditorialRouteDirs.has(entry.name)) {
+    if (
+      entry.isDirectory() &&
+      !allowedEditorialRouteDirs.has(entry.name) &&
+      walk(path.join(editorialRoot, entry.name)).length > 0
+    ) {
       failures.push(
         `forbidden editorial route in Immigrati: src/app/app/redazione/${entry.name}`,
       );
@@ -213,7 +224,7 @@ for (const file of reachable) {
 
   for (const pattern of forbiddenReachableModules) {
     if (pattern.test(normalizedAbsolute)) {
-      failures.push(`${rel}: Ponte module is reachable from Immigrati routes`);
+      failures.push(`${rel}: Ponte data module is reachable from Immigrati routes`);
     }
   }
 
