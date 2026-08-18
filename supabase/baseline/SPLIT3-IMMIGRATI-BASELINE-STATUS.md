@@ -10,7 +10,7 @@ The baseline intentionally does not import the PonteImprese business/professiona
 
 Cross-product identifiers such as opportunity, service and market UUIDs are opaque external references only. There are no PostgreSQL foreign keys from ImmigratiImprenditori to PonteImprese.
 
-## Executable baseline on this branch
+## Executable database baseline
 
 - `00000000000000_baseline_immigratiimprenditori.sql`
 - `00000000000001_runtime_link_compatibility.sql`
@@ -69,17 +69,45 @@ The final hosted cutover must use a supported recreation/invite/reset of the int
 
 The separated RLS policies use only local `profiles`, `accounts`, `account_role_assignments`, Auth helpers, and Centro Studi-owned relations. Cross-product opportunity/service/market UUIDs are opaque references; policy evaluation does not query PonteImprese.
 
+## Application/runtime boundary — PREPARED, LOCAL TYPECHECK PENDING
+
+The active Centro Studi runtime was audited after the database split. The inherited `/cultura` aggregation and related-data helpers still contained direct queries to Ponte-owned tables. These active cross-database assumptions have now been removed.
+
+Current runtime rules:
+
+- `/cultura` reads local Centro Studi events and contents only;
+- Ponte-owned culture sections (opportunities, professionals, businesses, organizations, collaborations, services and markets) remain typed empty collections until an explicit cross-product API/service boundary is introduced;
+- CS-related helpers may use opaque external UUIDs to find local CS rows that reference the same Ponte object, but never query Ponte tables to resolve that object;
+- content/event/observatory public and editorial paths continue to query only Centro Studi-owned tables;
+- no local public route is provided for Ponte-owned product domains.
+
+`scripts/split3/validate-runtime-boundary.mjs` is a fail-closed static guard for the active Centro Studi runtime. It fails if a Ponte route or direct query to a Ponte-owned core table is reintroduced.
+
 ## Automated local gate
 
-`scripts/split3/run-immigrati-local-cold-start.ps1` is fail-closed to the isolated `split3-local\immigratiimprenditori` directory. It refreshes the baseline copies, cold-starts migrations `00..03`, and runs `scripts/split3/validate-immigrati-local-baseline.sql`.
+`scripts/split3/run-immigrati-local-cold-start.ps1` is fail-closed to the `split-3b-executable-baseline` branch and the isolated `split3-local\immigratiimprenditori` laboratory.
 
-The validator checks the 29-table/RLS closure, current public-data counts, absence of unexpected cross-schema FKs, the four Auth-gate functions, and the `auth.users -> public.handle_new_user` trigger.
+It now performs, in order:
+
+1. application runtime boundary validation;
+2. TypeScript typecheck;
+3. refresh of exactly four baseline migrations (`00..03`) into the isolated laboratory;
+4. local-only `supabase db reset --local --no-seed`;
+5. deterministic read-only database validation.
+
+The final success markers are:
+
+- `SPLIT3_IMMIGRATI_RUNTIME_BOUNDARY = PASS`
+- `SPLIT3_IMMIGRATI_TYPECHECK = PASS`
+- `SPLIT3_IMMIGRATI_LOCAL_00_03 = PASS`
+
+This full gate has not yet been executed after the runtime-boundary and Auth-gate changes.
 
 ## Current gate
 
-1. Run the isolated automated Immigrati cold-start/validator through migration `03`.
-2. Run the isolated Ponte cold-start/validator through migration `44`.
-3. Validate public reads and editor/admin application runtime against separated local databases.
+1. Run the full isolated Immigrati application/database gate through migration `03`.
+2. Run the full isolated Ponte application/database gate through migration `44`.
+3. After both pass, validate representative public reads and Auth/editorial runtime against the separated local databases.
 4. Only after both products pass, plan supported Auth-user recreation and the hosted production cutover.
 
 ## Safety
