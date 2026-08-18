@@ -49,26 +49,6 @@ export async function getDefaultLanguageId(): Promise<number | null> {
   return data ? Number(data.id) : null;
 }
 
-export async function listActiveOrganizationTypes(): Promise<CatalogOption[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("organization_types")
-    .select("code, name_it")
-    .eq("is_active", true)
-    .order("sort_order");
-  return (data ?? []).map((r) => ({ code: r.code, label: r.name_it }));
-}
-
-export async function listActiveOrganizationScopes(): Promise<CatalogOption[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("organization_activity_scopes")
-    .select("code, name_it")
-    .eq("is_active", true)
-    .order("sort_order");
-  return (data ?? []).map((r) => ({ code: r.code, label: r.name_it }));
-}
-
 export async function listActiveEventTypes(): Promise<CatalogOption[]> {
   const supabase = await createClient();
   const { data } = await supabase
