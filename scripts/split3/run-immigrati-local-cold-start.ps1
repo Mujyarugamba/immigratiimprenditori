@@ -64,6 +64,10 @@ if ($copied.Count -ne 4) { throw "Expected 4 copied migrations, found $($copied.
 
 Push-Location $lab
 try {
+  Write-Host 'Ensuring the isolated Immigrati Supabase stack is running...'
+  & supabase start
+  if ($LASTEXITCODE -ne 0) { throw "supabase start failed with exit code $LASTEXITCODE" }
+
   Write-Host 'Running local-only cold start 00..03...'
   & supabase db reset --local --no-seed
   if ($LASTEXITCODE -ne 0) { throw "supabase db reset failed with exit code $LASTEXITCODE" }
