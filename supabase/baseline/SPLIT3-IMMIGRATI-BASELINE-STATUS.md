@@ -73,8 +73,6 @@ The standalone Centro Studi has a deliberately closed editorial login:
 - unauthorized or unprovisioned users are signed out;
 - `/app/redazione` uses its own standalone role gate and logout flow rather than Ponte onboarding redirects.
 
-Final hosted cutover must recreate/invite/reset the intended Auth user through supported Supabase Auth, then provision/link the local account and explicitly assign the required editorial role.
-
 ## Application/runtime separation — PASS
 
 The active Centro Studi runtime is separated from Ponte:
@@ -119,29 +117,42 @@ Success marker: `SPLIT3_IMMIGRATI_ANON_PUBLIC_READS = PASS`.
 
 It validates runtime boundary, TypeScript, exactly four baseline migrations, isolated Supabase cold-start and deterministic structural/data/RLS checks. The complete gate passed on 2026-08-18.
 
-## Local Auth identity smoke — PREPARED
+## Local Auth identity smoke — PASS
 
-The next local gate is transactional and leaves no test identity behind:
-
-- `scripts/split3/validate-immigrati-local-auth.sql`
-- `scripts/split3/run-immigrati-local-auth-smoke.ps1`
-- combined orchestrator lives in Ponte: `scripts/split3/run-all-local-auth-smoke.ps1`
-
-It creates a synthetic local `auth.users` row inside a transaction, verifies the Auth trigger creates the profile, provisions an account, performs authenticated self-link, assigns `redattore`, verifies account/person/editor access helpers, then rolls everything back and confirms no test rows remain.
-
-Expected markers:
+The transactional Auth smoke passed on 2026-08-18:
 
 - `SPLIT3_IMMIGRATI_AUTH_IDENTITY_FLOW = PASS`
 - `SPLIT3_IMMIGRATI_AUTH_ROLLBACK = PASS`
 
-This is an identity/database functional smoke only; password/session recreation for hosted cutover remains separate and must use supported Supabase Auth mechanisms.
+The smoke creates a synthetic local Auth identity inside a transaction, verifies trigger → profile → account provision → authenticated person link → `redattore` role → access helpers, then rolls the transaction back. The rollback check confirms no test identity remains.
+
+This validates the local identity/database mechanics only. Hosted password/session recreation remains separate and must use supported Supabase Auth mechanisms.
+
+## SPLIT-3 local separation — COMPLETE
+
+ImmigratiImprenditori has passed all local structural, data, RLS, runtime, typecheck and Auth identity gates required before hosted cutover planning.
+
+Canonical state:
+
+- `IMMIGRATI_COLD_START_00_03 = PASS`
+- `IMMIGRATI_RUNTIME_BOUNDARY = PASS`
+- `IMMIGRATI_TYPECHECK = PASS`
+- `IMMIGRATI_ANON_PUBLIC_READS = PASS`
+- `IMMIGRATI_AUTH_IDENTITY_FLOW = PASS`
+- `IMMIGRATI_AUTH_ROLLBACK = PASS`
+- `IMMIGRATI_SPLIT3_LOCAL = COMPLETE`
 
 ## Production cutover — PENDING
 
 The existing hosted source remains source/backup. All source checks used here were read-only. No hosted schema/data mutation has been performed.
 
-## Current gate
+Next work is hosted cutover planning only:
 
-1. Run the combined transactional local Auth identity smoke for Ponte and Immigrati.
-2. If both pass, freeze SPLIT-3 local separation as complete.
-3. Plan supported hosted Auth recreation and the Production split/cutover.
+1. keep the existing hosted Supabase project as the current source until cutover is explicitly approved;
+2. determine whether Immigrati will remain on that project after controlled cleanup or move to a new hosted target;
+3. perform supported hosted Auth recreation/invite/reset and explicit account/person/editor-role linking;
+4. validate hosted content/event/observatory counts, RLS and redazione access;
+5. switch application environment/deploy only after validation;
+6. remove Ponte-owned tables from the historical shared project only as a separate, reviewed cleanup after both products are live and verified.
+
+Never run `supabase db reset` against the hosted source. The current shared database remains the rollback/source reference until final cutover is complete.
