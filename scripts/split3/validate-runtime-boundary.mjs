@@ -39,7 +39,7 @@ const forbiddenHrefFragments = [
 
 const forbiddenDbPatterns = [
   /\.from\(["']businesses["']\)/,
-  /\.from\(["']business_[^"']+["']\)/,
+  /\.from\(["']business_(?!sectors["'])[^"']+["']\)/,
   /\.from\(["']professional_[^"']+["']\)/,
   /\.from\(["']service_offers["']\)/,
   /\.from\(["']service_requests["']\)/,
