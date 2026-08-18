@@ -17,6 +17,11 @@ const forbiddenRouteDirs = new Set([
   "collaborazioni",
   "organizzazioni",
 ]);
+const allowedEditorialRouteDirs = new Set([
+  "contenuti",
+  "eventi",
+  "osservatorio",
+]);
 
 const forbiddenHrefFragments = [
   'href="/persone',
@@ -35,6 +40,12 @@ const forbiddenHrefFragments = [
   'href: "/servizi',
   'href: "/collaborazioni',
   'href: "/organizzazioni',
+  'href="/app/redazione/opportunita',
+  'href="/app/redazione/mercati-internazionali',
+  'href="/app/redazione/organizzazioni',
+  'href: "/app/redazione/opportunita',
+  'href: "/app/redazione/mercati-internazionali',
+  'href: "/app/redazione/organizzazioni',
 ];
 
 const forbiddenDbPatterns = [
@@ -104,8 +115,7 @@ function resolveModule(specifier, fromFile) {
     ...extensions.map((ext) => path.join(base, `index${ext}`)),
   ];
   return candidates.find(
-    (candidate) =>
-      fs.existsSync(candidate) && fs.statSync(candidate).isFile(),
+    (candidate) => fs.existsSync(candidate) && fs.statSync(candidate).isFile(),
   ) ?? null;
 }
 
@@ -148,6 +158,29 @@ for (const entry of fs.readdirSync(appRoot, { withFileTypes: true })) {
     failures.push(
       `forbidden Ponte route directory in Immigrati: src/app/${entry.name}`,
     );
+  }
+}
+
+const editorialRoot = path.join(appRoot, "app", "redazione");
+if (fs.existsSync(editorialRoot)) {
+  for (const entry of fs.readdirSync(editorialRoot, { withFileTypes: true })) {
+    if (entry.isDirectory() && !allowedEditorialRouteDirs.has(entry.name)) {
+      failures.push(
+        `forbidden editorial route in Immigrati: src/app/app/redazione/${entry.name}`,
+      );
+    }
+  }
+  for (const required of allowedEditorialRouteDirs) {
+    if (!fs.existsSync(path.join(editorialRoot, required))) {
+      failures.push(
+        `missing Immigrati editorial route: src/app/app/redazione/${required}`,
+      );
+    }
+  }
+  for (const requiredFile of ["layout.tsx", "page.tsx"]) {
+    if (!fs.existsSync(path.join(editorialRoot, requiredFile))) {
+      failures.push(`missing Immigrati editorial ${requiredFile}`);
+    }
   }
 }
 
