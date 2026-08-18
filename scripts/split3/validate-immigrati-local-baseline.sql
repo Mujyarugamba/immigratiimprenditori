@@ -1,5 +1,5 @@
 -- SPLIT-3B ImmigratiImprenditori deterministic local validation.
--- READ-ONLY validation after the isolated baseline cold start (00..02).
+-- READ-ONLY validation after the isolated baseline cold start (00..03).
 
 DO $$
 DECLARE
@@ -29,9 +29,31 @@ BEGIN
     RAISE EXCEPTION 'SPLIT3 FAIL: expected 57 Immigrati RLS policies, found %', v;
   END IF;
 
-  -- The only non-public schema target allowed from public is Supabase Auth.
-  -- No public FK may point to a PonteImprese-owned public relation because none
-  -- of those relations exists in the separated Immigrati baseline.
+  SELECT count(*) INTO v
+  FROM pg_catalog.pg_proc p
+  JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname='public'
+    AND p.proname IN ('handle_new_user','access_provision_account','access_link_person','assign_application_role');
+  IF v <> 4 THEN
+    RAISE EXCEPTION 'SPLIT3 FAIL: expected 4 Auth-gate functions, found %', v;
+  END IF;
+
+  SELECT count(*) INTO v
+  FROM pg_catalog.pg_trigger t
+  JOIN pg_catalog.pg_class c ON c.oid=t.tgrelid
+  JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+  JOIN pg_catalog.pg_proc p ON p.oid=t.tgfoid
+  JOIN pg_catalog.pg_namespace pn ON pn.oid=p.pronamespace
+  WHERE n.nspname='auth'
+    AND c.relname='users'
+    AND t.tgname='on_auth_user_created'
+    AND pn.nspname='public'
+    AND p.proname='handle_new_user'
+    AND NOT t.tgisinternal;
+  IF v <> 1 THEN
+    RAISE EXCEPTION 'SPLIT3 FAIL: expected one auth.users -> public.handle_new_user trigger, found %', v;
+  END IF;
+
   SELECT count(*) INTO v
   FROM pg_catalog.pg_constraint con
   JOIN pg_catalog.pg_class child ON child.oid = con.conrelid
@@ -107,7 +129,7 @@ BEGIN
 END
 $$;
 
-SELECT 'SPLIT3_IMMIGRATI_LOCAL_00_02' AS check_name, 'PASS' AS result;
+SELECT 'SPLIT3_IMMIGRATI_LOCAL_00_03' AS check_name, 'PASS' AS result;
 
 SELECT 'public_tables' AS metric, count(*)::text AS value
 FROM pg_catalog.pg_tables WHERE schemaname = 'public'
