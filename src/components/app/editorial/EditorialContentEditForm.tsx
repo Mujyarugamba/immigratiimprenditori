@@ -12,6 +12,7 @@ import {
 } from "@/lib/editorial/actions";
 import type { EditorialContent } from "@/lib/data/editorial/contents";
 import type { CatalogOption } from "@/lib/data/editorial/catalogs";
+import { isStoryContentType } from "@/lib/data/public/stories";
 import { EDITORIAL_STATUS_LABELS, label } from "@/lib/public/labels";
 
 const initial: FormActionState = { ok: false };
@@ -36,6 +37,9 @@ export function EditorialContentEditForm({
     updateEditorialContentAction,
     initial,
   );
+  const publicHref = isStoryContentType(content.type_code)
+    ? `/storie/${content.slug}`
+    : `/contenuti/${content.slug}`;
 
   return (
     <>
@@ -177,9 +181,7 @@ export function EditorialContentEditForm({
         withdrawAction={withdrawEditorialContentAction}
         publicationStatus={content.publication_status}
         publicHref={
-          content.publication_status === "published"
-            ? `/contenuti/${content.slug}`
-            : undefined
+          content.publication_status === "published" ? publicHref : undefined
         }
       />
     </>
