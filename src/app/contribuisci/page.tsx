@@ -57,12 +57,19 @@ export default async function ContribuisciPage({ searchParams }: Props) {
           {hasError ? (
             <div className="mt-8 border border-black p-4 text-sm text-black" role="alert">
               {params.errore === "campi"
-                ? "Controlla i campi obbligatori e il consenso al ricontatto."
+                ? "Controlla i campi obbligatori e i valori inseriti."
                 : "L'invio non è riuscito. Riprova tra poco."}
             </div>
           ) : null}
 
           <form action={submitEditorialContributionAction} className="mt-10 space-y-10">
+            <div aria-hidden="true" className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden">
+              <label>
+                Sito web
+                <input name="website" tabIndex={-1} autoComplete="off" />
+              </label>
+            </div>
+
             <section>
               <h2 className="text-xl font-semibold text-black">1. Che cosa vuoi segnalarci?</h2>
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
@@ -79,7 +86,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Titolo o oggetto
-                  <input name="title" className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="Una breve descrizione" />
+                  <input name="title" maxLength={240} className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="Una breve descrizione" />
                 </label>
               </div>
 
@@ -88,6 +95,8 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 <textarea
                   name="contribution_text"
                   required
+                  minLength={20}
+                  maxLength={20000}
                   rows={9}
                   className="border border-neutral-400 px-3 py-2.5 font-normal leading-6"
                   placeholder="Raccontaci ciò che ritieni importante. Per una storia puoi spiegare chi è la persona, dove opera, che attività svolge e perché pensi che meriti attenzione."
@@ -95,7 +104,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
               </label>
               <label className="mt-5 flex flex-col gap-2 text-sm font-medium text-black">
                 Link originale o pagina di riferimento
-                <input name="original_url" type="url" className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="https://…" />
+                <input name="original_url" type="url" maxLength={2000} className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="https://…" />
               </label>
             </section>
 
@@ -107,11 +116,11 @@ export default async function ContribuisciPage({ searchParams }: Props) {
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Paese di origine
-                  <input name="origin_country_label" className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="es. Italia, Marocco, India" />
+                  <input name="origin_country_label" maxLength={120} className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="es. Italia, Marocco, India" />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Paese in cui opera / destinazione
-                  <input name="destination_country_label" className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="es. Stati Uniti, Francia, Italia" />
+                  <input name="destination_country_label" maxLength={120} className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="es. Stati Uniti, Francia, Italia" />
                 </label>
               </div>
             </section>
@@ -121,19 +130,19 @@ export default async function ContribuisciPage({ searchParams }: Props) {
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Nome e cognome <span aria-hidden="true">*</span>
-                  <input name="submitter_name" required autoComplete="name" className="border border-neutral-400 px-3 py-2.5 font-normal" />
+                  <input name="submitter_name" required minLength={2} maxLength={180} autoComplete="name" className="border border-neutral-400 px-3 py-2.5 font-normal" />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Email <span aria-hidden="true">*</span>
-                  <input name="submitter_email" required type="email" autoComplete="email" className="border border-neutral-400 px-3 py-2.5 font-normal" />
+                  <input name="submitter_email" required type="email" maxLength={320} autoComplete="email" className="border border-neutral-400 px-3 py-2.5 font-normal" />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Telefono
-                  <input name="submitter_phone" type="tel" autoComplete="tel" className="border border-neutral-400 px-3 py-2.5 font-normal" />
+                  <input name="submitter_phone" type="tel" maxLength={80} autoComplete="tel" className="border border-neutral-400 px-3 py-2.5 font-normal" />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
                   Organizzazione / impresa
-                  <input name="organization_name" autoComplete="organization" className="border border-neutral-400 px-3 py-2.5 font-normal" />
+                  <input name="organization_name" maxLength={240} autoComplete="organization" className="border border-neutral-400 px-3 py-2.5 font-normal" />
                 </label>
               </div>
             </section>
