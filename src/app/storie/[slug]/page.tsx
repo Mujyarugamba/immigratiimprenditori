@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
-import { isStoryContentType } from "@/lib/data/public/stories";
 import { countryDisplayNameIt } from "@/lib/public/geography";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
 import { safeHttpsUrl, youtubePrivacyEmbedUrl } from "@/lib/public/story-media";
+import { isStoryContentType } from "@/lib/public/story-types";
 
 type Props = {
   params: Promise<{ slug: string }>;
