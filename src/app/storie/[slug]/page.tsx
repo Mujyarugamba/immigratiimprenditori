@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
 import { isStoryContentType } from "@/lib/data/public/stories";
+import { countryDisplayNameIt } from "@/lib/public/geography";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
 import { safeHttpsUrl, youtubePrivacyEmbedUrl } from "@/lib/public/story-media";
 
@@ -29,6 +30,15 @@ export default async function StoryDetailPage({ params }: Props) {
   if (!content || !isStoryContentType(content.type_code)) notFound();
 
   const isPlainText = content.body_format === "plain_text";
+  const origins = content.geographies
+    .filter((item) => item.relation_kind === "origin" && item.country_code)
+    .map((item) => countryDisplayNameIt(item.country_code));
+  const destinations = content.geographies
+    .filter((item) => item.relation_kind === "destination" && item.country_code)
+    .map((item) => countryDisplayNameIt(item.country_code));
+  const focusCountries = content.geographies
+    .filter((item) => item.relation_kind === "focus" && item.country_code)
+    .map((item) => countryDisplayNameIt(item.country_code));
 
   return (
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
@@ -59,6 +69,37 @@ export default async function StoryDetailPage({ params }: Props) {
             <span>Immigrati Imprenditori · Voci</span>
           </div>
         </header>
+
+        {origins.length > 0 || destinations.length > 0 || focusCountries.length > 0 || content.sectors.length > 0 ? (
+          <section className="grid gap-5 border-b border-black py-6 text-sm sm:grid-cols-2" aria-label="Contesto della storia">
+            {origins.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Origine</p>
+                <p className="mt-1 font-medium text-black">{origins.join(", ")}</p>
+              </div>
+            ) : null}
+            {destinations.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Paese di attività / destinazione</p>
+                <p className="mt-1 font-medium text-black">{destinations.join(", ")}</p>
+              </div>
+            ) : null}
+            {focusCountries.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Paese principale</p>
+                <p className="mt-1 font-medium text-black">{focusCountries.join(", ")}</p>
+              </div>
+            ) : null}
+            {content.sectors.length > 0 ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Settore</p>
+                <p className="mt-1 font-medium text-black">
+                  {content.sectors.map((sector) => sector.sector_name).join(", ")}
+                </p>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         {content.cover_url ? (
           <figure className="border-b border-black py-8">
