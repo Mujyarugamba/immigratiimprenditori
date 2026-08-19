@@ -36,6 +36,7 @@ create policy international_markets_update_admin
   with check (
     public.access_is_application_admin()
     and public.access_is_active_account()
+    and market_id = market_id
   );
 
 -- ---------------------------------------------------------------------------

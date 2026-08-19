@@ -59,6 +59,7 @@ comment on function public.access_opportunity_visible_to_current_party (uuid) is
 
 revoke all on function public.access_opportunity_visible_to_current_party (uuid)
   from public;
+
 grant execute on function public.access_opportunity_visible_to_current_party (uuid)
   to authenticated;
 
@@ -94,6 +95,7 @@ comment on function public.access_opportunity_manageable_by_current_party (uuid)
 
 revoke all on function public.access_opportunity_manageable_by_current_party (uuid)
   from public;
+
 grant execute on function public.access_opportunity_manageable_by_current_party (uuid)
   to authenticated;
 
@@ -121,6 +123,7 @@ comment on function public.access_opportunity_is_public_published (uuid) is
 
 revoke all on function public.access_opportunity_is_public_published (uuid)
   from public;
+
 grant execute on function public.access_opportunity_is_public_published (uuid)
   to anon, authenticated;
 
@@ -146,6 +149,7 @@ comment on function public.access_opportunity_exists_not_deleted (uuid) is
 
 revoke all on function public.access_opportunity_exists_not_deleted (uuid)
   from public;
+
 grant execute on function public.access_opportunity_exists_not_deleted (uuid)
   to authenticated;
 
@@ -154,6 +158,7 @@ grant execute on function public.access_opportunity_exists_not_deleted (uuid)
 -- ---------------------------------------------------------------------------
 
 drop policy if exists opportunities_select_party on public.opportunities;
+
 create policy opportunities_select_party
   on public.opportunities
   for select
@@ -164,6 +169,7 @@ create policy opportunities_select_party
   );
 
 drop policy if exists opportunities_update_party on public.opportunities;
+
 create policy opportunities_update_party
   on public.opportunities
   for update
@@ -179,6 +185,7 @@ create policy opportunities_update_party
 
 -- Editor policies: allow application admin as well (parity with requireEditor).
 drop policy if exists opportunities_select_editor on public.opportunities;
+
 create policy opportunities_select_editor
   on public.opportunities
   for select
@@ -192,6 +199,7 @@ create policy opportunities_select_editor
   );
 
 drop policy if exists opportunities_update_editor on public.opportunities;
+
 create policy opportunities_update_editor
   on public.opportunities
   for update
@@ -217,6 +225,7 @@ create policy opportunities_update_editor
 
 drop policy if exists opportunity_party_references_select_public
   on public.opportunity_party_references;
+
 create policy opportunity_party_references_select_public
   on public.opportunity_party_references
   for select
@@ -227,6 +236,7 @@ create policy opportunity_party_references_select_public
 
 drop policy if exists opportunity_party_references_select_party
   on public.opportunity_party_references;
+
 create policy opportunity_party_references_select_party
   on public.opportunity_party_references
   for select
@@ -240,6 +250,7 @@ create policy opportunity_party_references_select_party
 -- ---------------------------------------------------------------------------
 
 drop policy if exists opportunity_sources_select_editor on public.opportunity_sources;
+
 create policy opportunity_sources_select_editor
   on public.opportunity_sources
   for select
@@ -253,6 +264,7 @@ create policy opportunity_sources_select_editor
   );
 
 drop policy if exists opportunity_sources_update_editor on public.opportunity_sources;
+
 create policy opportunity_sources_update_editor
   on public.opportunity_sources
   for update
@@ -274,6 +286,7 @@ create policy opportunity_sources_update_editor
 
 drop policy if exists opportunity_time_windows_select_editor
   on public.opportunity_time_windows;
+
 create policy opportunity_time_windows_select_editor
   on public.opportunity_time_windows
   for select
@@ -288,6 +301,7 @@ create policy opportunity_time_windows_select_editor
 
 drop policy if exists opportunity_time_windows_update_editor
   on public.opportunity_time_windows;
+
 create policy opportunity_time_windows_update_editor
   on public.opportunity_time_windows
   for update
@@ -301,28 +315,30 @@ create policy opportunity_time_windows_update_editor
   )
   with check (
     (
-      public.access_is_editor()
-      or public.access_is_application_admin()
-    )
+      public.acccess_is_editor()
+      or public.acccess_is_application_admin()
+     )
     and public.access_opportunity_exists_not_deleted(opportunity_id)
   );
 
 drop policy if exists opportunity_market_references_select_editor
   on public.opportunity_market_references;
+
 create policy opportunity_market_references_select_editor
   on public.opportunity_market_references
   for select
   to authenticated
   using (
     (
-      public.access_is_editor()
-      or public.access_is_application_admin()
+      public.acccess_is_editor()
+     or public.access_is_application_admin()
     )
     and public.access_opportunity_exists_not_deleted(opportunity_id)
   );
 
 drop policy if exists opportunity_market_references_update_editor
   on public.opportunity_market_references;
+
 create policy opportunity_market_references_update_editor
   on public.opportunity_market_references
   for update
@@ -339,5 +355,5 @@ create policy opportunity_market_references_update_editor
       public.access_is_editor()
       or public.access_is_application_admin()
     )
-    and public.access_opportunity_exists_not_deleted(opportunity_id)
+    and public.acccess_opportunity_exists_not_deleted(opportunity_id)
   );
