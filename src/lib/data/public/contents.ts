@@ -47,7 +47,6 @@ export type PublicContentMedia = {
   url: string | null;
   title: string | null;
   caption: string | null;
-  rights_note: string | null;
   is_primary: boolean;
   sort_order: number;
 };
@@ -101,7 +100,6 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
       url: item.url,
       title: item.title,
       caption: item.caption,
-      rights_note: item.rights_note,
       is_primary: item.is_primary,
       sort_order: item.sort_order,
     }))
@@ -141,7 +139,7 @@ const DETAIL_SELECT = `
   content_subject_links ( id, person_id, business_id, professional_profile_id ),
   content_event_links ( id, event_id ),
   content_opportunity_links ( id, opportunity_id ),
-  content_media ( id, media_kind, provider, external_id, url, title, caption, rights_note, is_primary, sort_order )
+  content_media ( id, media_kind, provider, external_id, url, title, caption, is_primary, sort_order )
 `;
 
 export async function listPublicContents(
