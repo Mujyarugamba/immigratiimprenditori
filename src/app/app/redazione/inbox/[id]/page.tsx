@@ -7,7 +7,10 @@ import {
   updateInboxPriorityAction,
   updateInboxStatusAction,
 } from "@/lib/editorial/inbox-actions";
-import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
+import {
+  getEditorialInboxItemById,
+  listEditorialInboxActivity,
+} from "@/lib/data/editorial/inbox";
 import { getApplicationSession } from "@/lib/session/get-application-session";
 
 export const metadata: Metadata = {
@@ -54,11 +57,33 @@ const KIND_LABELS: Record<string, string> = {
   other: "Altro",
 };
 
+const STATUS_LABELS: Record<string, string> = Object.fromEntries(STATUS_OPTIONS);
+const PRIORITY_LABELS: Record<string, string> = Object.fromEntries(PRIORITY_OPTIONS);
+
+function describeAuditChange(
+  key: string,
+  change: { from: string | null; to: string | null },
+) {
+  if (key === "status") {
+    return `Stato: ${STATUS_LABELS[change.from ?? ""] ?? change.from ?? "—"} → ${STATUS_LABELS[change.to ?? ""] ?? change.to ?? "—"}`;
+  }
+  if (key === "priority") {
+    return `Priorità: ${PRIORITY_LABELS[change.from ?? ""] ?? change.from ?? "—"} → ${PRIORITY_LABELS[change.to ?? ""] ?? change.to ?? "—"}`;
+  }
+  if (key === "assigned_account_id") {
+    if (!change.from && change.to) return "Presa in carico";
+    if (change.from && !change.to) return "Presa in carico rilasciata";
+    return "Assegnazione modificata";
+  }
+  return key;
+}
+
 export default async function InboxDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [item, session] = await Promise.all([
+  const [item, session, activity] = await Promise.all([
     getEditorialInboxItemById(id),
     getApplicationSession(),
+    listEditorialInboxActivity(id),
   ]);
   if (!item) notFound();
 
@@ -147,6 +172,28 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
               </div>
             </section>
           ) : null}
+
+          <section className="border-t border-black pt-6">
+            <h2 className="text-ink text-sm font-semibold uppercase tracking-wide">Cronologia redazionale</h2>
+            {activity.length === 0 ? (
+              <p className="text-ink-muted mt-3 text-sm">Nessuna modifica registrata.</p>
+            ) : (
+              <ol className="mt-3 divide-y divide-neutral-200 border-y border-neutral-300">
+                {activity.map((entry) => (
+                  <li key={entry.id} className="py-3 text-sm">
+                    <time className="text-ink-muted block text-xs">
+                      {new Intl.DateTimeFormat("it-IT", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.created_at))}
+                    </time>
+                    <div className="mt-1 space-y-1 text-ink">
+                      {Object.entries(entry.changes).map(([key, change]) => (
+                        <p key={key}>{describeAuditChange(key, change)}</p>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
         </div>
 
         <aside className="border-line border-t pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
