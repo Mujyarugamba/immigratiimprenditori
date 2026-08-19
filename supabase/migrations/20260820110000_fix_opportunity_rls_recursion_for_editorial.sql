@@ -315,9 +315,9 @@ create policy opportunity_time_windows_update_editor
   )
   with check (
     (
-      public.acccess_is_editor()
-      or public.acccess_is_application_admin()
-     )
+      public.access_is_editor()
+      or public.access_is_application_admin()
+    )
     and public.access_opportunity_exists_not_deleted(opportunity_id)
   );
 
@@ -330,8 +330,8 @@ create policy opportunity_market_references_select_editor
   to authenticated
   using (
     (
-      public.acccess_is_editor()
-     or public.access_is_application_admin()
+      public.access_is_editor()
+      or public.access_is_application_admin()
     )
     and public.access_opportunity_exists_not_deleted(opportunity_id)
   );
@@ -355,5 +355,5 @@ create policy opportunity_market_references_update_editor
       public.access_is_editor()
       or public.access_is_application_admin()
     )
-    and public.acccess_opportunity_exists_not_deleted(opportunity_id)
+    and public.access_opportunity_exists_not_deleted(opportunity_id)
   );
