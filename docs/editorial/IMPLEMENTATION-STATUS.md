@@ -9,10 +9,10 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 | 1. Fondazione editoriale | **PASS** | Progetto editoriale canonico. |
 | 2. Architettura informazione | **PASS** | Sezioni pubbliche e redazionali materializzate. |
 | 3. Tassonomie internazionali | **PASS** | Origine, destinazione, territorio e rotte globali. |
-| 4. Modello dati v1 | **LIVE VERIFIED / PASS** | Modello editoriale applicato su Supabase reale con RLS. |
+| 4. Modello dati v1 | **LIVE VERIFIED / PASS** | Modello editoriale applicato su Supabase reale con RLS; migrazioni repository riallineate alla cronologia applicata. |
 | 5. Scrivania redazionale | **PASS** | Inbox, triage, assegnazione, priorità, dashboard e audit attività. |
 | 6. Contribuisci | **FUNCTIONAL PASS** | Invio occasionale anonimo + contributore autenticato con read-own + area personale + UI amministrativa invito/abilitazione/revoca. Resta solo smoke di consegna email con un collaboratore reale. |
-| 7. Storie e interviste | **PLATFORM PASS / INTERVIEWS PENDING** | Workflow privato candidato→contatto→intervista→fact-check→approvazione; consensi separati per pubblicazione/citazioni/immagini/video, RLS editor-only. Tre candidati verificati sono in Inbox; le interviste reali restano da svolgere. |
+| 7. Storie e interviste | **PLATFORM PASS / INTERVIEWS PENDING** | Workflow privato candidato→contatto→intervista→fact-check→approvazione; consensi separati per pubblicazione/citazioni/immagini/video, RLS editor-only. Tutti i tre slot Voce del Numero zero hanno candidati verificati; le interviste reali restano da svolgere. |
 | 8. Osservatorio v1 | **PASS V1** | Eurostat, InfoCamere/Futurae e confronto OECD; fonte, periodo, unità, metodologia e aggiornamento pubblici. Relazione strutturata contenuto↔indicatore aggiunta. |
 | 9. Rapporti e ricerche | **PASS V1** | Metadata biblioteca strutturati + prime schede InfoCamere/Futurae e OECD. |
 | 10. Eventi | **PASS V1** | Futuro/passato, fusi, all-day, collegamenti contenuti; One Way Summit 2026 pubblicato come primo evento qualificato. |
@@ -21,11 +21,11 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 | 13. Identità visiva | **V1 PASS** | Bianco/nero/grigi, niente gradienti o effetti decorativi. |
 | 14. Home | **V1 PASS** | Home editoriale Dati · Analisi · Voci. |
 | 15. Social istituzionali | **PENDING EXTERNAL** | LinkedIn, X e YouTube richiedono account esterni. |
-| 16. Sostieni | **PAGE PASS / PAYMENTS PENDING** | Pagina pronta; pagamenti e formule fiscali dopo dati AIPEL verificati. |
-| 17. Identità AIPEL | **PARTIAL** | Presidenza/direzione visibili; sede, denominazione completa e dati fiscali da chiudere. |
+| 16. Sostieni | **PAGE PASS / PAYMENTS PENDING** | Pagina pronta e prudenziale: nessun pagamento attivo e nessuna promessa fiscale finché canale, trattamento amministrativo e formule fiscali non sono verificati. |
+| 17. Identità AIPEL | **PARTIAL** | Presidente/direzione, forma associativa e codice fiscale visibili; sede e denominazione legale estesa da consolidare. |
 | 18. SEO | **TECHNICAL V1 PASS** | Metadata, sitemap, robots, route canoniche e redirect. Multilingua successivo. |
-| 19. Qualità/privacy/sicurezza | **DEV GATE PASS / LAUNCH GATE PENDING** | Next 16.3.1; audit/test/typecheck/build in CI; Supabase RLS verificata; Preview Vercel già riuscita. Privacy finale e leaked-password protection prima del lancio. |
-| 20. Lancio editoriale | **ANALYTICAL CORE READY / VOICES PENDING** | Tutti i 7 contenuti analitici del Numero zero sono `ready` e non pubblicati; 3 slot Voci richiedono interviste originali reali. |
+| 19. Qualità/privacy/sicurezza | **DEV GATE PASS / LAUNCH GATE PENDING** | Next 16.3.1; audit/test/typecheck/build in CI; Supabase RLS verificata; Preview Vercel già riuscita. Privacy finale richiede contatto titolare verificato; leaked-password protection prima del lancio. |
+| 20. Lancio editoriale | **ANALYTICAL CORE READY / VOICE CANDIDATES READY / INTERVIEWS PENDING** | Tutti i 7 contenuti analitici sono `ready` e non pubblicati; i 3 slot Voci hanno candidati verificati e richiedono interviste originali reali. |
 
 ## Ultimi gate verificati
 
@@ -38,6 +38,9 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 - Commit `d8c64ce`: CI #107 PASS — Radar manuale redazionale.
 - Commit `c990868`: CI #108 PASS — Crossref/DataCite + Radar multi-sorgente.
 - Commit `c4aaade`: CI #116 PASS — workflow privato interviste e consensi.
+- Commit `51405fb`: CI #117 PASS — collegamenti Numero zero ↔ Osservatorio.
+- Commit `504b96e`: CI #119 PASS — identità AIPEL e pagina Sostieni.
+- Commit `229c69d`: migrazioni 20/08 riallineate alla cronologia Supabase applicata; nessuna migrazione rieseguita.
 - Vercel Preview aveva già completato con SUCCESS sull'head `e4e7fb9`; la produzione non è richiesta durante lo sviluppo.
 
 ## Numero zero — nucleo analitico
@@ -72,11 +75,13 @@ La tabella ha RLS attiva, nessun `SELECT` anonimo e accesso DML solo per redatto
 
 Candidati prioritari già in Inbox:
 
-1. Agie Hujian Zhou / Ravioleria Sarpi — Lombardia;
-2. Paolo Privitera — italiani all'estero;
-3. Gianni Chiloiro e Angelo Sannino / Doppio Zero — italiani all'estero.
+1. Agie Hujian Zhou / Ravioleria Sarpi — Lombardia (L2);
+2. Paolo Privitera — italiani all'estero (A1);
+3. Gianni Chiloiro e Angelo Sannino / Doppio Zero — italiani all'estero (A1 alternativa/complementare);
+4. Adeola Adedewe / Kredete — Nigeria → Stati Uniti (M2);
+5. Semyon Dukach / One Way Ventures — riserva qualificata M2.
 
-Le pagine pubbliche usate nella ricerca servono a verificare identità e percorso; non sostituiscono l'intervista originale.
+Le pagine pubbliche usate nella ricerca servono a verificare identità e percorso; non sostituiscono l'intervista originale. Nessun messaggio è stato inviato automaticamente.
 
 ## Radar mondiale — regola operativa
 
@@ -100,14 +105,21 @@ Non vengono trattate come misure intercambiabili.
 
 La relazione `content_observatory_indicator_links` consente ora di collegare formalmente analisi/data note agli indicatori che ne costituiscono evidenza, contesto o confronto. La lettura pubblica del link è consentita solo quando sia il contenuto sia l'indicatore sono pubblicati.
 
-## Riconciliazione migrazioni
+## Riconciliazione migrazioni — PASS
 
-Il database registra sette migrazioni datate 20/08/2026 non ancora presenti come file nel branch (`20260820100000` → `20260820160000`): opportunità external-ingestion/RLS, Mercati editorial RLS ed Eventi ownership/provenance/ingestion. Il SQL originale è conservato in `supabase_migrations.schema_migrations` ed è stato recuperato. **Non vanno riapplicate al database**; resta solo il backfill bit-identico dei file nel repository.
+Le sette migrazioni `20260820100000` → `20260820160000` sono ora presenti nel repository e riallineate alla cronologia effettivamente applicata in `supabase_migrations.schema_migrations`. **Non sono state rieseguite sul database.**
+
+Il confronto ha inoltre corretto nel repository due divergenze rispetto allo stato realmente applicato:
+
+- tre refusi `acccess_*` nella migrazione `20260820110000_fix_opportunity_rls_recursion_for_editorial.sql`;
+- una condizione tautologica `market_id = market_id` nella policy `international_markets_update_admin` della migrazione `20260820130000_mercati_editorial_select_rls.sql`.
+
+Le altre cinque migrazioni risultavano già identiche alla ricostruzione dalla cronologia Supabase.
 
 ## Advisor Supabase
 
 - `submit_editorial_contribution`: warning `SECURITY DEFINER` intenzionale; è il confine controllato del form pubblico e `anon` non ha DML diretto sulle tabelle.
-- Leaked Password Protection: da valutare/attivare prima del lancio.
+- Leaked Password Protection: da attivare/verificare prima del lancio.
 - Nessuna rimozione automatica di indici `unused` in fase di basso traffico.
 
 ## Regola di merge
