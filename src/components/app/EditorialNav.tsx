@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/app/redazione", label: "Dashboard", exact: true },
+  { href: "/app/redazione/numero-zero", label: "Numero zero" },
   { href: "/app/redazione/radar", label: "Radar" },
   { href: "/app/redazione/inbox", label: "Inbox" },
   { href: "/app/redazione/storie", label: "Storie e interviste" },
@@ -22,7 +23,6 @@ const activeClass = "text-ink bg-surface-muted block rounded-sm px-2 py-1.5 text
 export function EditorialNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
   const visibleLinks = isAdmin ? [...links, ...adminLinks] : links;
-
   return (
     <nav className="border-line mb-6 flex flex-wrap gap-1 border-b pb-4" aria-label="Redazione Centro Studi">
       {visibleLinks.map(({ href, label, ...rest }) => {
