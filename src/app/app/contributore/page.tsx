@@ -30,21 +30,15 @@ export default async function ContributorePage() {
   return (
     <main id="contenuto">
       <header className="max-w-3xl border-b border-black pb-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Immigrati Imprenditori · Contributore
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-black sm:text-4xl">
-          Le mie proposte
-        </h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Immigrati Imprenditori · Contributore</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-black sm:text-4xl">Le mie proposte</h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-neutral-700">
           Qui trovi soltanto i materiali inviati mentre eri collegato con il tuo account contributore. La redazione resta responsabile di verifica, selezione e pubblicazione.
         </p>
-        <Link
-          href="/contribuisci"
-          className="mt-5 inline-block text-sm font-semibold text-black underline underline-offset-4"
-        >
-          Invia una nuova proposta
-        </Link>
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+          <Link href="/contribuisci" className="text-black underline underline-offset-4">Invia una nuova proposta</Link>
+          <Link href="/app/account" className="text-black underline underline-offset-4">Gestisci account</Link>
+        </div>
       </header>
 
       {proposals.length === 0 ? (
@@ -59,25 +53,16 @@ export default async function ContributorePage() {
           <h2 id="elenco-proposte" className="sr-only">Elenco delle mie proposte</h2>
           <div className="border-t border-black">
             {proposals.map((proposal) => {
-              const route = [proposal.origin_country_label, proposal.destination_country_label]
-                .filter(Boolean)
-                .join(" → ");
+              const route = [proposal.origin_country_label, proposal.destination_country_label].filter(Boolean).join(" → ");
               return (
                 <article key={proposal.id} className="border-b border-neutral-300 py-5">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h3 className="text-base font-semibold text-black">{proposal.title}</h3>
-                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-600">
-                      {STATUS_LABELS[proposal.status] ?? proposal.status}
-                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-600">{STATUS_LABELS[proposal.status] ?? proposal.status}</span>
                   </div>
-                  <p className="mt-2 text-xs text-neutral-500">
-                    Inviata il {formatDate(proposal.received_at)}
-                    {route ? ` · ${route}` : ""}
-                  </p>
+                  <p className="mt-2 text-xs text-neutral-500">Inviata il {formatDate(proposal.received_at)}{route ? ` · ${route}` : ""}</p>
                   {proposal.linked_content_id || proposal.linked_event_id ? (
-                    <p className="mt-3 text-sm leading-6 text-neutral-700">
-                      La redazione ha collegato questa proposta a un contenuto in lavorazione o pubblicazione.
-                    </p>
+                    <p className="mt-3 text-sm leading-6 text-neutral-700">La redazione ha collegato questa proposta a un contenuto in lavorazione o pubblicazione.</p>
                   ) : null}
                 </article>
               );
