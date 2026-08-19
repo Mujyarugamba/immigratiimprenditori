@@ -40,16 +40,16 @@ export default function SostieniPage() {
         <section className="grid gap-8 py-10 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Donazioni</p>
-            <h2 className="mt-2 text-2xl font-semibold text-black">Canale in preparazione</h2>
+            <h2 className="mt-2 text-2xl font-semibold text-black">Canale non ancora attivo</h2>
           </div>
           <div>
             <p className="max-w-3xl text-sm leading-7 text-neutral-700">
-              Il sistema di donazione sarà attivato dopo la verifica dei dati amministrativi e fiscali di AIPEL. Fino ad allora non mostriamo promesse di detraibilità o deducibilità e non raccogliamo pagamenti attraverso questa pagina.
+              In questa fase AIPEL non raccoglie pagamenti attraverso questa pagina. Il canale sarà attivato soltanto dopo aver definito il conto di destinazione, il prestatore di pagamento, le informazioni da mostrare al donatore e il trattamento amministrativo e fiscale delle erogazioni.
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-700">
-              Partnership, ricerche commissionate e sponsorizzazioni compatibili con l&apos;indipendenza editoriale saranno trattate separatamente dalle decisioni della redazione.
+              Fino a quella verifica non pubblichiamo promesse di detraibilità o deducibilità. Partnership, ricerche commissionate e sponsorizzazioni compatibili con l&apos;indipendenza editoriale saranno inoltre distinte dalle donazioni e dalle decisioni della redazione.
             </p>
-            <Link href="/chi-siamo" className="mt-5 inline-block text-sm font-semibold text-black underline underline-offset-4">Chi promuove l&apos;Osservatorio</Link>
+            <Link href="/chi-siamo" className="mt-5 inline-block text-sm font-semibold text-black underline underline-offset-4">Identità e trasparenza di AIPEL</Link>
           </div>
         </section>
       </Container>

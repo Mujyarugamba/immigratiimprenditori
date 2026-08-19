@@ -45,7 +45,15 @@ export default function ChiSiamoPage() {
               <dd className="mt-1 font-semibold text-black">Ing. Augustin Mujyarugamba</dd>
             </div>
             <div>
-              <dt className="text-neutral-500">Forma iniziale</dt>
+              <dt className="text-neutral-500">Forma associativa</dt>
+              <dd className="mt-1 text-black">Associazione non riconosciuta</dd>
+            </div>
+            <div>
+              <dt className="text-neutral-500">Codice fiscale</dt>
+              <dd className="mt-1 font-mono text-black">97342380157</dd>
+            </div>
+            <div>
+              <dt className="text-neutral-500">Forma del progetto</dt>
               <dd className="mt-1 text-black">Osservatorio e Centro Studi associativo</dd>
             </div>
             <div>
@@ -57,9 +65,14 @@ export default function ChiSiamoPage() {
 
         <section className="py-10">
           <h2 className="text-2xl font-semibold text-black">Trasparenza</h2>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-700">
-            La denominazione completa di AIPEL, sede, dati fiscali e ulteriori informazioni amministrative saranno inseriti nei documenti istituzionali non appena consolidati. Questa pagina non sostituisce privacy policy, condizioni di utilizzo o informative specifiche sui contributi inviati alla redazione.
-          </p>
+          <div className="mt-4 max-w-3xl space-y-4 text-sm leading-7 text-neutral-700">
+            <p>
+              I dati istituzionali vengono pubblicati solo quando sono verificati. In questa fase rendiamo disponibili forma associativa, codice fiscale e governance editoriale; sede e denominazione legale estesa saranno aggiunte quando consolidate nei documenti istituzionali utilizzati dal progetto.
+            </p>
+            <p>
+              Questa pagina non sostituisce privacy policy, condizioni di utilizzo o informative specifiche sui contributi inviati alla redazione e non attribuisce automaticamente agevolazioni fiscali a eventuali erogazioni future.
+            </p>
+          </div>
         </section>
       </Container>
     </main>
