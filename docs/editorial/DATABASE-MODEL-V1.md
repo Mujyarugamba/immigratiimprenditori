@@ -1,10 +1,10 @@
 # Immigrati Imprenditori — Modello dati editoriale v1
 
-Stato: **DESIGN APPROVED FOR IMPLEMENTATION**
+Stato: **IMPLEMENTATO**
 
 ## Principio
 
-Il database standalone esistente viene esteso, non ricostruito.
+Il database standalone esistente è stato esteso, non ricostruito.
 
 Si riusano:
 
@@ -15,28 +15,23 @@ Si riusano:
 - `profiles`, `accounts`, `account_role_assignments`;
 - `business_sectors`, `languages`.
 
-Non viene reintrodotta alcuna dipendenza da PonteImprese.
+Non è stata reintrodotta alcuna dipendenza da PonteImprese.
 
 ## 1. Geografia
 
-### `geo_countries`
+### Paesi
 
-Catalogo globale ISO 3166-1 alpha-2.
+Non esiste una tabella `geo_countries` nella v1.
 
-Campi principali:
+I Paesi sono rappresentati da codici **ISO 3166-1 alpha-2** in maiuscolo nei campi normalizzati (`IT`, `US`, `FR`, ecc.). Questa scelta evita di precaricare e mantenere un catalogo globale che non aggiunge valore editoriale nella prima fase.
 
-- `code` PK (2 lettere uppercase);
-- `name_en`;
-- `is_active`;
-- timestamps.
-
-La UI italiana può rendere il nome localizzato a partire dal codice ISO; il database conserva una label internazionale stabile.
+Per le segnalazioni pubbliche sono inoltre conservate `origin_country_label` e `destination_country_label` in testo libero. Una persona può quindi scrivere “Italia” o “Stati Uniti” senza conoscere codici ISO; la redazione potrà successivamente normalizzare il dato.
 
 ### `geo_territories`
 
-Territori subnazionali o sovranazionali selezionati editorialmente.
+Territori subnazionali o sovranazionali creati solo quando servono editorialmente.
 
-Campi:
+Campi principali:
 
 - UUID;
 - `country_code` nullable per aree sovranazionali;
@@ -47,7 +42,7 @@ Campi:
 - `slug`;
 - `is_active`.
 
-Non è necessario popolare tutti i comuni del mondo. I territori entrano quando servono a dati o contenuti.
+Non è necessario popolare tutti i comuni del mondo.
 
 ### `migration_routes`
 
@@ -62,7 +57,7 @@ Campi:
 - `is_active`;
 - timestamps.
 
-L'Italia non ha alcun trattamento speciale.
+L'Italia non ha alcun trattamento tecnico speciale.
 
 ## 2. Collegamenti geografici
 
@@ -108,7 +103,7 @@ Campi principali:
 - fonte;
 - data della fonte;
 - sintesi di lavoro;
-- Paese origine/destinazione;
+- Paese origine/destinazione, sia codice normalizzato sia label quando necessario;
 - territorio;
 - fascia geografica editoriale;
 - priorità;
@@ -133,6 +128,7 @@ Campi minimi:
 - email;
 - telefono opzionale;
 - organizzazione opzionale;
+- Paese di origine/destinazione dichiarati;
 - testo del contributo/proposta;
 - consenso a essere ricontattato;
 - consenso eventuale alla pubblicazione del materiale inviato;
@@ -153,19 +149,19 @@ La funzione:
 5. non crea contenuti pubblici;
 6. non concede accesso alla Inbox.
 
-In futuro si aggiungeranno rate limiting/CAPTCHA a livello applicativo.
+In futuro si aggiungeranno rate limiting/CAPTCHA a livello applicativo se necessari.
 
 ## 5. Contributori abituali
 
-Non si introduce ancora un secondo sistema identità.
+Non si introduce un secondo sistema identità.
 
-La futura capacità `contributore` dovrà riusare `auth.users` + `accounts` + `profiles`, estendendo in modo controllato i ruoli applicativi solo quando sarà implementata la relativa UI.
+La futura capacità `contributore` riuserà `auth.users` + `accounts` + `profiles`, estendendo in modo controllato i ruoli applicativi solo quando verrà implementata la relativa UI.
 
 Le segnalazioni occasionali restano possibili senza account.
 
 ## 6. Storie e interviste
 
-Non creare una tabella `stories` autonoma nella v1.
+Non è stata creata una tabella `stories` autonoma.
 
 Una storia/intervista è un `contents` con:
 
@@ -175,54 +171,65 @@ Una storia/intervista è un `contents` con:
 - geografie;
 - rotta/e;
 - settore/i quando pertinenti;
-- media/URL video nel livello applicativo iniziale.
+- media/URL video a livello applicativo iniziale.
 
-Un eventuale `story_metadata` verrà aggiunto solo quando emergono campi strutturati non rappresentabili correttamente dal modello esistente.
+Un eventuale `story_metadata` verrà aggiunto solo se emergono campi strutturati che il modello esistente non rappresenta correttamente.
 
 ## 7. Rapporti
 
 Nella prima iterazione un rapporto può essere rappresentato come `contents` di tipo `research_report` con fonte e link ufficiale.
 
-Una tabella biblioteca dedicata verrà introdotta in Fase 9 solo se serve distinguere nettamente “pubblicazione catalogata” e “contenuto editoriale che la presenta”.
+Una biblioteca dedicata verrà introdotta nella Fase 9 solo se sarà utile distinguere “pubblicazione catalogata” e “contenuto editoriale che la presenta”.
 
 ## 8. Tassonomie
 
-Aggiungere in modo non distruttivo i nuovi `content_types` target.
+Sono stati aggiunti in modo non distruttivo i nuovi `content_types`:
 
-Non rinominare codici già referenziati.
+- `analysis`;
+- `testimony`;
+- `research_report`;
+- `data_note`;
+- `policy_brief`;
+- `event_report`.
 
-I tipi commerciali legacy senza referenze vengono disattivati per nuove scelte editoriali, non eliminati.
+Sono stati inoltre aggiunti 22 temi editoriali al catalogo esistente `content_tags`.
+
+I codici legacy commerciali senza referenze (`opportunity_presentation`, `service_presentation`, `market_content`) sono stati **disattivati**, non eliminati.
 
 ## 9. RLS
 
-Regole:
+Regole implementate:
 
-- cataloghi geografici: lettura pubblica; scrittura solo redattore/admin;
-- collegamenti contenuto/evento: lettura pubblica condizionata alla pubblicazione del padre; scrittura editoriale;
+- geografia/rotte: lettura pubblica quando attive; scrittura redattore/admin;
+- collegamenti contenuto/evento: lettura pubblica solo se il padre è pubblicato e pubblico; scrittura editoriale;
 - Inbox: solo redattore/admin;
 - submissions: solo redattore/admin;
 - invio anonimo esclusivamente via RPC controllata;
-- service role può alimentare il radar senza policy pubbliche aggiuntive.
+- nessun grant diretto anon su Inbox/submissions.
 
-## 10. Audit e preservazione
+## 10. Migrazioni applicate
 
-La migration deve essere:
+- `editorial_foundation_v1`
+- `editorial_submission_country_labels`
 
-- additiva;
-- idempotente per i seed controllati;
-- senza `DROP TABLE`;
-- senza perdita dei 18 contenuti esistenti;
-- senza cambiamenti alla semantica Auth attuale;
-- senza FK verso PonteImprese.
+Le corrispondenti SQL versionate sono:
 
-Gate richiesti dopo apply:
+- `supabase/migrations/20260820170000_editorial_foundation_v1.sql`
+- `supabase/migrations/20260820171000_editorial_submission_country_labels.sql`
 
-- tabelle preesistenti e conteggi contenuti invariati;
-- nuove tabelle presenti;
-- RLS attivo sulle nuove tabelle;
-- anon non legge Inbox/submissions;
-- anon può creare solo una submission attraverso RPC;
-- nessuna pubblicazione viene generata dall'RPC;
-- 0 FK verso oggetti esterni al perimetro standalone.
+## 11. Gate verificati
 
-`DATABASE_MODEL_V1 = READY_TO_IMPLEMENT`
+Dopo l'apply:
+
+- contenuti esistenti: **18**, invariati;
+- contenuti pubblicati: **17**, invariati;
+- 8 nuove tabelle editoriali/geografiche con RLS attivo;
+- 6 nuovi tipi di contenuto attivi;
+- 22 temi editoriali attivi;
+- 3 tipi commerciali legacy disattivati e con zero referenze;
+- anon non può leggere direttamente Inbox/submissions;
+- anon può creare una proposta soltanto via RPC;
+- test RPC effettuato in transazione con `ROLLBACK`, nessun dato di prova residuo;
+- nessun contenuto viene creato automaticamente dall'RPC.
+
+`DATABASE_MODEL_V1 = PASS`
