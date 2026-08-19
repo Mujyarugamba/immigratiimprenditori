@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
+import {
+  assignInboxToMeAction,
+  releaseInboxAssignmentAction,
+  updateInboxPriorityAction,
+  updateInboxStatusAction,
+} from "@/lib/editorial/inbox-actions";
 import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
+import { getApplicationSession } from "@/lib/session/get-application-session";
 
 export const metadata: Metadata = {
   title: "Arrivo — Inbox Redazione",
@@ -18,13 +24,49 @@ const STATUS_OPTIONS = [
   ["archived", "Archiviato"],
 ] as const;
 
+const PRIORITY_OPTIONS = [
+  ["critical", "Critica"],
+  ["high", "Alta"],
+  ["normal", "Normale"],
+  ["low", "Bassa"],
+] as const;
+
+const SOURCE_LABELS: Record<string, string> = {
+  radar: "Radar",
+  public_submission: "Segnalazione pubblica",
+  contributor: "Contributore",
+  editorial_manual: "Redazione",
+};
+
+const KIND_LABELS: Record<string, string> = {
+  news: "Notizia",
+  report: "Rapporto",
+  academic_paper: "Ricerca",
+  dataset: "Dataset",
+  statistical_release: "Dati statistici",
+  event: "Evento",
+  policy: "Politica pubblica",
+  law_regulation: "Normativa",
+  story_tip: "Segnalazione storia",
+  interview_proposal: "Proposta intervista",
+  user_testimony: "Testimonianza",
+  publication_submission: "Pubblicazione",
+  other: "Altro",
+};
+
 export default async function InboxDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = await getEditorialInboxItemById(id);
+  const [item, session] = await Promise.all([
+    getEditorialInboxItemById(id),
+    getApplicationSession(),
+  ]);
   if (!item) notFound();
 
   const origin = item.origin_country_label ?? item.origin_country_code ?? "—";
   const destination = item.destination_country_label ?? item.destination_country_code ?? "—";
+  const assignedToMe = Boolean(
+    item.assigned_account_id && session?.accountId === item.assigned_account_id,
+  );
 
   return (
     <div>
@@ -34,7 +76,7 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
 
       <div className="mt-5 border-b border-black pb-5">
         <p className="text-ink-muted text-xs font-semibold uppercase tracking-[0.14em]">
-          {item.source_kind} · {item.item_kind}
+          {SOURCE_LABELS[item.source_kind] ?? item.source_kind} · {KIND_LABELS[item.item_kind] ?? item.item_kind}
         </p>
         <h1 className="text-ink mt-2 text-3xl font-semibold tracking-tight">{item.title}</h1>
         <p className="text-ink-muted mt-2 text-sm">
@@ -42,7 +84,7 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
         </p>
       </div>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_260px]">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_280px]">
         <div className="space-y-7">
           {item.summary ? (
             <section>
@@ -87,11 +129,47 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
               </div>
             </section>
           ) : null}
+
+          {(item.linked_content_id || item.linked_event_id) ? (
+            <section className="border-t border-black pt-6">
+              <h2 className="text-ink text-sm font-semibold uppercase tracking-wide">Materiale collegato</h2>
+              <div className="mt-3 flex flex-wrap gap-4 text-sm">
+                {item.linked_content_id ? (
+                  <Link className="underline underline-offset-3" href={`/app/redazione/contenuti/${item.linked_content_id}`}>
+                    Apri contenuto creato
+                  </Link>
+                ) : null}
+                {item.linked_event_id ? (
+                  <Link className="underline underline-offset-3" href={`/app/redazione/eventi/${item.linked_event_id}`}>
+                    Apri evento collegato
+                  </Link>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <aside className="border-line border-t pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
           <h2 className="text-ink text-sm font-semibold uppercase tracking-wide">Valutazione</h2>
-          <form action={updateInboxStatusAction} className="mt-3 space-y-3">
+
+          <div className="mt-3 border-y border-black py-4">
+            <p className="text-ink-muted text-xs">Presa in carico</p>
+            <p className="text-ink mt-1 text-sm font-medium">
+              {item.assigned_account_id
+                ? assignedToMe
+                  ? "Assegnato a te"
+                  : "Assegnato a un altro redattore"
+                : "Non assegnato"}
+            </p>
+            <form action={item.assigned_account_id ? releaseInboxAssignmentAction : assignInboxToMeAction} className="mt-3">
+              <input type="hidden" name="id" value={item.id} />
+              <button type="submit" className="border-ink w-full border px-3 py-2 text-sm font-medium">
+                {item.assigned_account_id ? "Rilascia" : "Prendi in carico"}
+              </button>
+            </form>
+          </div>
+
+          <form action={updateInboxStatusAction} className="mt-5 space-y-3">
             <input type="hidden" name="id" value={item.id} />
             <label className="block text-sm">
               <span className="text-ink-muted block pb-1">Stato</span>
@@ -104,10 +182,23 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
             </button>
           </form>
 
+          <form action={updateInboxPriorityAction} className="mt-5 space-y-3">
+            <input type="hidden" name="id" value={item.id} />
+            <label className="block text-sm">
+              <span className="text-ink-muted block pb-1">Priorità</span>
+              <select name="priority" defaultValue={item.priority} className="border-line w-full border px-3 py-2">
+                {PRIORITY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </label>
+            <button type="submit" className="border-ink w-full border px-4 py-2 text-sm font-medium">
+              Aggiorna priorità
+            </button>
+          </form>
+
           <dl className="text-ink-muted mt-6 space-y-3 text-xs">
-            <div><dt>Priorità</dt><dd className="text-ink mt-1">{item.priority}</dd></div>
             <div><dt>Fascia geografica</dt><dd className="text-ink mt-1">{item.relevance_band ?? "—"}</dd></div>
             <div><dt>Fonte</dt><dd className="text-ink mt-1">{item.source_label ?? "—"}</dd></div>
+            <div><dt>Ultima revisione</dt><dd className="text-ink mt-1">{item.reviewed_at ? new Intl.DateTimeFormat("it-IT", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.reviewed_at)) : "—"}</dd></div>
           </dl>
         </aside>
       </div>
