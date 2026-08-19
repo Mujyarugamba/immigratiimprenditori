@@ -17,9 +17,9 @@ Il sito non va lanciato come guscio tecnico. Il numero zero deve dimostrare già
 | E1 | Europa | Confronto self-employment OECD | **READY — NON PUBBLICATO** |
 | E2 | Europa | Policy brief UE integrazione/imprenditoria | **READY — NON PUBBLICATO** |
 | M1 | Resto del mondo/OECD | ≈10 milioni self-employed immigrants | **READY — NON PUBBLICATO** |
-| M2 | Resto del mondo | Voce originale | **CANDIDATE SEARCH / INTERVIEW PENDING** |
+| M2 | Resto del mondo | Voce originale | **CANDIDATES IN INBOX — INTERVIEW PENDING** |
 
-**Sette contenuti analitici su dieci sono ora READY e restano privati/non pubblicati.** I tre slot Voci dipendono da interviste originali e non devono essere simulati o ricostruiti da fonti terze.
+**Sette contenuti analitici su dieci sono READY e restano privati/non pubblicati.** I tre slot Voci hanno ora candidati verificati in Inbox e dipendono da interviste originali reali; non devono essere simulati o ricostruiti da fonti terze.
 
 ## 1. Lombardia — circa 20%
 
@@ -84,7 +84,12 @@ Stato backend: **READY**, collegato all'indicatore OECD. Il titolo è stato corr
 
 ### M2 — Voce dal mondo
 
-Deve essere un'intervista originale fuori dall'Italia e dall'Europa. La ricerca può partire da Nord America, Africa, Asia o America Latina, privilegiando verificabilità e qualità della storia rispetto alla copertura geografica artificiale.
+Candidati verificati in Inbox:
+
+1. **Adeola Adedewe / Kredete** — Nigeria → Stati Uniti; priorità M2. Angolo: accesso al credito, percorso migratorio, impresa fintech, infrastruttura finanziaria transfrontaliera e diaspora africana. Canale pubblico aziendale verificato e bozza messaggio in `VOICES-OUTREACH-PACK.md`.
+2. **Semyon Dukach / One Way Ventures** — candidato di riserva qualificato; angolo su esperienza migratoria, costruzione di imprese, capitale e immigrant founders.
+
+Nessun messaggio è stato inviato automaticamente. La pagina pubblica e i profili di terzi servono solo a verificare e preparare una nuova intervista originale.
 
 ## Contenuti di servizio al lancio
 
@@ -120,4 +125,4 @@ Il numero zero è pronto quando non richiede testi placeholder per sembrare vivo
 - dichiara le fonti;
 - accetta contributi ma non autopubblicazione.
 
-`NUMBER_ZERO_PLAN = ANALYTICAL_CORE_READY_VOICES_PENDING`
+`NUMBER_ZERO_PLAN = ANALYTICAL_CORE_READY_VOICE_CANDIDATES_READY_INTERVIEWS_PENDING`

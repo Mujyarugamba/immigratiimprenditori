@@ -91,7 +91,7 @@ Immigrati Imprenditori / AIPEL
 
 ---
 
-## A1/M2 — Gianni Chiloiro e Angelo Sannino / Doppio Zero — Bay Area
+## A1 — Gianni Chiloiro e Angelo Sannino / Doppio Zero — Bay Area
 
 ### Verifica pubblica
 
@@ -126,6 +126,52 @@ This would be an original editorial interview, not a promotional profile. Could 
 Thank you,
 Augustin Mujyarugamba
 Immigrati Imprenditori / AIPEL
+
+---
+
+## M2 — Adeola Adedewe / Kredete — Stati Uniti / Africa
+
+### Verifica pubblica
+
+- profilo aziendale: https://kredete.io/about/
+- pagina contatti ufficiale: https://kredete.io/contact/
+- profilo Endeavor Nigeria: https://nigeria.endeavor.org/from-17-credit-card-rejections-to-building-global-payment-infrastructure/
+
+Kredete identifica Adeola Adedewe come Founder & CEO. Fonti pubbliche di Endeavor documentano un percorso dalla Nigeria agli Stati Uniti e collegano l'esperienza personale di esclusione dal credito alla successiva costruzione di Kredete. Queste informazioni servono esclusivamente a preparare e verificare una nuova intervista.
+
+### Canale pubblico
+
+- email generale/partnership/press: `support@kredete.io`
+- contact form/pagina: https://kredete.io/contact/
+
+Non utilizzare indirizzi personali ricavati da fonti non ufficiali quando esiste un canale aziendale pubblico adatto.
+
+### Angolo editoriale
+
+Migrazione Nigeria→USA; accesso al credito per chi arriva senza storia finanziaria; nascita dell'impresa; infrastruttura di pagamenti transfrontalieri; diaspora africana come mercato e rete; regolazione; raccolta di capitale; rapporto economico tra Stati Uniti e Africa; differenza tra risolvere un problema personale e costruire un'infrastruttura scalabile.
+
+### Primo messaggio — bozza
+
+**Subject:** Interview request for Adeola Adedewe — Immigrati Imprenditori
+
+Hello Kredete team,
+I am preparing the launch issue of *Immigrati Imprenditori*, an AIPEL observatory and study center focused on migrant entrepreneurship across countries and migration routes.
+
+We would like to invite Adeola Adedewe to an original editorial interview about his entrepreneurial path from Nigeria to the United States, the experience of navigating the US credit system as an immigrant, the decision to build Kredete, and the broader challenge of creating financial infrastructure for diaspora and cross-border markets.
+
+The interview would not be a promotional profile. We are particularly interested in what can be learned about access to finance, regulation, trust, capital, cross-border operations, and the economic links between the United States and Africa. Any factual company claims used in the final article would be verified before publication.
+
+Could you please forward this request to Adeola or let us know the appropriate contact for an editorial interview?
+
+Thank you,
+Augustin Mujyarugamba
+Immigrati Imprenditori / AIPEL
+
+---
+
+## M2 — Semyon Dukach / One Way Ventures — riserva qualificata
+
+Semyon Dukach resta in Inbox come secondo candidato M2. È utile soprattutto per un angolo su esperienza migratoria, costruzione d'impresa e capitale destinato a immigrant founders. Non va usato per sostituire una Voce imprenditoriale operativa se il Numero zero può ottenere un caso più direttamente legato a impresa e mercati transfrontalieri.
 
 ---
 
