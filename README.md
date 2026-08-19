@@ -19,19 +19,24 @@ Copia `env.example` in `.env.local`. Solo placeholder: nessun secret nel reposit
 - `NEXT_PUBLIC_SITE_URL` (opzionale)
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only, ingest)
 
-## Migration
+## Database e Auth
 
-Ownership copiata in `supabase/`. Manifesto: `supabase/CS-MIGRATION-MANIFEST.md`.
+Database e autenticazione sono entrambi sul progetto Supabase `immigratiimprenditori` (`hvfvfatlaspcpszgizhg`).
 
-`CS_DATABASE_BOOTSTRAP = SPLIT_3_PENDING`
+La baseline autonoma SPLIT-3 è in `supabase/baseline/` (`00..03`). Il database hosted è stato convertito in-place al perimetro Centro Studi il 19/08/2026.
 
-Non eseguire queste migration come catena autonoma prima di SPLIT-3.
+`CS_DATABASE_BOOTSTRAP = SPLIT_3_COMPLETE`
+
+Le SQL in `supabase/migrations/` precedenti allo SPLIT-3 sono conservate esclusivamente come storico di ownership/migrazione e non costituiscono la catena di bootstrap standalone.
+
+## Identità editoriale
+
+`CS_SSO_CUTOVER = COMPLETE` — Supabase Auth locale, account locale e ruoli editoriali locali; nessuna dipendenza Auth da PonteImprese.
 
 ## Residui di prodotto
 
-- `CS_SSO_CUTOVER = PENDING` — nessun SSO nuovo; ruoli editoriali locali.
 - `CS_LEGAL_CONTENT = CUTOVER_BLOCKER` — placeholder su `/dati-e-fonti`, non testo giuridico definitivo.
 
 ## Confini
 
-Nessuna dipendenza da PonteImprese. Package UI e product-config sono locali in `packages/`.
+Nessuna dipendenza runtime o FK da PonteImprese. Package UI e product-config sono locali in `packages/`.
