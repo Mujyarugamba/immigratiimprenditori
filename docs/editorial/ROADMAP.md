@@ -2,6 +2,17 @@
 
 Questa è la sequenza operativa canonica. Le correzioni sono ammesse, ma ogni modifica sostanziale deve aggiornare questo documento.
 
+## Stato di avanzamento
+
+- Fase 1 — Fondazione editoriale: **PASS**
+- Fase 2 — Architettura dell'informazione: **PASS**
+- Fase 3 — Tassonomie editoriali internazionali: **PASS**
+- Fase 4 — Modello dati v1: **PASS**
+- Fase 5 — Scrivania redazionale: **PASS**
+- Fase 6 — Contribuisci: **PASS**
+- Fase 7 — Storie e interviste: **IMPLEMENTED_PENDING_GATES**
+- Fase 8 — Osservatorio v1: **NEXT**
+
 ## Fase 1 — Fondazione editoriale
 
 Obiettivo: fissare identità, missione, pubblico, perimetro globale, equilibrio geografico, governance, social, partecipazione e tono.
@@ -87,7 +98,21 @@ Gate: `CONTRIBUTION_FLOW = PASS`.
 
 Sezione prioritaria con forte dignità editoriale e supporto a testo, immagini, video, trascrizioni, citazioni, geografia e settore.
 
-Gate: `STORIES_INTERVIEWS = PASS`.
+Implementazione v1:
+
+- `/storie` e `/storie/[slug]`;
+- riuso di `contents`, senza CMS parallelo;
+- tipi intervista / storia d'impresa / testimonianza / storia personale;
+- origine e destinazione tramite `content_geographies`;
+- settori tramite `content_sectors` e catalogo `business_sectors`;
+- video/audio/documenti tramite `content_media`;
+- YouTube in modalità privacy-enhanced;
+- note sui diritti media visibili solo alla redazione;
+- gestione geografia, settori e media dentro l'editor contenuti;
+- CTA permanente verso `/contribuisci`;
+- nessun contenuto fittizio inserito per riempire l'archivio.
+
+Gate: `STORIES_INTERVIEWS = PASS` dopo CI, Vercel e smoke Production.
 
 ## Fase 8 — Osservatorio v1
 
