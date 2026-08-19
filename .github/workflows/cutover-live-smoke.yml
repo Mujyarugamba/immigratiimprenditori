@@ -1,0 +1,39 @@
+name: Immigrati cutover live smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify live public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://immigratiimprenditori.vercel.app"
+          for path in / /accedi /cultura /osservatorio; do
+            code=$(curl --retry 3 --retry-all-errors --max-time 20 -sS -o /tmp/body -w '%{http_code}' "$base$path")
+            echo "$path -> $code"
+            test "$code" = "200"
+          done
+
+      - name: Verify redazione unauthenticated boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://immigratiimprenditori.vercel.app"
+          code=$(curl --max-time 20 -sS -o /tmp/redazione -w '%{http_code}' "$base/app/redazione")
+          echo "/app/redazione -> $code"
+          case "$code" in
+            200|301|302|303|307|308) ;;
+            *) exit 1 ;;
+          esac
+
+      - name: PASS
+        run: echo "IMMIGRATI_LIVE_SMOKE = PASS"
