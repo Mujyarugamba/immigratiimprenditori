@@ -12,6 +12,30 @@ export const metadata: Metadata = {
     "Fonti statistiche, criteri metodologici e regole di trasparenza dell'Osservatorio Immigrati Imprenditori.",
 };
 
+const discoverySources = [
+  {
+    name: "GDELT",
+    kind: "Web e notizie",
+    href: "https://www.gdeltproject.org/",
+    description:
+      "Usato dal Radar per individuare pagine recenti su imprese migranti, politiche, norme, report, statistiche ed eventi. Il risultato è un candidato da verificare, non una prova né una posizione editoriale.",
+  },
+  {
+    name: "Crossref",
+    kind: "Letteratura scientifica",
+    href: "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+    description:
+      "Usato per scoprire metadati bibliografici e DOI di lavori scientifici pertinenti. Il Radar conserva metadati essenziali e link originale; non copia abstract o testi delle pubblicazioni.",
+  },
+  {
+    name: "DataCite",
+    kind: "Dataset e DOI",
+    href: "https://support.datacite.org/docs/api",
+    description:
+      "Usato per individuare dataset registrati con DOI e relativi metadati. L'esistenza di un record DataCite non sostituisce la verifica della metodologia, del produttore o dell'idoneità del dataset.",
+  },
+] as const;
+
 function SourceCard({ source }: { source: PublicStatisticalSource }) {
   return (
     <article className="grid gap-4 border-b border-neutral-300 py-6 md:grid-cols-[180px_1fr]">
@@ -33,12 +57,7 @@ function SourceCard({ source }: { source: PublicStatisticalSource }) {
           {source.license_note ? <span>Riuso: {source.license_note}</span> : null}
         </div>
         {source.url ? (
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-block text-sm font-semibold text-black underline underline-offset-4"
-          >
+          <a href={source.url} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm font-semibold text-black underline underline-offset-4">
             Consulta la fonte originale
           </a>
         ) : null}
@@ -59,12 +78,8 @@ export default async function FontiPage() {
     <main id="contenuto" className="pb-16">
       <Container>
         <header className="border-b border-black py-10 sm:py-14">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-            Trasparenza dell'Osservatorio
-          </p>
-          <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-black sm:text-5xl">
-            Fonti e metodologia
-          </h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Trasparenza dell'Osservatorio</p>
+          <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-black sm:text-5xl">Fonti e metodologia</h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
             Ogni dato deve poter essere ricondotto alla fonte originale. Separiamo dati ufficiali,
             ricerca, documenti istituzionali, fonti giornalistiche e testimonianze, indicando i limiti
@@ -96,38 +111,47 @@ export default async function FontiPage() {
           </div>
         </section>
 
+        <section className="border-b border-black py-10" aria-labelledby="fonti-discovery">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Radar mondiale</p>
+          <h2 id="fonti-discovery" className="mt-2 text-2xl font-semibold tracking-tight text-black">Fonti di discovery, non fonti di evidenza</h2>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-700">
+            Il Radar serve a trovare materiale potenzialmente pertinente. Un record trovato dal Radar entra nella Inbox privata e deve essere verificato dalla redazione prima di diventare fonte, dato o contenuto pubblicato.
+          </p>
+          <div className="mt-6 divide-y divide-neutral-300 border-y border-black">
+            {discoverySources.map((source) => (
+              <article key={source.name} className="grid gap-3 py-5 md:grid-cols-[180px_1fr]">
+                <div>
+                  <h3 className="font-semibold text-black">{source.name}</h3>
+                  <p className="mt-1 text-xs uppercase tracking-[0.12em] text-neutral-500">{source.kind}</p>
+                </div>
+                <div>
+                  <p className="max-w-3xl text-sm leading-6 text-neutral-700">{source.description}</p>
+                  <a href={source.href} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-semibold text-black underline underline-offset-4">Documentazione ufficiale →</a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="py-10">
           <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black pb-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                Registro delle fonti statistiche
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Registro delle fonti statistiche</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-black">Fonti attive</h2>
             </div>
-            <span className="text-xs uppercase tracking-[0.12em] text-neutral-500">
-              {sources.length} {sources.length === 1 ? "fonte" : "fonti"}
-            </span>
+            <span className="text-xs uppercase tracking-[0.12em] text-neutral-500">{sources.length} {sources.length === 1 ? "fonte" : "fonti"}</span>
           </div>
-
           {sources.length > 0 ? (
             <div>{sources.map((source) => <SourceCard key={source.id} source={source} />)}</div>
           ) : (
-            <p className="max-w-2xl py-10 text-sm leading-6 text-neutral-600">
-              Il registro pubblico delle fonti statistiche è in aggiornamento. Le fonti utilizzate nei
-              singoli indicatori restano comunque indicate nelle relative schede.
-            </p>
+            <p className="max-w-2xl py-10 text-sm leading-6 text-neutral-600">Il registro pubblico delle fonti statistiche è in aggiornamento. Le fonti utilizzate nei singoli indicatori restano comunque indicate nelle relative schede.</p>
           )}
         </section>
 
         <section className="border-y border-black py-9">
           <h2 className="text-xl font-semibold text-black">Segnala una fonte o una ricerca</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">
-            Ricercatori, istituzioni e associazioni possono segnalare dati, rapporti o pubblicazioni.
-            La segnalazione entra nella Inbox privata della redazione e non viene pubblicata automaticamente.
-          </p>
-          <Link href="/contribuisci" className="mt-5 inline-block text-sm font-semibold text-black underline underline-offset-4">
-            Invia una segnalazione
-          </Link>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">Ricercatori, istituzioni e associazioni possono segnalare dati, rapporti o pubblicazioni. La segnalazione entra nella Inbox privata della redazione e non viene pubblicata automaticamente.</p>
+          <Link href="/contribuisci" className="mt-5 inline-block text-sm font-semibold text-black underline underline-offset-4">Invia una segnalazione</Link>
         </section>
       </Container>
     </main>

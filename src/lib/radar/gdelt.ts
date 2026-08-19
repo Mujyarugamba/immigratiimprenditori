@@ -23,8 +23,12 @@ const QUERIES: readonly QuerySpec[] = [
     itemKind: "statistical_release",
   },
   {
-    query: '(("migrant entrepreneur" OR "immigrant entrepreneur") AND (policy OR programme OR legislation OR regulation))',
+    query: '(("migrant entrepreneur" OR "immigrant entrepreneur") AND (policy OR programme OR program))',
     itemKind: "policy",
+  },
+  {
+    query: '(("migrant entrepreneur" OR "immigrant entrepreneur" OR "immigrant-owned business") AND (legislation OR regulation OR law))',
+    itemKind: "law_regulation",
   },
   {
     query: '(("immigrant founder" OR "migrant entrepreneur") AND (summit OR conference OR forum OR event))',
