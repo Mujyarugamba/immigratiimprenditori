@@ -156,6 +156,13 @@ export default async function ContribuisciPage({ searchParams }: Props) {
 
             <section className="border-t border-black pt-8">
               <h2 className="text-xl font-semibold text-black">4. Consensi</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+                Prima dell&apos;invio consulta l&apos;{" "}
+                <Link href="/privacy" className="font-semibold text-black underline underline-offset-4">
+                  informativa privacy
+                </Link>
+                , che descrive finalità, basi giuridiche, conservazione e modalità per esercitare i tuoi diritti.
+              </p>
               <div className="mt-5 space-y-4 text-sm leading-6 text-neutral-700">
                 <label className="flex items-start gap-3">
                   <input name="consent_contact" type="checkbox" required className="mt-1 size-4" />

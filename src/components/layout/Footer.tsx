@@ -6,6 +6,7 @@ const footerLinks = [
   { label: "Fonti e metodologia", href: "/fonti" },
   { label: "Contribuisci", href: "/contribuisci" },
   { label: "Sostieni l'Osservatorio", href: "/sostieni" },
+  { label: "Privacy", href: "/privacy" },
   { label: "Accedi", href: "/accedi" },
 ] as const;
 
@@ -33,9 +34,10 @@ export function Footer() {
             </ul>
           </nav>
         </div>
-        <p className="mt-8 border-t border-neutral-300 pt-5 text-xs leading-5 text-neutral-500">
-          AIPEL è l&apos;ente promotore e proprietario del progetto. Denominazione completa, sede e dati amministrativi saranno completati nella sezione istituzionale.
-        </p>
+        <div className="mt-8 border-t border-neutral-300 pt-5 text-xs leading-5 text-neutral-500">
+          <p>AIPEL — Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia.</p>
+          <p className="mt-1">Sede legale: Viale Molise 54, 20137 Milano (MI) · CF 97342380157 · P.IVA 04222160964 · <a href="mailto:info@immigratiimprenditori.it" className="underline underline-offset-4 hover:text-black">info@immigratiimprenditori.it</a></p>
+        </div>
       </Container>
     </footer>
   );

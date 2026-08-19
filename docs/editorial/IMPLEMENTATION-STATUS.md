@@ -22,9 +22,9 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 | 14. Home | **V1 PASS** | Home editoriale Dati · Analisi · Voci. |
 | 15. Social istituzionali | **PENDING EXTERNAL** | LinkedIn, X e YouTube richiedono account esterni. |
 | 16. Sostieni | **PAGE PASS / PAYMENTS PENDING** | Pagina pronta e prudenziale: nessun pagamento attivo e nessuna promessa fiscale finché canale, trattamento amministrativo e formule fiscali non sono verificati. |
-| 17. Identità AIPEL | **PARTIAL** | Presidente/direzione, forma associativa e codice fiscale visibili; sede e denominazione legale estesa da consolidare. |
-| 18. SEO | **TECHNICAL V1 PASS** | Metadata, sitemap, robots, route canoniche e redirect. Multilingua successivo. |
-| 19. Qualità/privacy/sicurezza | **DEV GATE PASS / LAUNCH GATE PENDING** | Next 16.3.1; audit/test/typecheck/build in CI; Supabase RLS verificata; Preview Vercel già riuscita. Privacy finale richiede contatto titolare verificato; leaked-password protection prima del lancio. |
+| 17. Identità AIPEL | **PASS V1** | Denominazione completa, forma associativa, sede legale, CF, P.IVA, presidente/direzione e contatto istituzionale pubblicati in modo coerente. |
+| 18. SEO | **TECHNICAL V1 PASS** | Metadata, sitemap, robots, route canoniche e redirect; `/privacy` aggiunta alle route pubbliche. Multilingua successivo. |
+| 19. Qualità/privacy/sicurezza | **PRIVACY V1 PASS / LAUNCH GATE PENDING** | CI, RLS e backend verificati; informativa privacy operativa v1 collegata al punto di raccolta dati. Restano verifica finale dei fornitori/trasferimenti e Leaked Password Protection. |
 | 20. Lancio editoriale | **ANALYTICAL CORE READY / VOICE CANDIDATES READY / INTERVIEWS PENDING** | Tutti i 7 contenuti analitici sono `ready` e non pubblicati; i 3 slot Voci hanno candidati verificati e richiedono interviste originali reali. |
 
 ## Ultimi gate verificati
@@ -40,7 +40,7 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 - Commit `c4aaade`: CI #116 PASS — workflow privato interviste e consensi.
 - Commit `51405fb`: CI #117 PASS — collegamenti Numero zero ↔ Osservatorio.
 - Commit `504b96e`: CI #119 PASS — identità AIPEL e pagina Sostieni.
-- Commit `229c69d`: migrazioni 20/08 riallineate alla cronologia Supabase applicata; nessuna migrazione rieseguita.
+- Commit `229c69d` + `bcf6579`: migrazioni 20/08 riallineate alla cronologia Supabase; CI #121 PASS.
 - Vercel Preview aveva già completato con SUCCESS sull'head `e4e7fb9`; la produzione non è richiesta durante lo sviluppo.
 
 ## Numero zero — nucleo analitico
@@ -83,6 +83,22 @@ Candidati prioritari già in Inbox:
 
 Le pagine pubbliche usate nella ricerca servono a verificare identità e percorso; non sostituiscono l'intervista originale. Nessun messaggio è stato inviato automaticamente.
 
+## Privacy operativa v1
+
+La route `/privacy` descrive il trattamento effettivamente implementato per:
+
+- dati tecnici e sicurezza;
+- account/autenticazione;
+- invii `Contribuisci`;
+- workflow privato delle interviste e relativi consensi;
+- ricerca editoriale su fonti pubbliche.
+
+L'informativa identifica AIPEL, sede e contatto privacy e rende visibili finalità, basi giuridiche, destinatari, criteri/periodi di conservazione, diritti, assenza di decisioni automatizzate e uso dei cookie tecnici di sessione. Il modulo `Contribuisci` rimanda all'informativa prima dei consensi.
+
+Il database attivo non espone attualmente una RPC di cancellazione account self-service: la privacy non promette quindi un pulsante inesistente e indirizza le richieste a `info@immigratiimprenditori.it`.
+
+Prima del go-live restano da verificare e documentare in via definitiva i fornitori tecnici, gli eventuali trasferimenti extra-SEE e le garanzie contrattuali applicabili.
+
 ## Radar mondiale — regola operativa
 
 Il Radar scopre candidati e li porta nella Inbox. Non pubblica mai automaticamente.
@@ -119,9 +135,9 @@ Le altre cinque migrazioni risultavano già identiche alla ricostruzione dalla c
 ## Advisor Supabase
 
 - `submit_editorial_contribution`: warning `SECURITY DEFINER` intenzionale; è il confine controllato del form pubblico e `anon` non ha DML diretto sulle tabelle.
-- Leaked Password Protection: da attivare/verificare prima del lancio.
+- Leaked Password Protection: da attivare/verificare prima del lancio; il connettore Supabase disponibile non espone la modifica della configurazione Auth.
 - Nessuna rimozione automatica di indici `unused` in fase di basso traffico.
 
 ## Regola di merge
 
-PR #7 resta Draft. Nessun merge su `main` durante la costruzione. Il gate di sviluppo richiede CI verde e backend verificato; produzione Vercel, cron definitivo, privacy finale e configurazioni esterne vengono chiusi al go-live.
+PR #7 resta Draft. Nessun merge su `main` durante la costruzione. Il gate di sviluppo richiede CI verde e backend verificato; produzione Vercel, cron definitivo, verifica finale privacy/fornitori e configurazioni esterne vengono chiusi al go-live.

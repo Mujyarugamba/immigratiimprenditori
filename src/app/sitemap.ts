@@ -13,6 +13,7 @@ const PUBLIC_PATHS = [
   "/contribuisci",
   "/chi-siamo",
   "/sostieni",
+  "/privacy",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

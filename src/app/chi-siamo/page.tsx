@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 
 export const metadata: Metadata = {
@@ -41,6 +42,10 @@ export default function ChiSiamoPage() {
               <dd className="mt-1 font-semibold text-black">AIPEL</dd>
             </div>
             <div>
+              <dt className="text-neutral-500">Denominazione completa</dt>
+              <dd className="mt-1 text-black">Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia</dd>
+            </div>
+            <div>
               <dt className="text-neutral-500">Presidente AIPEL e Direzione editoriale</dt>
               <dd className="mt-1 font-semibold text-black">Ing. Augustin Mujyarugamba</dd>
             </div>
@@ -49,8 +54,20 @@ export default function ChiSiamoPage() {
               <dd className="mt-1 text-black">Associazione non riconosciuta</dd>
             </div>
             <div>
+              <dt className="text-neutral-500">Sede legale</dt>
+              <dd className="mt-1 text-black">Viale Molise 54, 20137 Milano (MI), Italia</dd>
+            </div>
+            <div>
+              <dt className="text-neutral-500">Contatto</dt>
+              <dd className="mt-1"><a href="mailto:info@immigratiimprenditori.it" className="text-black underline underline-offset-4">info@immigratiimprenditori.it</a></dd>
+            </div>
+            <div>
               <dt className="text-neutral-500">Codice fiscale</dt>
               <dd className="mt-1 font-mono text-black">97342380157</dd>
+            </div>
+            <div>
+              <dt className="text-neutral-500">Partita IVA</dt>
+              <dd className="mt-1 font-mono text-black">04222160964</dd>
             </div>
             <div>
               <dt className="text-neutral-500">Forma del progetto</dt>
@@ -67,10 +84,10 @@ export default function ChiSiamoPage() {
           <h2 className="text-2xl font-semibold text-black">Trasparenza</h2>
           <div className="mt-4 max-w-3xl space-y-4 text-sm leading-7 text-neutral-700">
             <p>
-              I dati istituzionali vengono pubblicati solo quando sono verificati. In questa fase rendiamo disponibili forma associativa, codice fiscale e governance editoriale; sede e denominazione legale estesa saranno aggiunte quando consolidate nei documenti istituzionali utilizzati dal progetto.
+              Identità dell&apos;ente, sede, dati fiscali e governance editoriale sono resi pubblici per distinguere chiaramente l&apos;Osservatorio dal soggetto associativo che lo promuove.
             </p>
             <p>
-              Questa pagina non sostituisce privacy policy, condizioni di utilizzo o informative specifiche sui contributi inviati alla redazione e non attribuisce automaticamente agevolazioni fiscali a eventuali erogazioni future.
+              La pagina <Link href="/privacy" className="font-semibold text-black underline underline-offset-4">Privacy</Link> descrive il trattamento dei dati personali. La pagina <Link href="/sostieni" className="font-semibold text-black underline underline-offset-4">Sostieni</Link> non attribuisce automaticamente agevolazioni fiscali a eventuali erogazioni e non raccoglie pagamenti finché il canale non è formalmente attivato.
             </p>
           </div>
         </section>
