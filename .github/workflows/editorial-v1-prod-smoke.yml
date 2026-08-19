@@ -1,0 +1,39 @@
+name: Editorial v1 production smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify public production routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://immigratiimprenditori.vercel.app"
+          for path in / /contribuisci /accedi /osservatorio; do
+            code=$(curl --retry 3 --retry-all-errors --max-time 20 -sS -o /tmp/body -w '%{http_code}' "$base$path")
+            echo "$path -> $code"
+            test "$code" = "200"
+          done
+
+      - name: Verify redazione anonymous boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://immigratiimprenditori.vercel.app"
+          code=$(curl --max-time 20 -sS -o /tmp/redazione -w '%{http_code}' "$base/app/redazione")
+          echo "/app/redazione -> $code"
+          case "$code" in
+            301|302|303|307|308) ;;
+            *) exit 1 ;;
+          esac
+
+      - name: PASS
+        run: echo "EDITORIAL_V1_PRODUCTION_SMOKE = PASS"
