@@ -11,9 +11,9 @@ Questo documento è il checkpoint operativo della roadmap canonica `ROADMAP.md`.
 | 3. Tassonomie internazionali | **PASS** | Origine, destinazione e rotte senza privilegio tecnico per l'Italia. |
 | 4. Modello dati v1 | **LIVE VERIFIED / PASS** | Contenuti, autori/media, geografia, rotte, Inbox, submission, eventi e Osservatorio presenti sul Supabase reale; ruolo `contributore` e ownership delle proposte aggiunti e verificati. |
 | 5. Scrivania redazionale | **CODE + DB AUDIT PASS** | Inbox, triage, priorità, presa in carico, dashboard e audit attività attivi. Smoke RLS reale amministratore: update Inbox + audit trigger PASS, con rollback e zero dati residui. |
-| 6. Contribuisci | **PUBLIC FLOW + DATA MODEL PASS / CONTRIBUTOR UI PENDING** | Invio occasionale senza account PASS; contributore autenticato può essere associato alle proprie proposte e leggerle via RLS. Resta da esporre una pagina UI “le mie proposte”. Nessuna pubblicazione automatica. |
+| 6. Contribuisci | **PUBLIC + CONTRIBUTOR TRACKING PASS / INVITE UI PENDING** | Invio occasionale senza account PASS. Il contributore autenticato accede a `/app/contributore`, vede solo le proprie proposte via RLS e può inviarne di nuove. Assegnazione backend del ruolo `contributore` verificata; resta da esporre alla redazione un flusso UI di invito/abilitazione. Nessuna pubblicazione automatica. |
 | 7. Storie e interviste | **CODE + EDITORIAL STANDARD PASS** | Sezione pubblica/redazionale e standard editoriale canonico; popolamento del numero zero da fare. |
-| 8. Osservatorio v1 | **DATA MODEL LIVE / CONTENT REVIEW PENDING** | Indicatori, valori, fonti, metodologia e RLS esistono sul backend reale; nucleo dati del numero zero da popolare/revisionare. |
+| 8. Osservatorio v1 | **V1 NUCLEUS LIVE / TRACEABILITY PASS** | Nucleo verificato su backend reale: Eurostat lavoro autonomo per cittadinanza + InfoCamere/Futurae imprese straniere registrate Italia/Lombardia. La scheda pubblica espone periodo, unità, territorio/gruppo, fonte originale, metodologia del valore e aggiornamento. |
 | 9. Rapporti e ricerche | **CODE PASS** | Tipi contenuto e sezione pubblica/redazionale esistono; biblioteca da popolare. |
 | 10. Eventi | **FUNCTIONAL / CONTENT PENDING** | Calendario, redazione, geografie e rotte evento esistono; selezione qualificata da popolare. |
 | 11. Radar mondiale | **CODE PASS / PRODUCTION CRON PENDING** | GDELT v1 → normalizzazione/dedupe → Inbox; cron giornaliero predisposto. Nessuna auto-pubblicazione. Attivazione completa richiede `CRON_SECRET` e smoke del cron. |
@@ -24,8 +24,8 @@ Questo documento è il checkpoint operativo della roadmap canonica `ROADMAP.md`.
 | 16. Sostieni | **PAGE PASS / PAYMENTS PENDING** | Pagina pronta; pagamento e formule fiscali attendono dati AIPEL verificati. |
 | 17. Identità AIPEL | **PARTIAL PASS** | AIPEL, Presidenza e direzione editoriale visibili; denominazione completa/sede/dati fiscali ancora da inserire. |
 | 18. SEO | **TECHNICAL V1 PASS** | Metadata base, sitemap, robots, nuove route canoniche e redirect legacy. Multilingua resta evoluzione. |
-| 19. Qualità/privacy/sicurezza | **CODE SECURITY + SUPABASE RLS SMOKE PASS / PREVIEW+PRIVACY PENDING** | Next 16.3.1; npm audit 0 vulnerabilità; 60/60 test; typecheck/build PASS. Supabase `ACTIVE_HEALTHY`, grant editoriali ridotti, RLS verificata e FK editoriali indicizzate. Restano Preview Vercel e revisione privacy finale; leaked-password protection Auth da valutare/attivare prima del lancio. |
-| 20. Lancio editoriale | **NUMBER ZERO PLAN READY / CONTENT PENDING** | Piano di 10 contenuti bilanciati 20%×5 pronto; ricerca, verifica e produzione dei contenuti da completare. |
+| 19. Qualità/privacy/sicurezza | **CODE SECURITY + SUPABASE RLS SMOKE PASS / PREVIEW+PRIVACY PENDING** | Next 16.3.1; npm audit 0 vulnerabilità; test/typecheck/build controllati da CI. Supabase `ACTIVE_HEALTHY`, grant editoriali ridotti, RLS verificata e FK editoriali indicizzate. Restano Preview Vercel e revisione privacy finale; leaked-password protection Auth da valutare/attivare prima del lancio. |
+| 20. Lancio editoriale | **NUMBER ZERO PLAN READY / CONTENT IN PROGRESS** | Piano di 10 contenuti bilanciati 20%×5 pronto; primi dati Italia/Lombardia già caricati nell'Osservatorio; ricerca e produzione degli altri contenuti proseguono. |
 
 ## Gate database editoriale — 19/08/2026
 
@@ -40,7 +40,10 @@ Migrazioni editoriali applicate e allineate nel repository:
 - `20260819141338 harden_editorial_table_grants` — rimozione privilegi tecnici e grant espliciti minimi;
 - `20260819141551 editorial_contributor_tracking` — ruolo contributore, ownership e lettura delle proprie proposte;
 - `20260819141807 index_editorial_foreign_keys` — indici FK della fondazione editoriale;
-- `20260819141836 optimize_editorial_inbox_policies` — policy SELECT unificate e write editor-only.
+- `20260819141836 optimize_editorial_inbox_policies` — policy SELECT unificate e write editor-only;
+- `20260819142736 extend_access_application_roles_for_contributor` — helper autorizzativo esteso al ruolo contributore;
+- `20260819143251 allow_assign_contributor_role` — assegnazione service-role del ruolo contributore;
+- `20260819143646 seed_observatory_foreign_firms_2025` — fonte e valori InfoCamere/Futurae Italia/Lombardia 30 giugno 2025.
 
 Verifiche eseguite sul backend reale:
 
@@ -52,10 +55,22 @@ Verifiche eseguite sul backend reale:
 6. audit trigger Inbox: PASS;
 7. update Inbox da amministratore autenticato attraverso RLS: PASS;
 8. audit dell'update amministratore: PASS;
-9. righe smoke residue: 0;
-10. grant editoriali: ridotti a SELECT/DML necessari; niente TRUNCATE/TRIGGER/REFERENCES per `authenticated` sulle nuove tabelle;
-11. ruolo `contributore`: ammesso dal modello; lettura limitata alle proposte collegate al proprio account;
-12. nessun flusso pubblica automaticamente un contenuto.
+9. contributor smoke RLS: ruolo contributor vero, admin falso, 1 riga propria visibile, 0 righe altrui visibili — PASS con rollback;
+10. assegnazione `contributore` tramite funzione privilegiata: PASS in transazione con rollback;
+11. righe smoke residue: 0;
+12. grant editoriali: ridotti a SELECT/DML necessari; niente TRUNCATE/TRIGGER/REFERENCES per `authenticated` sulle nuove tabelle;
+13. nessun flusso pubblica automaticamente un contenuto.
+
+## Nucleo Osservatorio verificato
+
+Il backend reale contiene ora due famiglie di dati chiaramente separate per metodologia:
+
+- **Eurostat `lfsa_esgan`** — lavoro autonomo per cittadinanza, Italia, valori 2021–2023 già presenti; è una misura LFS riferita alle persone e alla cittadinanza;
+- **InfoCamere/Futurae, I semestre 2025** — imprese straniere registrate al 30 giugno 2025: Italia `678.004`, Lombardia `135.249`; è una misura camerale riferita alle imprese registrate.
+
+La separazione è intenzionale: “impresa straniera” secondo InfoCamere non equivale a “imprenditore immigrato” né a “lavoratore autonomo straniero” Eurostat. La definizione e il limite interpretativo sono memorizzati nella fonte, nell'indicatore e nelle note dei valori.
+
+La scheda pubblica dell'indicatore espone inoltre il link alla fonte originale, l'edizione, la data della fonte quando disponibile, la nota metodologica del singolo valore e la data di aggiornamento nell'Osservatorio.
 
 ### Nota advisor Supabase
 
@@ -77,7 +92,7 @@ GitHub Actions `Editorial v1 CI` esegue:
 4. `npm test`;
 5. `npm run build`.
 
-Sul commit `e6d645f` il run CI #99 è **PASS**. Il deploy Vercel `immigratiimprenditori` è **SUCCESS**; la Preview separata è ancora respinta dal `build-rate-limit` del piano.
+Il pacchetto contributor precedente (`cb7f464`) ha completato il run CI #101 con **PASS**. Ogni nuovo head resta soggetto allo stesso gate prima del merge.
 
 ## Standard editoriale e lancio
 
@@ -88,9 +103,8 @@ Sono canonici:
 
 ## Blocchi infrastrutturali residui
 
-- **Supabase:** non è più un blocco; progetto `ACTIVE_HEALTHY` e smoke reali PASS.
-- **Vercel produzione:** deploy dell'head precedente DB (`e6d645f`) riuscito.
-- **Vercel Preview:** resta soggetta a `build-rate-limit`; non viene considerata un errore del codice, ma resta un gate esterno prima del merge secondo la regola corrente.
+- **Supabase:** non è più un blocco; progetto `ACTIVE_HEALTHY`, migrazioni allineate e smoke reali PASS.
+- **Vercel:** l'head applicativo più recente è soggetto al `build-rate-limit` del piano; il fallimento del relativo check non viene interpretato come errore del codice.
 - **Radar cron:** `CRON_SECRET` e smoke del cron restano da verificare sul progetto Vercel corretto.
 
 ## Regola di merge

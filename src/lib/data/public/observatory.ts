@@ -31,7 +31,12 @@ export type PublicIndicatorValue = {
   territory_label: string | null;
   country_code: string | null;
   country_label: string | null;
+  methodology_note: string | null;
+  updated_at: string;
   source_name: string | null;
+  source_url: string | null;
+  source_edition_label: string | null;
+  source_published_on: string | null;
 };
 
 export type PublicIndicatorDetail = PublicIndicatorListItem & {
@@ -41,45 +46,56 @@ export type PublicIndicatorDetail = PublicIndicatorListItem & {
   values: PublicIndicatorValue[];
 };
 
+type IndicatorValueRow = {
+  id: string;
+  numeric_value: number;
+  period_start: string;
+  period_end: string;
+  quality_code: string;
+  territory_level: string | null;
+  territory_code: string | null;
+  territory_label: string | null;
+  country_code: string | null;
+  country_label: string | null;
+  methodology_note: string | null;
+  updated_at: string;
+  observatory_statistical_sources: {
+    name: string;
+    url: string | null;
+    edition_label: string | null;
+    source_published_on: string | null;
+  } | null;
+};
+
 function mapIndicatorValues(
-  rows:
-    | {
-        id: string;
-        numeric_value: number;
-        period_start: string;
-        period_end: string;
-        quality_code: string;
-        territory_level: string | null;
-        territory_code: string | null;
-        territory_label: string | null;
-        country_code: string | null;
-        country_label: string | null;
-        observatory_statistical_sources: { name: string } | null;
-      }[]
-    | null
-    | undefined,
+  rows: IndicatorValueRow[] | null | undefined,
 ): PublicIndicatorValue[] {
-  return (
-    (rows ?? [])
-      .map((v) => ({
-        id: v.id,
-        numeric_value: v.numeric_value,
-        period_start: v.period_start,
-        period_end: v.period_end,
-        quality_code: v.quality_code,
-        territory_level: v.territory_level,
-        territory_code: v.territory_code,
-        territory_label: v.territory_label,
-        country_code: v.country_code,
-        country_label: v.country_label,
-        source_name: v.observatory_statistical_sources?.name ?? null,
-      }))
-      .sort(
-        (a, b) =>
-          new Date(b.period_start).getTime() -
-          new Date(a.period_start).getTime(),
-      )
-  );
+  return (rows ?? [])
+    .map((v) => ({
+      id: v.id,
+      numeric_value: v.numeric_value,
+      period_start: v.period_start,
+      period_end: v.period_end,
+      quality_code: v.quality_code,
+      territory_level: v.territory_level,
+      territory_code: v.territory_code,
+      territory_label: v.territory_label,
+      country_code: v.country_code,
+      country_label: v.country_label,
+      methodology_note: v.methodology_note,
+      updated_at: v.updated_at,
+      source_name: v.observatory_statistical_sources?.name ?? null,
+      source_url: v.observatory_statistical_sources?.url ?? null,
+      source_edition_label:
+        v.observatory_statistical_sources?.edition_label ?? null,
+      source_published_on:
+        v.observatory_statistical_sources?.source_published_on ?? null,
+    }))
+    .sort(
+      (a, b) =>
+        new Date(b.period_start).getTime() -
+        new Date(a.period_start).getTime(),
+    );
 }
 
 export async function listPublicIndicators(
@@ -124,8 +140,10 @@ export async function getPublicIndicatorBySlug(
       observatory_indicator_values (
         id, numeric_value, period_start, period_end, quality_code,
         territory_level, territory_code, territory_label,
-        country_code, country_label,
-        observatory_statistical_sources ( name )
+        country_code, country_label, methodology_note, updated_at,
+        observatory_statistical_sources (
+          name, url, edition_label, source_published_on
+        )
       )
     `,
     )
@@ -148,9 +166,7 @@ export async function getPublicIndicatorBySlug(
     methodology_summary: data.methodology_summary,
     publication_status: data.publication_status,
     values: mapIndicatorValues(
-      data.observatory_indicator_values as unknown as Parameters<
-        typeof mapIndicatorValues
-      >[0],
+      data.observatory_indicator_values as unknown as IndicatorValueRow[],
     ),
   };
 }
