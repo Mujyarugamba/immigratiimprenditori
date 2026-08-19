@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import type { PublicContentListItem } from "@/lib/data/public/contents";
 import { listPublicStories } from "@/lib/data/public/stories";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function StoriePage() {
-  let stories = [];
+  let stories: PublicContentListItem[] = [];
   try {
     stories = await listPublicStories();
   } catch {
