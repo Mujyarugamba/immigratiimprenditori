@@ -49,6 +49,18 @@ type Props = {
   }>;
 };
 
+function geographicLabel(item: {
+  origin_country_label: string | null;
+  destination_country_label: string | null;
+  origin_country_code: string | null;
+  destination_country_code: string | null;
+}) {
+  const origin = item.origin_country_label ?? item.origin_country_code;
+  const destination =
+    item.destination_country_label ?? item.destination_country_code;
+  return [origin, destination].filter(Boolean).join(" → ");
+}
+
 export default async function InboxPage({ searchParams }: Props) {
   const params = await searchParams;
   const result = await listEditorialInbox(params);
@@ -123,24 +135,23 @@ export default async function InboxPage({ searchParams }: Props) {
           <tbody>
             {result.items.length === 0 ? (
               <tr><td colSpan={6} className="text-ink-muted border-line border-t px-3 py-10 text-center">Nessun arrivo.</td></tr>
-            ) : result.items.map((item) => (
-              <tr key={item.id} className="border-line border-t align-top">
-                <td className="px-3 py-3">
-                  <span className="text-ink font-medium">{item.title}</span>
-                  {item.source_label ? <span className="text-ink-muted mt-1 block text-xs">{item.source_label}</span> : null}
-                  {item.origin_country_code || item.destination_country_code ? (
-                    <span className="text-ink-muted mt-1 block text-xs">
-                      {[item.origin_country_code, item.destination_country_code].filter(Boolean).join(" → ")}
-                    </span>
-                  ) : null}
-                </td>
-                <td className="px-3 py-3">{KIND_LABELS[item.item_kind] ?? item.item_kind}</td>
-                <td className="px-3 py-3">{SOURCE_LABELS[item.source_kind] ?? item.source_kind}</td>
-                <td className="px-3 py-3">{STATUS_LABELS[item.status] ?? item.status}</td>
-                <td className="text-ink-muted px-3 py-3">{new Intl.DateTimeFormat("it-IT", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.received_at))}</td>
-                <td className="px-3 py-3"><Link className="text-ink underline underline-offset-2" href={`/app/redazione/inbox/${item.id}`}>Apri</Link></td>
-              </tr>
-            ))}
+            ) : result.items.map((item) => {
+              const geography = geographicLabel(item);
+              return (
+                <tr key={item.id} className="border-line border-t align-top">
+                  <td className="px-3 py-3">
+                    <span className="text-ink font-medium">{item.title}</span>
+                    {item.source_label ? <span className="text-ink-muted mt-1 block text-xs">{item.source_label}</span> : null}
+                    {geography ? <span className="text-ink-muted mt-1 block text-xs">{geography}</span> : null}
+                  </td>
+                  <td className="px-3 py-3">{KIND_LABELS[item.item_kind] ?? item.item_kind}</td>
+                  <td className="px-3 py-3">{SOURCE_LABELS[item.source_kind] ?? item.source_kind}</td>
+                  <td className="px-3 py-3">{STATUS_LABELS[item.status] ?? item.status}</td>
+                  <td className="text-ink-muted px-3 py-3">{new Intl.DateTimeFormat("it-IT", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.received_at))}</td>
+                  <td className="px-3 py-3"><Link className="text-ink underline underline-offset-2" href={`/app/redazione/inbox/${item.id}`}>Apri</Link></td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
