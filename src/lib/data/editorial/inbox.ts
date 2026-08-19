@@ -16,6 +16,8 @@ export type EditorialInboxListItem = {
   original_url: string | null;
   origin_country_code: string | null;
   destination_country_code: string | null;
+  origin_country_label: string | null;
+  destination_country_label: string | null;
   relevance_band: string | null;
   priority: string;
   status: string;
@@ -31,6 +33,8 @@ export type EditorialSubmission = {
   contribution_text: string;
   consent_contact: boolean;
   consent_publication: boolean;
+  origin_country_label: string | null;
+  destination_country_label: string | null;
   submitted_at: string;
 };
 
@@ -57,7 +61,7 @@ export type EditorialInboxSearchParams = {
 };
 
 const LIST_SELECT =
-  "id, source_kind, item_kind, title, source_label, original_url, origin_country_code, destination_country_code, relevance_band, priority, status, received_at";
+  "id, source_kind, item_kind, title, source_label, original_url, origin_country_code, destination_country_code, origin_country_label, destination_country_label, relevance_band, priority, status, received_at";
 
 const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_id, duplicate_of_id, assigned_account_id, linked_content_id, linked_event_id, reviewed_at, created_at, updated_at`;
 
@@ -105,7 +109,7 @@ export async function getEditorialInboxItemById(
       supabase
         .from("editorial_submissions")
         .select(
-          "submission_kind, submitter_name, submitter_email, submitter_phone, organization_name, contribution_text, consent_contact, consent_publication, submitted_at",
+          "submission_kind, submitter_name, submitter_email, submitter_phone, organization_name, contribution_text, consent_contact, consent_publication, origin_country_label, destination_country_label, submitted_at",
         )
         .eq("inbox_item_id", id)
         .maybeSingle(),
