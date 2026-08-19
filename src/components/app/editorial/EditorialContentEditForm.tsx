@@ -12,7 +12,7 @@ import {
 } from "@/lib/editorial/actions";
 import type { EditorialContent } from "@/lib/data/editorial/contents";
 import type { CatalogOption } from "@/lib/data/editorial/catalogs";
-import { isStoryContentType } from "@/lib/data/public/stories";
+import { isStoryContentType } from "@/lib/public/story-types";
 import { EDITORIAL_STATUS_LABELS, label } from "@/lib/public/labels";
 
 const initial: FormActionState = { ok: false };
