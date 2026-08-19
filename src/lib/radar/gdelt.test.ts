@@ -12,7 +12,7 @@ test("normalizeGdeltItem keeps metadata only and canonicalizes source url", () =
   });
 
   assert.ok(item);
-  assert.equal(item.originalUrl, "https://example.org/story");
+  assert.equal(item.originalUrl, "https://www.example.org/story");
   assert.equal(item.sourceLabel, "example.org");
   assert.equal(item.itemKind, "news");
   assert.equal(item.summary, null);
