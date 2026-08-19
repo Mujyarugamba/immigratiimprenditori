@@ -23,9 +23,13 @@ export function getPublicSupabaseEnv() {
   };
 }
 
-/** Public site origin for redirects/metadata. Optional; defaults to localhost in dev. */
+/** Canonical public site origin for metadata, sitemap and redirects. */
 export function getSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (!raw) return "http://localhost:3000";
-  return raw.replace(/\/$/, "");
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+
+  const vercelProduction = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercelProduction) return `https://${vercelProduction.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
+
+  return "http://localhost:3000";
 }
