@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
-import type { PublicContentListItem } from "@/lib/data/public/contents";
-import { listPublicReports } from "@/lib/data/public/reports";
-import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
+import { listPublicReports, type PublicReportListItem } from "@/lib/data/public/reports";
+import { CONTENT_TYPES, label } from "@/lib/public/labels";
 
 export const metadata: Metadata = {
   title: "Rapporti e ricerche",
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RapportiPage() {
-  let reports: PublicContentListItem[] = [];
+  let reports: PublicReportListItem[] = [];
   try {
     reports = await listPublicReports();
   } catch {
@@ -49,10 +48,20 @@ export default async function RapportiPage() {
           <section className="py-8">
             <div className="divide-y divide-neutral-300 border-y border-black">
               {reports.map((report) => (
-                <article key={report.id} className="grid gap-4 py-6 md:grid-cols-[180px_1fr]">
-                  <div className="text-xs leading-5 text-neutral-500">
-                    <p>{label(CONTENT_TYPES, report.type_code)}</p>
-                    {report.published_at ? <p>{formatItalianDate(report.published_at)}</p> : null}
+                <article key={report.id} className="grid gap-5 py-7 md:grid-cols-[220px_1fr]">
+                  <div className="space-y-2 text-xs leading-5 text-neutral-600">
+                    <p className="font-semibold uppercase tracking-[0.12em] text-black">
+                      {label(CONTENT_TYPES, report.type_code)}
+                    </p>
+                    {report.source_publication_year ? (
+                      <p><span className="font-medium text-black">Anno:</span> {report.source_publication_year}</p>
+                    ) : null}
+                    {report.publisher_name ? (
+                      <p><span className="font-medium text-black">Ente:</span> {report.publisher_name}</p>
+                    ) : null}
+                    {report.geographies.length > 0 ? (
+                      <p><span className="font-medium text-black">Area:</span> {report.geographies.join(", ")}</p>
+                    ) : null}
                     {report.is_featured ? <p className="font-semibold text-black">In evidenza</p> : null}
                   </div>
                   <div>
@@ -63,6 +72,26 @@ export default async function RapportiPage() {
                     </h2>
                     {report.abstract ? (
                       <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">{report.abstract}</p>
+                    ) : null}
+                    {report.authors.length > 0 ? (
+                      <p className="mt-3 text-xs leading-5 text-neutral-600">
+                        <span className="font-medium text-black">Autore / curatore:</span> {report.authors.join(", ")}
+                      </p>
+                    ) : null}
+                    {report.tags.length > 0 ? (
+                      <p className="mt-2 text-xs leading-5 text-neutral-600">
+                        <span className="font-medium text-black">Temi:</span> {report.tags.join(" · ")}
+                      </p>
+                    ) : null}
+                    {report.document_url ? (
+                      <a
+                        href={report.document_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-4 inline-block text-sm font-semibold text-black underline underline-offset-4"
+                      >
+                        Fonte originale ↗
+                      </a>
                     ) : null}
                   </div>
                 </article>
