@@ -29,3 +29,14 @@ jobs:
 
       - name: Tests
         run: npm test
+
+      - name: Smoke Vercel preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://immigratiimprenditori-git-editorial-fo-1b2713-inquotus-projects.vercel.app"
+          for path in / /contribuisci; do
+            code=$(curl --retry 3 --retry-all-errors --max-time 20 -sS -o /tmp/body -w '%{http_code}' "$base$path")
+            echo "$path -> $code"
+            test "$code" = "200"
+          done
