@@ -18,10 +18,19 @@ export type RadarCandidate = {
   rawMetadata: Record<string, unknown>;
 };
 
+export type RadarRunOptions = {
+  write?: boolean;
+  maxInsert?: number;
+};
+
 export type RadarRunResult = {
+  mode: "preview" | "write";
   fetched: number;
   normalized: number;
   duplicates: number;
+  newCandidates: number;
+  selected: number;
+  capped: number;
   inserted: number;
   sources: Record<string, number>;
 };
