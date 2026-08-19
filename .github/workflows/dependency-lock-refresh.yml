@@ -22,19 +22,22 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Refresh Next.js lock
-        run: npm install next@16.2.12 --save-exact --package-lock-only
+      - name: Verify target exists in npm registry
+        run: test "$(npm view next@16.3.1 version)" = "16.3.1"
 
-      - name: Verify resolved Next.js
+      - name: Refresh Next.js lock
+        run: npm install next@16.3.1 --save-exact --package-lock-only
+
+      - name: Verify resolved Next.js and audit
         run: |
-          node -e "const p=require('./package.json'); if(p.dependencies.next!=='16.2.12') process.exit(1)"
-          node -e "const l=require('./package-lock.json'); if(l.packages['node_modules/next'].version!=='16.2.12') process.exit(1)"
+          node -e "const p=require('./package.json'); if(p.dependencies.next!=='16.3.1') process.exit(1)"
+          node -e "const l=require('./package-lock.json'); if(l.packages['node_modules/next'].version!=='16.3.1') process.exit(1)"
           npm audit --audit-level=high
 
       - name: Upload refreshed dependency files
         uses: actions/upload-artifact@v4
         with:
-          name: next-16-2-12-lock
+          name: next-16-3-1-lock
           path: |
             package.json
             package-lock.json
