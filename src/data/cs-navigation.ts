@@ -8,6 +8,7 @@ import { centroStudiConfig } from "@immigrati/product-config";
 export const csPrimaryNav = [
   { label: "Osservatorio", href: "/osservatorio" },
   { label: "Storie e interviste", href: "/storie" },
+  { label: "Rapporti e ricerche", href: "/rapporti" },
   { label: "Contenuti", href: "/contenuti" },
   { label: "Eventi", href: "/eventi" },
   { label: "Dati e fonti", href: "/dati-e-fonti" },
