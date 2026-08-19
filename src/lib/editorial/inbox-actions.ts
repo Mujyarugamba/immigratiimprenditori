@@ -14,11 +14,29 @@ const ALLOWED_STATUSES = new Set([
   "archived",
 ]);
 
-export async function updateInboxStatusAction(formData: FormData) {
+const ALLOWED_PRIORITIES = new Set(["critical", "high", "normal", "low"]);
+
+type EditorialSession = NonNullable<Awaited<ReturnType<typeof getApplicationSession>>>;
+
+async function requireEditorialSession(): Promise<EditorialSession> {
   const session = await getApplicationSession();
   if (!session?.isActiveAccount || (!session.isEditor && !session.isApplicationAdmin)) {
     throw new Error("Accesso redazionale richiesto.");
   }
+  if (!session.accountId) {
+    throw new Error("Account redazionale non risolto.");
+  }
+  return session;
+}
+
+function revalidateInbox(id: string) {
+  revalidatePath("/app/redazione");
+  revalidatePath("/app/redazione/inbox");
+  revalidatePath(`/app/redazione/inbox/${id}`);
+}
+
+export async function updateInboxStatusAction(formData: FormData) {
+  await requireEditorialSession();
 
   const id = String(formData.get("id") ?? "").trim();
   const status = String(formData.get("status") ?? "").trim();
@@ -36,7 +54,62 @@ export async function updateInboxStatusAction(formData: FormData) {
     .eq("id", id);
 
   if (error) throw new Error("Impossibile aggiornare lo stato dell'arrivo.");
+  revalidateInbox(id);
+}
 
-  revalidatePath("/app/redazione/inbox");
-  revalidatePath(`/app/redazione/inbox/${id}`);
+export async function updateInboxPriorityAction(formData: FormData) {
+  await requireEditorialSession();
+
+  const id = String(formData.get("id") ?? "").trim();
+  const priority = String(formData.get("priority") ?? "").trim();
+  if (!id || !ALLOWED_PRIORITIES.has(priority)) {
+    throw new Error("Priorità Inbox non valida.");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("editorial_inbox_items")
+    .update({ priority })
+    .eq("id", id);
+
+  if (error) throw new Error("Impossibile aggiornare la priorità dell'arrivo.");
+  revalidateInbox(id);
+}
+
+export async function assignInboxToMeAction(formData: FormData) {
+  const session = await requireEditorialSession();
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) throw new Error("Arrivo Inbox non valido.");
+
+  const now = new Date().toISOString();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("editorial_inbox_items")
+    .update({
+      assigned_account_id: session.accountId,
+      status: "assigned",
+      reviewed_at: now,
+    })
+    .eq("id", id);
+
+  if (error) throw new Error("Impossibile prendere in carico l'arrivo.");
+  revalidateInbox(id);
+}
+
+export async function releaseInboxAssignmentAction(formData: FormData) {
+  await requireEditorialSession();
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) throw new Error("Arrivo Inbox non valido.");
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("editorial_inbox_items")
+    .update({
+      assigned_account_id: null,
+      status: "to_review",
+    })
+    .eq("id", id);
+
+  if (error) throw new Error("Impossibile rilasciare l'arrivo.");
+  revalidateInbox(id);
 }
