@@ -3,9 +3,33 @@ import type { RadarCandidate } from "./types";
 
 const GDELT_DOC_ENDPOINT = "https://api.gdeltproject.org/api/v2/doc/doc";
 
-const QUERIES = [
-  '("migrant entrepreneur" OR "migrant entrepreneurship" OR "immigrant entrepreneur" OR "immigrant entrepreneurship")',
-  '("diaspora entrepreneur" OR "diaspora entrepreneurship" OR "foreign-born entrepreneur" OR "immigrant-owned business")',
+type QuerySpec = { query: string; itemKind: RadarCandidate["itemKind"] };
+
+const QUERIES: readonly QuerySpec[] = [
+  {
+    query: '("migrant entrepreneur" OR "migrant entrepreneurship" OR "immigrant entrepreneur" OR "immigrant entrepreneurship")',
+    itemKind: "news",
+  },
+  {
+    query: '("diaspora entrepreneur" OR "diaspora entrepreneurship" OR "foreign-born entrepreneur" OR "immigrant-owned business")',
+    itemKind: "news",
+  },
+  {
+    query: '(("migrant entrepreneurship" OR "immigrant entrepreneurship") AND (report OR study OR research))',
+    itemKind: "report",
+  },
+  {
+    query: '(("migrant entrepreneur" OR "immigrant entrepreneur") AND (statistics OR dataset OR "data release"))',
+    itemKind: "statistical_release",
+  },
+  {
+    query: '(("migrant entrepreneur" OR "immigrant entrepreneur") AND (policy OR programme OR legislation OR regulation))',
+    itemKind: "policy",
+  },
+  {
+    query: '(("immigrant founder" OR "migrant entrepreneur") AND (summit OR conference OR forum OR event))',
+    itemKind: "event",
+  },
 ] as const;
 
 type JsonFeedItem = {
@@ -18,9 +42,7 @@ type JsonFeedItem = {
   domain?: unknown;
 };
 
-type JsonFeed = {
-  items?: unknown;
-};
+type JsonFeed = { items?: unknown };
 
 function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -33,11 +55,13 @@ function parsePublishedAt(value: unknown): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-export function normalizeGdeltItem(item: JsonFeedItem): RadarCandidate | null {
+export function normalizeGdeltItem(
+  item: JsonFeedItem,
+  discoveredKind: RadarCandidate["itemKind"] = "news",
+): RadarCandidate | null {
   const title = text(item.title);
   const rawUrl = text(item.url) ?? text(item.id);
   if (!title || !rawUrl) return null;
-
   const originalUrl = normalizeRadarUrl(rawUrl);
   if (!originalUrl) return null;
 
@@ -47,9 +71,10 @@ export function normalizeGdeltItem(item: JsonFeedItem): RadarCandidate | null {
     sourceLabel: text(item.domain) ?? sourceLabelFromUrl(originalUrl),
     sourcePublishedAt: parsePublishedAt(item.date_published),
     summary: null,
-    itemKind: "news",
+    itemKind: discoveredKind,
     rawMetadata: {
       adapter: "gdelt-doc-2",
+      discovery_kind: discoveredKind,
       language: text(item.language),
       source_country: text(item.sourcecountry),
     },
@@ -61,37 +86,29 @@ function buildUrl(query: string): string {
   url.searchParams.set("query", query);
   url.searchParams.set("mode", "artlist");
   url.searchParams.set("format", "jsonfeed");
-  url.searchParams.set("timespan", "2days");
+  url.searchParams.set("timespan", "7days");
   url.searchParams.set("sort", "datedesc");
-  url.searchParams.set("maxrecords", "75");
+  url.searchParams.set("maxrecords", "40");
   return url.toString();
 }
 
-async function fetchQuery(query: string): Promise<RadarCandidate[]> {
-  const response = await fetch(buildUrl(query), {
+async function fetchQuery(spec: QuerySpec): Promise<RadarCandidate[]> {
+  const response = await fetch(buildUrl(spec.query), {
     headers: { "user-agent": "ImmigratiImprenditori-EditorialRadar/1.0" },
     signal: AbortSignal.timeout(20_000),
     cache: "no-store",
   });
-  if (!response.ok) {
-    throw new Error(`GDELT request failed: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`GDELT request failed: ${response.status}`);
   const feed = (await response.json()) as JsonFeed;
   if (!Array.isArray(feed.items)) return [];
   return feed.items
-    .map((item) => normalizeGdeltItem((item ?? {}) as JsonFeedItem))
+    .map((item) => normalizeGdeltItem((item ?? {}) as JsonFeedItem, spec.itemKind))
     .filter((item): item is RadarCandidate => item !== null);
 }
 
 export async function fetchGdeltCandidates(): Promise<RadarCandidate[]> {
-  const batches = await Promise.allSettled(QUERIES.map((query) => fetchQuery(query)));
-  const candidates: RadarCandidate[] = [];
-  for (const batch of batches) {
-    if (batch.status === "fulfilled") candidates.push(...batch.value);
-  }
-  if (batches.every((batch) => batch.status === "rejected")) {
-    throw new Error("All GDELT radar queries failed");
-  }
+  const batches = await Promise.allSettled(QUERIES.map(fetchQuery));
+  const candidates = batches.flatMap((batch) => (batch.status === "fulfilled" ? batch.value : []));
+  if (batches.every((batch) => batch.status === "rejected")) throw new Error("All GDELT radar queries failed");
   return candidates;
 }
