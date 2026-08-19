@@ -1,0 +1,39 @@
+name: Observatory test diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'observatory-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --silent
+      - name: Run tests and persist output
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          npm test >tests.log 2>&1
+          status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          tail -n 100 tests.log
+          exit 0
+      - name: Upload test log
+        uses: actions/upload-artifact@v4
+        with:
+          name: observatory-tests-log
+          path: tests.log
+      - name: Fail if tests failed
+        if: steps.tests.outputs.status != '0'
+        run: exit 1

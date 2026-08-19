@@ -17,7 +17,7 @@ const pillars = [
   {
     title: "Voci",
     text: "Storie, interviste e testimonianze di chi fa impresa fuori dal proprio Paese d'origine.",
-    href: "/contribuisci",
+    href: "/storie",
   },
 ] as const;
 
@@ -95,6 +95,12 @@ export default function HomePage() {
               accesso al credito, passaggi generazionali, relazioni tra Paesi e
               impatto sulle comunità.
             </p>
+            <Link
+              href="/storie"
+              className="text-ink mt-5 inline-block text-sm font-semibold underline underline-offset-4"
+            >
+              Esplora storie e interviste
+            </Link>
           </div>
           <div className="md:border-l md:border-black md:pl-8">
             <h3 className="text-ink text-lg font-semibold">Conosci una storia?</h3>
