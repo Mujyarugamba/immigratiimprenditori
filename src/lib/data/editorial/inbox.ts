@@ -70,6 +70,7 @@ export type EditorialInboxSearchParams = {
 
 export type EditorialInboxStats = {
   newItems: number;
+  newRadarItems: number;
   toReview: number;
   assigned: number;
   draftCreated: number;
@@ -84,10 +85,15 @@ const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_i
 export async function getEditorialInboxStats(): Promise<EditorialInboxStats> {
   const supabase = await createClient();
 
-  const [newRes, reviewRes, assignedRes, draftRes, publicRes] = await Promise.all([
+  const [newRes, radarRes, reviewRes, assignedRes, draftRes, publicRes] = await Promise.all([
     supabase
       .from("editorial_inbox_items")
       .select("id", { count: "exact", head: true })
+      .eq("status", "new"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("source_kind", "radar")
       .eq("status", "new"),
     supabase
       .from("editorial_inbox_items")
@@ -109,6 +115,7 @@ export async function getEditorialInboxStats(): Promise<EditorialInboxStats> {
 
   return {
     newItems: newRes.count ?? 0,
+    newRadarItems: radarRes.count ?? 0,
     toReview: reviewRes.count ?? 0,
     assigned: assignedRes.count ?? 0,
     draftCreated: draftRes.count ?? 0,
