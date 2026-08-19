@@ -19,14 +19,21 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --silent
-      - name: Compact failing test output
+      - name: Run tests and persist output
+        id: tests
         shell: bash
         run: |
           set +e
-          npm test >/tmp/tests.log 2>&1
+          npm test >tests.log 2>&1
           status=$?
-          if [ "$status" -ne 0 ]; then
-            tail -n 100 /tmp/tests.log
-            exit "$status"
-          fi
-          tail -n 30 /tmp/tests.log
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          tail -n 100 tests.log
+          exit 0
+      - name: Upload test log
+        uses: actions/upload-artifact@v4
+        with:
+          name: observatory-tests-log
+          path: tests.log
+      - name: Fail if tests failed
+        if: steps.tests.outputs.status != '0'
+        run: exit 1
