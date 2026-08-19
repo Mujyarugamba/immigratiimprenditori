@@ -6,13 +6,10 @@ import {
   type PaginatedResult,
 } from "@/lib/data/public/paging";
 import type { PublicContentListItem } from "@/lib/data/public/contents";
-
-export const STORY_CONTENT_TYPES = [
-  "interview",
-  "business_story",
-  "testimony",
-  "personal_story",
-] as const;
+import {
+  STORY_CONTENT_TYPES,
+  type StoryContentType,
+} from "@/lib/public/story-types";
 
 const LIST_SELECT =
   "id, slug, title, abstract, type_code, primary_category_code, language_id, is_featured, published_at";
@@ -34,7 +31,7 @@ export async function listPublicStories(
     .range(from, to);
 
   if (q) query = query.or(`title.ilike.%${q}%,abstract.ilike.%${q}%`);
-  if (tipo && STORY_CONTENT_TYPES.includes(tipo as (typeof STORY_CONTENT_TYPES)[number])) {
+  if (tipo && STORY_CONTENT_TYPES.includes(tipo as StoryContentType)) {
     query = query.eq("type_code", tipo);
   }
 
@@ -45,11 +42,5 @@ export async function listPublicStories(
     count ?? 0,
     page,
     pageSize,
-  );
-}
-
-export function isStoryContentType(typeCode: string) {
-  return STORY_CONTENT_TYPES.includes(
-    typeCode as (typeof STORY_CONTENT_TYPES)[number],
   );
 }
