@@ -39,6 +39,19 @@ export type PublicContentOpportunityLink = {
   opportunity_id: string;
 };
 
+export type PublicContentMedia = {
+  id: string;
+  media_kind: "video" | "audio" | "image" | "document";
+  provider: "youtube" | "vimeo" | "external" | null;
+  external_id: string | null;
+  url: string | null;
+  title: string | null;
+  caption: string | null;
+  rights_note: string | null;
+  is_primary: boolean;
+  sort_order: number;
+};
+
 export type PublicContentDetail = PublicContentListItem & {
   body: string;
   body_format: string;
@@ -49,6 +62,7 @@ export type PublicContentDetail = PublicContentListItem & {
   subject_links: PublicContentSubjectLink[];
   event_links: PublicContentEventLink[];
   opportunity_links: PublicContentOpportunityLink[];
+  media: PublicContentMedia[];
 };
 
 function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
@@ -76,6 +90,27 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     opportunity_id: l.opportunity_id,
   }));
 
+  const media = (
+    (data.content_media as PublicContentMedia[] | null) ?? []
+  )
+    .map((item) => ({
+      id: item.id,
+      media_kind: item.media_kind,
+      provider: item.provider,
+      external_id: item.external_id,
+      url: item.url,
+      title: item.title,
+      caption: item.caption,
+      rights_note: item.rights_note,
+      is_primary: item.is_primary,
+      sort_order: item.sort_order,
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.is_primary) - Number(a.is_primary) ||
+        a.sort_order - b.sort_order,
+    );
+
   return {
     id: data.id as string,
     slug: data.slug as string,
@@ -95,6 +130,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     subject_links,
     event_links,
     opportunity_links,
+    media,
   };
 }
 
@@ -104,7 +140,8 @@ const DETAIL_SELECT = `
   publication_status, visibility_status,
   content_subject_links ( id, person_id, business_id, professional_profile_id ),
   content_event_links ( id, event_id ),
-  content_opportunity_links ( id, opportunity_id )
+  content_opportunity_links ( id, opportunity_id ),
+  content_media ( id, media_kind, provider, external_id, url, title, caption, rights_note, is_primary, sort_order )
 `;
 
 export async function listPublicContents(
@@ -150,9 +187,6 @@ export async function listPublicContents(
 export async function getPublicContentBySlug(
   slug: string,
 ): Promise<PublicContentDetail | null> {
-  // Public detail contract (P6 / C2.1): missing, private, or temporarily
-  // unavailable lookups resolve to null → route `notFound()`, never a thrown
-  // error that surfaces the generic "Errore inatteso" boundary for a slug miss.
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
