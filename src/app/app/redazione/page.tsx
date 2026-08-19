@@ -8,15 +8,20 @@ export const metadata: Metadata = {
 
 const sections = [
   {
+    href: "/app/redazione/inbox",
+    title: "Inbox",
+    description:
+      "Arrivi dal pubblico, dalla redazione e dal futuro radar mondiale. Nulla viene pubblicato automaticamente.",
+  },
+  {
     href: "/app/redazione/contenuti",
     title: "Contenuti",
-    description: "Articoli, guide e materiali editoriali del Centro Studi.",
+    description: "Articoli, analisi, storie, interviste e materiali editoriali del Centro Studi.",
   },
   {
     href: "/app/redazione/eventi",
     title: "Eventi",
-    description:
-      "Coda di revisione per eventi acquisiti o curati dalla redazione.",
+    description: "Coda di revisione per eventi acquisiti o curati dalla redazione.",
   },
   {
     href: "/app/redazione/osservatorio",
@@ -28,23 +33,26 @@ const sections = [
 export default function RedazioneDashboardPage() {
   return (
     <div>
-      <h1 className="text-ink text-2xl font-semibold tracking-tight">
-        Dashboard Redazione
+      <p className="text-ink-muted text-xs font-semibold uppercase tracking-[0.14em]">
+        Immigrati Imprenditori
+      </p>
+      <h1 className="text-ink mt-2 text-2xl font-semibold tracking-tight">
+        Scrivania redazionale
       </h1>
-      <p className="text-ink-muted mt-2 text-sm">
-        Area riservata al ruolo <strong>redattore</strong>. Gestisci contenuti,
-        eventi e dati dell&apos;osservatorio del Centro Studi.
+      <p className="text-ink-muted mt-2 max-w-2xl text-sm leading-6">
+        Area riservata alla redazione dell&apos;Osservatorio. Valuta gli arrivi,
+        approfondisci le fonti e pubblica soltanto materiale verificato.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {sections.map((s) => (
           <Link
             key={s.href}
             href={s.href}
-            className="border-line bg-surface-elevated hover:border-line-strong block rounded-md border p-5 shadow-soft transition-colors"
+            className="border-line hover:border-ink block border p-5 transition-colors"
           >
             <h2 className="text-ink text-base font-semibold">{s.title}</h2>
-            <p className="text-ink-muted mt-2 text-sm">{s.description}</p>
+            <p className="text-ink-muted mt-2 text-sm leading-6">{s.description}</p>
           </Link>
         ))}
       </div>
