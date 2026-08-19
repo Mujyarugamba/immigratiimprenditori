@@ -11,7 +11,7 @@ export const csPrimaryNav = [
   { label: "Rapporti e ricerche", href: "/rapporti" },
   { label: "Contenuti", href: "/contenuti" },
   { label: "Eventi", href: "/eventi" },
-  { label: "Dati e fonti", href: "/dati-e-fonti" },
+  { label: "Fonti e metodologia", href: "/fonti" },
   { label: "Contribuisci", href: "/contribuisci" },
 ] as const;
 
