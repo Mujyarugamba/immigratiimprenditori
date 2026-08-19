@@ -23,6 +23,9 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
   const item = await getEditorialInboxItemById(id);
   if (!item) notFound();
 
+  const origin = item.origin_country_label ?? item.origin_country_code ?? "—";
+  const destination = item.destination_country_label ?? item.destination_country_code ?? "—";
+
   return (
     <div>
       <Link href="/app/redazione/inbox" className="text-ink-muted text-sm underline underline-offset-2">
@@ -60,8 +63,8 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
           <section>
             <h2 className="text-ink text-sm font-semibold uppercase tracking-wide">Contesto geografico</h2>
             <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-              <div><dt className="text-ink-muted">Origine</dt><dd className="text-ink font-medium">{item.origin_country_code ?? "—"}</dd></div>
-              <div><dt className="text-ink-muted">Destinazione</dt><dd className="text-ink font-medium">{item.destination_country_code ?? "—"}</dd></div>
+              <div><dt className="text-ink-muted">Paese di origine</dt><dd className="text-ink font-medium">{origin}</dd></div>
+              <div><dt className="text-ink-muted">Paese di attività / destinazione</dt><dd className="text-ink font-medium">{destination}</dd></div>
             </dl>
           </section>
 
@@ -73,6 +76,8 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
                 <div><dt className="text-ink-muted">Email</dt><dd><a className="underline" href={`mailto:${item.submission.submitter_email}`}>{item.submission.submitter_email}</a></dd></div>
                 <div><dt className="text-ink-muted">Telefono</dt><dd>{item.submission.submitter_phone ?? "—"}</dd></div>
                 <div><dt className="text-ink-muted">Organizzazione</dt><dd>{item.submission.organization_name ?? "—"}</dd></div>
+                <div><dt className="text-ink-muted">Paese di origine dichiarato</dt><dd>{item.submission.origin_country_label ?? "—"}</dd></div>
+                <div><dt className="text-ink-muted">Paese di attività dichiarato</dt><dd>{item.submission.destination_country_label ?? "—"}</dd></div>
                 <div><dt className="text-ink-muted">Ricontatto autorizzato</dt><dd>{item.submission.consent_contact ? "Sì" : "No"}</dd></div>
                 <div><dt className="text-ink-muted">Pubblicazione materiale autorizzata</dt><dd>{item.submission.consent_publication ? "Sì" : "No"}</dd></div>
               </dl>
