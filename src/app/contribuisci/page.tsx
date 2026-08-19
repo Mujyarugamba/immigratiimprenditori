@@ -39,6 +39,13 @@ export default async function ContribuisciPage({ searchParams }: Props) {
           verifica le fonti e decide se approfondirla. L&apos;invio non comporta
           pubblicazione automatica.
         </p>
+        <p className="mt-4 text-sm text-neutral-700">
+          Hai già un account contributore?{" "}
+          <Link href="/accedi?next=/app/contributore" className="font-semibold text-black underline underline-offset-4">
+            Accedi per seguire le tue proposte
+          </Link>
+          .
+        </p>
       </header>
 
       {sent ? (
@@ -170,7 +177,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 Invia alla redazione
               </button>
               <p className="mt-4 max-w-2xl text-xs leading-5 text-neutral-500">
-                Non è necessario registrarsi. Se in futuro collaborerai con continuità, potrai richiedere un account contributore dedicato.
+                Non è necessario registrarsi per un invio occasionale. I collaboratori abituali possono ricevere un account contributore dedicato e seguire le proposte inviate da quell&apos;account.
               </p>
             </div>
           </form>

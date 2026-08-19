@@ -5,8 +5,8 @@ import { signInEditorialAction } from "@/lib/auth/actions";
 import { getApplicationSession } from "@/lib/session/get-application-session";
 
 export const metadata: Metadata = {
-  title: "Accesso redazione",
-  description: "Accesso riservato alla redazione del Centro Studi.",
+  title: "Accedi",
+  description: "Accesso riservato alla redazione e ai contributori autorizzati del Centro Studi.",
 };
 
 type PageProps = {
@@ -16,8 +16,8 @@ type PageProps = {
 const errorMessages: Record<string, string> = {
   missing: "Inserisci email e password.",
   credentials: "Credenziali non valide.",
-  account: "L’account redazionale non è ancora operativo.",
-  role: "Questo account non dispone di un ruolo redazionale.",
+  account: "L’account non è ancora operativo.",
+  role: "Questo account non dispone di un ruolo abilitato.",
 };
 
 function safeNextPath(raw: string | undefined): string {
@@ -33,8 +33,13 @@ export default async function AccediPage({ searchParams }: PageProps) {
   const next = safeNextPath(params.next);
   const session = await getApplicationSession();
 
-  if (session?.isActiveAccount && (session.isEditor || session.isApplicationAdmin)) {
-    redirect("/app/redazione");
+  if (session?.isActiveAccount) {
+    if (session.isEditor || session.isApplicationAdmin) {
+      redirect("/app/redazione");
+    }
+    if (session.isContributor) {
+      redirect("/app/contributore");
+    }
   }
 
   const errorMessage = params.error ? errorMessages[params.error] : null;
@@ -42,11 +47,9 @@ export default async function AccediPage({ searchParams }: PageProps) {
   return (
     <Container className="py-12 sm:py-16">
       <div className="border-line bg-surface-elevated mx-auto max-w-md rounded-md border p-6 shadow-soft sm:p-8">
-        <h1 className="text-ink text-2xl font-semibold tracking-tight">
-          Accesso redazione
-        </h1>
+        <h1 className="text-ink text-2xl font-semibold tracking-tight">Accedi</h1>
         <p className="text-ink-muted mt-2 text-sm">
-          Area riservata ai redattori autorizzati del Centro Studi.
+          Area riservata ai redattori e ai contributori autorizzati del Centro Studi.
         </p>
 
         {errorMessage ? (

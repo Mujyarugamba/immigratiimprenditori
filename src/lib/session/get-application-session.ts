@@ -12,6 +12,7 @@ type HelperRow = {
   is_active: boolean | null;
   is_editor: boolean | null;
   is_admin: boolean | null;
+  is_contributor: boolean | null;
 };
 
 /**
@@ -35,6 +36,7 @@ export async function getApplicationSession(): Promise<ApplicationSession | null
     activeRes,
     editorRes,
     adminRes,
+    contributorRes,
     accountRowRes,
   ] = await Promise.all([
     supabase.rpc("access_current_account_id"),
@@ -42,6 +44,7 @@ export async function getApplicationSession(): Promise<ApplicationSession | null
     supabase.rpc("access_is_active_account"),
     supabase.rpc("access_is_editor"),
     supabase.rpc("access_is_application_admin"),
+    supabase.rpc("access_is_contributor"),
     supabase
       .from("accounts")
       .select("id, account_status, person_id, person_association_status")
@@ -73,6 +76,7 @@ export async function getApplicationSession(): Promise<ApplicationSession | null
     isActiveAccount: Boolean(activeRes.data),
     isEditor: Boolean(editorRes.data),
     isApplicationAdmin: Boolean(adminRes.data),
+    isContributor: Boolean(contributorRes.data),
   };
 }
 
@@ -86,8 +90,9 @@ export async function getViewer(): Promise<Viewer> {
 
 /** Narrow helper for tests / UI without hitting the network. */
 export function buildSessionFromParts(
-  parts: Omit<ApplicationSession, "isActiveAccount"> & {
+  parts: Omit<ApplicationSession, "isActiveAccount" | "isContributor"> & {
     isActiveAccount?: boolean;
+    isContributor?: boolean;
   },
 ): ApplicationSession {
   return {
@@ -97,6 +102,7 @@ export function buildSessionFromParts(
     isActiveAccount:
       parts.isActiveAccount ??
       (parts.accountStatus === "active" && parts.personId != null),
+    isContributor: parts.isContributor ?? false,
   };
 }
 
