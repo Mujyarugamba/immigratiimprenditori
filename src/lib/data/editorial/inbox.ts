@@ -73,13 +73,6 @@ const LIST_SELECT =
 
 const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_id, duplicate_of_id, assigned_account_id, linked_content_id, linked_event_id, reviewed_at, created_at, updated_at`;
 
-async function exactCount(
-  filter: (query: ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>) => unknown,
-) {
-  void filter;
-  return 0;
-}
-
 export async function getEditorialInboxStats(): Promise<EditorialInboxStats> {
   const supabase = await createClient();
 
