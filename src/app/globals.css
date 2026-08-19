@@ -6,26 +6,26 @@
 }
 
 @theme inline {
-  --color-brand: #5a315e;
-  --color-brand-dark: #3d2142;
-  --color-brand-soft: #f3eaf1;
-  --color-surface: #fbf7f0;
+  --color-brand: #000000;
+  --color-brand-dark: #000000;
+  --color-brand-soft: #f2f2f2;
+  --color-surface: #ffffff;
   --color-surface-elevated: #ffffff;
-  --color-surface-muted: #f3ebe1;
-  --color-ink: #2c2430;
-  --color-ink-muted: #5c5348;
-  --color-ink-subtle: #8a8074;
-  --color-accent: #b85c45;
-  --color-accent-dark: #934836;
-  --color-accent-soft: #f6e8e3;
-  --color-line: #decfbe;
-  --color-line-strong: #c9b8a4;
+  --color-surface-muted: #f5f5f5;
+  --color-ink: #000000;
+  --color-ink-muted: #444444;
+  --color-ink-subtle: #6b6b6b;
+  --color-accent: #202020;
+  --color-accent-dark: #000000;
+  --color-accent-soft: #eeeeee;
+  --color-line: #d4d4d4;
+  --color-line-strong: #8a8a8a;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Georgia, ui-serif, serif;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --shadow-soft: 0 1px 2px rgb(44 36 48 / 0.04), 0 4px 12px rgb(44 36 48 / 0.04);
+  --font-sans: Georgia, "Times New Roman", ui-serif, serif;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --shadow-soft: none;
 }
 
 @layer base {
@@ -39,8 +39,13 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid #000000;
     outline-offset: 2px;
+  }
+
+  ::selection {
+    background: #000000;
+    color: #ffffff;
   }
 
   .table-scroll {
