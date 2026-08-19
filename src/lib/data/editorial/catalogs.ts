@@ -38,6 +38,22 @@ export async function listActiveLanguages(): Promise<
   }));
 }
 
+export async function listActiveBusinessSectors(): Promise<
+  { id: number; slug: string; label: string }[]
+> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("business_sectors")
+    .select("id, slug, name")
+    .eq("is_active", true)
+    .order("sort_order");
+  return (data ?? []).map((r) => ({
+    id: Number(r.id),
+    slug: r.slug,
+    label: r.name,
+  }));
+}
+
 export async function getDefaultLanguageId(): Promise<number | null> {
   const supabase = await createClient();
   const { data } = await supabase
