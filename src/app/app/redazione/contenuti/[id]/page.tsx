@@ -2,12 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditorialContentEditForm } from "@/components/app/editorial/EditorialContentEditForm";
+import { EditorialContentMediaPanel } from "@/components/app/editorial/EditorialContentMediaPanel";
+import { EditorialContentContextPanel } from "@/components/app/editorial/EditorialContentContextPanel";
 import {
+  listActiveBusinessSectors,
   listActiveContentCategories,
   listActiveContentTypes,
   listActiveLanguages,
 } from "@/lib/data/editorial/catalogs";
 import { getEditorialContentById } from "@/lib/data/editorial/contents";
+import { listEditorialContentMedia } from "@/lib/data/editorial/content-media";
+import {
+  listEditorialContentGeographies,
+  listEditorialContentSectors,
+} from "@/lib/data/editorial/content-context";
 
 export const metadata: Metadata = {
   title: "Modifica contenuto — Redazione",
@@ -17,11 +25,24 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function ContenutoRedazionePage({ params }: Props) {
   const { id } = await params;
-  const [content, contentTypes, categories, languages] = await Promise.all([
+  const [
+    content,
+    contentTypes,
+    categories,
+    languages,
+    media,
+    geographies,
+    sectors,
+    sectorOptions,
+  ] = await Promise.all([
     getEditorialContentById(id),
     listActiveContentTypes(),
     listActiveContentCategories(),
     listActiveLanguages(),
+    listEditorialContentMedia(id),
+    listEditorialContentGeographies(id),
+    listEditorialContentSectors(id),
+    listActiveBusinessSectors(),
   ]);
 
   if (!content) notFound();
@@ -46,6 +67,13 @@ export default async function ContenutoRedazionePage({ params }: Props) {
         categories={categories}
         languages={languages}
       />
+      <EditorialContentContextPanel
+        contentId={content.id}
+        geographies={geographies}
+        sectors={sectors}
+        sectorOptions={sectorOptions}
+      />
+      <EditorialContentMediaPanel contentId={content.id} media={media} />
     </div>
   );
 }
