@@ -1,18 +1,14 @@
 import { centroStudiConfig } from "@immigrati/product-config";
 
-/**
- * Public navigation during the editorial evolution of the Centro Studi.
- * Only implemented routes are exposed here; the target information architecture
- * is documented in docs/editorial/INFORMATION-ARCHITECTURE.md.
- */
+/** Canonical public navigation for the Observatory and Study Centre. */
 export const csPrimaryNav = [
   { label: "Osservatorio", href: "/osservatorio" },
   { label: "Storie e interviste", href: "/storie" },
   { label: "Rapporti e ricerche", href: "/rapporti" },
-  { label: "Contenuti", href: "/contenuti" },
+  { label: "Territori e rotte", href: "/territori" },
   { label: "Eventi", href: "/eventi" },
+  { label: "Politiche e normative", href: "/politiche" },
   { label: "Fonti e metodologia", href: "/fonti" },
-  { label: "Contribuisci", href: "/contribuisci" },
 ] as const;
 
 export const csSiteName = centroStudiConfig.name;
