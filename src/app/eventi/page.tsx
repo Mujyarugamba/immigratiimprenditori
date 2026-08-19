@@ -2,18 +2,49 @@ import type { Metadata } from "next";
 import { PublicListLayout } from "@/components/public/PublicListLayout";
 import { ErrorState } from "@/components/ui/states";
 import { sections } from "@/data/sections";
-import { listPublicEvents } from "@/lib/data/public/events";
+import { listPublicEvents, type PublicEventEdition } from "@/lib/data/public/events";
 import { param } from "@/lib/data/public/paging";
 import {
   EVENT_DELIVERY_MODES,
   EVENT_TYPES,
-  formatItalianDateTime,
   label,
   selectFilter,
   textFilter,
 } from "@/lib/public/labels";
 
 const section = sections.eventi;
+
+const TEMPORAL_LABELS = {
+  upcoming: "Futuro",
+  ongoing: "In corso",
+  past: "Passato",
+} as const;
+
+function formatEditionWhen(edition: PublicEventEdition): string {
+  const dateFormatter = new Intl.DateTimeFormat("it-IT", {
+    dateStyle: "medium",
+    timeZone: edition.timezone,
+  });
+  const dateTimeFormatter = new Intl.DateTimeFormat("it-IT", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: edition.timezone,
+  });
+
+  const start = new Date(edition.starts_at);
+  const end = edition.ends_at ? new Date(edition.ends_at) : null;
+  if (edition.all_day) {
+    const startLabel = dateFormatter.format(start);
+    const endLabel = end ? dateFormatter.format(end) : null;
+    return endLabel && endLabel !== startLabel
+      ? `${startLabel} – ${endLabel}`
+      : startLabel;
+  }
+
+  const startLabel = dateTimeFormatter.format(start);
+  const endLabel = end ? dateTimeFormatter.format(end) : null;
+  return endLabel ? `${startLabel} – ${endLabel}` : startLabel;
+}
 
 export const metadata: Metadata = {
   title: section.title,
@@ -63,13 +94,14 @@ export default async function EventiPage({ searchParams }: PageProps) {
         title: item.title,
         description: item.summary,
         badges: [
+          item.temporal_status ? TEMPORAL_LABELS[item.temporal_status] : null,
           label(EVENT_TYPES, item.type_code),
           label(EVENT_DELIVERY_MODES, item.delivery_mode),
-        ],
+        ].filter((value): value is string => Boolean(value)),
         meta: item.next_edition
           ? [
-              formatItalianDateTime(item.next_edition.starts_at),
-              item.next_edition.timezone,
+              formatEditionWhen(item.next_edition),
+              item.next_edition.all_day ? undefined : item.next_edition.timezone,
               item.next_edition.city_text ??
                 item.next_edition.venue_label ??
                 (item.next_edition.delivery_mode === "online"

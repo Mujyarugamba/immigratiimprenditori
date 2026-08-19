@@ -10,13 +10,14 @@ const LIST_SELECT =
   "id, title, summary, type_code, delivery_mode, audience_kind, economic_kind, external_organization_label, source_url";
 
 const EDITION_SELECT =
-  "id, starts_at, ends_at, timezone, delivery_mode, occurrence_status, venue_label, city_text, country_ref, online_reference";
+  "id, starts_at, ends_at, timezone, all_day, delivery_mode, occurrence_status, venue_label, city_text, country_ref, online_reference";
 
 export type PublicEventEdition = {
   id: string;
   starts_at: string;
   ends_at: string | null;
   timezone: string;
+  all_day: boolean;
   delivery_mode: string;
   occurrence_status: string;
   venue_label: string | null;
@@ -24,6 +25,8 @@ export type PublicEventEdition = {
   country_ref: string | null;
   online_reference: string | null;
 };
+
+export type EventTemporalStatus = "upcoming" | "ongoing" | "past";
 
 export type PublicEventListItem = {
   id: string;
@@ -35,6 +38,7 @@ export type PublicEventListItem = {
   economic_kind: string;
   external_organization_label: string | null;
   next_edition: PublicEventEdition | null;
+  temporal_status: EventTemporalStatus | null;
 };
 
 export type PublicEventDetail = {
@@ -58,34 +62,45 @@ export type PublicEventDetail = {
   editions: PublicEventEdition[];
 };
 
+export function eventTemporalStatus(
+  edition: PublicEventEdition | null,
+): EventTemporalStatus | null {
+  if (!edition) return null;
+  if (edition.occurrence_status === "ongoing") return "ongoing";
+  if (
+    edition.occurrence_status !== "concluded" &&
+    new Date(edition.starts_at).getTime() >= Date.now()
+  ) {
+    return "upcoming";
+  }
+  return "past";
+}
+
 function pickNextEdition(
   editions: PublicEventEdition[],
 ): PublicEventEdition | null {
   if (editions.length === 0) return null;
 
   const now = Date.now();
-  const preferred = editions
+  const ongoing = editions.find((e) => e.occurrence_status === "ongoing");
+  if (ongoing) return ongoing;
+
+  const upcoming = editions
     .filter(
       (e) =>
-        e.occurrence_status === "scheduled" ||
-        e.occurrence_status === "ongoing",
-    )
-    .filter(
-      (e) =>
-        e.occurrence_status === "ongoing" ||
+        (e.occurrence_status === "scheduled" || e.occurrence_status === "postponed") &&
         new Date(e.starts_at).getTime() >= now,
     )
     .sort(
       (a, b) =>
         new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
     );
+  if (upcoming.length > 0) return upcoming[0];
 
-  if (preferred.length > 0) return preferred[0];
-
-  const sorted = [...editions].sort(
-    (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
+  const past = [...editions].sort(
+    (a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime(),
   );
-  return sorted[0] ?? null;
+  return past[0] ?? null;
 }
 
 function mapEditionRows(
@@ -99,6 +114,7 @@ function mapEditionRows(
       starts_at: e.starts_at,
       ends_at: e.ends_at,
       timezone: e.timezone,
+      all_day: Boolean(e.all_day),
       delivery_mode: e.delivery_mode,
       occurrence_status: e.occurrence_status,
       venue_label: e.venue_label,
@@ -147,6 +163,7 @@ export async function listPublicEvents(
     const editions = mapEditionRows(
       row.event_editions as PublicEventEdition[] | null,
     );
+    const nextEdition = pickNextEdition(editions);
     return {
       id: row.id,
       title: row.title,
@@ -156,7 +173,8 @@ export async function listPublicEvents(
       audience_kind: row.audience_kind,
       economic_kind: row.economic_kind,
       external_organization_label: row.external_organization_label ?? null,
-      next_edition: pickNextEdition(editions),
+      next_edition: nextEdition,
+      temporal_status: eventTemporalStatus(nextEdition),
     };
   });
 
@@ -221,6 +239,7 @@ export async function listHomeEvents(limit = 3) {
     const editions = mapEditionRows(
       row.event_editions as PublicEventEdition[] | null,
     );
+    const nextEdition = pickNextEdition(editions);
     return {
       id: row.id,
       title: row.title,
@@ -230,7 +249,8 @@ export async function listHomeEvents(limit = 3) {
       audience_kind: row.audience_kind,
       economic_kind: row.economic_kind,
       external_organization_label: row.external_organization_label ?? null,
-      next_edition: pickNextEdition(editions),
+      next_edition: nextEdition,
+      temporal_status: eventTemporalStatus(nextEdition),
     };
   }) as PublicEventListItem[];
 }
