@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
 import { isStoryContentType } from "@/lib/data/public/stories";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
+import { safeHttpsUrl, youtubePrivacyEmbedUrl } from "@/lib/public/story-media";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -68,6 +69,64 @@ export default async function StoryDetailPage({ params }: Props) {
               className="max-h-[560px] w-full object-cover"
             />
           </figure>
+        ) : null}
+
+        {content.media.length > 0 ? (
+          <section className="space-y-8 border-b border-black py-8" aria-labelledby="media-heading">
+            <h2 id="media-heading" className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+              Video e materiali
+            </h2>
+            {content.media.map((media) => {
+              const youtubeUrl =
+                media.provider === "youtube"
+                  ? youtubePrivacyEmbedUrl(media.external_id)
+                  : null;
+              const externalUrl = safeHttpsUrl(media.url);
+
+              if (media.media_kind === "video" && youtubeUrl) {
+                return (
+                  <figure key={media.id}>
+                    <div className="aspect-video w-full overflow-hidden bg-black">
+                      <iframe
+                        src={youtubeUrl}
+                        title={media.title ?? content.title}
+                        className="h-full w-full"
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                    {media.title || media.caption ? (
+                      <figcaption className="mt-3 text-sm leading-6 text-neutral-600">
+                        {media.title ? <strong className="font-semibold text-black">{media.title}</strong> : null}
+                        {media.title && media.caption ? " — " : null}
+                        {media.caption}
+                      </figcaption>
+                    ) : null}
+                  </figure>
+                );
+              }
+
+              if (!externalUrl) return null;
+              return (
+                <div key={media.id} className="border-t border-neutral-300 pt-4 first:border-t-0 first:pt-0">
+                  <p className="text-sm font-semibold text-black">
+                    {media.title ?? (media.media_kind === "audio" ? "Audio" : media.media_kind === "document" ? "Documento" : "Materiale")}
+                  </p>
+                  {media.caption ? <p className="mt-1 text-sm leading-6 text-neutral-600">{media.caption}</p> : null}
+                  <a
+                    href={externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-block text-sm font-medium text-black underline underline-offset-4"
+                  >
+                    Apri il materiale
+                  </a>
+                </div>
+              );
+            })}
+          </section>
         ) : null}
 
         <section className="py-10">
