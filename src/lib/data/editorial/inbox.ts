@@ -52,6 +52,14 @@ export type EditorialInboxItem = EditorialInboxListItem & {
   submission: EditorialSubmission | null;
 };
 
+export type EditorialInboxActivity = {
+  id: string;
+  inbox_item_id: string;
+  actor_account_id: string | null;
+  changes: Record<string, { from: string | null; to: string | null }>;
+  created_at: string;
+};
+
 export type EditorialInboxSearchParams = {
   q?: string;
   stato?: string;
@@ -163,4 +171,19 @@ export async function getEditorialInboxItemById(
     ...(item as Omit<EditorialInboxItem, "submission">),
     submission: (submission as EditorialSubmission | null) ?? null,
   };
+}
+
+export async function listEditorialInboxActivity(
+  inboxItemId: string,
+): Promise<EditorialInboxActivity[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("editorial_inbox_activity")
+    .select("id, inbox_item_id, actor_account_id, changes, created_at")
+    .eq("inbox_item_id", inboxItemId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) return [];
+  return (data ?? []) as EditorialInboxActivity[];
 }
