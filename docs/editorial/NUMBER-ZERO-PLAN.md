@@ -1,114 +1,95 @@
 # Immigrati Imprenditori — Numero zero
 
-Stato: **PIANO EDITORIALE v1**
+Stato: **PRODUZIONE EDITORIALE IN CORSO**
 
 Il sito non va lanciato come guscio tecnico. Il numero zero deve dimostrare già il carattere **Dati · Analisi · Voci** e la natura internazionale dell'Osservatorio.
 
-## Obiettivo minimo di lancio
+## Stato dei 10 contenuti principali — 19/08/2026
 
-Preparare un nucleo di **10 contenuti principali**, due per ciascuna fascia geografica editoriale. Le percentuali sono una bussola; in fase di produzione un contenuto può cambiare fascia se la classificazione più corretta è un'altra.
+| Codice | Fascia | Contenuto | Stato |
+| --- | --- | --- | --- |
+| L1 | Lombardia | Nota dati 135 mila imprese straniere | **DRAFT READY FOR REVIEW** |
+| L2 | Lombardia | Voce originale | **CANDIDATE IN INBOX — INTERVIEW PENDING** |
+| I1 | Italia | Quadro nazionale 678 mila | **DRAFT READY FOR REVIEW** |
+| I2 | Italia | Lettura critica Futurae/InfoCamere 2025 | **DRAFT READY FOR REVIEW** |
+| A1 | Italiani all'estero | Voce originale | **CANDIDATES IN INBOX — INTERVIEW PENDING** |
+| A2 | Italiani all'estero | Perché non esiste un solo numero | **DRAFT + SOURCE MAP V1** |
+| E1 | Europa | Confronto self-employment OECD | **DRAFT READY FOR REVIEW** |
+| E2 | Europa | Policy brief UE integrazione/imprenditoria | **DRAFT READY FOR REVIEW** |
+| M1 | Resto del mondo/OECD | ≈10 milioni self-employed immigrants | **DRAFT READY FOR REVIEW** |
+| M2 | Resto del mondo | Voce originale | **CANDIDATE SEARCH / INTERVIEW PENDING** |
+
+**Sette contenuti su dieci hanno già una bozza editoriale sostanziale.** I tre mancanti dipendono da interviste originali e non devono essere simulati o ricostruiti da fonti terze.
 
 ## 1. Lombardia — circa 20%
 
 ### L1 — Nota dati
 
-**Tema:** imprenditoria migrante in Lombardia: consistenza, distribuzione territoriale e principali settori.
-
-Formato: `data_note`.
-
-Requisiti:
-- fonte ufficiale/statistica;
-- data e definizione della popolazione osservata;
-- confronto Lombardia/Italia quando metodologicamente possibile;
-- almeno un elemento territoriale provinciale o metropolitano verificabile.
+**Tema:** imprenditoria migrante in Lombardia: consistenza, distribuzione territoriale e principali settori.  
+Formato: `data_note`.  
+Bozza: `docs/editorial/drafts/L1-lombardia-135mila.md`.
 
 ### L2 — Voce
 
-**Tema:** intervista/storia di un imprenditore migrante attivo in Lombardia.
-
+**Tema:** intervista/storia di un imprenditore migrante attivo in Lombardia.  
 Formato: `interview` o `business_story`.
 
-Criterio: storia concreta con percorso, attività, ostacoli, occupazione/impatto quando documentabile e relazione con il territorio.
+Candidato prioritario in Inbox: Agie Zhou / La Ravioleria Sarpi. Contatto e messaggio preparati in `VOICES-OUTREACH-PACK.md`. Nessun messaggio inviato automaticamente.
 
 ## 2. Italia — circa 20%
 
 ### I1 — Quadro nazionale
 
-**Tema:** numeri e struttura dell'imprenditoria migrante in Italia.
-
-Formato: `analysis` + eventuale `data_note` collegata.
-
-Obiettivo: offrire una pagina di riferimento nazionale con fonti e definizioni esplicite.
+Bozza: `docs/editorial/drafts/I1-678mila-imprese-straniere.md`.
 
 ### I2 — Rapporto/ricerca
 
-**Tema:** presentazione critica di un rapporto recente e autorevole sull'imprenditoria migrante in Italia.
-
-Formato: `research_report`.
-
-Non è un riassunto promozionale: deve spiegare fonte, metodo, principali risultati, limiti e collegamento con gli indicatori dell'Osservatorio.
+Bozza: `docs/editorial/drafts/I2-futurae-report-2025.md`. La scheda del rapporto è già presente nella biblioteca del backend.
 
 ## 3. Italiani imprenditori all'estero — circa 20%
 
 ### A1 — Voce internazionale
 
-**Tema:** storia/intervista di un imprenditore italiano che opera stabilmente fuori dall'Italia.
-
-Prima priorità di ricerca: Europa o Stati Uniti, senza escludere altri Paesi.
-
-Obiettivo: rendere evidente fin dal lancio che “immigrato imprenditore” non significa soltanto straniero in Italia.
+Candidati prioritari in Inbox: Paolo Privitera; Gianni Chiloiro e Angelo Sannino / Doppio Zero. Contatti verificati e messaggi preparati, non inviati.
 
 ### A2 — Dossier iniziale
 
-**Tema:** cosa sappiamo, e cosa non sappiamo, sugli italiani che fanno impresa all'estero.
+Bozza: `docs/editorial/drafts/A2-italiani-impresa-estero.md`.  
+Mappa metodologica delle fonti: `docs/editorial/ITALIANS-ABROAD-SOURCE-MAP.md`.
 
-Formato: `analysis`.
-
-È accettabile dichiarare i limiti statistici: meglio una mappa delle fonti affidabile che numeri non comparabili forzati.
+La regola resta: dati di residenza/migrazione non sono una stima degli imprenditori italiani all'estero.
 
 ## 4. Europa — circa 20%
 
 ### E1 — Confronto europeo
 
-**Tema:** confronto tra alcuni Paesi europei sulla presenza/attività imprenditoriale dei migranti.
+Bozza: `docs/editorial/drafts/E1-europa-self-employment.md`.
 
-Formato: `analysis` / `data_note`.
+### E2 — Politica europea
 
-Requisito fondamentale: non confrontare indicatori con definizioni incompatibili senza spiegazione metodologica.
-
-### E2 — Politica/evento/ricerca europea
-
-**Tema:** una politica, una ricerca o un'iniziativa europea di particolare rilevanza per imprenditoria migrante, accesso all'impresa, credito o diaspora economica.
-
-Formato: `policy_brief`, `research_report` o `event_report`.
+Bozza: `docs/editorial/drafts/E2-eu-integration-entrepreneurship-policy.md`.
 
 ## 5. Resto del mondo — circa 20%
 
-### M1 — Numeri globali / dossier selettivo
+### M1 — Quadro OECD
 
-**Tema:** quadro documentale globale o dossier su un Paese/area con forte rilevanza.
-
-Formato: `analysis` / `data_note`.
-
-Non tentare una falsa copertura di tutti i Paesi: selezionare dati realmente comparabili e spiegare le lacune.
+Bozza: `docs/editorial/drafts/M1-oecd-10milioni-self-employed.md`.
 
 ### M2 — Voce dal mondo
 
-**Tema:** intervista/storia forte fuori dall'Italia e dall'Europa.
-
-Possibili aree iniziali: Stati Uniti/Canada, Africa, Asia o America Latina, in funzione della qualità e verificabilità della storia disponibile.
+Deve essere un'intervista originale fuori dall'Italia e dall'Europa. La ricerca può partire da Nord America, Africa, Asia o America Latina, privilegiando verificabilità e qualità della storia rispetto alla copertura geografica artificiale.
 
 ## Contenuti di servizio al lancio
 
-Oltre ai 10 contenuti principali, il numero zero deve includere:
+Già strutturalmente presenti:
 
-- pagina Chi siamo / AIPEL;
+- Chi siamo / AIPEL;
 - Fonti e metodologia;
-- almeno un indicatore dell'Osservatorio completo di fonte e metodo;
-- alcuni rapporti esterni catalogati;
-- almeno alcuni eventi pertinenti, se realmente disponibili;
-- “Racconta la tua storia” e gli altri flussi Contribuisci;
-- pagina Sostieni senza pagamento finché i dati AIPEL non sono verificati.
+- Osservatorio con indicatori e fonti;
+- biblioteca Rapporti;
+- Eventi;
+- flussi Contribuisci;
+- pagina Sostieni senza pagamento finché dati AIPEL e inquadramento sono verificati.
 
 ## Home al lancio
 
@@ -132,4 +113,4 @@ Il numero zero è pronto quando non richiede testi placeholder per sembrare vivo
 - dichiara le fonti;
 - accetta contributi ma non autopubblicazione.
 
-`NUMBER_ZERO_PLAN = READY`
+`NUMBER_ZERO_PLAN = PRODUCTION_IN_PROGRESS`
