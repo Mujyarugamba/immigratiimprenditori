@@ -41,3 +41,39 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Runtime route smoke
+        run: |
+          npm run start -- -p 3100 > /tmp/immigrati-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3100/ > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/immigrati-next.log
+            exit 1
+          fi
+
+          for path in / /osservatorio /storie /rapporti /territori /eventi /politiche /fonti /contribuisci /chi-siamo /sostieni /robots.txt /sitemap.xml; do
+            code=$(curl -sS -o /tmp/route-body -w '%{http_code}' "http://127.0.0.1:3100$path")
+            if [ "$code" != "200" ]; then
+              echo "$path returned $code"
+              cat /tmp/route-body
+              cat /tmp/immigrati-next.log
+              exit 1
+            fi
+          done
+
+          private_code=$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:3100/app/redazione)
+          if [ "$private_code" != "307" ] && [ "$private_code" != "302" ]; then
+            echo "/app/redazione expected redirect, got $private_code"
+            cat /tmp/immigrati-next.log
+            exit 1
+          fi
