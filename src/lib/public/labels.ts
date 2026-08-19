@@ -197,16 +197,19 @@ export const OFFICIAL_ROLES: Record<string, string> = {
 
 export const CONTENT_TYPES: Record<string, string> = {
   news: "Notizia",
+  analysis: "Analisi",
   guide: "Guida",
   insight: "Approfondimento",
   interview: "Intervista",
-  business_story: "Storia di Impresa",
-  event_presentation: "Presentazione Evento",
-  opportunity_presentation: "Presentazione Opportunità",
-  service_presentation: "Presentazione Servizio",
-  market_content: "Contenuto su Mercato",
-  institutional_page: "Pagina informativa",
+  business_story: "Storia d'impresa",
+  testimony: "Testimonianza",
   personal_story: "Storia personale",
+  research_report: "Rapporto / ricerca",
+  data_note: "Nota dati",
+  policy_brief: "Politiche e normative",
+  event_presentation: "Presentazione evento",
+  event_report: "Resoconto evento",
+  institutional_page: "Pagina informativa",
 };
 
 export const AVAILABILITY_STATUSES: Record<string, string> = {
