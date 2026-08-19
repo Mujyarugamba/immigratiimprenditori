@@ -1,0 +1,41 @@
+name: Dependency lock refresh
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-next-lock:
+    if: github.head_ref == 'editorial-desk-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Refresh Next.js lock
+        run: npm install next@16.2.12 --save-exact --package-lock-only
+
+      - name: Verify resolved Next.js
+        run: |
+          node -e "const p=require('./package.json'); if(p.dependencies.next!=='16.2.12') process.exit(1)"
+          node -e "const l=require('./package-lock.json'); if(l.packages['node_modules/next'].version!=='16.2.12') process.exit(1)"
+          npm audit --audit-level=high
+
+      - name: Upload refreshed dependency files
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-16-2-12-lock
+          path: |
+            package.json
+            package-lock.json
+          retention-days: 1
