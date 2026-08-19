@@ -12,13 +12,18 @@ const sections = [
     href: "/app/redazione/inbox",
     title: "Inbox",
     description:
-      "Arrivi dal pubblico, dalla redazione e dal futuro radar mondiale. Nulla viene pubblicato automaticamente.",
+      "Arrivi dal pubblico, dalla redazione e dal radar mondiale. Nulla viene pubblicato automaticamente.",
   },
   {
-    href: "/app/redazione/contenuti",
-    title: "Contenuti",
+    href: "/app/redazione/storie",
+    title: "Storie e interviste",
     description:
-      "Articoli, analisi, storie, interviste e materiali editoriali del Centro Studi.",
+      "Voci, testimonianze e interviste da verificare, curare e collegare a territori e rotte.",
+  },
+  {
+    href: "/app/redazione/rapporti",
+    title: "Rapporti e ricerche",
+    description: "Rapporti, ricerche, note dati e policy brief del Centro Studi.",
   },
   {
     href: "/app/redazione/eventi",
@@ -30,23 +35,24 @@ const sections = [
     title: "Osservatorio",
     description: "Indicatori, fonti statistiche e valori aggregati.",
   },
+  {
+    href: "/app/redazione/contenuti",
+    title: "Archivio contenuti",
+    description: "Vista completa dei contenuti editoriali e delle relative pubblicazioni.",
+  },
 ] as const;
 
 export default async function RedazioneDashboardPage() {
   const stats = await getEditorialInboxStats();
   const metrics = [
     { label: "Nuovi arrivi", value: stats.newItems, href: "/app/redazione/inbox?stato=new" },
+    { label: "Nuovi dal Radar", value: stats.newRadarItems, href: "/app/redazione/inbox?origine=radar&stato=new" },
     {
       label: "Da valutare / approfondire",
       value: stats.toReview,
       href: "/app/redazione/inbox?stato=to_review",
     },
     { label: "In carico", value: stats.assigned, href: "/app/redazione/inbox?stato=assigned" },
-    {
-      label: "Bozze create",
-      value: stats.draftCreated,
-      href: "/app/redazione/inbox?stato=draft_created",
-    },
     {
       label: "Segnalazioni pubbliche",
       value: stats.publicSubmissions,
@@ -97,6 +103,9 @@ export default async function RedazioneDashboardPage() {
             </Link>
           ))}
         </div>
+        <p className="text-ink-muted mt-2 text-xs">
+          Bozze originate dalla Inbox: {stats.draftCreated}
+        </p>
       </section>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
