@@ -91,11 +91,20 @@ function mapIndicatorValues(
       source_published_on:
         v.observatory_statistical_sources?.source_published_on ?? null,
     }))
-    .sort(
-      (a, b) =>
+    .sort((a, b) => {
+      const byPeriod =
         new Date(b.period_start).getTime() -
-        new Date(a.period_start).getTime(),
-    );
+        new Date(a.period_start).getTime();
+      if (byPeriod !== 0) return byPeriod;
+
+      const byTerritory = (a.territory_label ?? "").localeCompare(
+        b.territory_label ?? "",
+        "it",
+      );
+      if (byTerritory !== 0) return byTerritory;
+
+      return (a.country_code ?? "").localeCompare(b.country_code ?? "");
+    });
 }
 
 export async function listPublicIndicators(
