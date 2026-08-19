@@ -24,7 +24,7 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 | 16. Sostieni | **PAGE PASS / PAYMENTS PENDING** | Pagina pronta e prudenziale: nessun pagamento attivo e nessuna promessa fiscale finché canale, trattamento amministrativo e formule fiscali non sono verificati. |
 | 17. Identità AIPEL | **PASS V1** | Denominazione completa, forma associativa, sede legale, CF, P.IVA, presidente/direzione e contatto istituzionale pubblicati in modo coerente. |
 | 18. SEO | **TECHNICAL V1 PASS** | Metadata, sitemap, robots, route canoniche e redirect; `/privacy` aggiunta alle route pubbliche. Multilingua successivo. |
-| 19. Qualità/privacy/sicurezza | **PRIVACY V1 PASS / LAUNCH GATE PENDING** | CI, RLS e backend verificati; informativa privacy operativa v1 collegata al punto di raccolta dati. Restano verifica finale dei fornitori/trasferimenti e Leaked Password Protection. |
+| 19. Qualità/privacy/sicurezza | **PRIVACY V1 + ACCOUNT DELETION PASS / LAUNCH GATE PENDING** | CI, RLS e backend verificati; privacy v1 collegata ai form; cancellazione account self-service post-split con guardia ultimo amministratore. Restano verifica finale fornitori/trasferimenti e Leaked Password Protection. |
 | 20. Lancio editoriale | **ANALYTICAL CORE READY / VOICE CANDIDATES READY / INTERVIEWS PENDING** | Tutti i 7 contenuti analitici sono `ready` e non pubblicati; i 3 slot Voci hanno candidati verificati e richiedono interviste originali reali. |
 
 ## Ultimi gate verificati
@@ -41,100 +41,51 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 - Commit `51405fb`: CI #117 PASS — collegamenti Numero zero ↔ Osservatorio.
 - Commit `504b96e`: CI #119 PASS — identità AIPEL e pagina Sostieni.
 - Commit `229c69d` + `bcf6579`: migrazioni 20/08 riallineate alla cronologia Supabase; CI #121 PASS.
+- Commit `62d8109`: privacy v1 e identità AIPEL completa; CI #122 PASS.
+- Migrazione `20260819181358_self_service_account_deletion_post_split`: applicata; preflight del solo amministratore attivo → `last_application_admin`, `can_proceed=false` — PASS senza modifiche dati.
 - Vercel Preview aveva già completato con SUCCESS sull'head `e4e7fb9`; la produzione non è richiesta durante lo sviluppo.
 
 ## Numero zero — nucleo analitico
 
-Sette contenuti sono ora `editorial_status=ready` e restano `publication_status=unpublished`:
-
-- L1 Lombardia — 135 mila imprese straniere;
-- I1 Italia — 678 mila imprese straniere;
-- I2 — lettura critica Futurae/InfoCamere 2025;
-- A2 — italiani imprenditori all'estero: perché non esiste un solo numero;
-- E1 — confronto europeo self-employment;
-- E2 — Action Plan UE e imprenditoria migrante;
-- M1 — circa 10 milioni di self-employed immigrants nel perimetro OECD.
-
-L1/I1/I2/E1/M1 sono collegati agli indicatori dell'Osservatorio dove metodologicamente pertinente. M1 è stato corretto per non descrivere il perimetro OECD come un dato mondiale. A2 usa la source map ufficiale già versionata e non produce aggregazioni incompatibili.
+Sette contenuti sono `editorial_status=ready` e restano `publication_status=unpublished`: L1 Lombardia, I1 Italia, I2 Futurae/InfoCamere, A2 italiani all'estero, E1 confronto europeo, E2 Action Plan UE e M1 OECD. L1/I1/I2/E1/M1 sono collegati agli indicatori dell'Osservatorio dove metodologicamente pertinente. M1 non descrive il perimetro OECD come dato mondiale; A2 usa una source map e non somma definizioni incompatibili.
 
 ## Storie e interviste — workflow privato
 
-`content_interview_workflow` gestisce esclusivamente dati redazionali privati:
+`content_interview_workflow` gestisce candidatura/origine, primo contatto, programmazione, intervista, fact-check, consensi separati per pubblicazione/citazioni/immagini/video e note interne minimizzate. RLS attiva, nessun `SELECT` anonimo.
 
-- candidatura/origine;
-- primo contatto;
-- programmazione e intervista svolta;
-- fact-check e approvazione;
-- consenso pubblicazione;
-- approvazione citazioni;
-- consenso immagini;
-- consenso video;
-- note interne minimizzate.
-
-La tabella ha RLS attiva, nessun `SELECT` anonimo e accesso DML solo per redattori/amministratori attraverso policy. Le pagine pubbliche non espongono questi stati.
-
-Candidati prioritari già in Inbox:
-
-1. Agie Hujian Zhou / Ravioleria Sarpi — Lombardia (L2);
-2. Paolo Privitera — italiani all'estero (A1);
-3. Gianni Chiloiro e Angelo Sannino / Doppio Zero — italiani all'estero (A1 alternativa/complementare);
-4. Adeola Adedewe / Kredete — Nigeria → Stati Uniti (M2);
-5. Semyon Dukach / One Way Ventures — riserva qualificata M2.
-
-Le pagine pubbliche usate nella ricerca servono a verificare identità e percorso; non sostituiscono l'intervista originale. Nessun messaggio è stato inviato automaticamente.
+Candidati prioritari già in Inbox: Agie Hujian Zhou / Ravioleria Sarpi (L2); Paolo Privitera e Gianni Chiloiro + Angelo Sannino / Doppio Zero (A1); Adeola Adedewe / Kredete (M2); Semyon Dukach / One Way Ventures come riserva M2. Nessun messaggio è stato inviato automaticamente.
 
 ## Privacy operativa v1
 
-La route `/privacy` descrive il trattamento effettivamente implementato per:
+La route `/privacy` descrive il trattamento effettivamente implementato per dati tecnici/sicurezza, account, invii `Contribuisci`, workflow privato delle interviste e ricerca editoriale su fonti pubbliche. Identifica AIPEL e il contatto `info@immigratiimprenditori.it`, esplicita finalità, basi giuridiche, destinatari, conservazione, diritti, assenza di decisioni automatizzate e cookie tecnici di sessione.
 
-- dati tecnici e sicurezza;
-- account/autenticazione;
-- invii `Contribuisci`;
-- workflow privato delle interviste e relativi consensi;
-- ricerca editoriale su fonti pubbliche.
+La cancellazione account è self-service nel perimetro post-split:
 
-L'informativa identifica AIPEL, sede e contatto privacy e rende visibili finalità, basi giuridiche, destinatari, criteri/periodi di conservazione, diritti, assenza di decisioni automatizzate e uso dei cookie tecnici di sessione. Il modulo `Contribuisci` rimanda all'informativa prima dei consensi.
+- `/app/account` esegue una preflight sul solo account autenticato;
+- l'ultimo amministratore applicativo attivo è bloccato;
+- la conferma richiede la stringa `ELIMINA`;
+- la RPC revoca i ruoli e chiude l'Account in modo atomico;
+- il server elimina poi lo stesso utente Supabase Auth usando esclusivamente la `service_role` server-side;
+- profili e materiali editoriali non vengono cancellati automaticamente e restano soggetti a separata richiesta privacy/valutazione di conservazione.
 
-Il database attivo non espone attualmente una RPC di cancellazione account self-service: la privacy non promette quindi un pulsante inesistente e indirizza le richieste a `info@immigratiimprenditori.it`.
-
-Prima del go-live restano da verificare e documentare in via definitiva i fornitori tecnici, gli eventuali trasferimenti extra-SEE e le garanzie contrattuali applicabili.
+Prima del go-live restano da verificare in via definitiva i fornitori tecnici, gli eventuali trasferimenti extra-SEE e le garanzie contrattuali applicabili.
 
 ## Radar mondiale — regola operativa
 
-Il Radar scopre candidati e li porta nella Inbox. Non pubblica mai automaticamente.
-
-- **GDELT**: discovery web/notizie, report, statistiche, policy, norme ed eventi.
-- **Crossref**: metadati di lavori scientifici e DOI; non vengono copiati abstract o testi.
-- **DataCite**: metadati di dataset registrati con DOI.
-- Il redattore può fare dry-run o importare al massimo 50 URL nuovi per esecuzione.
-- Il cron Vercel è solo un trigger futuro dello stesso motore e può attendere il go-live.
+Il Radar scopre candidati e li porta nella Inbox. Non pubblica mai automaticamente. GDELT è discovery web/notizie; Crossref e DataCite forniscono metadati; il redattore può fare dry-run o importare al massimo 50 URL nuovi per esecuzione. Il cron produzione può attendere il go-live.
 
 ## Nucleo Osservatorio
 
-Tre famiglie restano volutamente separate:
-
-- Eurostat `lfsa_esgan`: lavoro autonomo per cittadinanza, misura LFS riferita alle persone;
-- InfoCamere/Futurae: imprese straniere registrate, Italia `678.004` e Lombardia `135.249` al 30/06/2025;
-- OECD 2022: tassi di self-employment per nati all'estero / nati nel Paese, 8 territori × 2 gruppi.
-
-Non vengono trattate come misure intercambiabili.
-
-La relazione `content_observatory_indicator_links` consente ora di collegare formalmente analisi/data note agli indicatori che ne costituiscono evidenza, contesto o confronto. La lettura pubblica del link è consentita solo quando sia il contenuto sia l'indicatore sono pubblicati.
+Tre famiglie restano separate: Eurostat `lfsa_esgan` (persone/LFS); InfoCamere/Futurae (imprese straniere registrate, Italia `678.004` e Lombardia `135.249` al 30/06/2025); OECD 2022 (self-employment per luogo di nascita). `content_observatory_indicator_links` collega formalmente contenuti e indicatori quando pertinente.
 
 ## Riconciliazione migrazioni — PASS
 
-Le sette migrazioni `20260820100000` → `20260820160000` sono ora presenti nel repository e riallineate alla cronologia effettivamente applicata in `supabase_migrations.schema_migrations`. **Non sono state rieseguite sul database.**
-
-Il confronto ha inoltre corretto nel repository due divergenze rispetto allo stato realmente applicato:
-
-- tre refusi `acccess_*` nella migrazione `20260820110000_fix_opportunity_rls_recursion_for_editorial.sql`;
-- una condizione tautologica `market_id = market_id` nella policy `international_markets_update_admin` della migrazione `20260820130000_mercati_editorial_select_rls.sql`.
-
-Le altre cinque migrazioni risultavano già identiche alla ricostruzione dalla cronologia Supabase.
+Le sette migrazioni `20260820100000` → `20260820160000` sono presenti nel repository e riallineate alla cronologia applicata; non sono state rieseguite. Il confronto ha corretto tre refusi `acccess_*` nella `20260820110000` e la tautologia `market_id = market_id` nella `20260820130000`; le altre cinque erano già coerenti.
 
 ## Advisor Supabase
 
 - `submit_editorial_contribution`: warning `SECURITY DEFINER` intenzionale; è il confine controllato del form pubblico e `anon` non ha DML diretto sulle tabelle.
+- Le funzioni self-delete sono `SECURITY DEFINER` ma eseguibili solo da `authenticated` e vincolate a `auth.uid()`; l'advisor va rieseguito dopo il commit per registrare il warning atteso.
 - Leaked Password Protection: da attivare/verificare prima del lancio; il connettore Supabase disponibile non espone la modifica della configurazione Auth.
 - Nessuna rimozione automatica di indici `unused` in fase di basso traffico.
 
