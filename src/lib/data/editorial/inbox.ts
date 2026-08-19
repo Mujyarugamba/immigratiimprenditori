@@ -60,10 +60,60 @@ export type EditorialInboxSearchParams = {
   page?: string;
 };
 
+export type EditorialInboxStats = {
+  newItems: number;
+  toReview: number;
+  assigned: number;
+  draftCreated: number;
+  publicSubmissions: number;
+};
+
 const LIST_SELECT =
   "id, source_kind, item_kind, title, source_label, original_url, origin_country_code, destination_country_code, origin_country_label, destination_country_label, relevance_band, priority, status, received_at";
 
 const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_id, duplicate_of_id, assigned_account_id, linked_content_id, linked_event_id, reviewed_at, created_at, updated_at`;
+
+async function exactCount(
+  filter: (query: ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>) => unknown,
+) {
+  void filter;
+  return 0;
+}
+
+export async function getEditorialInboxStats(): Promise<EditorialInboxStats> {
+  const supabase = await createClient();
+
+  const [newRes, reviewRes, assignedRes, draftRes, publicRes] = await Promise.all([
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["to_review", "needs_research"]),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "assigned"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "draft_created"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("source_kind", "public_submission"),
+  ]);
+
+  return {
+    newItems: newRes.count ?? 0,
+    toReview: reviewRes.count ?? 0,
+    assigned: assignedRes.count ?? 0,
+    draftCreated: draftRes.count ?? 0,
+    publicSubmissions: publicRes.count ?? 0,
+  };
+}
 
 export async function listEditorialInbox(
   searchParams: EditorialInboxSearchParams = {},
