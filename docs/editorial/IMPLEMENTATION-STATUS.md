@@ -43,6 +43,8 @@ Checkpoint operativo della roadmap canonica `ROADMAP.md`, aggiornato al 19/08/20
 - Commit `229c69d` + `bcf6579`: migrazioni 20/08 riallineate alla cronologia Supabase; CI #121 PASS.
 - Commit `62d8109`: privacy v1 e identità AIPEL completa; CI #122 PASS.
 - Migrazione `20260819181358_self_service_account_deletion_post_split`: applicata; preflight del solo amministratore attivo → `last_application_admin`, `can_proceed=false` — PASS senza modifiche dati.
+- Migrazione `20260819182441_harden_self_delete_execute_privileges`: `anon EXECUTE=false`, `authenticated EXECUTE=true` per entrambe le RPC.
+- CI #129 PASS — pagina/account deletion; CI #130 PASS — hardening privilegi sul relativo head.
 - Vercel Preview aveva già completato con SUCCESS sull'head `e4e7fb9`; la produzione non è richiesta durante lo sviluppo.
 
 ## Numero zero — nucleo analitico
@@ -59,14 +61,7 @@ Candidati prioritari già in Inbox: Agie Hujian Zhou / Ravioleria Sarpi (L2); Pa
 
 La route `/privacy` descrive il trattamento effettivamente implementato per dati tecnici/sicurezza, account, invii `Contribuisci`, workflow privato delle interviste e ricerca editoriale su fonti pubbliche. Identifica AIPEL e il contatto `info@immigratiimprenditori.it`, esplicita finalità, basi giuridiche, destinatari, conservazione, diritti, assenza di decisioni automatizzate e cookie tecnici di sessione.
 
-La cancellazione account è self-service nel perimetro post-split:
-
-- `/app/account` esegue una preflight sul solo account autenticato;
-- l'ultimo amministratore applicativo attivo è bloccato;
-- la conferma richiede la stringa `ELIMINA`;
-- la RPC revoca i ruoli e chiude l'Account in modo atomico;
-- il server elimina poi lo stesso utente Supabase Auth usando esclusivamente la `service_role` server-side;
-- profili e materiali editoriali non vengono cancellati automaticamente e restano soggetti a separata richiesta privacy/valutazione di conservazione.
+La cancellazione account è self-service nel perimetro post-split: `/app/account` esegue una preflight sul solo account autenticato; l'ultimo amministratore attivo è bloccato; la conferma richiede `ELIMINA`; la RPC revoca i ruoli e chiude l'Account; il server elimina lo stesso utente Supabase Auth con `service_role` server-side. Profili e materiali editoriali restano soggetti a separata richiesta privacy/valutazione di conservazione.
 
 Prima del go-live restano da verificare in via definitiva i fornitori tecnici, gli eventuali trasferimenti extra-SEE e le garanzie contrattuali applicabili.
 
@@ -85,7 +80,7 @@ Le sette migrazioni `20260820100000` → `20260820160000` sono presenti nel repo
 ## Advisor Supabase
 
 - `submit_editorial_contribution`: warning `SECURITY DEFINER` intenzionale; è il confine controllato del form pubblico e `anon` non ha DML diretto sulle tabelle.
-- Le funzioni self-delete sono `SECURITY DEFINER` ma eseguibili solo da `authenticated` e vincolate a `auth.uid()`; l'advisor va rieseguito dopo il commit per registrare il warning atteso.
+- `access_self_delete_preflight` e `access_self_close_account`: warning `SECURITY DEFINER` per `authenticated` intenzionale; entrambe sono vincolate a `auth.uid()`. Hardening verificato: `anon` non ha EXECUTE.
 - Leaked Password Protection: da attivare/verificare prima del lancio; il connettore Supabase disponibile non espone la modifica della configurazione Auth.
 - Nessuna rimozione automatica di indici `unused` in fase di basso traffico.
 
