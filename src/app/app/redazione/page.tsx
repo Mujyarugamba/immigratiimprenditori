@@ -10,7 +10,7 @@ const sections = [
   {
     href: "/app/redazione/contenuti",
     title: "Contenuti",
-    description: "Articoli, guide e materiali editoriali di piattaforma.",
+    description: "Articoli, guide e materiali editoriali del Centro Studi.",
   },
   {
     href: "/app/redazione/eventi",
@@ -19,26 +19,9 @@ const sections = [
       "Coda di revisione per eventi acquisiti o curati dalla redazione.",
   },
   {
-    href: "/app/redazione/opportunita",
-    title: "Opportunità",
-    description:
-      "Coda di revisione per bandi e misure da fonti ufficiali e dalla rete.",
-  },
-  {
-    href: "/app/redazione/mercati-internazionali",
-    title: "Mercati internazionali",
-    description:
-      "Revisione e pubblicazione selettiva di indicatori World Bank (M1).",
-  },
-  {
     href: "/app/redazione/osservatorio",
     title: "Osservatorio",
     description: "Indicatori, fonti statistiche e valori aggregati.",
-  },
-  {
-    href: "/app/redazione/organizzazioni",
-    title: "Organizzazioni",
-    description: "Schede istituzionali curate dalla redazione.",
   },
 ] as const;
 
@@ -50,12 +33,7 @@ export default function RedazioneDashboardPage() {
       </h1>
       <p className="text-ink-muted mt-2 text-sm">
         Area riservata al ruolo <strong>redattore</strong>. Gestisci contenuti,
-        dati dell&apos;osservatorio e organizzazioni editoriali.
-      </p>
-
-      <p className="border-line bg-surface-elevated text-ink mt-4 rounded-md border p-4 text-sm shadow-soft">
-        L&apos;amministrazione è un&apos;area separata e non sostituisce la
-        redazione.
+        eventi e dati dell&apos;osservatorio del Centro Studi.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

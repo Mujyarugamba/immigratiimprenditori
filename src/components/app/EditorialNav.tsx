@@ -6,10 +6,8 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/app/redazione", label: "Dashboard Redazione", exact: true },
   { href: "/app/redazione/contenuti", label: "Contenuti" },
-  { href: "/app/redazione/opportunita", label: "Opportunità" },
-  { href: "/app/redazione/mercati-internazionali", label: "Mercati" },
+  { href: "/app/redazione/eventi", label: "Eventi" },
   { href: "/app/redazione/osservatorio", label: "Osservatorio" },
-  { href: "/app/redazione/organizzazioni", label: "Organizzazioni" },
 ] as const;
 
 const linkClass =
@@ -24,7 +22,7 @@ export function EditorialNav() {
   return (
     <nav
       className="border-line mb-6 flex flex-wrap gap-1 border-b pb-4"
-      aria-label="Redazione"
+      aria-label="Redazione Centro Studi"
     >
       {links.map(({ href, label, ...rest }) => {
         const exact = "exact" in rest && rest.exact;

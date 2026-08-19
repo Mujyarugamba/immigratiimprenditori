@@ -49,24 +49,14 @@ export async function getDefaultLanguageId(): Promise<number | null> {
   return data ? Number(data.id) : null;
 }
 
+/** Ponte-owned after SPLIT-3; retained only for compile-time compatibility. */
 export async function listActiveOrganizationTypes(): Promise<CatalogOption[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("organization_types")
-    .select("code, name_it")
-    .eq("is_active", true)
-    .order("sort_order");
-  return (data ?? []).map((r) => ({ code: r.code, label: r.name_it }));
+  return [];
 }
 
+/** Ponte-owned after SPLIT-3; retained only for compile-time compatibility. */
 export async function listActiveOrganizationScopes(): Promise<CatalogOption[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("organization_activity_scopes")
-    .select("code, name_it")
-    .eq("is_active", true)
-    .order("sort_order");
-  return (data ?? []).map((r) => ({ code: r.code, label: r.name_it }));
+  return [];
 }
 
 export async function listActiveEventTypes(): Promise<CatalogOption[]> {
