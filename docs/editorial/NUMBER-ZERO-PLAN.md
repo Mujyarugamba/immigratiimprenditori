@@ -8,18 +8,18 @@ Il sito non va lanciato come guscio tecnico. Il numero zero deve dimostrare già
 
 | Codice | Fascia | Contenuto | Stato |
 | --- | --- | --- | --- |
-| L1 | Lombardia | Nota dati 135 mila imprese straniere | **DRAFT READY FOR REVIEW** |
+| L1 | Lombardia | Nota dati 135 mila imprese straniere | **READY — NON PUBBLICATO** |
 | L2 | Lombardia | Voce originale | **CANDIDATE IN INBOX — INTERVIEW PENDING** |
-| I1 | Italia | Quadro nazionale 678 mila | **DRAFT READY FOR REVIEW** |
-| I2 | Italia | Lettura critica Futurae/InfoCamere 2025 | **DRAFT READY FOR REVIEW** |
+| I1 | Italia | Quadro nazionale 678 mila | **READY — NON PUBBLICATO** |
+| I2 | Italia | Lettura critica Futurae/InfoCamere 2025 | **READY — NON PUBBLICATO** |
 | A1 | Italiani all'estero | Voce originale | **CANDIDATES IN INBOX — INTERVIEW PENDING** |
-| A2 | Italiani all'estero | Perché non esiste un solo numero | **DRAFT + SOURCE MAP V1** |
-| E1 | Europa | Confronto self-employment OECD | **DRAFT READY FOR REVIEW** |
-| E2 | Europa | Policy brief UE integrazione/imprenditoria | **DRAFT READY FOR REVIEW** |
-| M1 | Resto del mondo/OECD | ≈10 milioni self-employed immigrants | **DRAFT READY FOR REVIEW** |
+| A2 | Italiani all'estero | Perché non esiste un solo numero | **READY — SOURCE MAP PASS V1 — NON PUBBLICATO** |
+| E1 | Europa | Confronto self-employment OECD | **READY — NON PUBBLICATO** |
+| E2 | Europa | Policy brief UE integrazione/imprenditoria | **READY — NON PUBBLICATO** |
+| M1 | Resto del mondo/OECD | ≈10 milioni self-employed immigrants | **READY — NON PUBBLICATO** |
 | M2 | Resto del mondo | Voce originale | **CANDIDATE SEARCH / INTERVIEW PENDING** |
 
-**Sette contenuti su dieci hanno già una bozza editoriale sostanziale.** I tre mancanti dipendono da interviste originali e non devono essere simulati o ricostruiti da fonti terze.
+**Sette contenuti analitici su dieci sono ora READY e restano privati/non pubblicati.** I tre slot Voci dipendono da interviste originali e non devono essere simulati o ricostruiti da fonti terze.
 
 ## 1. Lombardia — circa 20%
 
@@ -27,7 +27,8 @@ Il sito non va lanciato come guscio tecnico. Il numero zero deve dimostrare già
 
 **Tema:** imprenditoria migrante in Lombardia: consistenza, distribuzione territoriale e principali settori.  
 Formato: `data_note`.  
-Bozza: `docs/editorial/drafts/L1-lombardia-135mila.md`.
+Bozza: `docs/editorial/drafts/L1-lombardia-135mila.md`.  
+Stato backend: `editorial_status=ready`, `publication_status=unpublished`. Collegato all'indicatore Osservatorio sulle imprese straniere registrate.
 
 ### L2 — Voce
 
@@ -40,11 +41,13 @@ Candidato prioritario in Inbox: Agie Zhou / La Ravioleria Sarpi. Contatto e mess
 
 ### I1 — Quadro nazionale
 
-Bozza: `docs/editorial/drafts/I1-678mila-imprese-straniere.md`.
+Bozza: `docs/editorial/drafts/I1-678mila-imprese-straniere.md`.  
+Stato backend: **READY**, collegato formalmente all'indicatore InfoCamere/Futurae dell'Osservatorio.
 
 ### I2 — Rapporto/ricerca
 
-Bozza: `docs/editorial/drafts/I2-futurae-report-2025.md`. La scheda del rapporto è già presente nella biblioteca del backend.
+Bozza: `docs/editorial/drafts/I2-futurae-report-2025.md`. La scheda del rapporto è già presente nella biblioteca del backend.  
+Stato backend: **READY**, con collegamento contestuale all'indicatore camerale.
 
 ## 3. Italiani imprenditori all'estero — circa 20%
 
@@ -55,25 +58,29 @@ Candidati prioritari in Inbox: Paolo Privitera; Gianni Chiloiro e Angelo Sannino
 ### A2 — Dossier iniziale
 
 Bozza: `docs/editorial/drafts/A2-italiani-impresa-estero.md`.  
-Mappa metodologica delle fonti: `docs/editorial/ITALIANS-ABROAD-SOURCE-MAP.md`.
+Mappa metodologica delle fonti: `docs/editorial/ITALIANS-ABROAD-SOURCE-MAP.md` (`PASS_V1`).  
+Stato backend: **READY**.
 
-La regola resta: dati di residenza/migrazione non sono una stima degli imprenditori italiani all'estero.
+La regola resta: dati di residenza/migrazione non sono una stima degli imprenditori italiani all'estero. La source map identifica Stati Uniti, Australia, Regno Unito, Canada, Germania ed Eurostat come percorsi distinti di estrazione; non li somma finché le definizioni non sono compatibili.
 
 ## 4. Europa — circa 20%
 
 ### E1 — Confronto europeo
 
-Bozza: `docs/editorial/drafts/E1-europa-self-employment.md`.
+Bozza: `docs/editorial/drafts/E1-europa-self-employment.md`.  
+Stato backend: **READY**, collegato al confronto OECD per luogo di nascita.
 
 ### E2 — Politica europea
 
-Bozza: `docs/editorial/drafts/E2-eu-integration-entrepreneurship-policy.md`.
+Bozza: `docs/editorial/drafts/E2-eu-integration-entrepreneurship-policy.md`.  
+Stato backend: **READY** dopo verifica del tracker Commissione europea 2026.
 
 ## 5. Resto del mondo — circa 20%
 
 ### M1 — Quadro OECD
 
-Bozza: `docs/editorial/drafts/M1-oecd-10milioni-self-employed.md`.
+Bozza: `docs/editorial/drafts/M1-oecd-10milioni-self-employed.md`.  
+Stato backend: **READY**, collegato all'indicatore OECD. Il titolo è stato corretto per non presentare il perimetro OECD come dato mondiale/globale.
 
 ### M2 — Voce dal mondo
 
@@ -113,4 +120,4 @@ Il numero zero è pronto quando non richiede testi placeholder per sembrare vivo
 - dichiara le fonti;
 - accetta contributi ma non autopubblicazione.
 
-`NUMBER_ZERO_PLAN = PRODUCTION_IN_PROGRESS`
+`NUMBER_ZERO_PLAN = ANALYTICAL_CORE_READY_VOICES_PENDING`
