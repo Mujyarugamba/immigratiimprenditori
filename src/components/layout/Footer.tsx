@@ -1,23 +1,41 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
-import { csPrimaryNav } from "@/data/cs-navigation";
+
+const footerLinks = [
+  { label: "Chi siamo", href: "/chi-siamo" },
+  { label: "Fonti e metodologia", href: "/fonti" },
+  { label: "Contribuisci", href: "/contribuisci" },
+  { label: "Sostieni l'Osservatorio", href: "/sostieni" },
+  { label: "Accedi", href: "/accedi" },
+] as const;
 
 export function Footer() {
   return (
-    <footer className="border-line mt-16 border-t">
-      <Container className="flex flex-wrap justify-between gap-4 py-8 text-sm">
-        <p className="text-ink-muted">Centro Studi sull&apos;imprenditoria migrante.</p>
-        <nav aria-label="Piè di pagina">
-          <ul className="flex flex-wrap gap-4">
-            {csPrimaryNav.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className="text-ink-muted hover:text-ink">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+    <footer className="mt-16 border-t-2 border-black">
+      <Container className="py-9">
+        <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <p className="text-base font-semibold text-black">Immigrati Imprenditori</p>
+            <p className="mt-1 text-sm text-neutral-700">Osservatorio sull&apos;imprenditoria migrante · un progetto AIPEL.</p>
+            <p className="mt-4 text-xs leading-5 text-neutral-500">
+              Direzione editoriale: Ing. Augustin Mujyarugamba, Presidente AIPEL.
+            </p>
+          </div>
+          <nav aria-label="Piè di pagina" className="md:text-right">
+            <ul className="flex flex-wrap gap-x-5 gap-y-3 text-sm md:justify-end">
+              {footerLinks.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="text-neutral-700 underline-offset-4 hover:text-black hover:underline">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+        <p className="mt-8 border-t border-neutral-300 pt-5 text-xs leading-5 text-neutral-500">
+          AIPEL è l&apos;ente promotore e proprietario del progetto. Denominazione completa, sede e dati amministrativi saranno completati nella sezione istituzionale.
+        </p>
       </Container>
     </footer>
   );
