@@ -22,6 +22,18 @@ export type PublicContentListItem = {
   published_at: string | null;
 };
 
+export type PublicContentAuthor = {
+  id: string;
+  role_kind: string;
+  person_id: string | null;
+  business_id: string | null;
+  professional_profile_id: string | null;
+  display_label: string | null;
+  is_primary: boolean;
+  sort_order: number;
+  attribution_note: string | null;
+};
+
 export type PublicContentSubjectLink = {
   id: string;
   person_id: string | null;
@@ -46,12 +58,29 @@ export type PublicContentDetail = PublicContentListItem & {
   source_url: string | null;
   publication_status: string;
   visibility_status: string;
+  authors: PublicContentAuthor[];
   subject_links: PublicContentSubjectLink[];
   event_links: PublicContentEventLink[];
   opportunity_links: PublicContentOpportunityLink[];
 };
 
 function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
+  const authors = (
+    (data.content_authors as PublicContentAuthor[] | null) ?? []
+  )
+    .map((author) => ({
+      id: author.id,
+      role_kind: author.role_kind,
+      person_id: author.person_id,
+      business_id: author.business_id,
+      professional_profile_id: author.professional_profile_id,
+      display_label: author.display_label,
+      is_primary: Boolean(author.is_primary),
+      sort_order: author.sort_order ?? 0,
+      attribution_note: author.attribution_note,
+    }))
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   const subject_links = (
     (data.content_subject_links as PublicContentSubjectLink[] | null) ?? []
   ).map((l) => ({
@@ -92,6 +121,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     source_url: data.source_url as string | null,
     publication_status: data.publication_status as string,
     visibility_status: data.visibility_status as string,
+    authors,
     subject_links,
     event_links,
     opportunity_links,
@@ -102,6 +132,10 @@ const DETAIL_SELECT = `
   id, slug, title, abstract, type_code, primary_category_code, language_id,
   is_featured, published_at, body, body_format, cover_url, source_url,
   publication_status, visibility_status,
+  content_authors (
+    id, role_kind, person_id, business_id, professional_profile_id,
+    display_label, is_primary, sort_order, attribution_note
+  ),
   content_subject_links ( id, person_id, business_id, professional_profile_id ),
   content_event_links ( id, event_id ),
   content_opportunity_links ( id, opportunity_id )
@@ -150,9 +184,6 @@ export async function listPublicContents(
 export async function getPublicContentBySlug(
   slug: string,
 ): Promise<PublicContentDetail | null> {
-  // Public detail contract (P6 / C2.1): missing, private, or temporarily
-  // unavailable lookups resolve to null → route `notFound()`, never a thrown
-  // error that surfaces the generic "Errore inatteso" boundary for a slug miss.
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
