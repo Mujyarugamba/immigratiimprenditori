@@ -36,6 +36,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/politica-editoriale" className="text-ink-muted hover:text-ink">
+                  Politica editoriale
+                </Link>
+              </li>
+              <li>
                 <Link href="/sostieni" className="text-ink-muted hover:text-ink">
                   Sostieni l&apos;Osservatorio
                 </Link>
