@@ -111,21 +111,21 @@ export default async function ContenutiRedazionePage({ searchParams }: Props) {
       </form>
 
       <div className="table-scroll mt-6">
-        <table className="border-line w-full min-w-[640px] border text-left text-sm">
+        <table className="border-line w-full min-w-[700px] border text-left text-sm">
           <thead className="bg-surface-muted text-ink">
             <tr>
               <th className="border-line border px-3 py-2 font-medium">Titolo</th>
               <th className="border-line border px-3 py-2 font-medium">Tipo</th>
               <th className="border-line border px-3 py-2 font-medium">Editoriale</th>
               <th className="border-line border px-3 py-2 font-medium">Pubblicazione</th>
-              <th className="border-line border px-3 py-2 font-medium" />
+              <th className="border-line border px-3 py-2 font-medium">Azioni</th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-ink-muted border-line border px-3 py-6 text-center">
-                  Nessun contenuto editoriali.
+                  Nessun contenuto editoriale.
                 </td>
               </tr>
             ) : (
@@ -144,12 +144,20 @@ export default async function ContenutiRedazionePage({ searchParams }: Props) {
                     {label(EDITORIAL_PUBLICATION_LABELS, c.publication_status)}
                   </td>
                   <td className="border-line border px-3 py-2">
-                    <Link
-                      href={`/app/redazione/contenuti/${c.id}`}
-                      className="text-brand hover:underline"
-                    >
-                      Modifica
-                    </Link>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                      <Link
+                        href={`/app/redazione/contenuti/${c.id}`}
+                        className="text-brand hover:underline"
+                      >
+                        Modifica
+                      </Link>
+                      <Link
+                        href={`/contenuti/${encodeURIComponent(c.slug)}`}
+                        className="text-brand hover:underline"
+                      >
+                        Anteprima
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))
