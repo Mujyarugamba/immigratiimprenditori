@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     event.publication_status === "published" && event.visibility_status === "public";
   if (!isPublic) {
     return {
-      title: event.title,
+      title: `Anteprima — ${event.title}`,
       description: event.summary ?? undefined,
       robots: { index: false, follow: false },
     };
@@ -123,7 +123,7 @@ function placeLine(edition: {
 function attendanceMode(mode: string): string | undefined {
   if (mode === "online") return "https://schema.org/OnlineEventAttendanceMode";
   if (mode === "hybrid") return "https://schema.org/MixedEventAttendanceMode";
-  if (mode === "in_person") return "https://schema.org/OfflineEventAttendanceMode";
+  if (mode === "in_presence") return "https://schema.org/OfflineEventAttendanceMode";
   return undefined;
 }
 
@@ -172,6 +172,8 @@ export default async function EventoDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const isPublic =
+    event.publication_status === "published" && event.visibility_status === "public";
   const related = await relatedForEvent({
     id: event.id,
     context_opportunity_id: event.context_opportunity_id,
@@ -220,8 +222,25 @@ export default async function EventoDetailPage({ params }: PageProps) {
   return (
     <main id="contenuto">
       <Section>
-        <JsonLd data={eventJsonLd} />
+        {isPublic ? <JsonLd data={eventJsonLd} /> : null}
         <Container className="max-w-3xl space-y-8">
+          {!isPublic ? (
+            <aside className="border-2 border-black bg-neutral-100 p-4" role="status">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-600">
+                Anteprima privata
+              </p>
+              <p className="mt-1 text-sm font-semibold text-black">
+                Questo evento non è pubblicato e non è visibile agli utenti anonimi.
+              </p>
+              <Link
+                href={`/app/redazione/eventi/${event.id}`}
+                className="mt-3 inline-block text-sm font-semibold text-black underline underline-offset-4"
+              >
+                Torna alla modifica in redazione
+              </Link>
+            </aside>
+          ) : null}
+
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link
               href="/eventi"
