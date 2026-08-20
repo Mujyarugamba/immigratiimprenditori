@@ -107,10 +107,12 @@ export default function ChiSiamoPage() {
 
           <dt className="text-sm font-semibold text-black">Partita IVA</dt>
           <dd className="text-sm leading-6 text-neutral-700">04222160964</dd>
+
+          <dt className="text-sm font-semibold text-black">Email</dt>
+          <dd className="text-sm leading-6 text-neutral-700">
+            <a href="mailto:info@aipel.it" className="underline underline-offset-4">info@aipel.it</a>
+          </dd>
         </dl>
-        <p className="mt-6 max-w-3xl text-sm leading-6 text-neutral-600">
-          I recapiti istituzionali e il contatto privacy saranno aggiunti prima del lancio editoriale definitivo.
-        </p>
       </section>
     </main>
   );
