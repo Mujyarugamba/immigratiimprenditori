@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     content.publication_status === "published" && content.visibility_status === "public";
   if (!isPublic) {
     return {
-      title: content.title,
+      title: `Anteprima — ${content.title}`,
       description: content.abstract ?? undefined,
       robots: { index: false, follow: false },
     };
@@ -76,6 +76,8 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
   const content = await getPublicContentBySlug(slug);
   if (!content) notFound();
 
+  const isPublic =
+    content.publication_status === "published" && content.visibility_status === "public";
   const isPlainText = content.body_format === "plain_text";
   const visibleAuthors = content.authors.filter((author) => Boolean(author.display_label));
   const [related, relatedContents, showCulture] = await Promise.all([
@@ -121,8 +123,25 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
   return (
     <main id="contenuto">
       <Section>
-        <JsonLd data={articleJsonLd} />
+        {isPublic ? <JsonLd data={articleJsonLd} /> : null}
         <Container className="max-w-3xl space-y-8">
+          {!isPublic ? (
+            <aside className="border-2 border-black bg-neutral-100 p-4" role="status">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-600">
+                Anteprima privata
+              </p>
+              <p className="mt-1 text-sm font-semibold text-black">
+                Questo contenuto non è pubblicato e non è visibile agli utenti anonimi.
+              </p>
+              <Link
+                href={`/app/redazione/contenuti/${content.id}`}
+                className="mt-3 inline-block text-sm font-semibold text-black underline underline-offset-4"
+              >
+                Torna alla modifica in redazione
+              </Link>
+            </aside>
+          ) : null}
+
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link href="/contenuti" className="text-brand hover:text-brand-dark text-sm font-medium">← Torna a notizie e guide</Link>
             {showCulture ? <Link href="/cultura" className="text-brand hover:text-brand-dark text-sm font-medium">Esplora Cultura</Link> : null}
