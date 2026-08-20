@@ -16,6 +16,11 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/sostieni" className="text-ink-muted hover:text-ink">
+                Sostieni l&apos;Osservatorio
+              </Link>
+            </li>
           </ul>
         </nav>
       </Container>
