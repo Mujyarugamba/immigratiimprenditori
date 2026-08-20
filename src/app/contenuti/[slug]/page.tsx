@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarkdownArticle } from "@/components/public/MarkdownArticle";
 import { RelatedLinks } from "@/components/public/RelatedLinks";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
@@ -10,17 +11,64 @@ import { listRelatedContents } from "@/lib/data/public/content-relations";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
 import { contentQualifiesForCultureHub } from "@/lib/data/public/culture";
 import { relatedForContent } from "@/lib/data/public/related";
+import { getSiteUrl } from "@/lib/env";
+import { DEFAULT_LANGUAGE_TAG, localizedPath } from "@/lib/i18n/config";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+function publicCanonicalPath(slug: string): string {
+  return localizedPath(`/contenuti/${encodeURIComponent(slug)}`);
+}
+
+function absoluteAssetUrl(value: string | null): string | undefined {
+  if (!value) return undefined;
+  if (/^https?:\/\//i.test(value)) return value;
+  const origin = getSiteUrl();
+  return `${origin}${value.startsWith("/") ? value : `/${value}`}`;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const content = await getPublicContentBySlug(slug);
-  if (!content) return { title: "Non trovato" };
-  return { title: content.title, description: content.abstract ?? undefined };
+  if (!content) return { title: "Non trovato", robots: { index: false, follow: false } };
+
+  const isPublic =
+    content.publication_status === "published" && content.visibility_status === "public";
+  if (!isPublic) {
+    return {
+      title: content.title,
+      description: content.abstract ?? undefined,
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonical = publicCanonicalPath(content.slug);
+  const image = absoluteAssetUrl(content.cover_url);
+  const description = content.abstract ?? undefined;
+
+  return {
+    title: content.title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      title: content.title,
+      description,
+      locale: "it_IT",
+      publishedTime: content.published_at ?? undefined,
+      images: image ? [{ url: image, alt: content.title }] : undefined,
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title: content.title,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
 }
 
 export default async function ContenutoDetailPage({ params }: PageProps) {
@@ -46,8 +94,26 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
     ? [{ title: "Approfondimenti e fonti", links: relatedContents }, ...related]
     : related;
 
+  const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}${publicCanonicalPath(content.slug)}`;
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${canonicalUrl}#article`,
+    headline: content.title,
+    description: content.abstract ?? undefined,
+    datePublished: content.published_at ?? undefined,
+    inLanguage: DEFAULT_LANGUAGE_TAG,
+    mainEntityOfPage: canonicalUrl,
+    url: canonicalUrl,
+    image: absoluteAssetUrl(content.cover_url),
+    isBasedOn: content.source_url ?? undefined,
+    publisher: { "@id": `${siteUrl}/#organization` },
+  };
+
   return (
     <Section>
+      <JsonLd data={articleJsonLd} />
       <Container className="max-w-3xl space-y-8">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/contenuti" className="text-brand hover:text-brand-dark text-sm font-medium">← Torna a notizie e guide</Link>
