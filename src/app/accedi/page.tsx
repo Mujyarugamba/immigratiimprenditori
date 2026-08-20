@@ -7,6 +7,10 @@ import { getApplicationSession } from "@/lib/session/get-application-session";
 export const metadata: Metadata = {
   title: "Accesso redazione",
   description: "Accesso riservato alla redazione del Centro Studi.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 type PageProps = {
