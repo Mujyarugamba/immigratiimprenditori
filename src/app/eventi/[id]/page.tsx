@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RelatedLinks } from "@/components/public/RelatedLinks";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
@@ -11,6 +12,8 @@ import {
   type PublicEventEdition,
 } from "@/lib/data/public/events";
 import { relatedForEvent } from "@/lib/data/public/related";
+import { getSiteUrl } from "@/lib/env";
+import { DEFAULT_LANGUAGE_TAG, localizedPath } from "@/lib/i18n/config";
 import {
   EDITION_STATUSES,
   EVENT_AUDIENCE,
@@ -54,15 +57,44 @@ function formatEditionWhen(edition: PublicEventEdition): string {
   return endLabel ? `${startLabel} – ${endLabel}` : startLabel;
 }
 
+function publicCanonicalPath(id: string): string {
+  return localizedPath(`/eventi/${encodeURIComponent(id)}`);
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const event = await getPublicEventById(id);
   if (!event) {
-    return { title: "Non trovato" };
+    return { title: "Non trovato", robots: { index: false, follow: false } };
   }
+
+  const isPublic =
+    event.publication_status === "published" && event.visibility_status === "public";
+  if (!isPublic) {
+    return {
+      title: event.title,
+      description: event.summary ?? undefined,
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonical = publicCanonicalPath(event.id);
   return {
     title: event.title,
     description: event.summary ?? undefined,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title: event.title,
+      description: event.summary ?? undefined,
+      locale: "it_IT",
+    },
+    twitter: {
+      card: "summary",
+      title: event.title,
+      description: event.summary ?? undefined,
+    },
   };
 }
 
@@ -88,6 +120,50 @@ function placeLine(edition: {
   return null;
 }
 
+function attendanceMode(mode: string): string | undefined {
+  if (mode === "online") return "https://schema.org/OnlineEventAttendanceMode";
+  if (mode === "hybrid") return "https://schema.org/MixedEventAttendanceMode";
+  if (mode === "in_person") return "https://schema.org/OfflineEventAttendanceMode";
+  return undefined;
+}
+
+function schemaEventStatus(status: string): string | undefined {
+  if (status === "postponed") return "https://schema.org/EventPostponed";
+  if (status === "cancelled") return "https://schema.org/EventCancelled";
+  if (status === "scheduled" || status === "ongoing" || status === "concluded") {
+    return "https://schema.org/EventScheduled";
+  }
+  return undefined;
+}
+
+function schemaLocation(edition: PublicEventEdition): Record<string, unknown> | Array<Record<string, unknown>> | undefined {
+  const locations: Array<Record<string, unknown>> = [];
+  const physicalLabel = [edition.venue_label, edition.city_text, edition.country_ref]
+    .filter(Boolean)
+    .join(", ");
+
+  if (physicalLabel) {
+    locations.push({
+      "@type": "Place",
+      name: edition.venue_label ?? physicalLabel,
+      address: [edition.city_text, edition.country_ref].filter(Boolean).join(", ") || undefined,
+    });
+  }
+
+  if (
+    (edition.delivery_mode === "online" || edition.delivery_mode === "hybrid") &&
+    edition.online_reference
+  ) {
+    locations.push({
+      "@type": "VirtualLocation",
+      url: edition.online_reference,
+    });
+  }
+
+  if (locations.length === 0) return undefined;
+  return locations.length === 1 ? locations[0] : locations;
+}
+
 export default async function EventoDetailPage({ params }: PageProps) {
   const { id } = await params;
   const event = await getPublicEventById(id);
@@ -103,8 +179,47 @@ export default async function EventoDetailPage({ params }: PageProps) {
     owner_business_id: event.owner_business_id,
   }).catch(() => []);
 
+  const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}${publicCanonicalPath(event.id)}`;
+  const eventGraph = event.editions.map((edition) => ({
+    "@type": "Event",
+    "@id": `${canonicalUrl}#edition-${edition.id}`,
+    name: event.title,
+    description: event.summary ?? event.description,
+    url: canonicalUrl,
+    startDate: edition.starts_at,
+    endDate: edition.ends_at ?? undefined,
+    eventAttendanceMode: attendanceMode(edition.delivery_mode),
+    eventStatus: schemaEventStatus(edition.occurrence_status),
+    location: schemaLocation(edition),
+    organizer: event.external_organization_label
+      ? { "@type": "Organization", name: event.external_organization_label }
+      : undefined,
+    isAccessibleForFree:
+      event.economic_kind === "free"
+        ? true
+        : event.economic_kind === "paid"
+          ? false
+          : undefined,
+    inLanguage: DEFAULT_LANGUAGE_TAG,
+  }));
+  const eventJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": eventGraph.length > 0
+      ? eventGraph
+      : [{
+          "@type": "Event",
+          "@id": `${canonicalUrl}#event`,
+          name: event.title,
+          description: event.summary ?? event.description,
+          url: canonicalUrl,
+          inLanguage: DEFAULT_LANGUAGE_TAG,
+        }],
+  };
+
   return (
     <Section>
+      <JsonLd data={eventJsonLd} />
       <Container className="max-w-3xl space-y-8">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link
