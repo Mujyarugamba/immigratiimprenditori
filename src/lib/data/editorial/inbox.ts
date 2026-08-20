@@ -52,6 +52,14 @@ export type EditorialInboxItem = EditorialInboxListItem & {
   submission: EditorialSubmission | null;
 };
 
+export type EditorialInboxActivity = {
+  id: string;
+  inbox_item_id: string;
+  actor_account_id: string | null;
+  changes: Record<string, { from: string | null; to: string | null }>;
+  created_at: string;
+};
+
 export type EditorialInboxSearchParams = {
   q?: string;
   stato?: string;
@@ -60,10 +68,60 @@ export type EditorialInboxSearchParams = {
   page?: string;
 };
 
+export type EditorialInboxStats = {
+  newItems: number;
+  newRadarItems: number;
+  toReview: number;
+  assigned: number;
+  draftCreated: number;
+  publicSubmissions: number;
+};
+
 const LIST_SELECT =
   "id, source_kind, item_kind, title, source_label, original_url, origin_country_code, destination_country_code, origin_country_label, destination_country_label, relevance_band, priority, status, received_at";
 
 const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_id, duplicate_of_id, assigned_account_id, linked_content_id, linked_event_id, reviewed_at, created_at, updated_at`;
+
+export async function getEditorialInboxStats(): Promise<EditorialInboxStats> {
+  const supabase = await createClient();
+
+  const [newRes, radarRes, reviewRes, assignedRes, draftRes, publicRes] = await Promise.all([
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "new"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("source_kind", "radar")
+      .eq("status", "new"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["to_review", "needs_research"]),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "assigned"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "draft_created"),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("source_kind", "public_submission"),
+  ]);
+
+  return {
+    newItems: newRes.count ?? 0,
+    newRadarItems: radarRes.count ?? 0,
+    toReview: reviewRes.count ?? 0,
+    assigned: assignedRes.count ?? 0,
+    draftCreated: draftRes.count ?? 0,
+    publicSubmissions: publicRes.count ?? 0,
+  };
+}
 
 export async function listEditorialInbox(
   searchParams: EditorialInboxSearchParams = {},
@@ -120,4 +178,19 @@ export async function getEditorialInboxItemById(
     ...(item as Omit<EditorialInboxItem, "submission">),
     submission: (submission as EditorialSubmission | null) ?? null,
   };
+}
+
+export async function listEditorialInboxActivity(
+  inboxItemId: string,
+): Promise<EditorialInboxActivity[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("editorial_inbox_activity")
+    .select("id, inbox_item_id, actor_account_id, changes, created_at")
+    .eq("inbox_item_id", inboxItemId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) return [];
+  return (data ?? []) as EditorialInboxActivity[];
 }

@@ -10,7 +10,13 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-publishable-placeholder
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      CRON_SECRET: ci-cron-secret-1234567890
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,8 +30,14 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Security audit
+        run: npm audit --audit-level=high
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Tests
         run: npm test
+
+      - name: Production build
+        run: npm run build

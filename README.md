@@ -1,42 +1,32 @@
-# Centro Studi sull'imprenditoria migrante
+# Immigrati Imprenditori
 
-Prodotto editoriale e di ricerca. Non è la piattaforma commerciale PonteImprese.
+Piattaforma editoriale e Osservatorio AIPEL dedicato all'imprenditoria migrante in Italia e nel mondo.
 
-## Sviluppo
+## Stato sviluppo
 
-```bash
-npm run dev
-npm run typecheck
-npm test
-```
+Il lavoro editoriale v1 è raccolto nel branch `editorial-desk-v1` e nella PR #7. `main` resta il ramo stabile finché i gate di lancio non sono chiusi.
 
-Copia `env.example` in `.env.local`. Solo placeholder: nessun secret nel repository.
+## Stack
 
-## Env richieste
+- Next.js 16 / App Router
+- Supabase per database e autenticazione
+- GitHub Actions per CI
+- Vercel per preview/sviluppo
+- Compatibilità Netlify pronta come opzione di produzione self-serve
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_SITE_URL` (opzionale)
-- `SUPABASE_SERVICE_ROLE_KEY` (server-only, ingest)
+## Radar editoriale
 
-## Database e Auth
+Il Radar non pubblica automaticamente. Raccoglie candidati da GDELT, Crossref e DataCite, normalizza/deduplica e li porta nella Inbox della redazione.
 
-Database e autenticazione sono entrambi sul progetto Supabase `immigratiimprenditori` (`hvfvfatlaspcpszgizhg`).
+Sono disponibili due modalità di schedulazione:
 
-La baseline autonoma SPLIT-3 è in `supabase/baseline/` (`00..03`). Il database hosted è stato convertito in-place al perimetro Centro Studi il 19/08/2026.
+- Vercel: `/api/cron/editorial-radar` protetto da `CRON_SECRET` e configurato in `vercel.json`;
+- Netlify: scheduled trigger → background worker → lo stesso endpoint protetto. Senza `CRON_SECRET` il percorso Netlify resta fail-closed e non esegue ingestione.
 
-`CS_DATABASE_BOOTSTRAP = SPLIT_3_COMPLETE`
+## Variabili ambiente
 
-Le SQL in `supabase/migrations/` precedenti allo SPLIT-3 sono conservate esclusivamente come storico di ownership/migrazione e non costituiscono la catena di bootstrap standalone.
+Vedi `env.example`. I segreti reali non devono essere committati.
 
-## Identità editoriale
+## Documentazione editoriale
 
-`CS_SSO_CUTOVER = COMPLETE` — Supabase Auth locale, account locale e ruoli editoriali locali; nessuna dipendenza Auth da PonteImprese.
-
-## Residui di prodotto
-
-- `CS_LEGAL_CONTENT = CUTOVER_BLOCKER` — placeholder su `/dati-e-fonti`, non testo giuridico definitivo.
-
-## Confini
-
-Nessuna dipendenza runtime o FK da PonteImprese. Package UI e product-config sono locali in `packages/`.
+La roadmap e lo stato di implementazione sono in `docs/editorial/`.

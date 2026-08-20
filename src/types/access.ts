@@ -33,6 +33,8 @@ export type ApplicationSession = {
   isActiveAccount: boolean;
   isEditor: boolean;
   isApplicationAdmin: boolean;
+  /** Editorial contributor: may submit and read only proposals linked to own account. */
+  isContributor?: boolean;
 };
 
 export function isPersonAssociationStatus(

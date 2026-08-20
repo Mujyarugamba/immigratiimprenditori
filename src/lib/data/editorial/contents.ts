@@ -213,14 +213,75 @@ export type PublishEditorialContentResult =
   | { ok: true; authorInserted: boolean; authorError?: string }
   | { ok: false; error: AppError };
 
+function contentPublicationBlocker(content: EditorialContent): string | null {
+  if (content.slug.toLowerCase().startsWith("qa-") || /^\[qa\]/i.test(content.title)) {
+    return "I contenuti QA sono riservati ai test e non possono essere pubblicati.";
+  }
+
+  const searchableText = [
+    content.title,
+    content.subtitle,
+    content.abstract,
+    content.body,
+    content.source_label,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(" ");
+
+  if (/numero\s+zero/i.test(searchableText)) {
+    return "Il contenuto contiene un'etichetta interna di lavorazione che non deve essere pubblicata.";
+  }
+
+  if (/(NUMBER_ZERO_|BOZZA EDITORIALE|NON PUBBLICARE|Check prima della pubblicazione)/i.test(searchableText)) {
+    return "Il contenuto contiene note o marcatori interni di redazione. Rimuovili prima di pubblicare.";
+  }
+
+  if (/(^|\n)#\s/.test(content.body)) {
+    return "Il corpo contiene un titolo H1. Usa il campo Titolo e lascia nel corpo soltanto sezioni H2 o inferiori.";
+  }
+
+  return null;
+}
+
 /** Publish editorial content; optionally insert editorial_responsible author. */
 export async function publishEditorialContent(
   id: string,
   personId: string | null,
 ): Promise<PublishEditorialContentResult> {
   const supabase = await createClient();
-  const now = new Date().toISOString();
+  const content = await getEditorialContentById(id);
+  if (!content) {
+    return {
+      ok: false,
+      error: { code: "not_found", message: "Contenuto non trovato in redazione." },
+    };
+  }
 
+  const blocker = contentPublicationBlocker(content);
+  if (blocker) {
+    return { ok: false, error: { code: "validation", message: blocker } };
+  }
+
+  const { count: existingAuthorCount, error: authorCountError } = await supabase
+    .from("content_authors")
+    .select("id", { count: "exact", head: true })
+    .eq("content_id", id);
+
+  if (authorCountError) {
+    return { ok: false, error: mapPostgresError(authorCountError) };
+  }
+
+  if ((existingAuthorCount ?? 0) === 0 && !personId) {
+    return {
+      ok: false,
+      error: {
+        code: "validation",
+        message: "Aggiungi almeno un autore o responsabile editoriale prima di pubblicare.",
+      },
+    };
+  }
+
+  const now = new Date().toISOString();
   let authorInserted = false;
   let authorError: string | undefined;
 
