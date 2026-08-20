@@ -5,11 +5,16 @@ import { Header } from "@/components/layout/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://immigratiimprenditori.it"),
   title: {
     default: centroStudiConfig.name,
     template: `%s | Centro Studi`,
   },
   description: centroStudiConfig.description,
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
