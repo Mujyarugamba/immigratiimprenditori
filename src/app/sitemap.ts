@@ -12,6 +12,7 @@ const publicRoutes = [
   "/notizie-e-guide",
   "/contribuisci",
   "/chi-siamo",
+  "/politica-editoriale",
   "/sostieni",
   "/privacy",
   "/cookie",
