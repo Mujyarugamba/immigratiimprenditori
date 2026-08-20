@@ -7,9 +7,14 @@ export function Footer() {
     <footer className="border-line mt-16 border-t">
       <Container className="py-8 text-sm">
         <div className="flex flex-wrap justify-between gap-6">
-          <div className="max-w-md text-ink-muted">
+          <div className="max-w-xl text-ink-muted">
             <p>Immigrati Imprenditori · Osservatorio e Centro Studi AIPEL.</p>
-            <p className="mt-1">AIPEL · Codice fiscale 97342380157.</p>
+            <p className="mt-1">
+              Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL).
+            </p>
+            <p className="mt-1">
+              Viale Molise 54, Milano · CF 97342380157 · P.IVA 04222160964.
+            </p>
           </div>
           <nav aria-label="Piè di pagina">
             <ul className="flex flex-wrap gap-4">
