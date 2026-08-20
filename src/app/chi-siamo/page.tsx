@@ -44,7 +44,8 @@ export default function ChiSiamoPage() {
         <h2 className="text-2xl font-semibold tracking-tight text-black">AIPEL</h2>
         <div className="mt-4 max-w-3xl space-y-4 text-base leading-7 text-neutral-700">
           <p>
-            AIPEL è l&apos;ente promotore e titolare del progetto Immigrati Imprenditori.
+            AIPEL — Associazione degli Imprenditori e Liberi Professionisti Extracomunitari
+            in Lombardia — è l&apos;ente promotore e titolare del progetto Immigrati Imprenditori.
             Nella fase iniziale il progetto opera come <strong className="text-black">Osservatorio e Centro Studi</strong>.
           </p>
           <p>
@@ -90,18 +91,25 @@ export default function ChiSiamoPage() {
       <section className="mt-10 border-t border-black pt-8">
         <h2 className="text-2xl font-semibold tracking-tight text-black">Dati amministrativi</h2>
         <dl className="mt-5 grid max-w-3xl gap-x-8 gap-y-5 sm:grid-cols-[12rem_1fr]">
-          <dt className="text-sm font-semibold text-black">Soggetto</dt>
-          <dd className="text-sm leading-6 text-neutral-700">AIPEL</dd>
+          <dt className="text-sm font-semibold text-black">Denominazione</dt>
+          <dd className="text-sm leading-6 text-neutral-700">
+            Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)
+          </dd>
 
           <dt className="text-sm font-semibold text-black">Forma</dt>
           <dd className="text-sm leading-6 text-neutral-700">Associazione non riconosciuta</dd>
 
+          <dt className="text-sm font-semibold text-black">Sede</dt>
+          <dd className="text-sm leading-6 text-neutral-700">Viale Molise 54, Milano</dd>
+
           <dt className="text-sm font-semibold text-black">Codice fiscale</dt>
           <dd className="text-sm leading-6 text-neutral-700">97342380157</dd>
+
+          <dt className="text-sm font-semibold text-black">Partita IVA</dt>
+          <dd className="text-sm leading-6 text-neutral-700">04222160964</dd>
         </dl>
         <p className="mt-6 max-w-3xl text-sm leading-6 text-neutral-600">
-          La denominazione legale completa, la sede e i contatti istituzionali saranno
-          pubblicati in questa pagina prima del lancio editoriale definitivo.
+          I recapiti istituzionali e il contatto privacy saranno aggiunti prima del lancio editoriale definitivo.
         </p>
       </section>
     </main>
