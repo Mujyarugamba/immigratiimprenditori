@@ -77,6 +77,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
   if (!content) notFound();
 
   const isPlainText = content.body_format === "plain_text";
+  const visibleAuthors = content.authors.filter((author) => Boolean(author.display_label));
   const [related, relatedContents, showCulture] = await Promise.all([
     relatedForContent({
       subject_links: content.subject_links,
@@ -108,6 +109,12 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
     url: canonicalUrl,
     image: absoluteAssetUrl(content.cover_url),
     isBasedOn: content.source_url ?? undefined,
+    author: visibleAuthors.length > 0
+      ? visibleAuthors.map((author) => ({
+          "@type": author.person_id ? "Person" : "Organization",
+          name: author.display_label,
+        }))
+      : undefined,
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -127,6 +134,11 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
           </div>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">{content.title}</h1>
           {content.abstract ? <p className="text-ink-muted text-lg leading-7">{content.abstract}</p> : null}
+          {visibleAuthors.length > 0 ? (
+            <p className="text-sm font-medium text-neutral-700">
+              Di {visibleAuthors.map((author) => author.display_label).join(", ")}
+            </p>
+          ) : null}
           {content.published_at ? <p className="text-ink-muted text-sm">Pubblicato il {formatItalianDate(content.published_at)}</p> : null}
         </header>
 
