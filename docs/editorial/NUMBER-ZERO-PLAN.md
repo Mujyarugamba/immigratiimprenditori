@@ -4,22 +4,22 @@ Stato: **PRODUZIONE EDITORIALE IN CORSO**
 
 Il sito non va lanciato come guscio tecnico. Il numero zero deve dimostrare già il carattere **Dati · Analisi · Voci** e la natura internazionale dell'Osservatorio.
 
-## Stato dei 10 contenuti principali — 19/08/2026
+## Stato dei 10 contenuti principali — 20/08/2026
 
 | Codice | Fascia | Contenuto | Stato |
 | --- | --- | --- | --- |
 | L1 | Lombardia | Nota dati 135 mila imprese straniere | **READY — NON PUBBLICATO** |
-| L2 | Lombardia | Voce originale | **CANDIDATE IN INBOX — INTERVIEW PENDING** |
+| L2 | Lombardia | Voce originale | **INTERVISTATO DA SELEZIONARE** |
 | I1 | Italia | Quadro nazionale 678 mila | **READY — NON PUBBLICATO** |
 | I2 | Italia | Lettura critica Futurae/InfoCamere 2025 | **READY — NON PUBBLICATO** |
-| A1 | Italiani all'estero | Voce originale | **CANDIDATES IN INBOX — INTERVIEW PENDING** |
+| A1 | Italiani all'estero | Voce originale | **INTERVISTATO DA SELEZIONARE** |
 | A2 | Italiani all'estero | Perché non esiste un solo numero | **READY — SOURCE MAP PASS V1 — NON PUBBLICATO** |
 | E1 | Europa | Confronto self-employment OECD | **READY — NON PUBBLICATO** |
 | E2 | Europa | Policy brief UE integrazione/imprenditoria | **READY — NON PUBBLICATO** |
 | M1 | Resto del mondo/OECD | ≈10 milioni self-employed immigrants | **READY — NON PUBBLICATO** |
-| M2 | Resto del mondo | Voce originale | **CANDIDATES IN INBOX — INTERVIEW PENDING** |
+| M2 | Resto del mondo | Voce originale | **INTERVISTATO DA SELEZIONARE** |
 
-**Sette contenuti analitici su dieci sono READY e restano privati/non pubblicati.** I tre slot Voci hanno ora candidati verificati in Inbox e dipendono da interviste originali reali; non devono essere simulati o ricostruiti da fonti terze.
+**Sette contenuti analitici su dieci sono READY e restano privati/non pubblicati.** I tre slot Voci restano volutamente senza persona assegnata durante lo sviluppo. La scelta degli intervistati sarà effettuata più avanti dal responsabile del progetto. Nessun contatto va effettuato prima di quella scelta.
 
 ## 1. Lombardia — circa 20%
 
@@ -33,9 +33,8 @@ Stato backend: `editorial_status=ready`, `publication_status=unpublished`. Colle
 ### L2 — Voce
 
 **Tema:** intervista/storia di un imprenditore migrante attivo in Lombardia.  
-Formato: `interview` o `business_story`.
-
-Candidato prioritario in Inbox: Agie Zhou / La Ravioleria Sarpi. Contatto e messaggio preparati in `VOICES-OUTREACH-PACK.md`. Nessun messaggio inviato automaticamente.
+Formato: `interview` o `business_story`.  
+Intervistato: **da selezionare**.
 
 ## 2. Italia — circa 20%
 
@@ -53,7 +52,8 @@ Stato backend: **READY**, con collegamento contestuale all'indicatore camerale.
 
 ### A1 — Voce internazionale
 
-Candidati prioritari in Inbox: Paolo Privitera; Gianni Chiloiro e Angelo Sannino / Doppio Zero. Contatti verificati e messaggi preparati, non inviati.
+Intervistato: **da selezionare**.  
+Criterio: persona con percorso imprenditoriale documentabile fuori dall'Italia, utile a leggere ecosistema, capitale, reti, mercato e rapporto economico/professionale con il Paese d'origine.
 
 ### A2 — Dossier iniziale
 
@@ -61,7 +61,7 @@ Bozza: `docs/editorial/drafts/A2-italiani-impresa-estero.md`.
 Mappa metodologica delle fonti: `docs/editorial/ITALIANS-ABROAD-SOURCE-MAP.md` (`PASS_V1`).  
 Stato backend: **READY**.
 
-La regola resta: dati di residenza/migrazione non sono una stima degli imprenditori italiani all'estero. La source map identifica Stati Uniti, Australia, Regno Unito, Canada, Germania ed Eurostat come percorsi distinti di estrazione; non li somma finché le definizioni non sono compatibili.
+La regola resta: dati di residenza/migrazione non sono una stima degli imprenditori italiani all'estero. La source map identifica percorsi distinti di estrazione e non li somma finché le definizioni non sono compatibili.
 
 ## 4. Europa — circa 20%
 
@@ -84,12 +84,18 @@ Stato backend: **READY**, collegato all'indicatore OECD. Il titolo è stato corr
 
 ### M2 — Voce dal mondo
 
-Candidati verificati in Inbox:
+Intervistato: **da selezionare**.  
+Criterio: caso imprenditoriale originale fuori dal perimetro Italia/Europa, con percorso migratorio o transfrontaliero documentabile e contenuto sostanziale su impresa, mercati, capitale, lavoro o filiere.
 
-1. **Adeola Adedewe / Kredete** — Nigeria → Stati Uniti; priorità M2. Angolo: accesso al credito, percorso migratorio, impresa fintech, infrastruttura finanziaria transfrontaliera e diaspora africana. Canale pubblico aziendale verificato e bozza messaggio in `VOICES-OUTREACH-PACK.md`.
-2. **Semyon Dukach / One Way Ventures** — candidato di riserva qualificato; angolo su esperienza migratoria, costruzione di imprese, capitale e immigrant founders.
+## Regola interviste durante lo sviluppo
 
-Nessun messaggio è stato inviato automaticamente. La pagina pubblica e i profili di terzi servono solo a verificare e preparare una nuova intervista originale.
+- nessun contatto;
+- nessuna email o messaggio;
+- nessuno slot assegnato automaticamente;
+- eventuali nomi raccolti nella ricerca restano soltanto pool di ricerca interno;
+- la persona viene trasformata in intervistato operativo solo dopo scelta esplicita del responsabile del progetto.
+
+Dopo la scelta, il workflow previsto è: verifica identità/ruolo → contatto → intervista originale → fact-check → consensi separati → eventuale pubblicazione.
 
 ## Contenuti di servizio al lancio
 
@@ -125,4 +131,4 @@ Il numero zero è pronto quando non richiede testi placeholder per sembrare vivo
 - dichiara le fonti;
 - accetta contributi ma non autopubblicazione.
 
-`NUMBER_ZERO_PLAN = ANALYTICAL_CORE_READY_VOICE_CANDIDATES_READY_INTERVIEWS_PENDING`
+`NUMBER_ZERO_PLAN = ANALYTICAL_CORE_READY_INTERVIEWEES_DEFERRED`
