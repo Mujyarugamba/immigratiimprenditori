@@ -65,6 +65,12 @@ export default function RootLayout({
     <html lang={DEFAULT_LOCALE}>
       <body className="bg-surface text-ink min-h-screen antialiased">
         <JsonLd data={organizationJsonLd} />
+        <a
+          href="#contenuto"
+          className="sr-only fixed left-4 top-4 z-50 bg-black px-4 py-2 text-sm font-semibold text-white focus:not-sr-only"
+        >
+          Vai al contenuto
+        </a>
         <Header />
         {children}
         <Footer />
