@@ -154,12 +154,20 @@ export default async function EventiRedazionePage({ searchParams }: Props) {
                     : ""}
                 </p>
               </div>
-              <Link
-                href={`/app/redazione/eventi/${item.id}`}
-                className="text-brand text-sm hover:underline"
-              >
-                Apri →
-              </Link>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <Link
+                  href={`/app/redazione/eventi/${item.id}`}
+                  className="text-brand hover:underline"
+                >
+                  Modifica
+                </Link>
+                <Link
+                  href={`/eventi/${encodeURIComponent(item.id)}`}
+                  className="text-brand hover:underline"
+                >
+                  Anteprima
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
