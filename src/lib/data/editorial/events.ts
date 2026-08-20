@@ -298,6 +298,22 @@ export async function updateEditorialEventEdition(
   return { ok: true };
 }
 
+function eventPublicationBlocker(event: EditorialEvent): string | null {
+  if (
+    /^\[qa\]/i.test(event.title) ||
+    event.external_source_code?.toLowerCase() === "qa" ||
+    event.external_natural_key?.toLowerCase().startsWith("qa:")
+  ) {
+    return "Gli eventi QA sono riservati ai test e non possono essere pubblicati.";
+  }
+
+  if (/NON PUBBLICARE/i.test(event.editorial_internal_notes ?? "")) {
+    return "L'evento contiene una nota interna NON PUBBLICARE. Rimuovila prima di pubblicare.";
+  }
+
+  return null;
+}
+
 export async function publishEditorialEvent(
   id: string,
 ): Promise<{ ok: true } | { ok: false; error: AppError }> {
@@ -309,6 +325,12 @@ export async function publishEditorialEvent(
       error: { code: "not_found", message: "Evento non trovato." },
     };
   }
+
+  const blocker = eventPublicationBlocker(event);
+  if (blocker) {
+    return { ok: false, error: { code: "validation", message: blocker } };
+  }
+
   if (event.editorial_status !== "ready") {
     return {
       ok: false,
