@@ -3,6 +3,7 @@ import { getSiteUrl } from "@/lib/env";
 import {
   listPublicContentSitemapEntries,
   listPublicEventSitemapEntries,
+  listPublicIndicatorSitemapEntries,
   type PublicSitemapEntry,
 } from "@/lib/seo/sitemap-data";
 
@@ -38,14 +39,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: index === 0 ? 1 : index <= 7 ? 0.8 : 0.5,
   }));
 
-  const [contents, events] = await Promise.all([
+  const [contents, events, indicators] = await Promise.all([
     listPublicContentSitemapEntries().catch(() => []),
     listPublicEventSitemapEntries().catch(() => []),
+    listPublicIndicatorSitemapEntries().catch(() => []),
   ]);
 
   return [
     ...staticEntries,
     ...dynamicEntries(origin, contents),
     ...dynamicEntries(origin, events),
+    ...dynamicEntries(origin, indicators),
   ];
 }
