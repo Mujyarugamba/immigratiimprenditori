@@ -26,7 +26,7 @@ export function Header() {
         <div className="site-container primary-header-inner">
           <Link href="/" className="brand-link" aria-label="Immigrati Imprenditori - Home">
             <img
-              src="/brand/immigrati-imprenditori-logo.png"
+              src="/logo-immigrati-imprenditori.png"
               alt="Immigrati Imprenditori"
               width="360"
               height="120"
