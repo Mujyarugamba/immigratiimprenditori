@@ -11,15 +11,15 @@ export default function CookiePage() {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Documenti legali · aggiornamento 20 agosto 2026
+          Documenti legali · aggiornamento 21 agosto 2026
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
           Cookie Policy
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Nella configurazione attuale ImmigratiImprenditori.it utilizza soltanto strumenti
-          tecnici necessari al funzionamento e alla sicurezza del servizio. Non sono attivi
-          cookie di profilazione, advertising o analytics comportamentali.
+          ImmigratiImprenditori.it utilizza soltanto strumenti tecnici necessari
+          al funzionamento e alla sicurezza del servizio. Non sono attivi cookie
+          di profilazione, advertising o analytics comportamentali.
         </p>
       </header>
 
@@ -52,9 +52,9 @@ export default function CookiePage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">3. Nessun cookie di profilazione nella configurazione attuale</h2>
+          <h2 className="text-2xl font-semibold text-black">3. Nessun cookie di profilazione</h2>
           <p className="mt-4">
-            Al 20 agosto 2026 non risultano integrati nel sito Google Analytics, pixel
+            Alla data di aggiornamento non risultano integrati nel sito Google Analytics, pixel
             pubblicitari, sistemi di remarketing, Hotjar o altri strumenti di tracciamento
             comportamentale. Non sono inoltre caricati automaticamente embed social o video
             YouTube che richiedano cookie non tecnici.
@@ -65,13 +65,13 @@ export default function CookiePage() {
           <h2 className="text-2xl font-semibold text-black">4. Perché non compare un banner “Accetta tutto”</h2>
           <p className="mt-4">
             Le linee guida del Garante distinguono gli strumenti tecnici, necessari al servizio,
-            dagli strumenti non tecnici che richiedono consenso preventivo. Poiché la
-            configurazione attuale utilizza soltanto strumenti tecnici, non viene mostrato un
-            banner di consenso privo di una scelta reale da compiere.
+            dagli strumenti non tecnici che richiedono consenso preventivo. Poiché il sito utilizza
+            soltanto strumenti tecnici, non viene mostrato un banner di consenso privo di una scelta
+            reale da compiere.
           </p>
           <p className="mt-3">
-            Se in futuro verranno introdotti strumenti non tecnici, questi non saranno attivati
-            prima dell&apos;implementazione del meccanismo di informazione e consenso richiesto.
+            Gli strumenti non tecnici vengono attivati soltanto quando sono presenti le informazioni
+            e i meccanismi di consenso richiesti dalla normativa applicabile.
           </p>
         </section>
 
@@ -83,8 +83,8 @@ export default function CookiePage() {
             applicano le regole e le informative del sito raggiunto.
           </p>
           <p className="mt-3">
-            Eventuali futuri contenuti incorporati saranno valutati prima della pubblicazione;
-            ove opportuno verranno utilizzate soluzioni click-to-load o equivalenti.
+            I contenuti incorporati che richiedono strumenti non tecnici sono pubblicati solo con
+            soluzioni compatibili con gli obblighi di informazione e consenso applicabili.
           </p>
         </section>
 
@@ -100,8 +100,7 @@ export default function CookiePage() {
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">7. Titolare e contatti</h2>
           <p className="mt-4">
-            Il titolare è AIPEL — Associazione degli Imprenditori e Liberi Professionisti
-            Extracomunitari in Lombardia, Viale Molise 54, Milano. Per informazioni:
+            Il titolare è AIPEL. Per informazioni:
             {" "}<a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
           </p>
           <p className="mt-3">
