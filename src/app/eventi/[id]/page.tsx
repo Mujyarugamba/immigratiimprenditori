@@ -25,11 +25,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const event = await getPublicEventById(id);
   if (!event) {
-    return { title: "Non trovato" };
+    return { title: "Non trovato", robots: { index: false, follow: false } };
   }
+
+  const canonical = `/eventi/${event.id}`;
+  const description = event.summary ?? undefined;
   return {
     title: event.title,
-    description: event.summary ?? undefined,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title: event.title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title: event.title,
+      description,
+    },
   };
 }
 
