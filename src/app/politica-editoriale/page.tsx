@@ -17,8 +17,8 @@ export default function PoliticaEditorialePage() {
           Politica editoriale e correzioni
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Immigrati Imprenditori nasce per studiare e raccontare l&apos;imprenditoria migrante
-          con un metodo riconoscibile: fonti identificabili, distinzione tra dati e interpretazioni,
+          Immigrati Imprenditori studia e racconta l&apos;imprenditoria migrante con un metodo
+          chiaro e riconoscibile: fonti identificabili, distinzione tra dati e interpretazioni,
           responsabilità umana della redazione e correzione trasparente degli errori.
         </p>
       </header>
@@ -28,7 +28,7 @@ export default function PoliticaEditorialePage() {
           <h2 className="text-2xl font-semibold text-black">1. Indipendenza editoriale</h2>
           <p className="mt-4">
             Le decisioni su cosa studiare, verificare e pubblicare spettano alla redazione.
-            Donazioni, partnership, sponsorizzazioni e rapporti istituzionali non attribuiscono
+            Sostegni, partnership, sponsorizzazioni e rapporti istituzionali non attribuiscono
             alcun diritto di approvazione preventiva, modifica o rimozione dei contenuti editoriali.
           </p>
         </section>
@@ -83,9 +83,10 @@ export default function PoliticaEditorialePage() {
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">6. Contributi esterni</h2>
           <p className="mt-4">
-            Segnalazioni e proposte inviate tramite “Contribuisci” non vengono pubblicate automaticamente.
-            Entrano nella Inbox privata e possono essere verificate, approfondite, assegnate, rifiutate o
-            archiviate. La responsabilità della pubblicazione resta alla redazione.
+            Segnalazioni, storie e proposte inviate attraverso i moduli di partecipazione non vengono
+            pubblicate automaticamente. Entrano nella Inbox privata e possono essere verificate,
+            approfondite, assegnate, rifiutate o archiviate. La responsabilità della pubblicazione
+            resta alla redazione.
           </p>
         </section>
 
