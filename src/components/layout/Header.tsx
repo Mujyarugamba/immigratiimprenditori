@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 const mainNav = [
@@ -26,12 +25,11 @@ export function Header() {
       <div className="primary-header">
         <div className="site-container primary-header-inner">
           <Link href="/" className="brand-link" aria-label="Immigrati Imprenditori - Home">
-            <Image
+            <img
               src="/brand/immigrati-imprenditori-logo.png"
               alt="Immigrati Imprenditori"
-              width={360}
-              height={120}
-              priority
+              width="360"
+              height="120"
               className="brand-logo"
             />
           </Link>
