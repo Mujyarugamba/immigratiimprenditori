@@ -77,6 +77,9 @@ export default function SostieniPage() {
           iniziative pubbliche. Ogni collaborazione rispetta la missione e
           l&apos;indipendenza del Centro Studi.
         </p>
+        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
+          Per partnership e rapporti istituzionali: <a className="underline underline-offset-4" href="mailto:direzione@immigratiimprenditori.it">direzione@immigratiimprenditori.it</a>.
+        </p>
       </section>
     </main>
   );
