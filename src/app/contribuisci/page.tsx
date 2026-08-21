@@ -3,9 +3,9 @@ import Link from "next/link";
 import { submitEditorialContributionAction } from "@/lib/editorial/submission-actions";
 
 export const metadata: Metadata = {
-  title: "Contribuisci all'Osservatorio",
+  title: "Racconta la tua storia d'impresa",
   description:
-    "Proponi una storia, un'intervista, un evento, una ricerca o una pubblicazione alla redazione di Immigrati Imprenditori.",
+    "Racconta una storia d'impresa o segnala un'intervista, un evento, una ricerca, una pubblicazione o un contenuto alla redazione di Immigrati Imprenditori.",
 };
 
 type Props = {
@@ -24,15 +24,16 @@ export default async function ContribuisciPage({ searchParams }: Props) {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Immigrati Imprenditori · Osservatorio
+          Immigrati Imprenditori · Storie e segnalazioni
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
-          Contribuisci all&apos;Osservatorio
+          Racconta la tua storia d&apos;impresa
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-700">
-          Conosci una storia che merita di essere raccontata? Hai pubblicato una
-          ricerca, conosci un evento o vuoi proporre un&apos;intervista? Puoi
-          segnalarlo alla redazione senza creare un account.
+          Sei imprenditore o professionista e vuoi raccontare la tua esperienza?
+          Puoi proporre una storia, un&apos;intervista o un contenuto audiovisivo alla redazione.
+          Ricercatori, studiosi, associazioni, istituzioni e altri soggetti possono inoltre
+          segnalare ricerche, pubblicazioni, eventi e materiali pertinenti.
         </p>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-neutral-600">
           Ogni proposta entra nella nostra Inbox privata. La redazione la valuta,
@@ -45,11 +46,11 @@ export default async function ContribuisciPage({ searchParams }: Props) {
         <section className="mt-8 border border-black p-5" role="status">
           <h2 className="text-lg font-semibold text-black">Proposta ricevuta</h2>
           <p className="mt-2 text-sm leading-6 text-neutral-700">
-            Grazie. Il materiale è stato inviato alla redazione e verrà valutato.
-            Se necessario ti contatteremo ai recapiti indicati.
+            Grazie. Il materiale entra nella coda redazionale per la valutazione.
+            La redazione utilizza i recapiti indicati se serve un approfondimento.
           </p>
           <Link href="/" className="mt-4 inline-block text-sm font-medium text-black underline underline-offset-4">
-            Torna all&apos;Osservatorio
+            Torna al Centro Studi
           </Link>
         </section>
       ) : (
@@ -71,17 +72,17 @@ export default async function ContribuisciPage({ searchParams }: Props) {
             </div>
 
             <section>
-              <h2 className="text-xl font-semibold text-black">1. Che cosa vuoi segnalarci?</h2>
+              <h2 className="text-xl font-semibold text-black">1. Che cosa vuoi proporre alla redazione?</h2>
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
-                  Tipo di contributo <span aria-hidden="true">*</span>
+                  Tipo di proposta <span aria-hidden="true">*</span>
                   <select name="submission_kind" required className="border border-neutral-400 bg-white px-3 py-2.5 font-normal text-black">
-                    <option value="story">Racconta una storia</option>
+                    <option value="story">Racconta la tua storia d&apos;impresa</option>
                     <option value="interview">Proponi un&apos;intervista</option>
                     <option value="event">Segnala un evento</option>
                     <option value="research">Segnala una ricerca</option>
                     <option value="publication">Invia una pubblicazione</option>
-                    <option value="other">Altro</option>
+                    <option value="other">Video o altro materiale</option>
                   </select>
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium text-black">
@@ -98,11 +99,11 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                   maxLength={20000}
                   rows={9}
                   className="border border-neutral-400 px-3 py-2.5 font-normal leading-6"
-                  placeholder="Raccontaci ciò che ritieni importante. Per una storia puoi spiegare chi è la persona, dove opera, che attività svolge e perché pensi che meriti attenzione."
+                  placeholder="Raccontaci ciò che ritieni importante. Per una storia puoi spiegare chi sei, dove operi, che attività svolgi e quali aspetti della tua esperienza vuoi documentare."
                 />
               </label>
               <label className="mt-5 flex flex-col gap-2 text-sm font-medium text-black">
-                Link originale o pagina di riferimento
+                Link originale, video o pagina di riferimento
                 <input name="original_url" type="url" maxLength={2048} className="border border-neutral-400 px-3 py-2.5 font-normal" placeholder="https://…" />
               </label>
             </section>
@@ -158,7 +159,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 <label className="flex items-start gap-3">
                   <input name="consent_publication" type="checkbox" className="mt-1 size-4" />
                   <span>
-                    Autorizzo la possibile pubblicazione del materiale inviato, fermo restando il lavoro di verifica, selezione e cura della redazione. Potremo richiedere ulteriori autorizzazioni per immagini, audio o video.
+                    Autorizzo la possibile pubblicazione del materiale inviato, fermo restando il lavoro di verifica, selezione e cura della redazione. Per immagini, audio o video possono essere richieste ulteriori autorizzazioni.
                   </span>
                 </label>
               </div>
@@ -169,7 +170,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 Invia alla redazione
               </button>
               <p className="mt-4 max-w-2xl text-xs leading-5 text-neutral-500">
-                Non è necessario registrarsi. Se in futuro collaborerai con continuità, potrai richiedere un account contributore dedicato.
+                Non è necessario registrarsi. Chi collabora con continuità può richiedere un account contributore dedicato.
               </p>
             </div>
           </form>
