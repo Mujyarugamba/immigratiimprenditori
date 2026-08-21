@@ -17,6 +17,7 @@ const section = sections["notizie-e-guide"];
 export const metadata: Metadata = {
   title: "Analisi e ricerche",
   description: section.description,
+  alternates: { canonical: "/contenuti" },
 };
 
 type PageProps = {
