@@ -168,17 +168,17 @@ Il progetto Netlify `immigratiimprenditori-preview` esegue correttamente build e
 ### LEGAL-01 — Privacy Policy
 **CONTENUTO AGGIORNATO / REVISIONE FINALE PENDING**
 
-La pagina identifica AIPEL, il contatto privacy e i fornitori applicativi effettivamente usati, inclusi Supabase e Netlify. Resta necessaria una revisione finale rispetto alla configurazione reale al go-live e agli obblighi giuridici applicabili.
+La pagina identifica AIPEL come titolare, pubblica codice fiscale `97342380157`, PEC `direzione@pec.aipel.it` e contatto privacy `info@aipel.it`; indica inoltre i fornitori applicativi effettivamente usati, inclusi Supabase e Netlify. Resta necessaria una revisione finale rispetto alla configurazione reale al go-live e agli obblighi giuridici applicabili.
 
 ### LEGAL-02 — Cookie Policy
 **CONTENUTO AGGIORNATO / VERIFICA TECNICA PENDING**
 
-La pagina descrive l'uso di strumenti tecnici e l'assenza di profilazione. Prima del go-live va verificato tecnicamente che non siano caricati strumenti non tecnici o embed che richiedano consenso.
+La pagina descrive l'uso di strumenti tecnici e l'assenza di profilazione e usa `cookies@aipel.it` come contatto dedicato. Prima del go-live va verificato tecnicamente che non siano caricati strumenti non tecnici o embed che richiedano consenso.
 
 ### LEGAL-03 — Termini di utilizzo
 **CONTENUTO AGGIORNATO / REVISIONE FINALE PENDING**
 
-I termini coprono account, proposte editoriali, materiali, proprietà intellettuale, abusi, modifiche del servizio e responsabilità. Resta la revisione giuridica finale.
+I termini identificano AIPEL, pubblicano codice fiscale `97342380157`, PEC `direzione@pec.aipel.it` e il contatto dedicato `termini@aipel.it`; coprono account, proposte editoriali, materiali, proprietà intellettuale, abusi, modifiche del servizio e responsabilità. Resta la revisione giuridica finale.
 
 ### LEGAL-04 — Materiali editoriali / autorizzazioni
 **PARZIALE**
@@ -187,10 +187,20 @@ Il flusso pubblico registra consenso al ricontatto e consenso facoltativo alla p
 
 ## 9. Identità istituzionale e continuità
 
-### INST-01 — AIPEL e dati amministrativi pubblici
+### INST-01 — AIPEL, dati amministrativi e matrice contatti
 **PASS SECONDO REGOLA EDITORIALE CORRENTE**
 
-Le pagine HTML pubbliche utilizzano la sigla `AIPEL` e il recapito stabile `info@aipel.it`. Denominazione completa, sede e dati amministrativi/fiscali non vengono esposti nelle pagine HTML; possono comparire esclusivamente nei documenti formali PDF pertinenti, quando verificati e aggiornati.
+Le pagine HTML pubbliche utilizzano la sigla `AIPEL`. Denominazione completa e sede non vengono esposte finché non sono aggiornate e stabilizzate. Codice fiscale e PEC compaiono nelle pagine legali pertinenti.
+
+Matrice corrente:
+
+- `info@immigratiimprenditori.it` — contatto generale del Centro Studi;
+- `direzione@immigratiimprenditori.it` — rapporti istituzionali e partnership;
+- `redazione@immigratiimprenditori.it` — contatti editoriali, fonti e correzioni;
+- `info@aipel.it` — richieste privacy e informazioni istituzionali AIPEL quando pertinenti;
+- `direzione@pec.aipel.it` — comunicazioni formali PEC;
+- `termini@aipel.it` — Termini di utilizzo;
+- `cookies@aipel.it` — Cookie Policy.
 
 ### INST-02 — Terminologia
 **PASS SULLE PAGINE AUDITATE**
