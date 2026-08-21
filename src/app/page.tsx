@@ -92,7 +92,7 @@ function MiniTrend({
   if (series.length < 2) {
     return (
       <div className="home-chart-empty">
-        <span>Serie storica in aggiornamento</span>
+        <span>Serie storica non disponibile per questa selezione</span>
       </div>
     );
   }
@@ -223,10 +223,10 @@ export default async function HomePage() {
             </h2>
             <p>
               {hero?.abstract ??
-                "Un osservatorio internazionale per leggere i fenomeni economici senza perdere le storie delle persone."}
+                "Un centro studi internazionale per leggere i fenomeni economici senza perdere le storie delle persone."}
             </p>
             <Link href={hero ? `/contenuti/${hero.slug}` : "/contenuti"}>
-              {hero ? "Leggi l'approfondimento" : "Scopri le ricerche"} →
+              {hero ? "Leggi l'approfondimento" : "Esplora analisi e ricerche"} →
             </Link>
           </article>
         </div>
@@ -289,11 +289,10 @@ export default async function HomePage() {
 
             {featuredContents.length === 0 && !firstEvent ? (
               <div className="featured-empty">
-                <p className="eyebrow">Numero zero in preparazione</p>
-                <h3>Le prossime ricerche appariranno qui.</h3>
+                <p className="eyebrow">In evidenza</p>
+                <h3>Nessun contenuto disponibile in questa selezione.</h3>
                 <p>
-                  La home è già collegata alla redazione: appena un contenuto
-                  viene pubblicato, entra automaticamente nell&apos;impaginazione.
+                  Consulta Analisi e ricerche per esplorare i contenuti pubblicati dal Centro Studi.
                 </p>
               </div>
             ) : null}
@@ -334,8 +333,7 @@ export default async function HomePage() {
 
             {metrics.length === 0 ? (
               <div className="metrics-empty">
-                Gli indicatori pubblicati dall&apos;Osservatorio compariranno qui
-                automaticamente.
+                Nessun indicatore disponibile in questa selezione.
               </div>
             ) : null}
           </div>
@@ -370,45 +368,9 @@ export default async function HomePage() {
               ))}
               {storyContents.length === 0 ? (
                 <div className="voices-placeholder">
-                  Foto, video e interviste entreranno qui man mano che la redazione
-                  li pubblica.
+                  Nessuna storia o intervista disponibile in questa selezione.
                 </div>
               ) : null}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="support-band">
-        <div className="site-container support-grid">
-          <div className="support-mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className="support-copy">
-            <p className="eyebrow">Sostieni l&apos;Osservatorio</p>
-            <h2>La ricerca indipendente ha bisogno di continuità.</h2>
-            <p>
-              Il sostegno contribuisce a ricerca, raccolta e verifica dei dati,
-              interviste, rapporti e produzione audiovisiva.
-            </p>
-            <Link href="/sostieni" className="button button-gold">
-              Sostieni il Centro Studi →
-            </Link>
-          </div>
-          <div className="principles-grid">
-            <div>
-              <strong>Indipendenza</strong>
-              <span>Contenuti separati da sostegni e partnership.</span>
-            </div>
-            <div>
-              <strong>Metodo</strong>
-              <span>Fonti, limiti e aggiornamenti visibili.</span>
-            </div>
-            <div>
-              <strong>Persone</strong>
-              <span>Dati e testimonianze nello stesso progetto.</span>
             </div>
           </div>
         </div>
