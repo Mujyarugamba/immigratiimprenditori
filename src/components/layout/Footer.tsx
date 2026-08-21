@@ -20,10 +20,6 @@ export function Footer() {
             migrante, alle sue traiettorie economiche e alle persone che la
             costruiscono.
           </p>
-          <p className="footer-small">
-            Associazione degli Imprenditori e Liberi Professionisti
-            Extracomunitari in Lombardia (AIPEL).
-          </p>
         </div>
 
         <div>
@@ -48,11 +44,6 @@ export function Footer() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/cookie">Cookie</Link>
           <Link href="/termini">Termini</Link>
-          <p className="footer-small">
-            Viale Molise 54, Milano
-            <br />
-            CF 97342380157 · P.IVA 04222160964
-          </p>
         </div>
       </div>
 
