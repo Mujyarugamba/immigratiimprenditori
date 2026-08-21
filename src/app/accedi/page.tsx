@@ -20,7 +20,7 @@ type PageProps = {
 const errorMessages: Record<string, string> = {
   missing: "Inserisci email e password.",
   credentials: "Credenziali non valide.",
-  account: "L’account redazionale non è ancora operativo.",
+  account: "L’account redazionale non è abilitato.",
   role: "Questo account non dispone di un ruolo redazionale.",
 };
 
