@@ -55,7 +55,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
             href="/contenuti"
             className="text-brand hover:text-brand-dark text-sm font-medium"
           >
-            ← Torna a notizie e guide
+            ← Torna ad analisi e ricerche
           </Link>
           {showCulture ? (
             <Link
@@ -70,9 +70,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
         <header className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <Badge tone="brand">{label(CONTENT_TYPES, content.type_code)}</Badge>
-            {content.is_featured ? (
-              <Badge tone="accent">In evidenza</Badge>
-            ) : null}
+            {content.is_featured ? <Badge tone="accent">In evidenza</Badge> : null}
           </div>
           <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
             {content.title}
