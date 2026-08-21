@@ -40,6 +40,9 @@ export default async function ContribuisciPage({ searchParams }: Props) {
           verifica le fonti e decide se approfondirla. L&apos;invio non comporta
           pubblicazione automatica.
         </p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-600">
+          Per contatti editoriali: <a className="underline underline-offset-4" href="mailto:redazione@immigratiimprenditori.it">redazione@immigratiimprenditori.it</a>.
+        </p>
       </header>
 
       {sent ? (
