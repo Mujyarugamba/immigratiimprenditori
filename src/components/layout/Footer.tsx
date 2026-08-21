@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
@@ -7,11 +6,11 @@ export function Footer() {
       <div className="site-container footer-grid">
         <div className="footer-brand">
           <div className="footer-logo-shell">
-            <Image
-              src="/brand/immigrati-imprenditori-logo.png"
+            <img
+              src="/logo-immigrati-imprenditori.png"
               alt="Immigrati Imprenditori"
-              width={300}
-              height={100}
+              width="300"
+              height="100"
               className="footer-logo"
             />
           </div>
