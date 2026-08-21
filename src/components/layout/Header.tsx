@@ -5,7 +5,7 @@ const mainNav = [
   { label: "Analisi", href: "/contenuti" },
   { label: "Eventi", href: "/eventi" },
   { label: "Fonti e metodologia", href: "/dati-e-fonti" },
-  { label: "Racconta la tua storia", href: "/contribuisci" },
+  { label: "Partecipa", href: "/contribuisci" },
 ] as const;
 
 export function Header() {
