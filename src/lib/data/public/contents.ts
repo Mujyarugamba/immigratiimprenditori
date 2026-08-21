@@ -8,7 +8,7 @@ import {
 } from "@/lib/data/public/paging";
 
 const LIST_SELECT =
-  "id, slug, title, abstract, type_code, primary_category_code, language_id, is_featured, published_at";
+  "id, slug, title, abstract, type_code, primary_category_code, language_id, is_featured, published_at, cover_url";
 
 export type PublicContentListItem = {
   id: string;
@@ -20,6 +20,7 @@ export type PublicContentListItem = {
   language_id: number;
   is_featured: boolean;
   published_at: string | null;
+  cover_url: string | null;
 };
 
 export type PublicContentSubjectLink = {
@@ -42,7 +43,6 @@ export type PublicContentOpportunityLink = {
 export type PublicContentDetail = PublicContentListItem & {
   body: string;
   body_format: string;
-  cover_url: string | null;
   source_url: string | null;
   publication_status: string;
   visibility_status: string;
@@ -86,9 +86,9 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     language_id: data.language_id as number,
     is_featured: data.is_featured as boolean,
     published_at: data.published_at as string | null,
+    cover_url: data.cover_url as string | null,
     body: stripContentsAcquisitionTrailer(data.body as string),
     body_format: data.body_format as string,
-    cover_url: data.cover_url as string | null,
     source_url: data.source_url as string | null,
     publication_status: data.publication_status as string,
     visibility_status: data.visibility_status as string,
@@ -150,9 +150,6 @@ export async function listPublicContents(
 export async function getPublicContentBySlug(
   slug: string,
 ): Promise<PublicContentDetail | null> {
-  // Public detail contract (P6 / C2.1): missing, private, or temporarily
-  // unavailable lookups resolve to null → route `notFound()`, never a thrown
-  // error that surfaces the generic "Errore inatteso" boundary for a slug miss.
   try {
     const supabase = await createClient();
     const { data, error } = await supabase

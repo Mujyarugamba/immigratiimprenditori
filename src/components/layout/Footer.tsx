@@ -1,69 +1,65 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Container } from "@/components/ui/Container";
-import { csPrimaryNav } from "@/data/cs-navigation";
 
 export function Footer() {
   return (
-    <footer className="border-line mt-16 border-t">
-      <Container className="py-8 text-sm">
-        <div className="flex flex-wrap justify-between gap-6">
-          <div className="max-w-xl text-ink-muted">
-            <p>Immigrati Imprenditori · Osservatorio e Centro Studi AIPEL.</p>
-            <p className="mt-1">
-              Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL).
-            </p>
-            <p className="mt-1">
-              Viale Molise 54, Milano · CF 97342380157 · P.IVA 04222160964.
-            </p>
-            <p className="mt-1">
-              <a href="mailto:info@aipel.it" className="hover:text-ink underline underline-offset-4">
-                info@aipel.it
-              </a>
-            </p>
+    <footer className="site-footer">
+      <div className="site-container footer-grid">
+        <div className="footer-brand">
+          <div className="footer-logo-shell">
+            <Image
+              src="/brand/immigrati-imprenditori-logo.png"
+              alt="Immigrati Imprenditori"
+              width={300}
+              height={100}
+              className="footer-logo"
+            />
           </div>
-          <nav aria-label="Piè di pagina">
-            <ul className="flex flex-wrap gap-4">
-              {csPrimaryNav.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="text-ink-muted hover:text-ink">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link href="/chi-siamo" className="text-ink-muted hover:text-ink">
-                  Chi siamo
-                </Link>
-              </li>
-              <li>
-                <Link href="/politica-editoriale" className="text-ink-muted hover:text-ink">
-                  Politica editoriale
-                </Link>
-              </li>
-              <li>
-                <Link href="/sostieni" className="text-ink-muted hover:text-ink">
-                  Sostieni l&apos;Osservatorio
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-ink-muted hover:text-ink">
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link href="/cookie" className="text-ink-muted hover:text-ink">
-                  Cookie
-                </Link>
-              </li>
-              <li>
-                <Link href="/termini" className="text-ink-muted hover:text-ink">
-                  Termini
-                </Link>
-              </li>
-            </ul>
-          </nav>
+          <p>
+            Osservatorio e Centro Studi AIPEL dedicato all&apos;imprenditoria
+            migrante, alle sue traiettorie economiche e alle persone che la
+            costruiscono.
+          </p>
+          <p className="footer-small">
+            Associazione degli Imprenditori e Liberi Professionisti
+            Extracomunitari in Lombardia (AIPEL).
+          </p>
         </div>
-      </Container>
+
+        <div>
+          <h2>Naviga</h2>
+          <Link href="/osservatorio">Osservatorio</Link>
+          <Link href="/contenuti">Analisi e ricerche</Link>
+          <Link href="/eventi">Eventi</Link>
+          <Link href="/dati-e-fonti">Fonti e metodologia</Link>
+          <Link href="/contribuisci">Contribuisci</Link>
+        </div>
+
+        <div>
+          <h2>Il Centro</h2>
+          <Link href="/chi-siamo">Chi siamo</Link>
+          <Link href="/politica-editoriale">Politica editoriale</Link>
+          <Link href="/sostieni">Sostieni l&apos;Osservatorio</Link>
+          <a href="mailto:info@aipel.it">Contatti</a>
+        </div>
+
+        <div>
+          <h2>Trasparenza</h2>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/cookie">Cookie</Link>
+          <Link href="/termini">Termini</Link>
+          <p className="footer-small">
+            Viale Molise 54, Milano
+            <br />
+            CF 97342380157 · P.IVA 04222160964
+          </p>
+        </div>
+      </div>
+
+      <div className="site-container footer-bottom">
+        <span>© 2026 Immigrati Imprenditori · Centro Studi AIPEL</span>
+        <span>Ricerca · dati · persone</span>
+      </div>
     </footer>
   );
 }
