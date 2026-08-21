@@ -261,7 +261,19 @@ Immigrati Imprenditori è il **Centro Studi di AIPEL**. L'Osservatorio è la sez
 
 AIPEL è l'ente promotore e titolare del progetto. Il Presidente AIPEL svolge la direzione editoriale.
 
-Le pagine HTML pubbliche utilizzano la sigla **AIPEL** e i soli recapiti stabili e verificati. Denominazione completa, sede e dati amministrativi o fiscali non vengono esposti nelle pagine HTML. Tali informazioni possono comparire esclusivamente nei documenti formali in PDF scaricabili quando pertinenti, verificate e aggiornate.
+Le pagine HTML pubbliche utilizzano la sigla **AIPEL**. La denominazione completa e la sede non vengono esposte nelle pagine HTML finché non sono aggiornate e stabilizzate. Il codice fiscale **97342380157** e la PEC **direzione@pec.aipel.it** possono comparire nelle pagine legali in cui sono pertinenti, in particolare Privacy Policy e Termini di utilizzo.
+
+Matrice dei recapiti pubblici:
+
+- **info@immigratiimprenditori.it** — contatto generale del Centro Studi, Chi siamo e footer;
+- **direzione@immigratiimprenditori.it** — rapporti istituzionali, partnership e sostegno istituzionale;
+- **redazione@immigratiimprenditori.it** — storie, interviste, segnalazioni, fonti e richieste di correzione editoriale;
+- **info@aipel.it** — richieste privacy e informazioni istituzionali su AIPEL quando pertinenti;
+- **direzione@pec.aipel.it** — comunicazioni formali e PEC;
+- **termini@aipel.it** — richieste relative ai Termini di utilizzo;
+- **cookies@aipel.it** — richieste relative alla Cookie Policy.
+
+Gli indirizzi email vengono pubblicati in minuscolo e ogni collegamento `mailto:` deve corrispondere all'indirizzo mostrato.
 
 ## 16. Identità visiva
 
