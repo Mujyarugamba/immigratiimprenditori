@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Chi siamo | Immigrati Imprenditori",
   description:
-    "Immigrati Imprenditori è il Centro Studi AIPEL dedicato all'imprenditoria migrante attraverso dati, analisi e testimonianze.",
+    "Immigrati Imprenditori è il Centro Studi promosso da AIPEL per studiare, misurare e raccontare l'imprenditoria migrante in Italia e non solo.",
 };
 
 export default function ChiSiamoPage() {
@@ -18,7 +18,7 @@ export default function ChiSiamoPage() {
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-700">
           ImmigratiImprenditori.it è il Centro Studi promosso da AIPEL per studiare,
-          misurare e raccontare l&apos;imprenditoria migrante nel mondo.
+          misurare e raccontare l&apos;imprenditoria migrante in Italia e non solo.
         </p>
       </header>
 
