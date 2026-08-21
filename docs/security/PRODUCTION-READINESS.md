@@ -2,9 +2,9 @@
 
 Stato: **GATE APERTO — NON PASS**
 
-Data audit: 2026-08-20
+Data audit: 2026-08-21
 
-Questo documento registra lo stato verificato del gate 19 della roadmap. Un elemento è PASS solo quando è stato verificato sul codice o sul progetto Supabase collegato; gli elementi non verificati restano aperti.
+Questo documento registra lo stato verificato del gate 19 della roadmap. Un elemento è PASS solo quando è stato verificato sul codice o sul servizio collegato; gli elementi non verificati restano aperti.
 
 ## 1. Database e RLS
 
@@ -63,14 +63,14 @@ La migration aggiunge:
 - normalizzazione email;
 - grant espliciti soltanto a `anon` e `authenticated` dopo revoca da `public`.
 
-Non applicare alla produzione finché il branch non ha superato build/test.
+Non applicare alla produzione finché il branch non ha superato build/test e il piano di rilascio della migration.
 
 ## 3. Form pubblico / anti-abuso
 
 ### SEC-FORM-01 — Validazione server-side
 **PASS SUL BRANCH**
 
-La Server Action di `/contribuisci` verifica tipo di contributo, campi obbligatori, consenso, limiti di lunghezza e URL HTTP/HTTPS.
+La Server Action di `/contribuisci` verifica tipo di proposta, campi obbligatori, consenso, limiti di lunghezza e URL HTTP/HTTPS.
 
 ### SEC-FORM-02 — Honeypot
 **PASS SUL BRANCH**
@@ -124,7 +124,7 @@ CSP non ancora applicata. Va costruita dopo l'inventario definitivo di Supabase,
 
 ## 6. SEO / aree private
 
-### SEC-INDEX-01 — Aree riservate fuori dall'indice
+### SEO-INDEX-01 — Aree riservate fuori dall'indice
 **PASS SUL BRANCH**
 
 - `/app/` esclusa da `robots.txt`;
@@ -132,12 +132,22 @@ CSP non ancora applicata. Va costruita dopo l'inventario definitivo di Supabase,
 - login con `robots: noindex, nofollow`;
 - layout redazione con `robots: noindex, nofollow`.
 
-## 7. Dipendenze e CI
+### SEO-BASE-02 — Base pubblica
+**PASS DI BASE**
+
+Sono presenti metadata globali, dominio canonico, `robots.txt` e `sitemap.xml` per le rotte pubbliche principali.
+
+### SEO-FINAL-03 — Audit pagina per pagina
+**PENDING**
+
+Prima del go-live verificare title e description specifici, canonical, gerarchia H1/H2, Open Graph, immagini/alt, contenuti dinamici in sitemap e dati strutturati dove utili.
+
+## 7. Dipendenze, CI e hosting
 
 ### SEC-DEPS-01 — Dependabot
 **PASS SUL BRANCH**
 
-Aggiunta configurazione settimanale npm in `.github/dependabot.yml`.
+Configurazione settimanale npm presente in `.github/dependabot.yml`.
 
 ### SEC-CI-01 — CI applicativa
 **PARZIALE**
@@ -148,62 +158,84 @@ Il repository ha CI su pull request verso `main` con:
 - typecheck;
 - test.
 
-### SEC-CI-02 — Verifica ultimo branch
-**BLOCKED DA HOSTING**
+### HOST-NETLIFY-01 — Deploy branch
+**PASS DI INFRASTRUTTURA / HEAD DA RIVERIFICARE**
 
-L'ultimo deploy Vercel non è stato eseguito per `build-rate-limit`. Questo non è un errore di compilazione, ma impedisce di dichiarare il branch verificato.
+Il progetto Netlify `immigratiimprenditori-preview` esegue correttamente build e deployment Next.js sul branch `feature/institutional-identity`. Prima della chiusura del gate va verificato che il deploy corrente corrisponda all'ultimo commit del branch e che non vi siano regressioni runtime.
 
 ## 8. Privacy e documenti legali
 
 ### LEGAL-01 — Privacy Policy
-**BLOCKER**
+**CONTENUTO AGGIORNATO / REVISIONE FINALE PENDING**
 
-Da completare rispetto ai fornitori realmente usati e ai contatti del titolare.
+La pagina identifica AIPEL, il contatto privacy e i fornitori applicativi effettivamente usati, inclusi Supabase e Netlify. Resta necessaria una revisione finale rispetto alla configurazione reale al go-live e agli obblighi giuridici applicabili.
 
 ### LEGAL-02 — Cookie Policy
-**BLOCKER**
+**CONTENUTO AGGIORNATO / VERIFICA TECNICA PENDING**
 
-Da completare. Nella configurazione iniziale mantenere solo strumenti tecnici finché non viene definito un meccanismo di consenso per eventuali strumenti non tecnici.
+La pagina descrive l'uso di strumenti tecnici e l'assenza di profilazione. Prima del go-live va verificato tecnicamente che non siano caricati strumenti non tecnici o embed che richiedano consenso.
 
 ### LEGAL-03 — Termini di utilizzo
-**BLOCKER**
+**CONTENUTO AGGIORNATO / REVISIONE FINALE PENDING**
 
-Da completare per account, contributi, materiali editoriali, proprietà intellettuale, abusi e sospensione account.
+I termini coprono account, proposte editoriali, materiali, proprietà intellettuale, abusi, modifiche del servizio e responsabilità. Resta la revisione giuridica finale.
 
 ### LEGAL-04 — Materiali editoriali / autorizzazioni
 **PARZIALE**
 
-Il flusso `Contribuisci` registra consenso al ricontatto e consenso facoltativo alla possibile pubblicazione; immagini, audio e video richiedono autorizzazioni dedicate.
+Il flusso pubblico registra consenso al ricontatto e consenso facoltativo alla possibile pubblicazione; immagini, audio e video possono richiedere autorizzazioni dedicate.
 
-## 9. Identità istituzionale
+## 9. Identità istituzionale e continuità
 
-### INST-01 — AIPEL
-**QUASI PASS**
+### INST-01 — AIPEL e dati amministrativi pubblici
+**PASS SECONDO REGOLA EDITORIALE CORRENTE**
 
-Pubblicati sul branch:
+Le pagine HTML pubbliche utilizzano la sigla `AIPEL` e il recapito stabile `info@aipel.it`. Denominazione completa, sede e dati amministrativi/fiscali non vengono esposti nelle pagine HTML; possono comparire esclusivamente nei documenti formali PDF pertinenti, quando verificati e aggiornati.
 
-- denominazione AIPEL;
-- forma associativa;
-- sede;
-- codice fiscale;
-- partita IVA;
-- Presidente;
-- direzione editoriale;
-- natura del progetto come Osservatorio e Centro Studi, non testata giornalistica.
+### INST-02 — Terminologia
+**PASS SULLE PAGINE AUDITATE**
 
-Mancano ancora recapiti istituzionali e contatto privacy da pubblicare.
+Regola canonica:
 
-## 10. Gate residui prima di PRODUCTION_READINESS = PASS
+- `Immigrati Imprenditori` = progetto;
+- `Centro Studi` = struttura complessiva;
+- `Osservatorio` = sezione dati, indicatori e metodologia;
+- `redazione` = persone responsabili dei contenuti.
 
-1. build/test del branch senza rate-limit Vercel;
-2. applicazione e verifica della migration di hardening contributi;
-3. rate limiting persistente su login e contributi;
-4. Leaked Password Protection Supabase attiva;
-5. CSP progettata e verificata;
-6. Privacy Policy, Cookie Policy e Termini completi;
-7. recapiti istituzionali/privacy AIPEL;
-8. test E2E finale ruoli, bozze, escalation, pubblicazione e mobile/accessibilità;
-9. verifica branch protection e controlli obbligatori su `main`.
+### INST-03 — Continuità istituzionale
+**PASS SULLE PAGINE PUBBLICHE AUDITATE**
+
+Il progetto non viene presentato come nuovo o in avvio. Rimossi dalle pagine pubbliche auditate i riferimenti a “nasce”, “numero zero”, “fase iniziale”, “in preparazione”, funzioni “in arrivo” e placeholder di servizi non disponibili. La regola è permanente nel progetto editoriale.
+
+## 10. Responsive e accessibilità
+
+### UI-RESP-01 — Responsive nel codice
+**PASS DI BASE**
+
+La UI include breakpoint e ricomposizioni per desktop, tablet e mobile, comprese griglie, header, hero, dati e footer.
+
+### UI-RESP-02 — Verifica visuale reale
+**PENDING**
+
+Prima del go-live eseguire controllo visuale almeno su desktop, laptop, tablet e smartphone, verificando overflow, menu, logo, gerarchie tipografiche, tabelle, grafici e moduli.
+
+### UI-A11Y-01 — Accessibilità finale
+**PENDING**
+
+Verificare tastiera, focus, contrasto, etichette, struttura semantica, testi alternativi e principali flussi assistivi.
+
+## 11. Gate residui prima di PRODUCTION_READINESS = PASS
+
+1. verificare build/test sull'ultimo commit del branch;
+2. applicare e verificare la migration di hardening contributi;
+3. introdurre rate limiting persistente su login e invio contributi;
+4. abilitare Leaked Password Protection Supabase;
+5. progettare e verificare CSP;
+6. completare revisione legale e verifica tecnica di Privacy, Cookie e Termini;
+7. completare audit SEO pagina per pagina;
+8. completare test responsive e accessibilità reali;
+9. completare test E2E ruoli, bozze, escalation e pubblicazione;
+10. verificare branch protection e controlli obbligatori su `main`.
 
 Fino alla chiusura di questi punti:
 
