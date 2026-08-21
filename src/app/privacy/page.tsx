@@ -11,7 +11,7 @@ export default function PrivacyPage() {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Documenti legali · aggiornamento 20 agosto 2026
+          Documenti legali · aggiornamento 21 agosto 2026
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
           Privacy Policy
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li>dati tecnici di navigazione e sicurezza, come indirizzo IP, data e ora, richieste al server e informazioni tecniche del browser;</li>
             <li>dati di account e autenticazione per redattori, amministratori e contributori abituali;</li>
-            <li>nome, email, telefono, organizzazione e informazioni geografiche fornite attraverso “Contribuisci”;</li>
+            <li>nome, email, telefono, organizzazione e informazioni geografiche fornite attraverso i moduli di partecipazione;</li>
             <li>testi, link, materiali e informazioni contenuti nelle proposte editoriali;</li>
             <li>consensi e autorizzazioni registrati in relazione a ricontatto, pubblicazione e materiali audiovisivi;</li>
             <li>comunicazioni inviate ad AIPEL e dati necessari a gestire richieste, segnalazioni e rapporti istituzionali.</li>
@@ -69,9 +69,9 @@ export default function PrivacyPage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">4. Contribuisci e materiali editoriali</h2>
+          <h2 className="text-2xl font-semibold text-black">4. Storie, segnalazioni e materiali editoriali</h2>
           <p className="mt-4">
-            Le proposte inviate attraverso “Contribuisci” entrano in una Inbox redazionale
+            Le proposte inviate attraverso i moduli di partecipazione entrano in una Inbox redazionale
             privata e non vengono pubblicate automaticamente. La redazione può verificare,
             approfondire, assegnare, archiviare o rifiutare una proposta.
           </p>
@@ -85,12 +85,12 @@ export default function PrivacyPage() {
           <h2 className="text-2xl font-semibold text-black">5. Destinatari e fornitori</h2>
           <p className="mt-4">
             I dati sono accessibili soltanto a persone autorizzate e ai fornitori necessari al
-            funzionamento del progetto, secondo i rispettivi ruoli e contratti. Nella configurazione
-            attuale possono rientrare, in particolare:
+            funzionamento del progetto, secondo i rispettivi ruoli e contratti. Tra i fornitori
+            utilizzati rientrano, in particolare:
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li>Supabase, per database, autenticazione e servizi applicativi;</li>
-            <li>Vercel, per hosting e deployment dell&apos;applicazione web;</li>
+            <li>Netlify, per hosting e deployment dell&apos;applicazione web;</li>
             <li>fornitori di dominio e posta elettronica utilizzati da AIPEL, inclusi Aruba e i servizi Google quando impiegati per la gestione delle comunicazioni;</li>
             <li>consulenti o soggetti istituzionali quando la comunicazione sia necessaria per obblighi di legge o per la tutela di diritti.</li>
           </ul>
