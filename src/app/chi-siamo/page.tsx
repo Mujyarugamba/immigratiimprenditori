@@ -91,7 +91,7 @@ export default function ChiSiamoPage() {
       <section className="mt-10 border-t border-black pt-8">
         <h2 className="text-2xl font-semibold tracking-tight text-black">Contatti</h2>
         <p className="mt-4 text-base leading-7 text-neutral-700">
-          <a href="mailto:info@aipel.it" className="underline underline-offset-4">info@aipel.it</a>
+          <a href="mailto:info@immigratiimprenditori.it" className="underline underline-offset-4">info@immigratiimprenditori.it</a>
         </p>
       </section>
     </main>
