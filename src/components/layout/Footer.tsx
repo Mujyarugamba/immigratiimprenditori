@@ -34,7 +34,7 @@ export function Footer() {
           <Link href="/chi-siamo">Chi siamo</Link>
           <Link href="/politica-editoriale">Politica editoriale</Link>
           <Link href="/sostieni">Sostieni il Centro Studi</Link>
-          <a href="mailto:info@aipel.it">Contatti</a>
+          <a href="mailto:info@immigratiimprenditori.it">Contatti</a>
         </div>
 
         <div>
