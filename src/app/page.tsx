@@ -233,7 +233,7 @@ export default async function HomePage() {
             <p className="hero-intro">
               Ricerca indipendente, dati verificati e testimonianze per capire
               come l&apos;imprenditoria migrante trasforma economie, territori e
-              relazioni tra Paesi.
+              relazioni, nei singoli Paesi e tra Paesi.
             </p>
             <div className="hero-actions">
               <Link href="/osservatorio" className="button button-gold">
