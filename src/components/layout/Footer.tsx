@@ -26,7 +26,7 @@ export function Footer() {
           <Link href="/contenuti">Analisi e ricerche</Link>
           <Link href="/eventi">Eventi</Link>
           <Link href="/dati-e-fonti">Fonti e metodologia</Link>
-          <Link href="/contribuisci">Racconta la tua storia</Link>
+          <Link href="/contribuisci">Partecipa</Link>
         </div>
 
         <div>
