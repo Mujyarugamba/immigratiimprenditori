@@ -18,11 +18,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const content = await getPublicContentBySlug(slug);
   if (!content) {
-    return { title: "Non trovato" };
+    return { title: "Non trovato", robots: { index: false, follow: false } };
   }
+
+  const canonical = `/contenuti/${content.slug}`;
+  const description = content.abstract ?? undefined;
+
   return {
     title: content.title,
-    description: content.abstract ?? undefined,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      title: content.title,
+      description,
+      publishedTime: content.published_at ?? undefined,
+      images: content.cover_url
+        ? [{ url: content.cover_url, alt: `Copertina di ${content.title}` }]
+        : undefined,
+    },
+    twitter: {
+      card: content.cover_url ? "summary_large_image" : "summary",
+      title: content.title,
+      description,
+      images: content.cover_url ? [content.cover_url] : undefined,
+    },
   };
 }
 
@@ -91,7 +112,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.cover_url}
-              alt=""
+              alt={`Copertina di ${content.title}`}
               className="border-line max-h-80 w-full rounded-md border object-cover"
             />
           </section>
