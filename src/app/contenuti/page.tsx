@@ -15,7 +15,7 @@ import {
 const section = sections["notizie-e-guide"];
 
 export const metadata: Metadata = {
-  title: "Notizie e guide",
+  title: "Analisi e ricerche",
   description: section.description,
 };
 
@@ -37,7 +37,7 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
   } catch {
     return (
       <ErrorState
-        title="Impossibile caricare i contenuti"
+        title="Impossibile caricare analisi e ricerche"
         description="Si è verificato un problema temporaneo. Riprova tra qualche istante."
         actionHref="/contenuti"
         actionLabel="Riprova"
@@ -47,7 +47,7 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
 
   return (
     <PublicListLayout
-      title="Notizie e guide"
+      title="Analisi e ricerche"
       description={section.description}
       basePath="/contenuti"
       filters={[
@@ -57,9 +57,7 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
           kind: "select",
           name: "in_evidenza",
           label: "Evidenza",
-          options: [
-            { value: "1", label: "Solo in evidenza" },
-          ],
+          options: [{ value: "1", label: "Solo in evidenza" }],
         },
       ]}
       filterValues={filterValues}
@@ -72,12 +70,10 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
           label(CONTENT_TYPES, item.type_code),
           ...(item.is_featured ? ["In evidenza"] : []),
         ],
-        meta: item.published_at
-          ? [formatItalianDate(item.published_at)]
-          : undefined,
+        meta: item.published_at ? [formatItalianDate(item.published_at)] : undefined,
       })}
-      emptyTitle="Nessuna notizia o guida trovata."
-      emptyDescription="Nessuna notizia o guida corrisponde ai filtri selezionati."
+      emptyTitle="Nessuna analisi o ricerca trovata."
+      emptyDescription="Nessun contenuto corrisponde ai filtri selezionati."
     />
   );
 }
