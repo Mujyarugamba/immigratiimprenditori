@@ -192,11 +192,11 @@ export default async function HomePage() {
           <div className="home-hero-copy">
             <p className="hero-kicker">Conoscenza. Dati. Persone.</p>
             <h1>
-              Imprenditoria migrante:
+              Migrazioni legali e imprenditoria
               <br />
-              <span>misurare</span> il cambiamento,
+              per una società <span>inclusiva</span>
               <br />
-              ascoltare le persone.
+              e competitiva.
             </h1>
             <p className="hero-intro">
               Ricerca indipendente, dati verificati e testimonianze per capire
