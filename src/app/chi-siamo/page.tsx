@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Chi siamo | Immigrati Imprenditori",
   description:
-    "Immigrati Imprenditori è l'Osservatorio e Centro Studi AIPEL dedicato all'imprenditoria migrante attraverso dati, analisi e testimonianze.",
+    "Immigrati Imprenditori è il Centro Studi AIPEL dedicato all'imprenditoria migrante attraverso dati, analisi e testimonianze.",
 };
 
 export default function ChiSiamoPage() {
@@ -17,8 +17,8 @@ export default function ChiSiamoPage() {
           Chi siamo
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-700">
-          ImmigratiImprenditori.it è l&apos;Osservatorio e Centro Studi promosso da AIPEL
-          per studiare, misurare e raccontare l&apos;imprenditoria migrante nel mondo.
+          ImmigratiImprenditori.it è il Centro Studi promosso da AIPEL per studiare,
+          misurare e raccontare l&apos;imprenditoria migrante nel mondo.
         </p>
       </header>
 
@@ -41,15 +41,16 @@ export default function ChiSiamoPage() {
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-black">AIPEL</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-black">Centro Studi e Osservatorio</h2>
         <div className="mt-4 max-w-3xl space-y-4 text-base leading-7 text-neutral-700">
           <p>
             AIPEL è l&apos;ente promotore e titolare del progetto Immigrati Imprenditori.
-            Nella fase iniziale il progetto opera come <strong className="text-black">Osservatorio e Centro Studi</strong>.
+            Immigrati Imprenditori opera come <strong className="text-black">Centro Studi</strong>.
           </p>
           <p>
-            Non è qualificato come testata giornalistica. Un&apos;eventuale evoluzione futura
-            sarà valutata separatamente e, se adottata, verrà comunicata in modo esplicito.
+            L&apos;<strong className="text-black">Osservatorio</strong> è la sezione del Centro Studi
+            dedicata a dati, indicatori, serie storiche, confronti territoriali e metodologia.
+            Il progetto non è una testata giornalistica registrata.
           </p>
         </div>
       </section>
@@ -81,7 +82,7 @@ export default function ChiSiamoPage() {
             la responsabilità della verifica, della selezione e della pubblicazione dei contenuti.
           </p>
           <p>
-            Donazioni, partnership e sponsorizzazioni non attribuiscono alcun diritto di
+            Sostegni, partnership e sponsorizzazioni non attribuiscono alcun diritto di
             intervento sulle scelte editoriali.
           </p>
         </div>
