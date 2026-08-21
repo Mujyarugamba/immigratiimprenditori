@@ -100,8 +100,8 @@ export default function CookiePage() {
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">7. Titolare e contatti</h2>
           <p className="mt-4">
-            Il titolare è AIPEL. Per informazioni:
-            {" "}<a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
+            Il titolare è AIPEL. Per informazioni sui cookie:
+            {" "}<a className="underline underline-offset-4" href="mailto:cookies@aipel.it">cookies@aipel.it</a>.
           </p>
           <p className="mt-3">
             Per il quadro completo dei trattamenti consulta la <Link href="/privacy" className="underline underline-offset-4">Privacy Policy</Link>.
