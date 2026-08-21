@@ -44,8 +44,7 @@ export default function ChiSiamoPage() {
         <h2 className="text-2xl font-semibold tracking-tight text-black">AIPEL</h2>
         <div className="mt-4 max-w-3xl space-y-4 text-base leading-7 text-neutral-700">
           <p>
-            AIPEL — Associazione degli Imprenditori e Liberi Professionisti Extracomunitari
-            in Lombardia — è l&apos;ente promotore e titolare del progetto Immigrati Imprenditori.
+            AIPEL è l&apos;ente promotore e titolare del progetto Immigrati Imprenditori.
             Nella fase iniziale il progetto opera come <strong className="text-black">Osservatorio e Centro Studi</strong>.
           </p>
           <p>
@@ -89,30 +88,10 @@ export default function ChiSiamoPage() {
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-black">Dati amministrativi</h2>
-        <dl className="mt-5 grid max-w-3xl gap-x-8 gap-y-5 sm:grid-cols-[12rem_1fr]">
-          <dt className="text-sm font-semibold text-black">Denominazione</dt>
-          <dd className="text-sm leading-6 text-neutral-700">
-            Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)
-          </dd>
-
-          <dt className="text-sm font-semibold text-black">Forma</dt>
-          <dd className="text-sm leading-6 text-neutral-700">Associazione non riconosciuta</dd>
-
-          <dt className="text-sm font-semibold text-black">Sede</dt>
-          <dd className="text-sm leading-6 text-neutral-700">Viale Molise 54, Milano</dd>
-
-          <dt className="text-sm font-semibold text-black">Codice fiscale</dt>
-          <dd className="text-sm leading-6 text-neutral-700">97342380157</dd>
-
-          <dt className="text-sm font-semibold text-black">Partita IVA</dt>
-          <dd className="text-sm leading-6 text-neutral-700">04222160964</dd>
-
-          <dt className="text-sm font-semibold text-black">Email</dt>
-          <dd className="text-sm leading-6 text-neutral-700">
-            <a href="mailto:info@aipel.it" className="underline underline-offset-4">info@aipel.it</a>
-          </dd>
-        </dl>
+        <h2 className="text-2xl font-semibold tracking-tight text-black">Contatti</h2>
+        <p className="mt-4 text-base leading-7 text-neutral-700">
+          <a href="mailto:info@aipel.it" className="underline underline-offset-4">info@aipel.it</a>
+        </p>
       </section>
     </main>
   );
