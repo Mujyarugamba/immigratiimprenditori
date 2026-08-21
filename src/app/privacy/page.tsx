@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Informativa sul trattamento dei dati personali di ImmigratiImprenditori.it.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
@@ -28,6 +29,9 @@ export default function PrivacyPage() {
           <h2 className="text-2xl font-semibold text-black">1. Titolare del trattamento</h2>
           <p className="mt-4">
             Il titolare del trattamento è <strong className="text-black">AIPEL</strong>, ente promotore del progetto ImmigratiImprenditori.it.
+          </p>
+          <p className="mt-3">
+            Codice fiscale: <strong className="text-black">97342380157</strong>. PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>.
           </p>
           <p className="mt-3">
             Contatto per informazioni e richieste privacy: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
