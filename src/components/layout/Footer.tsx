@@ -15,9 +15,8 @@ export function Footer() {
             />
           </div>
           <p>
-            Osservatorio e Centro Studi AIPEL dedicato all&apos;imprenditoria
-            migrante, alle sue traiettorie economiche e alle persone che la
-            costruiscono.
+            Centro Studi AIPEL dedicato all&apos;imprenditoria migrante, alle sue
+            traiettorie economiche e alle persone che la costruiscono.
           </p>
         </div>
 
@@ -27,14 +26,14 @@ export function Footer() {
           <Link href="/contenuti">Analisi e ricerche</Link>
           <Link href="/eventi">Eventi</Link>
           <Link href="/dati-e-fonti">Fonti e metodologia</Link>
-          <Link href="/contribuisci">Contribuisci</Link>
+          <Link href="/contribuisci">Racconta la tua storia</Link>
         </div>
 
         <div>
           <h2>Il Centro</h2>
           <Link href="/chi-siamo">Chi siamo</Link>
           <Link href="/politica-editoriale">Politica editoriale</Link>
-          <Link href="/sostieni">Sostieni l&apos;Osservatorio</Link>
+          <Link href="/sostieni">Sostieni il Centro Studi</Link>
           <a href="mailto:info@aipel.it">Contatti</a>
         </div>
 
