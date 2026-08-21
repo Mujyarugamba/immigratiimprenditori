@@ -27,9 +27,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-2xl font-semibold text-black">1. Titolare del trattamento</h2>
           <p className="mt-4">
-            Il titolare è <strong className="text-black">AIPEL — Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia</strong>,
-            associazione non riconosciuta, con sede in Viale Molise 54, Milano, codice fiscale
-            97342380157 e partita IVA 04222160964.
+            Il titolare del trattamento è <strong className="text-black">AIPEL</strong>, ente promotore del progetto ImmigratiImprenditori.it.
           </p>
           <p className="mt-3">
             Contatto per informazioni e richieste privacy: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
