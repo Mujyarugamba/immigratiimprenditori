@@ -5,7 +5,7 @@ const mainNav = [
   { label: "Analisi", href: "/contenuti" },
   { label: "Eventi", href: "/eventi" },
   { label: "Fonti e metodologia", href: "/dati-e-fonti" },
-  { label: "Contribuisci", href: "/contribuisci" },
+  { label: "Racconta la tua storia", href: "/contribuisci" },
 ] as const;
 
 export function Header() {
@@ -13,7 +13,7 @@ export function Header() {
     <header className="site-header">
       <div className="institutional-bar">
         <div className="site-container institutional-bar-inner">
-          <p>Centro Studi e Osservatorio sull&apos;imprenditoria migrante</p>
+          <p>Centro Studi sull&apos;imprenditoria migrante</p>
           <nav aria-label="Link istituzionali">
             <Link href="/chi-siamo">Chi siamo</Link>
             <Link href="/politica-editoriale">Politica editoriale</Link>
@@ -41,10 +41,6 @@ export function Header() {
               </Link>
             ))}
           </nav>
-
-          <Link href="/sostieni" className="header-support">
-            Sostieni
-          </Link>
         </div>
       </div>
     </header>
