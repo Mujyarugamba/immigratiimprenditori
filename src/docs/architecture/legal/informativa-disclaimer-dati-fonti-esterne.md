@@ -49,4 +49,4 @@ Materiali, marchi, dataset e documenti di terzi restano soggetti ai diritti, all
 
 Le informazioni pubblicate hanno finalità di studio, documentazione e informazione. Chi utilizza dati o contenuti per decisioni professionali, economiche, amministrative o giuridiche deve verificare la fonte originale e il contesto metodologico pertinente.
 
-Per segnalare un errore o proporre una fonte: **info@aipel.it**.
+Per segnalare un errore o proporre una fonte: **redazione@immigratiimprenditori.it**.
