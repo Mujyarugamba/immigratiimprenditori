@@ -26,9 +26,7 @@ export default function TerminiPage() {
         <section>
           <h2 className="text-2xl font-semibold text-black">1. Titolare del progetto</h2>
           <p className="mt-4">
-            ImmigratiImprenditori.it è un progetto di AIPEL — Associazione degli Imprenditori
-            e Liberi Professionisti Extracomunitari in Lombardia, associazione non riconosciuta,
-            con sede in Viale Molise 54, Milano, codice fiscale 97342380157 e partita IVA 04222160964.
+            ImmigratiImprenditori.it è un progetto promosso da AIPEL.
           </p>
           <p className="mt-3">
             Contatto: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
