@@ -12,7 +12,7 @@ function centroStudiLegalDocsDir(): string {
 }
 
 const SAFE_PUBLIC_FALLBACK =
-  "Le fonti utilizzate dal Centro Studi sono indicate nelle singole schede e nei contenuti pubblicati. Per segnalazioni o richieste di chiarimento: info@aipel.it.";
+  "Le fonti utilizzate dal Centro Studi sono indicate nelle singole schede e nei contenuti pubblicati. Per segnalazioni o richieste di chiarimento: redazione@immigratiimprenditori.it.";
 
 /** Loads CS-local legal and methodology markdown. */
 export function loadPublicLegalMarkdown(docId: LegalDocId): string {
