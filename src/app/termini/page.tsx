@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Termini di utilizzo",
-  description: "Termini di utilizzo di ImmigratiImprenditori.it, Osservatorio e Centro Studi AIPEL.",
+  description: "Termini di utilizzo di ImmigratiImprenditori.it, Centro Studi AIPEL.",
 };
 
 export default function TerminiPage() {
@@ -11,7 +11,7 @@ export default function TerminiPage() {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Documenti legali · aggiornamento 20 agosto 2026
+          Documenti legali · aggiornamento 21 agosto 2026
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
           Termini di utilizzo
@@ -36,12 +36,13 @@ export default function TerminiPage() {
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">2. Natura del servizio</h2>
           <p className="mt-4">
-            Il sito opera come Osservatorio e Centro Studi dedicato all&apos;imprenditoria migrante.
-            Offre dati, analisi, rapporti, fonti, eventi, storie e interviste e mette a disposizione
-            strumenti per inviare proposte alla redazione.
+            Immigrati Imprenditori opera come Centro Studi dedicato all&apos;imprenditoria migrante.
+            L&apos;Osservatorio è la sezione dedicata a dati, indicatori, serie storiche e metodologia.
+            Il sito offre inoltre analisi, rapporti, fonti, eventi, storie e interviste e mette a
+            disposizione strumenti per inviare proposte alla redazione.
           </p>
           <p className="mt-3">
-            Il progetto non è, nella configurazione attuale, una testata giornalistica registrata.
+            Il progetto non è una testata giornalistica registrata.
           </p>
         </section>
 
@@ -124,7 +125,7 @@ export default function TerminiPage() {
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">9. Dati, fonti e link esterni</h2>
           <p className="mt-4">
-            Il Centro Studi mira a indicare origine, periodo e metodologia dei dati utilizzati.
+            Il Centro Studi indica, quando pertinenti, origine, periodo e metodologia dei dati utilizzati.
             La presenza di un link verso una fonte esterna non implica controllo permanente del
             contenuto esterno né approvazione di tutte le posizioni espresse dal relativo sito.
           </p>
