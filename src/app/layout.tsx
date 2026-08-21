@@ -3,6 +3,7 @@ import { centroStudiConfig } from "@immigrati/product-config";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import "./globals.css";
+import "./responsive-overrides.css";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
