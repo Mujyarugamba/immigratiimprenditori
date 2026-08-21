@@ -16,8 +16,13 @@ import {
 const typeLabels: Record<string, string> = {
   analysis: "Analisi",
   article: "Analisi",
+  insight: "Approfondimento",
+  data_note: "Nota dati",
+  policy_brief: "Policy brief",
+  institutional_page: "Documento istituzionale",
   report: "Rapporto",
   research: "Ricerca",
+  research_report: "Rapporto di ricerca",
   interview: "Intervista",
   business_story: "Storia d'impresa",
   testimony: "Testimonianza",
@@ -52,6 +57,29 @@ function formatMetric(value: number) {
   return new Intl.NumberFormat("it-IT", {
     maximumFractionDigits: Number.isInteger(value) ? 0 : 1,
   }).format(value);
+}
+
+function formatMetricUnit(indicator: PublicIndicatorDetail) {
+  switch (indicator.unit_code) {
+    case "percent":
+      return "%";
+    case "eur":
+      return "euro";
+    case "eur_thousands":
+      return "migliaia di euro";
+    case "ratio":
+      return "rapporto";
+    case "index_points":
+      return "punti indice";
+    case "units":
+      return "unità";
+    default:
+      return indicator.unit_code || "valore indicatore";
+  }
+}
+
+function metricContext(value: PublicIndicatorDetail["values"][number]) {
+  return [value.territory_label, value.country_label].filter(Boolean).join(" · ");
 }
 
 function imageStyle(url: string | null | undefined) {
@@ -177,6 +205,10 @@ export default async function HomePage() {
   const featuredContents = contents.slice(1, 4);
   const storyContents = contents.slice(4, 8);
   const firstEvent = events[0];
+  const firstEventContext =
+    firstEvent?.next_edition?.city_text ??
+    firstEvent?.external_organization_label ??
+    null;
   const trendIndicator =
     metrics.find((indicator) => comparableSeries(indicator).length >= 2) ??
     metrics[0];
@@ -223,7 +255,7 @@ export default async function HomePage() {
             </h2>
             <p>
               {hero?.abstract ??
-                "Un centro studi internazionale per leggere i fenomeni economici senza perdere le storie delle persone."}
+                "Un Centro Studi per leggere i fenomeni economici senza perdere le storie delle persone."}
             </p>
             <Link href={hero ? `/contenuti/${hero.slug}` : "/contenuti"}>
               {hero ? "Leggi l'approfondimento" : "Esplora analisi e ricerche"} →
@@ -271,14 +303,8 @@ export default async function HomePage() {
                   </h3>
                   {firstEvent.summary ? <p>{firstEvent.summary}</p> : null}
                   <div className="event-date-block">
-                    <span>
-                      {formatDate(firstEvent.next_edition?.starts_at)}
-                    </span>
-                    <span>
-                      {firstEvent.next_edition?.city_text ??
-                        firstEvent.external_organization_label ??
-                        "Evento online / sede da consultare"}
-                    </span>
+                    <span>{formatDate(firstEvent.next_edition?.starts_at)}</span>
+                    {firstEventContext ? <span>{firstEventContext}</span> : null}
                   </div>
                   <Link href={`/eventi/${firstEvent.id}`} className="card-link">
                     Scopri l&apos;evento →
@@ -316,15 +342,17 @@ export default async function HomePage() {
           <div className="metrics-grid">
             {metrics.slice(0, 4).map((indicator) => {
               const latest = indicator.values[0];
+              const context = metricContext(latest);
               return (
                 <article key={indicator.id} className="metric-card">
                   <p>{indicator.title}</p>
                   <strong>{formatMetric(latest.numeric_value)}</strong>
                   <span className="metric-unit">
-                    {indicator.unit_code || "valore indicatore"}
+                    {formatMetricUnit(indicator)}
                   </span>
                   <span className="metric-source">
                     {new Date(latest.period_start).getFullYear()}
+                    {context ? ` · ${context}` : ""}
                     {latest.source_name ? ` · ${latest.source_name}` : ""}
                   </span>
                 </article>
