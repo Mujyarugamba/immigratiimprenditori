@@ -29,7 +29,10 @@ export default function TerminiPage() {
             ImmigratiImprenditori.it è un progetto promosso da AIPEL.
           </p>
           <p className="mt-3">
-            Contatto: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
+            Codice fiscale: <strong className="text-black">97342380157</strong>. PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>.
+          </p>
+          <p className="mt-3">
+            Contatto per informazioni sui termini: <a className="underline underline-offset-4" href="mailto:termini@aipel.it">termini@aipel.it</a>.
           </p>
         </section>
 
