@@ -164,9 +164,22 @@ includes("src/app/responsive-overrides.css", [
   "max-width: 100%",
   "flex-direction: column",
 ]);
+includes("src/app/[locale]/fonti/page.tsx", [
+  'href={`/${locale}/dati-e-fonti`}',
+  'href={`/${locale}/glossario`}',
+]);
 includes("e2e/public-readonly.spec.ts", [
   "automated accessibility structure gate",
   "all seven platform languages",
+  "go-live core interface renders across all seven platform languages",
+  "goLiveLocalizedCorePaths",
+  '"/dati-e-fonti"',
+  '"/fonti"',
+  '"/glossario"',
+  '"/open-data"',
+  '"/eventi"',
+  '"/storie"',
+  '"/contribuisci"',
   "canonical and hreflang",
   "Arabic RTL",
   "reflow without horizontal overflow",
