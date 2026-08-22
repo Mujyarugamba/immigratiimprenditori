@@ -151,14 +151,16 @@ includes("src/app/api/analytics/page-view/route.ts", [
 file("src/app/accessibility.css");
 includes("src/components/public/PublicListLayout.tsx", ["<main>", "</main>"]);
 includes("src/app/responsive-overrides.css", [
-  ".data-stories-grid,",
-  ".home-chart-head > *",
+  ".data-stories-grid > *,",
+  ".voices-panel,",
+  ".voices-placeholder",
   "width: 100%",
   "grid-template-columns: minmax(0, 1fr)",
   "flex-wrap: wrap",
-  "overflow: hidden",
-  ".institutional-bar,",
-  "overflow-x: hidden",
+  ".institutional-bar nav > label",
+  ".institutional-bar nav select",
+  "overflow-x: visible",
+  "overflow-wrap: anywhere",
   "max-width: 100%",
   "flex-direction: column",
 ]);
