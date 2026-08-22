@@ -80,6 +80,14 @@ includes("supabase/migrations/20260822210500_go_live_audit_analytics.sql", [
   "record_site_page_view",
   "log_editorial_content_activity",
 ]);
+includes("supabase/migrations/20260822211500_fix_public_rls_mfa_compatibility.sql", [
+  "geo_territories_public_read",
+  "migration_routes_public_read",
+  "author_profiles_public_read",
+  "using (is_active)",
+  "using (is_public)",
+  "revoke all on function public.access_is_editor() from anon",
+]);
 
 includes(".github/workflows/production-backup.yml", [
   "postgres:17-alpine",
@@ -110,7 +118,8 @@ includes("src/app/api/analytics/page-view/route.ts", [
   "PRIVACY_ANALYTICS_WRITE_ENABLED",
   "record_site_page_view",
   '"Cache-Control": "private, no-store"',
-  "origin !== requestUrl.origin",
+  "externalRequestOrigin",
+  "allowedOrigins.has(origin)",
 ]);
 
 // Accessibility, language, international SEO and RTL are enforced by browser gates.
