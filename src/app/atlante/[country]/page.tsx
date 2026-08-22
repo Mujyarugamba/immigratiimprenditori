@@ -94,30 +94,37 @@ export default async function AtlasCountryPage({ params }: PageProps) {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Osservatorio</p>
               <h2 className="mt-2 text-2xl font-semibold text-black">Dati disponibili</h2>
             </div>
-            <Link
-              href={`/esplora/dati?territorio=${encodeURIComponent(country.iso3)}`}
-              className="text-sm font-semibold underline underline-offset-4"
-            >
-              Esplora tutti i valori →
+            <Link href="/esplora/dati" className="text-sm font-semibold underline underline-offset-4">
+              Apri il Data Explorer →
             </Link>
           </div>
 
           <div className="mt-6 grid gap-px border border-black bg-black md:grid-cols-2">
             {detail.indicators.map(({ indicator, values }) => {
-              const latest = values[0];
+              const latestPeriod = values[0]?.period_start;
+              const latestValues = values.filter((value) => value.period_start === latestPeriod);
               return (
                 <article key={indicator.id} className="bg-white p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                    {new Date(latest.period_start).getFullYear()}
+                    {latestPeriod ? new Date(latestPeriod).getFullYear() : ""}
                   </p>
                   <h3 className="mt-2 text-xl font-semibold text-black">
                     <Link href={`/osservatorio/${indicator.slug}`}>{indicator.title}</Link>
                   </h3>
-                  <p className="mt-4 text-3xl font-semibold text-black">
-                    {formatExplorerValue(latest.numeric_value, indicator.unit_code, "it")}
-                  </p>
-                  <p className="mt-2 text-sm text-neutral-600">
-                    {latest.territory_label ?? country.name} · qualità {latest.quality_code}
+                  <div className="mt-4 space-y-4">
+                    {latestValues.map((value) => (
+                      <div key={value.id} className="border-t border-neutral-200 pt-3 first:border-t-0 first:pt-0">
+                        <p className="text-3xl font-semibold text-black">
+                          {formatExplorerValue(value.numeric_value, indicator.unit_code, "it")}
+                        </p>
+                        <p className="mt-1 text-sm text-neutral-600">
+                          {value.country_label ?? value.territory_label ?? country.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-xs text-neutral-500">
+                    Qualità: {latestValues[0]?.quality_code ?? "—"}
                   </p>
                   <Link
                     href={`/osservatorio/${indicator.slug}`}
