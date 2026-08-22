@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   evaluateNumberZeroReadiness,
+  isItalyTerritoryCode,
+  strongestInternationalComparisonTerritories,
   type NumberZeroReadiness,
   type NumberZeroSnapshot,
 } from "@/lib/editorial/launch-readiness";
@@ -23,9 +25,6 @@ export const INTERVIEW_WORKFLOW_STATUSES = [
   "closed",
 ] as const;
 
-const ITALY_TERRITORY_CODES = new Set(["IT", "ITA"]);
-const AGGREGATE_TERRITORY_CODES = new Set(["OECD37", "OECD"]);
-
 export type NumberZeroDashboard = {
   available: boolean;
   snapshot: NumberZeroSnapshot;
@@ -37,34 +36,6 @@ export type NumberZeroDashboard = {
   interviewWorkflowByStatus: Record<(typeof INTERVIEW_WORKFLOW_STATUSES)[number], number>;
   errors: string[];
 };
-
-function isComparableForeignTerritory(code: string | null): code is string {
-  if (!code) return false;
-  if (ITALY_TERRITORY_CODES.has(code)) return false;
-  if (code.startsWith("IT-")) return false;
-  if (AGGREGATE_TERRITORY_CODES.has(code)) return false;
-  return true;
-}
-
-function strongestInternationalComparison(
-  values: Array<{ indicator_id: string; territory_code: string | null }>,
-) {
-  const territoriesByIndicator = new Map<string, Set<string>>();
-
-  for (const value of values) {
-    if (!isComparableForeignTerritory(value.territory_code)) continue;
-    const territories = territoriesByIndicator.get(value.indicator_id) ?? new Set<string>();
-    territories.add(value.territory_code);
-    territoriesByIndicator.set(value.indicator_id, territories);
-  }
-
-  let strongest: string[] = [];
-  for (const territories of territoriesByIndicator.values()) {
-    const sorted = Array.from(territories).sort();
-    if (sorted.length > strongest.length) strongest = sorted;
-  }
-  return strongest;
-}
 
 function emptyInterviewWorkflowCounts() {
   return Object.fromEntries(
@@ -152,7 +123,7 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
     }
   }
 
-  const internationalTerritories = strongestInternationalComparison(values);
+  const internationalTerritories = strongestInternationalComparisonTerritories(values);
   const interviewWorkflowByStatus = emptyInterviewWorkflowCounts();
   for (const row of interviewWorkflowResult.data ?? []) {
     const status = row.workflow_status as (typeof INTERVIEW_WORKFLOW_STATUSES)[number];
@@ -163,7 +134,7 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
 
   const snapshot: NumberZeroSnapshot = {
     lombardyDataValues: values.filter((value) => value.territory_code === "IT-25").length,
-    italyDataValues: values.filter((value) => ITALY_TERRITORY_CODES.has(value.territory_code ?? "")).length,
+    italyDataValues: values.filter((value) => isItalyTerritoryCode(value.territory_code)).length,
     internationalComparisonTerritories: internationalTerritories.length,
     selectedReports: reportsResult.count ?? 0,
     publishedStoriesVoices: storiesResult.count ?? 0,
