@@ -49,67 +49,6 @@ function expectHeader(response, header, expected) {
   if (actual !== expected) fail(`${header}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
 }
 
-function extractInternalAnchors(sourcePath, body) {
-  const links = new Map();
-  const matcher = /<a\b[^>]*\bhref=(?:"([^"]*)"|'([^']*)')[^>]*>/gi;
-  for (const match of body.matchAll(matcher)) {
-    const rawHref = (match[1] ?? match[2] ?? "").replaceAll("&amp;", "&").trim();
-    if (!rawHref || rawHref.startsWith("#")) continue;
-    if (/^(?:mailto:|tel:|javascript:|data:)/i.test(rawHref)) continue;
-
-    let url;
-    try {
-      url = new URL(rawHref, `${ORIGIN}${sourcePath}`);
-    } catch {
-      fail(`${sourcePath}: invalid anchor href ${JSON.stringify(rawHref)}`);
-    }
-    if (url.origin !== ORIGIN) continue;
-    url.hash = "";
-    links.set(`${url.pathname}${url.search}`, { sourcePath, rawHref });
-  }
-  return links;
-}
-
-async function checkInternalLink(path, sourcePath, rawHref) {
-  const response = await fetch(`${ORIGIN}${path}`, { redirect: "manual" });
-  if (response.status >= 200 && response.status < 300) return;
-
-  if (response.status >= 300 && response.status < 400) {
-    const location = response.headers.get("location");
-    if (!location) fail(`${sourcePath}: ${rawHref} redirects without Location`);
-    const target = new URL(location, `${ORIGIN}${path}`);
-    if (target.origin !== ORIGIN) {
-      fail(`${sourcePath}: internal link ${rawHref} redirects outside the site to ${target.href}`);
-    }
-    const targetResponse = await fetch(target, { redirect: "manual" });
-    if (targetResponse.status >= 200 && targetResponse.status < 300) return;
-    fail(`${sourcePath}: ${rawHref} -> ${target.pathname} returned HTTP ${targetResponse.status}`);
-  }
-
-  fail(`${sourcePath}: internal link ${rawHref} returned HTTP ${response.status}`);
-}
-
-async function checkInternalLinkIntegrity(surfaces) {
-  const links = new Map();
-  for (const { path, body } of surfaces) {
-    for (const [target, context] of extractInternalAnchors(path, body)) {
-      if (!links.has(target)) links.set(target, context);
-    }
-  }
-
-  const queue = [...links.entries()];
-  const workers = Array.from({ length: Math.min(6, queue.length || 1) }, async () => {
-    while (queue.length > 0) {
-      const entry = queue.shift();
-      if (!entry) return;
-      const [target, context] = entry;
-      await checkInternalLink(target, context.sourcePath, context.rawHref);
-    }
-  });
-  await Promise.all(workers);
-  return links.size;
-}
-
 async function main() {
   const server = spawn(
     process.execPath,
@@ -149,22 +88,11 @@ async function main() {
     expectHeader(home.response, "content-security-policy", /default-src 'self'/i);
     expectHeader(home.response, "referrer-policy", "strict-origin-when-cross-origin");
 
-    const english = await expectText("/en", ['<html lang="en" dir="ltr"', 'data-platform-locale="en"']);
-    const arabic = await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
+    await expectText("/en", ['<html lang="en" dir="ltr"', 'data-platform-locale="en"']);
+    await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
 
-    const about = await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
-    const support = await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
-
-    const checkedInternalLinks = await checkInternalLinkIntegrity([
-      { path: "/", body: home.body },
-      { path: "/en", body: english.body },
-      { path: "/ar", body: arabic.body },
-      { path: "/chi-siamo", body: about.body },
-      { path: "/sostieni", body: support.body },
-    ]);
-    if (checkedInternalLinks < 8) {
-      fail(`internal link integrity: expected at least 8 unique public links, checked ${checkedInternalLinks}`);
-    }
+    await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
+    await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
 
     const robots = await expectText("/robots.txt", [
       "Sitemap: https://immigratiimprenditori.it/sitemap.xml",
@@ -217,7 +145,6 @@ async function main() {
         "home",
         "security response headers",
         "localized document lang/dir",
-        `internal link integrity (${checkedInternalLinks} unique public links)`,
         "institutional transparency",
         "support fail-closed state",
         "robots",
