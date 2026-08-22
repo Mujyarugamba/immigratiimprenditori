@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { getPublicSupabaseEnv } from "@/lib/env";
 import { PLATFORM_LOCALES } from "@/lib/i18n/config";
+import { ATLAS_COUNTRIES } from "@/lib/atlas/scope";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 
@@ -115,7 +116,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const [contentsResult, indicatorsResult, eventsResult] = await Promise.all([
+    const [contentsResult, indicatorsResult, eventsResult, valuesResult] = await Promise.all([
       supabase
         .from("contents")
         .select("slug, updated_at, published_at")
@@ -124,7 +125,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq("visibility_status", "public"),
       supabase
         .from("observatory_indicators")
-        .select("slug, updated_at, published_at")
+        .select("id, slug, updated_at, published_at")
         .eq("publication_status", "published")
         .in("operational_status", ["active", "deprecated"]),
       supabase
@@ -133,6 +134,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq("editorial_status", "ready")
         .eq("publication_status", "published")
         .eq("visibility_status", "public"),
+      supabase
+        .from("observatory_indicator_values")
+        .select("indicator_id, territory_code, updated_at, published_at")
+        .eq("status", "final")
+        .is("withdrawn_at", null),
     ]);
 
     const contents: MetadataRoute.Sitemap = (contentsResult.data ?? []).map((item) => ({
@@ -142,7 +148,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    const indicators: MetadataRoute.Sitemap = (indicatorsResult.data ?? []).map((item) => ({
+    const indicatorRows = indicatorsResult.data ?? [];
+    const indicators: MetadataRoute.Sitemap = indicatorRows.map((item) => ({
       url: `${SITE_URL}/osservatorio/${item.slug}`,
       lastModified: item.updated_at ?? item.published_at ?? undefined,
       changeFrequency: "monthly",
@@ -156,7 +163,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.75,
     }));
 
-    return [...base, ...contents, ...indicators, ...events];
+    const publishedIndicatorIds = new Set(indicatorRows.map((item) => item.id));
+    const atlasEvidence = new Map<string, string | undefined>();
+    for (const value of valuesResult.data ?? []) {
+      if (!publishedIndicatorIds.has(value.indicator_id)) continue;
+      const code = value.territory_code?.toUpperCase();
+      if (!code) continue;
+      const country = ATLAS_COUNTRIES.find(
+        (candidate) => candidate.code === code || candidate.iso3 === code,
+      );
+      if (!country) continue;
+      const modified = value.updated_at ?? value.published_at ?? undefined;
+      const previous = atlasEvidence.get(country.slug);
+      if (!previous || (modified && modified > previous)) {
+        atlasEvidence.set(country.slug, modified);
+      }
+    }
+
+    const atlasCountries: MetadataRoute.Sitemap = Array.from(atlasEvidence).map(
+      ([slug, lastModified]) => ({
+        url: `${SITE_URL}/atlante/${slug}`,
+        lastModified,
+        changeFrequency: "monthly",
+        priority: 0.82,
+      }),
+    );
+
+    return [...base, ...contents, ...indicators, ...events, ...atlasCountries];
   } catch {
     return base;
   }
