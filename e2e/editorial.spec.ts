@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { loginViaUi } from "./helpers/auth";
 import {
@@ -12,6 +13,38 @@ import {
 } from "./helpers/supabase";
 
 const PASS = "P6E2E!pass9";
+const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+function decodeBase32(value: string): Buffer {
+  let bits = "";
+  for (const raw of value.replace(/=+$/g, "").toUpperCase()) {
+    const index = BASE32_ALPHABET.indexOf(raw);
+    if (index < 0) throw new Error(`Invalid base32 TOTP secret character: ${raw}`);
+    bits += index.toString(2).padStart(5, "0");
+  }
+
+  const bytes: number[] = [];
+  for (let offset = 0; offset + 8 <= bits.length; offset += 8) {
+    bytes.push(Number.parseInt(bits.slice(offset, offset + 8), 2));
+  }
+  return Buffer.from(bytes);
+}
+
+function totpCode(secret: string, now = Date.now()): string {
+  const counter = BigInt(Math.floor(now / 1000 / 30));
+  const counterBuffer = Buffer.alloc(8);
+  counterBuffer.writeBigUInt64BE(counter);
+
+  const digest = createHmac("sha1", decodeBase32(secret)).update(counterBuffer).digest();
+  const offset = digest[digest.length - 1] & 0x0f;
+  const binary =
+    ((digest[offset] & 0x7f) << 24) |
+    ((digest[offset + 1] & 0xff) << 16) |
+    ((digest[offset + 2] & 0xff) << 8) |
+    (digest[offset + 3] & 0xff);
+
+  return String(binary % 1_000_000).padStart(6, "0");
+}
 
 test.describe("Authenticated editorial UI", () => {
   const users: string[] = [];
@@ -79,9 +112,7 @@ test.describe("Authenticated editorial UI", () => {
     ).toBeVisible();
   });
 
-  test("editor can log in, create a ready draft, publish it, and open the public page", async ({
-    page,
-  }) => {
+  test("editor must complete TOTP MFA before creating and publishing content", async ({ page }) => {
     const env = loadStatusEnv();
     const stamp = Date.now();
     const email = `p6editor-${stamp}@example.invalid`;
@@ -94,7 +125,30 @@ test.describe("Authenticated editorial UI", () => {
       p_role_code: "redattore",
     });
 
-    await loginViaUi(page, email, PASS);
+    await page.goto("/accedi?next=%2Fapp%2Fredazione");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(PASS);
+    await page.getByRole("button", { name: "Accedi" }).click();
+
+    await expect(page).toHaveURL(/\/app\/mfa\?next=%2Fapp%2Fredazione/, {
+      timeout: 45_000,
+    });
+    await expect(page.getByRole("heading", { name: "Verifica in due passaggi" })).toBeVisible();
+
+    // Server-side guard: a direct redazione request at AAL1 must return to MFA,
+    // not expose the privileged area and not misclassify the assigned role.
+    await page.goto("/app/redazione");
+    await expect(page).toHaveURL(/\/app\/mfa\?next=%2Fapp%2Fredazione/, {
+      timeout: 30_000,
+    });
+
+    await page.getByRole("button", { name: "Aggiungi autenticatore" }).click();
+    const secret = (await page.locator("code").textContent())?.trim() ?? "";
+    expect(secret.length).toBeGreaterThan(10);
+
+    await page.locator("#mfa-enroll-code").fill(totpCode(secret));
+    await page.getByRole("button", { name: "Verifica e attiva" }).click();
+    await expect(page).toHaveURL(/\/app\/redazione$/, { timeout: 45_000 });
 
     await page.goto("/app/redazione/contenuti/nuovo");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -102,7 +156,7 @@ test.describe("Authenticated editorial UI", () => {
     const title = `P6 E2E Content ${stamp}`;
     await page.locator('select[name="type_code"]').selectOption({ index: 1 });
     await page.getByRole("textbox", { name: "Titolo", exact: true }).fill(title);
-    await page.locator("#body").fill("Corpo editoriale E2E P6 con pubblicazione verificata dal browser.");
+    await page.locator("#body").fill("Corpo editoriale E2E P6 con pubblicazione verificata dal browser dopo MFA AAL2.");
     await page.getByRole("button", { name: "Crea contenuto" }).click();
     await page.waitForURL(/\/app\/redazione\/contenuti\/[0-9a-f-]{36}/i, {
       timeout: 45_000,
