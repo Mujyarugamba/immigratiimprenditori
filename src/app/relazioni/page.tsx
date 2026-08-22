@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPublicKnowledgeSnapshot } from "@/lib/data/public/knowledge";
+import {
+  getPublicKnowledgeSnapshot,
+  knowledgeNodeRelationalHref,
+} from "@/lib/data/public/knowledge";
 
 export const metadata: Metadata = {
   title: "Relazioni tra dati e conoscenza | Centro Studi",
@@ -33,8 +36,7 @@ export default async function RelazioniPage() {
           Relazioni tra dati e conoscenza
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Questa vista collega soltanto entità già sostenute da dati pubblicati: Paesi, indicatori, settori e rotte.
-          Le relazioni sono derivate dalle strutture informative del Centro Studi e rimandano sempre alle relative schede.
+          Questa vista collega soltanto entità già sostenute da dati pubblicati: Paesi, indicatori, settori e rotte. Ogni entità dispone ora di una pagina relazionale dedicata per attraversare il grafo senza perdere il collegamento alla scheda originale.
         </p>
       </header>
 
@@ -59,11 +61,11 @@ export default async function RelazioniPage() {
             const to = nodeMap.get(edge.to)!;
             return (
               <article key={`${edge.from}-${edge.predicate}-${edge.to}-${index}`} className="grid gap-2 py-5 md:grid-cols-[1fr_auto_1fr] md:items-center">
-                <Link href={from.href} className="font-semibold underline underline-offset-4">
+                <Link href={knowledgeNodeRelationalHref(from)} className="font-semibold underline underline-offset-4">
                   {from.label}
                 </Link>
                 <span className="text-sm text-neutral-500">{PREDICATE_LABEL[edge.predicate]}</span>
-                <Link href={to.href} className="font-semibold underline underline-offset-4 md:text-right">
+                <Link href={knowledgeNodeRelationalHref(to)} className="font-semibold underline underline-offset-4 md:text-right">
                   {to.label}
                 </Link>
               </article>
@@ -79,6 +81,7 @@ export default async function RelazioniPage() {
         <Link href="/atlante" className="underline underline-offset-4">Atlante →</Link>
         <Link href="/esplora/dati" className="underline underline-offset-4">Data Explorer →</Link>
         <Link href="/timeline" className="underline underline-offset-4">Timeline →</Link>
+        <Link href="/api/v1/graph" className="underline underline-offset-4">API Knowledge Graph →</Link>
       </div>
     </main>
   );
