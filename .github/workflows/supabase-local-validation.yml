@@ -11,6 +11,7 @@ on:
       - "supabase/standalone-evolutions/**"
       - "supabase/migrations/**"
       - "scripts/ci/supabase-security-smoke.sql"
+      - "scripts/ci/rate-limit-smoke.sql"
       - ".github/workflows/supabase-local-validation.yml"
 
 permissions:
@@ -87,6 +88,14 @@ jobs:
           psql "postgresql://postgres@127.0.0.1:54322/postgres" \
             -v ON_ERROR_STOP=1 \
             -f scripts/ci/supabase-security-smoke.sql
+
+      - name: Persistent rate limit security smoke
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/ci/rate-limit-smoke.sql
 
       - name: Stop ephemeral local stack
         if: always()
