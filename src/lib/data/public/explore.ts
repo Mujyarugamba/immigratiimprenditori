@@ -140,14 +140,45 @@ export async function getExplorerSnapshot(): Promise<ExplorerSnapshot> {
   };
 }
 
-export function formatExplorerValue(value: number, unitCode: string) {
-  const formatted = new Intl.NumberFormat("it-IT", {
+const NUMBER_LOCALES: Record<string, string> = {
+  it: "it-IT",
+  en: "en-GB",
+  fr: "fr-FR",
+  es: "es-ES",
+  de: "de-DE",
+  ar: "ar",
+  zh: "zh-CN",
+};
+
+const UNIT_LABELS: Record<string, Record<string, string>> = {
+  eur_thousands: {
+    it: "mila €",
+    en: "thousand €",
+    fr: "milliers d'€",
+    es: "miles de €",
+    de: "Tsd. €",
+    ar: "ألف €",
+    zh: "千欧元",
+  },
+  index_points: {
+    it: "punti",
+    en: "points",
+    fr: "points",
+    es: "puntos",
+    de: "Punkte",
+    ar: "نقطة",
+    zh: "点",
+  },
+};
+
+export function formatExplorerValue(value: number, unitCode: string, locale = "it") {
+  const formatted = new Intl.NumberFormat(NUMBER_LOCALES[locale] ?? locale, {
     maximumFractionDigits: Number.isInteger(value) ? 0 : 1,
   }).format(value);
 
   if (unitCode === "percent") return `${formatted}%`;
   if (unitCode === "eur") return `${formatted} €`;
-  if (unitCode === "eur_thousands") return `${formatted} mila €`;
-  if (unitCode === "index_points") return `${formatted} punti`;
+  const localizedUnit = UNIT_LABELS[unitCode]?.[locale];
+  if (localizedUnit) return `${formatted} ${localizedUnit}`;
   return formatted;
 }
