@@ -36,11 +36,26 @@ export default async function MandatoryMfaPage({ searchParams }: PageProps) {
   if (!session.isActiveAccount) {
     redirect(`/accedi?error=account&next=${encodeURIComponent(next)}`);
   }
-  if (!session.isEditor && !session.isApplicationAdmin) {
+
+  const supabase = await createClient();
+
+  // These helpers intentionally check only assignment, not AAL2 authorization.
+  // The mandatory MFA page must remain reachable from a fresh AAL1 password
+  // session, otherwise a privileged user could be locked out before enrolling
+  // or verifying the second factor.
+  const [editorAssigned, adminAssigned] = await Promise.all([
+    supabase.rpc("access_is_editor_assigned"),
+    supabase.rpc("access_is_application_admin_assigned"),
+  ]);
+
+  if (
+    editorAssigned.error ||
+    adminAssigned.error ||
+    !Boolean(editorAssigned.data || adminAssigned.data)
+  ) {
     redirect(`/accedi?error=role&next=${encodeURIComponent(next)}`);
   }
 
-  const supabase = await createClient();
   const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (!assurance.error && assurance.data.currentLevel === "aal2") {
     redirect(next);
