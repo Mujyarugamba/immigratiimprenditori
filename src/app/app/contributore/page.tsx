@@ -3,11 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 
 const STATUS_LABEL: Record<string, string> = {
   new: "Ricevuta",
-  triage: "In valutazione",
-  in_review: "In revisione",
-  accepted: "Accettata",
+  to_review: "Da valutare",
+  needs_research: "In approfondimento",
+  assigned: "Assegnata",
+  draft_created: "Bozza redazionale creata",
   rejected: "Non accolta",
-  published: "Pubblicata",
   archived: "Archiviata",
 };
 
@@ -31,9 +31,14 @@ export default async function ContributorPage() {
             ogni contributo resta soggetto a verifica e revisione della redazione.
           </p>
         </div>
-        <Link href="/contribuisci" className="border border-black px-4 py-2 text-sm font-semibold">
-          Nuova proposta
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/app/contributore/profilo" className="border border-black px-4 py-2 text-sm font-semibold">
+            Profilo
+          </Link>
+          <Link href="/contribuisci" className="border border-black bg-black px-4 py-2 text-sm font-semibold text-white">
+            Nuova proposta
+          </Link>
+        </div>
       </section>
 
       <section className="mt-8">
@@ -58,7 +63,7 @@ export default async function ContributorPage() {
               </div>
               <div className="md:text-right">
                 <span className="inline-block border border-black px-3 py-1 text-xs font-semibold">
-                  {STATUS_LABEL[item.status] ?? item.status}
+                  {STATUS_LABEL[item.status] ?? item.status.replaceAll("_", " ")}
                 </span>
               </div>
             </article>
