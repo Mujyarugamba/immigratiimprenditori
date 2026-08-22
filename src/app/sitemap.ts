@@ -21,6 +21,7 @@ const publicRoutes = [
   "/esplora/settori",
   "/esplora/autori",
   "/open-data",
+  "/open-data/api",
   "/fonti",
   "/glossario",
   "/dati-e-fonti",
