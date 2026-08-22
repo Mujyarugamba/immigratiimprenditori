@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
+import { languageAlternates } from "@/lib/i18n/seo";
 import { listPublicIndicators } from "@/lib/data/public/observatory";
 
 const descriptions = {
@@ -23,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: NAV_MESSAGES[locale].observatory,
     description: descriptions[locale],
-    alternates: { canonical: `/${locale}/osservatorio` },
+    alternates: { canonical: `/${locale}/osservatorio`, languages: languageAlternates("/osservatorio") },
   };
 }
 
@@ -32,6 +34,7 @@ export default async function LocalizedObservatoryPage({ params }: Props) {
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = NAV_MESSAGES[locale];
   const core = CORE_MESSAGES[locale];
+  const open = COLLECTION_MESSAGES[locale].open;
   const result = await listPublicIndicators();
 
   return (
@@ -49,14 +52,14 @@ export default async function LocalizedObservatoryPage({ params }: Props) {
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{indicator.code}</p>
             <h2 className="mt-2 text-xl font-semibold leading-7 text-black">{indicator.title}</h2>
             <p className="mt-3 flex-1 text-sm leading-6 text-neutral-700">{indicator.description}</p>
-            <Link href={`/${locale}/osservatorio/${indicator.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">Open →</Link>
+            <Link href={`/${locale}/osservatorio/${indicator.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} →</Link>
           </article>
         ))}
       </div>
 
       <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold">
-        <Link href="/esplora/dati" className="underline underline-offset-4">{core.dataExplorer} →</Link>
-        <Link href="/open-data" className="underline underline-offset-4">{core.openData} →</Link>
+        <Link href={`/${locale}/esplora/dati`} className="underline underline-offset-4">{core.dataExplorer} →</Link>
+        <Link href={`/${locale}/open-data`} className="underline underline-offset-4">{core.openData} →</Link>
       </div>
     </main>
   );
