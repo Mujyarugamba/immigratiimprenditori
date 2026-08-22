@@ -57,6 +57,26 @@ svg {
     width: min(100% - 24px, 1180px);
   }
 
+  .primary-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .brand-link {
+    min-width: 0;
+  }
+
+  .brand-logo {
+    width: min(170px, 100%);
+  }
+
+  .header-support {
+    min-height: 38px;
+    padding-inline: 10px;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
   .home-hero-inner {
     padding-block: 40px;
   }
