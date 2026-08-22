@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 type SearchKind = "all" | SearchResult["kind"];
 
 type Props = {
-  searchParams: Promise<{ q?: string; tipo?: string }>;
+  searchParams: Promise<{ q?: string; tipo?: string; anno?: string }>;
 };
 
 const labels = {
@@ -25,12 +25,31 @@ function normalizeKind(value: string | undefined): SearchKind {
   return "all";
 }
 
+function normalizeYear(value: string | undefined) {
+  return /^\d{4}$/.test(value ?? "") ? value! : "all";
+}
+
 export default async function CercaPage({ searchParams }: Props) {
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const kind = normalizeKind(params.tipo);
+  const year = normalizeYear(params.anno);
   const allResults = q.length >= 2 ? await searchPublicSite(q) : [];
-  const results = kind === "all" ? allResults : allResults.filter((result) => result.kind === kind);
+  const years = Array.from(
+    new Set(
+      allResults
+        .map((result) => result.publishedAt ? String(new Date(result.publishedAt).getFullYear()) : null)
+        .filter((value): value is string => Boolean(value) && value !== "NaN"),
+    ),
+  ).sort((a, b) => Number(b) - Number(a));
+  const results = allResults.filter((result) => {
+    if (kind !== "all" && result.kind !== kind) return false;
+    if (year !== "all") {
+      if (!result.publishedAt) return false;
+      if (String(new Date(result.publishedAt).getFullYear()) !== year) return false;
+    }
+    return true;
+  });
 
   const counts = allResults.reduce(
     (acc, result) => {
@@ -47,11 +66,11 @@ export default async function CercaPage({ searchParams }: Props) {
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">Cerca</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
           Cerca contemporaneamente tra contenuti editoriali, indicatori dell&apos;Osservatorio ed eventi pubblicati.
-          I risultati sono ordinati per pertinenza e poi per data.
+          I risultati sono ordinati per pertinenza e poi per data, con filtri per tipo e anno.
         </p>
       </header>
 
-      <form method="get" className="mt-8 grid max-w-4xl gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
+      <form method="get" className="mt-8 grid max-w-5xl gap-3 md:grid-cols-[minmax(0,1fr)_11rem_8rem_auto]">
         <label className="sr-only" htmlFor="site-search">Cerca nel Centro Studi</label>
         <input
           id="site-search"
@@ -69,6 +88,11 @@ export default async function CercaPage({ searchParams }: Props) {
           <option value="indicator">Indicatori</option>
           <option value="content">Contenuti</option>
           <option value="event">Eventi</option>
+        </select>
+        <label className="sr-only" htmlFor="search-year">Anno</label>
+        <select id="search-year" name="anno" defaultValue={year} className="border border-black bg-white px-3 py-3">
+          <option value="all">Tutti gli anni</option>
+          {years.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
         <button type="submit" className="border border-black bg-black px-5 py-3 text-sm font-semibold text-white">Cerca</button>
       </form>
@@ -93,10 +117,13 @@ export default async function CercaPage({ searchParams }: Props) {
                 <h3 className="mt-2 text-xl font-semibold text-black">
                   <Link href={result.href} className="underline-offset-4 hover:underline">{result.title}</Link>
                 </h3>
+                {result.publishedAt ? (
+                  <p className="mt-2 text-xs text-neutral-500">{new Date(result.publishedAt).getFullYear()}</p>
+                ) : null}
                 {result.excerpt ? <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{result.excerpt}</p> : null}
               </article>
             ))}
-            {results.length === 0 ? <p className="py-8 text-neutral-600">Nessun risultato pubblicato corrisponde alla ricerca e al filtro selezionato.</p> : null}
+            {results.length === 0 ? <p className="py-8 text-neutral-600">Nessun risultato pubblicato corrisponde alla ricerca e ai filtri selezionati.</p> : null}
           </div>
         </section>
       ) : null}
