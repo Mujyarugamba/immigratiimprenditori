@@ -153,10 +153,12 @@ includes("src/components/public/PublicListLayout.tsx", ["<main>", "</main>"]);
 includes("src/app/responsive-overrides.css", [
   ".data-stories-grid,",
   ".home-chart-head > *",
+  "width: 100%",
+  "grid-template-columns: minmax(0, 1fr)",
   "flex-wrap: wrap",
   "overflow: hidden",
   ".institutional-bar,",
-  "overflow-x: clip",
+  "overflow-x: hidden",
   "max-width: 100%",
   "flex-direction: column",
 ]);
