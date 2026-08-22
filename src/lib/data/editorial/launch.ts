@@ -23,18 +23,6 @@ export type NumberZeroDashboard = {
   errors: string[];
 };
 
-function emptySnapshot(): NumberZeroSnapshot {
-  return {
-    lombardyDataValues: 0,
-    italyDataValues: 0,
-    internationalComparisonTerritories: 0,
-    selectedReports: 0,
-    publishedStoriesVoices: 0,
-    publishedEvents: 0,
-    interviewCandidatesInResearch: 0,
-  };
-}
-
 export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
   const supabase = await createClient();
   const errors: string[] = [];
@@ -109,7 +97,7 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
         .map((value) => value.territory_code)
         .filter(
           (code): code is string =>
-            Boolean(code) && code !== "IT" && !code.startsWith("IT-"),
+            code !== null && code !== "" && code !== "IT" && !code.startsWith("IT-"),
         ),
     ),
   ).sort();
