@@ -71,7 +71,10 @@ test.describe("Authenticated editorial UI", () => {
 
     await page.goto("/app/redazione");
     await expect(page).toHaveURL(/\/accedi\?error=role/, { timeout: 30_000 });
-    await expect(page.getByRole("heading", { name: /Accedi/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Accesso redazione" })).toBeVisible();
+    await expect(page.getByRole("alert")).toContainText(
+      "Questo account non dispone del ruolo richiesto per questa area.",
+    );
   });
 
   test("editor can log in, create a ready draft, publish it, and open the public page", async ({
