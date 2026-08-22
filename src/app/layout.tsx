@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { centroStudiConfig } from "@immigrati/product-config";
+import { PrivacyFriendlyAnalytics } from "@/components/analytics/PrivacyFriendlyAnalytics";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { SkipLink } from "@/components/layout/SkipLink";
 import { DEFAULT_LOCALE, getPlatformLanguage, isPlatformLocale } from "@/lib/i18n/config";
+import { enabledInstitutionalSocialChannels } from "@/lib/social/channels";
 import "./globals.css";
 import "./responsive-overrides.css";
+import "./editorial-identity.css";
+import "./accessibility.css";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
@@ -62,6 +67,9 @@ export const metadata: Metadata = {
 
 function structuredData(locale: string) {
   const searchPath = locale === DEFAULT_LOCALE ? "/cerca" : `/${locale}/cerca`;
+  const verifiedSocialUrls = enabledInstitutionalSocialChannels().map(
+    (channel) => channel.plannedUrl,
+  );
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -76,6 +84,7 @@ function structuredData(locale: string) {
           name: "AIPEL",
         },
         email: "info@immigratiimprenditori.it",
+        sameAs: verifiedSocialUrls.length ? verifiedSocialUrls : undefined,
       },
       {
         "@type": "WebSite",
@@ -111,9 +120,13 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
+        <SkipLink />
         <Header />
-        {children}
+        <div id="contenuto-principale" tabIndex={-1}>
+          {children}
+        </div>
         <Footer />
+        <PrivacyFriendlyAnalytics />
       </body>
     </html>
   );

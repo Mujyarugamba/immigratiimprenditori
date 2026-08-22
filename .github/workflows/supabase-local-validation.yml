@@ -1,0 +1,232 @@
+name: Supabase local migration validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - feature/institutional-identity
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "supabase/baseline/**"
+      - "supabase/standalone-evolutions/**"
+      - "supabase/migrations/**"
+      - "scripts/ci/supabase-security-smoke.sql"
+      - "scripts/ci/rate-limit-smoke.sql"
+      - "scripts/ci/go-live-db-smoke.sql"
+      - "scripts/ci/backup-archive-smoke.sh"
+      - "scripts/ci/auth-integration-smoke.mjs"
+      - "src/lib/auth/**"
+      - "src/lib/supabase/**"
+      - "src/lib/export/**"
+      - "src/lib/data/public/authors.ts"
+      - "src/lib/env.ts"
+      - "src/components/app/MfaSecurityPanel.tsx"
+      - "src/components/analytics/**"
+      - "src/app/layout.tsx"
+      - "src/app/accedi/**"
+      - "src/app/api/analytics/**"
+      - "src/app/api/open-data/**"
+      - "src/app/app/mfa/**"
+      - "src/app/app/redazione/**"
+      - "src/app/autori/**"
+      - "src/app/esplora/autori/**"
+      - "e2e/editorial.spec.ts"
+      - "e2e/go-live-local.spec.ts"
+      - "e2e/public-readonly.spec.ts"
+      - "e2e/public-smoke.spec.ts"
+      - "e2e/helpers/auth.ts"
+      - "e2e/helpers/supabase.ts"
+      - "playwright.auth-ci.config.ts"
+      - "playwright.public.config.ts"
+      - "docs/roadmap/EXECUTION-MASTER.md"
+      - "docs/roadmap/ROADMAP-110-PRIORITIES.md"
+      - "docs/security/PRODUCTION-READINESS.md"
+      - "docs/security/BACKUP-RECOVERY.md"
+      - ".github/workflows/production-backup.yml"
+      - ".github/workflows/supabase-local-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-local-database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Initialize ephemeral local config
+        run: supabase init
+
+      - name: Enable TOTP MFA in ephemeral local Auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("supabase/config.toml")
+          text = path.read_text(encoding="utf-8")
+          section = re.compile(r"(?ms)^(\[auth\.mfa\.totp\]\n)(.*?)(?=^\[|\Z)")
+          match = section.search(text)
+          if not match:
+              raise SystemExit("Generated Supabase config is missing [auth.mfa.totp]")
+
+          block = match.group(2)
+          for key in ("enroll_enabled", "verify_enabled"):
+              block, count = re.subn(
+                  rf"(?m)^{key}\s*=\s*(?:true|false)\s*$",
+                  f"{key} = true",
+                  block,
+              )
+              if count != 1:
+                  raise SystemExit(f"Expected exactly one {key} flag in [auth.mfa.totp], found {count}")
+
+          text = text[: match.start(2)] + block + text[match.end(2) :]
+          path.write_text(text, encoding="utf-8")
+
+          verified = section.search(text)
+          if not verified:
+              raise SystemExit("Unable to re-read [auth.mfa.totp] after update")
+          verified_block = verified.group(2)
+          for expected in ("enroll_enabled = true", "verify_enabled = true"):
+              if expected not in verified_block:
+                  raise SystemExit(f"TOTP MFA config verification failed: {expected}")
+
+          print("LOCAL_TOTP_MFA_CONFIG = PASS")
+          PY
+
+      - name: Assemble standalone Centro Studi migration chain
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # supabase/migrations contains historical pre-SPLIT-3 ownership files as
+          # well as recent Centro Studi evolutions. The canonical cold-start base
+          # is supabase/baseline/00..03 (see CS-MIGRATION-MANIFEST.md), so never
+          # concatenate the historical monolith chain.
+          mv supabase/migrations /tmp/repository-migrations
+          mkdir -p supabase/migrations
+
+          cp supabase/baseline/00000000000000_baseline_immigratiimprenditori.sql supabase/migrations/
+          cp supabase/baseline/00000000000001_runtime_link_compatibility.sql supabase/migrations/
+          cp supabase/baseline/00000000000002_seed_immigrati_public_data.sql supabase/migrations/
+          cp supabase/baseline/00000000000003_auth_identity_gate.sql supabase/migrations/
+
+          # Standalone editorial foundation. These repository versions are copied
+          # under their hosted chronological timestamps so the audit/contributor
+          # post-cutover migrations run only after editorial_inbox_items exists.
+          cp /tmp/repository-migrations/20260819100000_grant_observatory_ingestion_writer.sql \
+            supabase/migrations/20260819100000_grant_observatory_ingestion_writer.sql
+          cp /tmp/repository-migrations/20260820170000_editorial_foundation_v1.sql \
+            supabase/migrations/20260819102530_editorial_foundation_v1.sql
+          cp /tmp/repository-migrations/20260820171000_editorial_submission_country_labels.sql \
+            supabase/migrations/20260819103031_editorial_submission_country_labels.sql
+          cp supabase/standalone-evolutions/20260819141022_editorial_inbox_activity.sql \
+            supabase/migrations/20260819141022_editorial_inbox_activity.sql
+          cp supabase/standalone-evolutions/20260819141338_editorial_contributor_hardening.sql \
+            supabase/migrations/20260819141338_editorial_contributor_hardening.sql
+          cp /tmp/repository-migrations/20260820173000_harden_editorial_public_submission.sql \
+            supabase/migrations/20260820173000_harden_editorial_public_submission.sql
+
+          # Current standalone branch evolutions. Older monolith/Ponte migration
+          # files remain intentionally excluded from this cold start.
+          cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
+
+          echo "Standalone cold-start chain:"
+          find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort
+
+      - name: Replay standalone chain and start fresh local Supabase stack
+        run: supabase start
+
+      - name: Lint PostgreSQL functions and schema
+        run: supabase db lint --level error --fail-on error
+
+      - name: Publication and RLS security smoke
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql --version
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/ci/supabase-security-smoke.sql
+
+      - name: Persistent rate limit security smoke
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/ci/rate-limit-smoke.sql
+
+      - name: Go-live audit and analytics smoke
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/ci/go-live-db-smoke.sql
+
+      - name: Backup archive integrity smoke
+        env:
+          PGPASSWORD: postgres
+        run: bash scripts/ci/backup-archive-smoke.sh
+
+      - name: Auth integration smoke with local ephemeral users
+        run: node scripts/ci/auth-integration-smoke.mjs
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Build application against local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          PUBLIC_KEY="${PUBLISHABLE_KEY:-${ANON_KEY:-}}"
+          SERVICE_KEY="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
+          test -n "${API_URL:-}"
+          test -n "$PUBLIC_KEY"
+          test -n "$SERVICE_KEY"
+          case "$API_URL" in
+            http://127.0.0.1:*|http://localhost:*) ;;
+            *) echo "Refusing non-local Supabase API_URL: $API_URL" >&2; exit 1 ;;
+          esac
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLIC_KEY" >> "$GITHUB_ENV"
+          printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_KEY" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SITE_URL=%s\n' 'http://127.0.0.1:3000' >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          printf 'PRIVACY_ANALYTICS_WRITE_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLIC_KEY" \
+          SUPABASE_SERVICE_ROLE_KEY="$SERVICE_KEY" \
+          NEXT_PUBLIC_SITE_URL="http://127.0.0.1:3000" \
+          NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED="true" \
+          PRIVACY_ANALYTICS_WRITE_ENABLED="true" \
+          npm run build
+
+      - name: Authenticated browser E2E, go-live surfaces and login throttling
+        run: npx playwright test --config=playwright.auth-ci.config.ts
+
+      - name: Stop ephemeral local stack
+        if: always()
+        run: supabase stop --no-backup || true

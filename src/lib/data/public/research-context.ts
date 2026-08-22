@@ -8,6 +8,12 @@ const KIND_LABEL: Record<SearchResult["kind"], string> = {
   content: "Contenuto",
   indicator: "Indicatore",
   event: "Evento",
+  country: "Paese",
+  territory: "Territorio",
+  sector: "Settore",
+  route: "Rotta",
+  author: "Autore",
+  source: "Fonte",
 };
 
 export async function buildResearchContext(

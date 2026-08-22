@@ -32,6 +32,21 @@ const typeLabels: Record<string, string> = {
   podcast: "Podcast",
 };
 
+const RESEARCH_TYPES = new Set([
+  "report",
+  "research",
+  "research_report",
+  "policy_brief",
+  "data_note",
+]);
+
+const STORY_TYPES = new Set([
+  "interview",
+  "business_story",
+  "testimony",
+  "personal_story",
+]);
+
 async function safeLoad<T>(loader: () => Promise<T>, fallback: T): Promise<T> {
   try {
     return await loader();
@@ -184,26 +199,40 @@ function MiniTrend({
 
 export default async function HomePage() {
   const [contents, indicators, events] = await Promise.all([
-    safeLoad(() => listHomeContents(8), [] as PublicContentListItem[]),
+    safeLoad(() => listHomeContents(16), [] as PublicContentListItem[]),
     safeLoad(() => listHomeIndicators(4), []),
     safeLoad(() => listHomeEvents(2), [] as PublicEventListItem[]),
   ]);
 
   const indicatorDetails = await Promise.all(
     indicators.map((indicator) =>
-      safeLoad(
-        () => getPublicIndicatorBySlug(indicator.slug),
-        null,
-      ),
+      safeLoad(() => getPublicIndicatorBySlug(indicator.slug), null),
     ),
   );
 
   const metrics = indicatorDetails.filter(
     (item): item is PublicIndicatorDetail => Boolean(item?.values.length),
   );
-  const hero = contents[0];
-  const featuredContents = contents.slice(1, 4);
-  const storyContents = contents.slice(4, 8);
+
+  const researchFeature = contents.find((item) => RESEARCH_TYPES.has(item.type_code));
+  const heroFeature = researchFeature ?? contents[0];
+  const storyContents = contents.filter((item) => STORY_TYPES.has(item.type_code)).slice(0, 4);
+  const storyFeature = storyContents[0];
+  const excludedIds = new Set(
+    [heroFeature?.id, storyFeature?.id].filter((id): id is string => Boolean(id)),
+  );
+  const analysisFeature = contents.find(
+    (item) =>
+      !excludedIds.has(item.id) &&
+      !RESEARCH_TYPES.has(item.type_code) &&
+      !STORY_TYPES.has(item.type_code),
+  );
+  if (analysisFeature) excludedIds.add(analysisFeature.id);
+  const recentFeature = contents.find((item) => !excludedIds.has(item.id));
+  const featuredContents = [analysisFeature, storyFeature, recentFeature].filter(
+    (item): item is PublicContentListItem => Boolean(item),
+  );
+
   const firstEvent = events[0];
   const firstEventContext =
     firstEvent?.next_edition?.city_text ??
@@ -216,24 +245,22 @@ export default async function HomePage() {
   return (
     <main id="contenuto" className="home-page">
       <section
-        className={`home-hero ${hero?.cover_url ? "has-cover" : ""}`}
-        style={imageStyle(hero?.cover_url)}
+        className={`home-hero ${heroFeature?.cover_url ? "has-cover" : ""}`}
+        style={imageStyle(heroFeature?.cover_url)}
       >
         <div className="home-hero-overlay" />
         <div className="site-container home-hero-inner">
           <div className="home-hero-copy">
-            <p className="hero-kicker">Conoscenza. Dati. Persone.</p>
+            <p className="hero-kicker">Dati. Analisi. Voci.</p>
             <h1>
-              Migrazioni legali e imprenditoria
+              Studiare l&apos;imprenditoria migrante,
               <br />
-              per una società <span>inclusiva</span>
-              <br />
-              e competitiva.
+              <span>in ogni direzione.</span>
             </h1>
             <p className="hero-intro">
-              Ricerca indipendente, dati verificati e testimonianze per capire
-              come l&apos;imprenditoria migrante trasforma economie, territori e
-              relazioni, nei singoli Paesi e tra Paesi.
+              Dati verificati, ricerca e testimonianze per capire come persone e
+              imprese si muovono, si radicano e creano valore tra Paesi,
+              territori e settori economici.
             </p>
             <div className="hero-actions">
               <Link href="/osservatorio" className="button button-gold">
@@ -247,18 +274,17 @@ export default async function HomePage() {
 
           <article className="hero-feature">
             <p className="eyebrow eyebrow-gold">
-              {hero ? contentLabel(hero) : "Centro Studi AIPEL"}
+              {heroFeature ? contentLabel(heroFeature) : "Rapporti e ricerche"}
             </p>
             <h2>
-              {hero?.title ??
-                "Dati, analisi e voci sull'imprenditoria migrante"}
+              {heroFeature?.title ?? "La biblioteca di studi e rapporti del Centro Studi"}
             </h2>
             <p>
-              {hero?.abstract ??
-                "Un Centro Studi per leggere i fenomeni economici senza perdere le storie delle persone."}
+              {heroFeature?.abstract ??
+                "Rapporti, ricerche e analisi selezionate per documentare l'imprenditoria migrante con fonti verificabili."}
             </p>
-            <Link href={hero ? `/contenuti/${hero.slug}` : "/contenuti"}>
-              {hero ? "Leggi l'approfondimento" : "Esplora analisi e ricerche"} →
+            <Link href={heroFeature ? `/contenuti/${heroFeature.slug}` : "/ricerca"}>
+              {heroFeature ? "Apri lo studio" : "Esplora rapporti e ricerche"} →
             </Link>
           </article>
         </div>
@@ -297,9 +323,7 @@ export default async function HomePage() {
                 <div className="editorial-card-body">
                   <p className="eyebrow">Evento</p>
                   <h3>
-                    <Link href={`/eventi/${firstEvent.id}`}>
-                      {firstEvent.title}
-                    </Link>
+                    <Link href={`/eventi/${firstEvent.id}`}>{firstEvent.title}</Link>
                   </h3>
                   {firstEvent.summary ? <p>{firstEvent.summary}</p> : null}
                   <div className="event-date-block">
@@ -311,15 +335,22 @@ export default async function HomePage() {
                   </Link>
                 </div>
               </article>
-            ) : null}
+            ) : (
+              <article className="editorial-card editorial-card-event">
+                <div className="editorial-card-body">
+                  <p className="eyebrow">Eventi</p>
+                  <h3>Nessun evento pubblico in evidenza</h3>
+                  <p>Il calendario mostra soltanto iniziative qualificate e già pubblicate.</p>
+                  <Link href="/eventi" className="card-link">Apri il calendario →</Link>
+                </div>
+              </article>
+            )}
 
-            {featuredContents.length === 0 && !firstEvent ? (
+            {featuredContents.length === 0 ? (
               <div className="featured-empty">
-                <p className="eyebrow">In evidenza</p>
+                <p className="eyebrow">Contenuti recenti</p>
                 <h3>Nessun contenuto disponibile in questa selezione.</h3>
-                <p>
-                  Consulta Analisi e ricerche per esplorare i contenuti pubblicati dal Centro Studi.
-                </p>
+                <p>Consulta Analisi e ricerche per esplorare il materiale pubblicato dal Centro Studi.</p>
               </div>
             ) : null}
           </div>
@@ -331,9 +362,7 @@ export default async function HomePage() {
           <div className="metrics-intro">
             <p className="eyebrow">Osservatorio</p>
             <h2>I numeri chiave</h2>
-            <p>
-              Ogni indicatore rimanda a fonte, periodo, territorio e metodologia.
-            </p>
+            <p>Ogni indicatore rimanda a fonte, periodo, territorio e metodologia.</p>
             <Link href="/osservatorio" className="button button-outline-light">
               Esplora tutti i dati →
             </Link>
@@ -347,9 +376,7 @@ export default async function HomePage() {
                 <article key={indicator.id} className="metric-card">
                   <p>{indicator.title}</p>
                   <strong>{formatMetric(latest.numeric_value)}</strong>
-                  <span className="metric-unit">
-                    {formatMetricUnit(indicator)}
-                  </span>
+                  <span className="metric-unit">{formatMetricUnit(indicator)}</span>
                   <span className="metric-source">
                     {new Date(latest.period_start).getFullYear()}
                     {context ? ` · ${context}` : ""}
@@ -360,9 +387,7 @@ export default async function HomePage() {
             })}
 
             {metrics.length === 0 ? (
-              <div className="metrics-empty">
-                Nessun indicatore disponibile in questa selezione.
-              </div>
+              <div className="metrics-empty">Nessun indicatore disponibile in questa selezione.</div>
             ) : null}
           </div>
         </div>
@@ -374,16 +399,16 @@ export default async function HomePage() {
 
           <div className="voices-panel">
             <div className="voices-copy">
-              <p className="eyebrow eyebrow-gold">Storie e voci</p>
-              <h2>Persone, idee, imprese.</h2>
+              <p className="eyebrow eyebrow-gold">Storie e interviste</p>
+              <h2>Le voci dell&apos;imprenditoria migrante.</h2>
               <p>
-                Le esperienze individuali completano i numeri: origini,
-                destinazioni, settori, ostacoli, innovazione e impatto.
+                Esperienze individuali collegate a origine, destinazione,
+                territorio, settore, ostacoli, innovazione e impatto.
               </p>
-              <Link href="/contenuti">Leggi le storie →</Link>
+              <Link href="/storie">Leggi le storie →</Link>
             </div>
             <div className="voices-grid">
-              {storyContents.slice(0, 4).map((item) => (
+              {storyContents.map((item) => (
                 <Link
                   key={item.id}
                   href={`/contenuti/${item.slug}`}
@@ -396,9 +421,33 @@ export default async function HomePage() {
               ))}
               {storyContents.length === 0 ? (
                 <div className="voices-placeholder">
-                  Nessuna storia o intervista disponibile in questa selezione.
+                  Nessuna storia o intervista è ancora pubblicata in questa selezione. La redazione non sostituisce contenuti mancanti con materiale generico.
                 </div>
               ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="contribute-section">
+        <div className="site-container contribute-grid">
+          <div>
+            <p className="eyebrow">Contribuisci al Centro Studi</p>
+            <h2>Una ricerca può partire anche da una storia, un evento o una segnalazione.</h2>
+          </div>
+          <div>
+            <p>
+              Puoi raccontare una storia, proporre un&apos;intervista, segnalare un evento,
+              una ricerca o un rapporto. Il materiale entra nella Inbox redazionale:
+              viene verificato e valutato prima di qualsiasi pubblicazione.
+            </p>
+            <div className="contribute-actions">
+              <Link href="/contribuisci" className="button contribute-primary">
+                Invia una proposta →
+              </Link>
+              <Link href="/fonti" className="contribute-method-link">
+                Consulta fonti e metodologia →
+              </Link>
             </div>
           </div>
         </div>

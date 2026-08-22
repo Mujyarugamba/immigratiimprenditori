@@ -2,7 +2,10 @@ name: Editorial v1 CI
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - feature/institutional-identity
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -10,7 +13,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,3 +32,40 @@ jobs:
 
       - name: Tests
         run: npm test
+
+      - name: Go-live functional source gates
+        run: node scripts/ci/go-live-functional-gates.mjs
+
+      - name: Production dependency vulnerability gate
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Supabase Auth deprecation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(grep -R --line-number --include='*.sql' --fixed-strings 'auth.role()' \
+            supabase/baseline supabase/standalone-evolutions supabase/migrations \
+            | grep -vE ':[0-9]+:[[:space:]]*--' || true)"
+          if [[ -n "$matches" ]]; then
+            echo "Deprecated auth.role() usage found in executable Supabase SQL:"
+            echo "$matches"
+            exit 1
+          fi
+          echo "SUPABASE_AUTH_DEPRECATION_GUARD = PASS"
+
+      - name: Next build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
+        run: npm run build
+
+      - name: HTTP smoke
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
+        run: npm run test:smoke
+
+      - name: Public browser E2E
+        run: npx playwright test --config=playwright.public.config.ts

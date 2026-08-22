@@ -15,9 +15,9 @@ type HelperRow = {
 };
 
 /**
- * Resolve Auth → Account → Persona → roles for the current request.
- * Uses Access helpers via RPC-style SQL through supabase.rpc where available,
- * falling back to parallel rpc calls.
+ * Resolve Auth → Account → Persona → assigned application roles for the current
+ * request. Privileged authorization itself is enforced separately by the AAL2-
+ * aware database helpers and by the redazione layout.
  */
 export async function getApplicationSession(): Promise<ApplicationSession | null> {
   const supabase = await createClient();
@@ -40,8 +40,8 @@ export async function getApplicationSession(): Promise<ApplicationSession | null
     supabase.rpc("access_current_account_id"),
     supabase.rpc("access_current_person_id"),
     supabase.rpc("access_is_active_account"),
-    supabase.rpc("access_is_editor"),
-    supabase.rpc("access_is_application_admin"),
+    supabase.rpc("access_is_editor_assigned"),
+    supabase.rpc("access_is_application_admin_assigned"),
     supabase
       .from("accounts")
       .select("id, account_status, person_id, person_association_status")

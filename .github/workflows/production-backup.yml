@@ -1,0 +1,86 @@
+name: Production encrypted backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    # Scheduled workflows only run from the default branch. Keep manual runs on
+    # feature branches inert so development never touches Production.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout metadata
+        uses: actions/checkout@v4
+
+      - name: Verify backup secrets
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_DB_URL" || { echo "SUPABASE_DB_URL secret missing" >&2; exit 1; }
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE secret missing" >&2; exit 1; }
+          echo "BACKUP_SECRET_GATE = PASS"
+
+      - name: Create encrypted PostgreSQL backup
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+          dump="centro-studi-${stamp}.dump"
+          encrypted="${dump}.gpg"
+
+          # Pin the client major version instead of relying on the Ubuntu runner's
+          # preinstalled pg_dump. PostgreSQL rejects dumps from an older client
+          # when the server is newer (Supabase currently uses PostgreSQL 17 here).
+          docker run --rm postgres:17-alpine \
+            pg_dump "$SUPABASE_DB_URL" \
+              --format=custom \
+              --no-owner \
+              --no-privileges \
+            > "$dump"
+
+          test -s "$dump"
+          docker run --rm -i postgres:17-alpine pg_restore --list \
+            < "$dump" >/dev/null
+
+          printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" \
+            | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --symmetric --cipher-algo AES256 --output "$encrypted" "$dump"
+
+          rm -f "$dump"
+          test -s "$encrypted"
+          sha256sum "$encrypted" > "${encrypted}.sha256"
+          printf '%s\n' "$encrypted" > backup-filename.txt
+          echo "BACKUP_ENCRYPTION = PASS"
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: centro-studi-encrypted-backup-${{ github.run_id }}
+          path: |
+            *.dump.gpg
+            *.dump.gpg.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Confirm plaintext removal
+        shell: bash
+        run: |
+          set -euo pipefail
+          if compgen -G '*.dump' >/dev/null; then
+            echo "Plaintext database dump still present" >&2
+            exit 1
+          fi
+          echo "BACKUP_PLAINTEXT_REMOVAL = PASS"

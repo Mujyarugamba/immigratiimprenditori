@@ -1,15 +1,50 @@
 import { createClient } from "@/lib/supabase/server";
 
+export type SearchResultKind =
+  | "content"
+  | "indicator"
+  | "event"
+  | "country"
+  | "territory"
+  | "sector"
+  | "route"
+  | "author"
+  | "source";
+
 export type SearchResult = {
-  kind: "content" | "indicator" | "event";
+  kind: SearchResultKind;
   title: string;
   excerpt: string | null;
   href: string;
   publishedAt: string | null;
 };
 
+const INDEXED_KINDS = new Set<SearchResultKind>([
+  "content",
+  "indicator",
+  "event",
+  "country",
+  "territory",
+  "sector",
+  "route",
+  "author",
+  "source",
+]);
+
 function cleanQuery(value: string) {
-  return value.trim().replaceAll("%", "").replaceAll(",", " ").slice(0, 160);
+  return value
+    .trim()
+    .replaceAll("%", "")
+    .replaceAll(",", " ")
+    .replace(/\s+/g, " ")
+    .slice(0, 160);
+}
+
+function excerptFromBody(value: string | null) {
+  if (!value) return null;
+  const clean = value.replace(/\s+/g, " ").trim();
+  if (!clean) return null;
+  return clean.length > 320 ? `${clean.slice(0, 317)}…` : clean;
 }
 
 function relevanceScore(result: SearchResult, query: string) {
@@ -38,12 +73,44 @@ function relevanceScore(result: SearchResult, query: string) {
   return score;
 }
 
-export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]> {
-  const q = cleanQuery(rawQuery);
-  if (q.length < 2) return [];
+async function searchIndexedDocuments(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  query: string,
+): Promise<SearchResult[]> {
+  try {
+    const { data, error } = await supabase
+      .from("search_documents")
+      .select("entity_kind, entity_key, title, body, href, source_updated_at")
+      .eq("is_public", true)
+      .textSearch("search_vector", query, { type: "websearch", config: "simple" })
+      .limit(80);
 
-  const supabase = await createClient();
-  const pattern = `%${q}%`;
+    if (error) return [];
+
+    return (data ?? []).flatMap((row) => {
+      const kind = row.entity_kind as SearchResultKind;
+      if (!INDEXED_KINDS.has(kind)) return [];
+      return [
+        {
+          kind,
+          title: row.title,
+          excerpt: excerptFromBody(row.body),
+          href: row.href,
+          publishedAt: row.source_updated_at,
+        } satisfies SearchResult,
+      ];
+    });
+  } catch {
+    // search_documents is intentionally optional until its prepared migration is applied.
+    return [];
+  }
+}
+
+async function searchLegacyPublicData(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  query: string,
+): Promise<SearchResult[]> {
+  const pattern = `%${query}%`;
 
   const [contentsResult, indicatorsResult, eventsResult] = await Promise.all([
     supabase
@@ -76,35 +143,54 @@ export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]
       .limit(20),
   ]);
 
-  if (contentsResult.error) throw new Error(contentsResult.error.message);
-  if (indicatorsResult.error) throw new Error(indicatorsResult.error.message);
-  if (eventsResult.error) throw new Error(eventsResult.error.message);
+  const contents: SearchResult[] = contentsResult.error
+    ? []
+    : (contentsResult.data ?? []).map((item) => ({
+        kind: "content",
+        title: item.title,
+        excerpt: item.abstract,
+        href: `/contenuti/${item.slug}`,
+        publishedAt: item.published_at,
+      }));
 
-  const contents: SearchResult[] = (contentsResult.data ?? []).map((item) => ({
-    kind: "content",
-    title: item.title,
-    excerpt: item.abstract,
-    href: `/contenuti/${item.slug}`,
-    publishedAt: item.published_at,
-  }));
+  const indicators: SearchResult[] = indicatorsResult.error
+    ? []
+    : (indicatorsResult.data ?? []).map((item) => ({
+        kind: "indicator",
+        title: item.title,
+        excerpt: item.description,
+        href: `/osservatorio/${item.slug}`,
+        publishedAt: item.published_at,
+      }));
 
-  const indicators: SearchResult[] = (indicatorsResult.data ?? []).map((item) => ({
-    kind: "indicator",
-    title: item.title,
-    excerpt: item.description,
-    href: `/osservatorio/${item.slug}`,
-    publishedAt: item.published_at,
-  }));
+  const events: SearchResult[] = eventsResult.error
+    ? []
+    : (eventsResult.data ?? []).map((item) => ({
+        kind: "event",
+        title: item.title,
+        excerpt: item.summary,
+        href: `/eventi/${item.id}`,
+        publishedAt: item.published_at,
+      }));
 
-  const events: SearchResult[] = (eventsResult.data ?? []).map((item) => ({
-    kind: "event",
-    title: item.title,
-    excerpt: item.summary,
-    href: `/eventi/${item.id}`,
-    publishedAt: item.published_at,
-  }));
+  return [...indicators, ...contents, ...events];
+}
 
-  return [...indicators, ...contents, ...events].sort((a, b) => {
+export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]> {
+  const q = cleanQuery(rawQuery);
+  if (q.length < 2) return [];
+
+  const supabase = await createClient();
+  const [indexed, fallback] = await Promise.all([
+    searchIndexedDocuments(supabase, q),
+    searchLegacyPublicData(supabase, q),
+  ]);
+
+  const byHref = new Map<string, SearchResult>();
+  for (const result of fallback) byHref.set(result.href, result);
+  for (const result of indexed) byHref.set(result.href, result);
+
+  return Array.from(byHref.values()).sort((a, b) => {
     const scoreDiff = relevanceScore(b, q) - relevanceScore(a, q);
     if (scoreDiff !== 0) return scoreDiff;
     const aDate = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;

@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+const isNetlifyPreviewLikeContext =
+  process.env.NETLIFY === "true" && process.env.CONTEXT !== "production";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -42,6 +45,14 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
+  ...(isNetlifyPreviewLikeContext
+    ? [
+        {
+          key: "X-Robots-Tag",
+          value: "noindex, nofollow, noarchive",
+        },
+      ]
+    : []),
 ];
 
 const nextConfig: NextConfig = {

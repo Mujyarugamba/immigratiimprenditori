@@ -102,7 +102,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
           ) : null}
 
           <form id="modulo-partecipazione" action={submitEditorialContributionAction} className="mt-10 space-y-10">
-            <div className="sr-only" aria-hidden="true">
+            <div hidden aria-hidden="true">
               <label>
                 Sito web
                 <input name="website" type="text" tabIndex={-1} autoComplete="off" />

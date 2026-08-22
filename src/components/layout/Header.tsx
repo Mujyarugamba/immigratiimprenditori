@@ -57,6 +57,13 @@ export function Header() {
               </Link>
             ))}
           </nav>
+
+          <Link
+            href={localizedHref(locale, "/sostieni")}
+            className="header-support"
+          >
+            {m.support}
+          </Link>
         </div>
       </div>
     </header>

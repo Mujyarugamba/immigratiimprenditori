@@ -2,9 +2,9 @@
 
 Stato: **GATE APERTO — NON PASS**
 
-Data audit: 2026-08-21
+Data audit: 2026-08-22
 
-Questo documento registra lo stato verificato del gate 19 della roadmap. Un elemento è PASS solo quando è stato verificato sul codice o sul servizio collegato; gli elementi non verificati restano aperti.
+Questo documento registra lo stato verificato del gate 19 della roadmap. Un elemento è PASS solo quando è stato verificato sul codice o sul servizio collegato; gli elementi non verificati restano aperti. Le verifiche locali/CI non autorizzano né implicano applicazione al database o al deploy di produzione.
 
 ## 1. Database e RLS
 
@@ -26,7 +26,7 @@ La coda redazionale e gli account non sono quindi consultabili anonimamente.
 ### SEC-RLS-03 — Solo contenuti pubblicati visibili ad anon
 **PASS**
 
-Test live con ruolo `anon`:
+Test con ruolo `anon`:
 
 - contenuti visibili: esclusivamente `editorial_status=ready`, `publication_status=published`, `visibility_status=public`;
 - eventi visibili: esclusivamente `editorial_status=ready`, `publication_status=published`, `visibility_status=public`.
@@ -38,7 +38,7 @@ Test live con ruolo `anon`:
 
 `access_self_close_account()` e `access_self_delete_preflight()` sono `SECURITY DEFINER`, ma:
 
-- richiedono `auth.role() = authenticated`;
+- richiedono utente autenticato;
 - richiedono `auth.uid()`;
 - hanno `search_path=''`;
 - lavorano soltanto sull'account associato all'utente corrente;
@@ -47,23 +47,20 @@ Test live con ruolo `anon`:
 Il warning del Supabase Security Advisor è quindi previsto e non va rimosso automaticamente.
 
 ### SEC-FUNC-02 — Contributo editoriale pubblico
-**HARDENING PREPARATO — APPLY PENDING**
+**HARDENING PREPARATO / LOCAL CI PASS — PRODUCTION APPLY PENDING**
 
 `submit_editorial_contribution()` deve restare eseguibile da `anon` perché `/contribuisci` funziona senza account.
 
-Hardening preparato nella migration:
-
-`20260820173000_harden_editorial_public_submission.sql`
-
-La migration aggiunge:
+L'hardening preparato aggiunge:
 
 - limiti massimi agli input;
 - consenso al ricontatto obbligatorio anche nel database;
 - URL ammessi solo `http://` e `https://`;
 - normalizzazione email;
-- grant espliciti soltanto a `anon` e `authenticated` dopo revoca da `public`.
+- grant espliciti soltanto a `anon` e `authenticated` dopo revoca da `public`;
+- rate limiting persistente con chiavi non reversibili.
 
-Non applicare alla produzione finché il branch non ha superato build/test e il piano di rilascio della migration.
+Il laboratorio Supabase standalone ricostruito da zero e gli smoke di sicurezza risultano PASS. L'applicazione al database production resta un'operazione separata e non è stata eseguita.
 
 ## 3. Form pubblico / anti-abuso
 
@@ -78,31 +75,42 @@ La Server Action di `/contribuisci` verifica tipo di proposta, campi obbligatori
 Aggiunto honeypot senza cookie o tracker esterni per filtrare bot elementari.
 
 ### SEC-FORM-03 — Rate limiting persistente
-**BLOCKER**
+**PASS LOCAL/CI — PRODUCTION ACTIVATION PENDING**
 
-Manca ancora un rate limit persistente affidabile per login e invio contributi. L'honeypot non sostituisce il rate limiting.
+Il rate limiting persistente è verificato nel laboratorio locale/CI per form e login. Il browser E2E prova anche il blocco del login dopo la soglia prevista. La produzione non è stata modificata.
 
 ## 4. Autenticazione
 
 ### SEC-AUTH-01 — Leaked Password Protection
-**BLOCKER**
+**NON DISPONIBILE SUL PIANO FREE / MITIGAZIONE PRIVILEGIATI PASS LOCAL/CI**
 
-Il Supabase Security Advisor segnala:
-
-`Leaked Password Protection Disabled`
-
-Da abilitare nelle impostazioni Auth del progetto prima del go-live.
+La funzione Supabase Leaked Password Protection non è disponibile nel perimetro Free attuale. Per gli account privilegiati la mitigazione applicativa è MFA TOTP obbligatoria. L'attivazione/configurazione production resta separata dal test locale.
 
 ### SEC-AUTH-02 — Separazione ruoli redazionali
-**PASS DI BASE**
+**PASS LOCAL/CI**
 
-L'accesso alla redazione verifica:
+Sono verificati:
 
 - account attivo;
-- ruolo redattore oppure amministratore applicativo;
-- redirect fuori dall'area privata in caso di ruolo non ammesso.
+- assegnazione separata dei ruoli `contributore`, `redattore`, `amministratore_applicativo`;
+- auto-elevazione del contributore negata;
+- contributore ammesso alla propria proposta e negato alla redazione;
+- redattore con sola password riconosciuto come assegnato ma privo dei privilegi editoriali.
 
-Resta necessario il test E2E completo dei ruoli prima del go-live.
+### SEC-AUTH-03 — MFA TOTP e AAL2 per ruoli privilegiati
+**PASS LOCAL/CI — PRODUCTION ACTIVATION PENDING**
+
+Per `redattore` e `amministratore_applicativo` l'autorizzazione privilegiata richiede `aal2` anche nei helper DB/RLS/RPC. Il browser E2E reale verifica:
+
+1. login password → `aal1`;
+2. accesso diretto alla redazione → redirect MFA;
+3. enrollment TOTP reale;
+4. challenge + verify reale;
+5. sessione promossa e persistita `aal2` su una nuova richiesta server;
+6. accesso a `/app/redazione/contenuti/nuovo`;
+7. creazione → `ready` → pubblicazione → pagina pubblica.
+
+Il laboratorio CI abilita esplicitamente TOTP nella configurazione Auth effimera per non dipendere da default impliciti. Nessuna configurazione Auth production è stata cambiata.
 
 ## 5. HTTP security
 
@@ -149,19 +157,25 @@ Prima del go-live verificare title e description specifici, canonical, gerarchia
 
 Configurazione settimanale npm presente in `.github/dependabot.yml`.
 
-### SEC-CI-01 — CI applicativa
-**PARZIALE**
+### SEC-CI-01 — CI applicativa e laboratorio Supabase
+**PASS SUL BRANCH**
 
-Il repository ha CI su pull request verso `main` con:
+Sul commit `7f3a39a70bca4f728442855a85ed3fc2f72fbbb3` risultano completamente PASS:
 
-- `npm ci`;
-- typecheck;
-- test.
+- `Editorial v1 CI / verify`;
+- `Supabase local migration validation / validate-local-database`.
+
+La validazione comprende typecheck, test, Auth deprecation guard, Next build, HTTP smoke, browser pubblico, cold-start standalone Supabase, lint PostgreSQL, RLS/security smoke, rate-limit smoke, Auth integration, build contro Supabase locale e browser E2E autenticato con MFA.
+
+### SEC-CI-02 — Protezione `main`
+**PASS — RULESET ATTIVO**
+
+GitHub restituisce `main` come `protected: true` dopo l'attivazione del ruleset sul default branch. I required status checks non vengono dichiarati attivi finché non saranno verificati separatamente; questa distinzione va mantenuta.
 
 ### HOST-NETLIFY-01 — Deploy branch
 **PASS DI INFRASTRUTTURA / HEAD DA RIVERIFICARE**
 
-Il progetto Netlify `immigratiimprenditori-preview` esegue correttamente build e deployment Next.js sul branch `feature/institutional-identity`. Prima della chiusura del gate va verificato che il deploy corrente corrisponda all'ultimo commit del branch e che non vi siano regressioni runtime.
+Netlify resta il solo ambiente preview previsto per questo branch. Prima della chiusura del gate va verificato che il deploy preview corrente corrisponda all'ultimo commit approvato e che non vi siano regressioni runtime. Nessun deploy production è parte di questo audit.
 
 ## 8. Privacy e documenti legali
 
@@ -236,16 +250,16 @@ Verificare tastiera, focus, contrasto, etichette, struttura semantica, testi alt
 
 ## 11. Gate residui prima di PRODUCTION_READINESS = PASS
 
-1. verificare build/test sull'ultimo commit del branch;
-2. applicare e verificare la migration di hardening contributi;
-3. introdurre rate limiting persistente su login e invio contributi;
-4. abilitare Leaked Password Protection Supabase;
-5. progettare e verificare CSP;
-6. completare revisione legale e verifica tecnica di Privacy, Cookie e Termini;
-7. completare audit SEO pagina per pagina;
-8. completare test responsive e accessibilità reali;
-9. completare test E2E ruoli, bozze, escalation e pubblicazione;
-10. verificare branch protection e controlli obbligatori su `main`.
+1. applicare soltanto dopo autorizzazione le migration/hardening già validate localmente e ripetere gli smoke sulla configurazione production;
+2. attivare e verificare MFA TOTP per i ruoli privilegiati nella configurazione Auth production;
+3. decidere formalmente il trattamento del limite Leaked Password Protection del piano Free, mantenendo almeno la mitigazione MFA privilegiati;
+4. progettare e verificare CSP;
+5. completare revisione legale e verifica tecnica di Privacy, Cookie e Termini;
+6. completare audit SEO pagina per pagina;
+7. completare test responsive e accessibilità reali;
+8. completare performance/Lighthouse e piano backup/recovery;
+9. verificare separatamente i required status checks del ruleset `main` se devono diventare obbligatori per il merge;
+10. verificare il preview Netlify sull'head finale approvato e chiudere il quality gate complessivo.
 
 Fino alla chiusura di questi punti:
 

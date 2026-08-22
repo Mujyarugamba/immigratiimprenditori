@@ -2,5 +2,27 @@
   command = "npm run build"
   publish = ".next"
 
+# Code-based rate limiting is available on all Netlify plans. Rules are kept
+# intentionally scarce: the public API receives a moderate per-client budget,
+# while the canonical anonymous contribution form is much tighter.
+# Specific rules come before any future general redirect rules.
+[[redirects]]
+  from = "/api/*"
+  to = "/api/:splat"
+
+  [redirects.rate_limit]
+    window_limit = 60
+    window_size = 60
+    aggregate_by = ["ip", "domain"]
+
+[[redirects]]
+  from = "/contribuisci"
+  to = "/contribuisci"
+
+  [redirects.rate_limit]
+    window_limit = 5
+    window_size = 60
+    aggregate_by = ["ip", "domain"]
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"

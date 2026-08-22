@@ -5,10 +5,15 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/app/redazione", label: "Dashboard Redazione", exact: true },
+  { href: "/app/redazione/sicurezza", label: "Sicurezza" },
   { href: "/app/redazione/inbox", label: "Inbox" },
+  { href: "/app/redazione/radar", label: "Radar" },
+  { href: "/app/redazione/ai", label: "AI redazionale" },
   { href: "/app/redazione/contenuti", label: "Contenuti" },
   { href: "/app/redazione/eventi", label: "Eventi" },
   { href: "/app/redazione/osservatorio", label: "Osservatorio" },
+  { href: "/app/redazione/voci-candidate", label: "Voci candidate" },
+  { href: "/app/redazione/lancio", label: "Numero zero" },
 ] as const;
 
 const linkClass =
