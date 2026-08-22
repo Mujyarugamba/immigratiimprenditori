@@ -104,8 +104,23 @@ file("scripts/ci/backup-archive-smoke.sh");
 file("scripts/ci/go-live-db-smoke.sql");
 file("e2e/go-live-local.spec.ts");
 file("e2e/public-readonly.spec.ts");
+file("e2e/public-smoke.spec.ts");
 file(".github/dependabot.yml");
 file(".github/workflows/source-health-weekly.yml");
+
+// The placeholder public browser run must stay data-independent; the full
+// public/accessibility audit belongs to the real local Supabase laboratory.
+includes("playwright.public.config.ts", ['testMatch: "public-smoke.spec.ts"']);
+includes("playwright.auth-ci.config.ts", [
+  '"editorial.spec.ts"',
+  '"go-live-local.spec.ts"',
+  '"public-readonly.spec.ts"',
+]);
+includes(".github/workflows/supabase-local-validation.yml", [
+  '"e2e/public-readonly.spec.ts"',
+  '"e2e/public-smoke.spec.ts"',
+  '"src/app/autori/**"',
+]);
 
 // Privacy baseline: analytics remains first-party and explicitly enabled at deployment.
 includes("src/components/analytics/PrivacyFriendlyAnalytics.tsx", [
