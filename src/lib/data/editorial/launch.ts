@@ -25,6 +25,16 @@ export const INTERVIEW_WORKFLOW_STATUSES = [
   "closed",
 ] as const;
 
+export type NumberZeroInterviewCandidate = {
+  id: string;
+  title: string;
+  sourceLabel: string | null;
+  originCountryCode: string | null;
+  destinationCountryCode: string | null;
+  relevanceBand: string | null;
+  priority: string;
+};
+
 export type NumberZeroDashboard = {
   available: boolean;
   snapshot: NumberZeroSnapshot;
@@ -33,6 +43,7 @@ export type NumberZeroDashboard = {
   storyVoiceTitles: string[];
   eventTitles: string[];
   internationalTerritories: string[];
+  interviewCandidates: NumberZeroInterviewCandidate[];
   interviewWorkflowByStatus: Record<(typeof INTERVIEW_WORKFLOW_STATUSES)[number], number>;
   errors: string[];
 };
@@ -85,9 +96,13 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
       .is("archived_at", null),
     supabase
       .from("editorial_inbox_items")
-      .select("id", { count: "exact", head: true })
+      .select(
+        "id, title, source_label, origin_country_code, destination_country_code, relevance_band, priority",
+        { count: "exact" },
+      )
       .eq("item_kind", "interview_proposal")
-      .eq("status", "needs_research"),
+      .eq("status", "needs_research")
+      .order("received_at", { ascending: false }),
     supabase
       .from("content_interview_workflow")
       .select("workflow_status"),
@@ -132,6 +147,18 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
     }
   }
 
+  const interviewCandidates: NumberZeroInterviewCandidate[] = (interviewResult.data ?? []).map(
+    (row) => ({
+      id: row.id as string,
+      title: row.title as string,
+      sourceLabel: row.source_label as string | null,
+      originCountryCode: row.origin_country_code as string | null,
+      destinationCountryCode: row.destination_country_code as string | null,
+      relevanceBand: row.relevance_band as string | null,
+      priority: row.priority as string,
+    }),
+  );
+
   const snapshot: NumberZeroSnapshot = {
     lombardyDataValues: values.filter((value) => value.territory_code === "IT-25").length,
     italyDataValues: values.filter((value) => isItalyTerritoryCode(value.territory_code)).length,
@@ -139,7 +166,7 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
     selectedReports: reportsResult.count ?? 0,
     publishedStoriesVoices: storiesResult.count ?? 0,
     publishedEvents: eventsResult.count ?? 0,
-    interviewCandidatesInResearch: interviewResult.count ?? 0,
+    interviewCandidatesInResearch: interviewResult.count ?? interviewCandidates.length,
   };
 
   const coreAvailable =
@@ -157,6 +184,7 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
     storyVoiceTitles: (storiesResult.data ?? []).map((row) => row.title as string),
     eventTitles: (eventsResult.data ?? []).map((row) => row.title as string),
     internationalTerritories,
+    interviewCandidates,
     interviewWorkflowByStatus,
     errors,
   };
