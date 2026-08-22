@@ -33,7 +33,10 @@ async function writeInboxActivity(
     actor_account_id: actorAccountId,
     changes,
   });
-  if (error) throw new Error("Impossibile registrare l'attività redazionale.");
+  // The write policy is prepared in a migration but may not yet be applied to
+  // the production DB used by branch previews. Editorial state changes must not
+  // fail merely because the optional audit append is not available yet.
+  return !error;
 }
 
 export async function updateInboxStatusAction(formData: FormData) {
