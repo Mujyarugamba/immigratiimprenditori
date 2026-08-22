@@ -71,6 +71,36 @@ begin
 end;
 $$;
 
+-- Login integration: only the trusted service role may consume the application
+-- login buckets. Eight attempts for one email+IP pair are allowed; the ninth is
+-- rejected. Raw identifiers are hashed inside the shared primitive.
+set local role service_role;
+do $$
+declare
+  i integer;
+  allowed boolean;
+begin
+  for i in 1..8 loop
+    select public.consume_editorial_login_rate_limit(
+      'ci-login@example.test',
+      '203.0.113.42'
+    ) into allowed;
+    if allowed is distinct from true then
+      raise exception 'login limiter rejected attempt % before pair threshold', i;
+    end if;
+  end loop;
+
+  select public.consume_editorial_login_rate_limit(
+    'ci-login@example.test',
+    '203.0.113.42'
+  ) into allowed;
+  if allowed is distinct from false then
+    raise exception 'login limiter did not reject the ninth email+IP attempt';
+  end if;
+end;
+$$;
+reset role;
+
 -- Privilege and implementation checks: counters/functions stay private and
 -- deprecated auth.role() must not re-enter the SECURITY DEFINER trigger.
 do $$
@@ -96,6 +126,27 @@ begin
     'EXECUTE'
   ) then
     raise exception 'authenticated unexpectedly has EXECUTE on internal rate limit function';
+  end if;
+  if has_function_privilege(
+    'anon',
+    'public.consume_editorial_login_rate_limit(text,text)',
+    'EXECUTE'
+  ) then
+    raise exception 'anon unexpectedly has EXECUTE on login rate limit function';
+  end if;
+  if has_function_privilege(
+    'authenticated',
+    'public.consume_editorial_login_rate_limit(text,text)',
+    'EXECUTE'
+  ) then
+    raise exception 'authenticated unexpectedly has EXECUTE on login rate limit function';
+  end if;
+  if not has_function_privilege(
+    'service_role',
+    'public.consume_editorial_login_rate_limit(text,text)',
+    'EXECUTE'
+  ) then
+    raise exception 'service_role is missing EXECUTE on login rate limit function';
   end if;
   if has_function_privilege(
     'anon',
@@ -134,3 +185,4 @@ $$;
 rollback;
 
 select 'PERSISTENT_RATE_LIMIT_SECURITY = PASS' as result;
+select 'PERSISTENT_LOGIN_RATE_LIMIT_SECURITY = PASS' as result;
