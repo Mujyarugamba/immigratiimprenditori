@@ -132,4 +132,34 @@ test.describe("Authenticated editorial UI", () => {
       timeout: 30_000,
     });
   });
+
+  test("repeated invalid password attempts are blocked before Auth", async ({ page }) => {
+    const email = `p6-login-limit-${Date.now()}@example.invalid`;
+
+    // Netlify supplies this header in production. Setting it explicitly here
+    // makes the local browser exercise the same email+IP bucket deterministically.
+    await page.setExtraHTTPHeaders({
+      "x-nf-client-connection-ip": "203.0.113.42",
+    });
+
+    for (let attempt = 1; attempt <= 8; attempt += 1) {
+      await page.goto("/accedi");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(`wrong-${attempt}`);
+      await page.getByRole("button", { name: "Accedi" }).click();
+      await expect(page).toHaveURL(/\/accedi\?error=credentials/, { timeout: 30_000 });
+    }
+
+    await page.goto("/accedi");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill("wrong-9");
+    await page.getByRole("button", { name: "Accedi" }).click();
+
+    await expect(page).toHaveURL(/\/accedi\?error=rate/, { timeout: 30_000 });
+    await expect(
+      page.getByRole("alert").filter({
+        hasText: "Troppi tentativi di accesso. Riprova più tardi.",
+      }),
+    ).toBeVisible();
+  });
 });
