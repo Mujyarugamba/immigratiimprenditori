@@ -38,6 +38,13 @@ export type EditorialSubmission = {
   submitted_at: string;
 };
 
+export type EditorialInboxActivity = {
+  id: string;
+  actor_account_id: string | null;
+  changes: Record<string, unknown>;
+  created_at: string;
+};
+
 export type EditorialInboxItem = EditorialInboxListItem & {
   source_published_at: string | null;
   summary: string | null;
@@ -50,6 +57,7 @@ export type EditorialInboxItem = EditorialInboxListItem & {
   created_at: string;
   updated_at: string;
   submission: EditorialSubmission | null;
+  activity: EditorialInboxActivity[];
 };
 
 export type EditorialInboxSearchParams = {
@@ -99,25 +107,35 @@ export async function getEditorialInboxItemById(
   id: string,
 ): Promise<EditorialInboxItem | null> {
   const supabase = await createClient();
-  const [{ data: item, error: itemError }, { data: submission }] =
-    await Promise.all([
-      supabase
-        .from("editorial_inbox_items")
-        .select(DETAIL_SELECT)
-        .eq("id", id)
-        .maybeSingle(),
-      supabase
-        .from("editorial_submissions")
-        .select(
-          "submission_kind, submitter_name, submitter_email, submitter_phone, organization_name, contribution_text, consent_contact, consent_publication, origin_country_label, destination_country_label, submitted_at",
-        )
-        .eq("inbox_item_id", id)
-        .maybeSingle(),
-    ]);
+  const [
+    { data: item, error: itemError },
+    { data: submission },
+    { data: activity, error: activityError },
+  ] = await Promise.all([
+    supabase
+      .from("editorial_inbox_items")
+      .select(DETAIL_SELECT)
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("editorial_submissions")
+      .select(
+        "submission_kind, submitter_name, submitter_email, submitter_phone, organization_name, contribution_text, consent_contact, consent_publication, origin_country_label, destination_country_label, submitted_at",
+      )
+      .eq("inbox_item_id", id)
+      .maybeSingle(),
+    supabase
+      .from("editorial_inbox_activity")
+      .select("id, actor_account_id, changes, created_at")
+      .eq("inbox_item_id", id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
 
   if (itemError || !item) return null;
   return {
-    ...(item as Omit<EditorialInboxItem, "submission">),
+    ...(item as Omit<EditorialInboxItem, "submission" | "activity">),
     submission: (submission as EditorialSubmission | null) ?? null,
+    activity: activityError ? [] : ((activity ?? []) as EditorialInboxActivity[]),
   };
 }
