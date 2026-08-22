@@ -4,7 +4,7 @@ const baseURL = "http://127.0.0.1:3000";
 
 export default defineConfig({
   testDir: "e2e",
-  testMatch: ["editorial.spec.ts", "go-live-local.spec.ts"],
+  testMatch: ["editorial.spec.ts", "go-live-local.spec.ts", "public-readonly.spec.ts"],
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
