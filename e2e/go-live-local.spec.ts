@@ -20,6 +20,18 @@ test.describe("Go-live local surfaces", () => {
     await page.goto("/osservatorio");
     expect(await page.locator('a[href^="/osservatorio/"]').count()).toBeGreaterThan(0);
 
+    await page.goto("/atlante");
+    expect(
+      await page.locator('a[href^="/atlante/"]:not([href="/atlante/rotte"])').count(),
+      "Atlas must expose at least one navigable evidence-backed country",
+    ).toBeGreaterThan(0);
+
+    await page.goto("/atlante/rotte");
+    expect(
+      await page.locator('a[href^="/atlante/rotte/"]').count(),
+      "Routes must expose at least one navigable evidence-backed origin-destination route",
+    ).toBeGreaterThan(0);
+
     await page.goto("/storie");
     await expect(page.getByRole("link", { name: /Partecipa/i })).toBeVisible();
   });
