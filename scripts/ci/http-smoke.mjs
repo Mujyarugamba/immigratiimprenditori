@@ -88,6 +88,9 @@ async function main() {
     expectHeader(home.response, "content-security-policy", /default-src 'self'/i);
     expectHeader(home.response, "referrer-policy", "strict-origin-when-cross-origin");
 
+    await expectText("/en", ['<html lang="en" dir="ltr"', 'data-platform-locale="en"']);
+    await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
+
     await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
     await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
 
@@ -141,6 +144,7 @@ async function main() {
       checks: [
         "home",
         "security response headers",
+        "localized document lang/dir",
         "institutional transparency",
         "support fail-closed state",
         "robots",
