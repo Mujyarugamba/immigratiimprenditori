@@ -4,7 +4,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 
 export const metadata: Metadata = {
   title: "Open data | Immigrati Imprenditori",
-  description: "Accesso ai dati pubblicati dall'Osservatorio di Immigrati Imprenditori in formato consultabile e JSON.",
+  description: "Accesso ai dati pubblicati dall'Osservatorio di Immigrati Imprenditori in formato consultabile, JSON e CSV.",
   alternates: { canonical: "/open-data" },
 };
 
@@ -32,21 +32,29 @@ export default async function OpenDataPage() {
           <strong className="mt-2 block text-3xl">{snapshot.values.length}</strong>
         </div>
         <div className="bg-white p-6">
-          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Formato API</p>
-          <strong className="mt-2 block text-3xl">JSON</strong>
+          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Formati</p>
+          <strong className="mt-2 block text-3xl">JSON · CSV</strong>
         </div>
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Endpoint pubblico</h2>
+        <h2 className="text-2xl font-semibold text-black">Dataset pubblico</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          L&apos;endpoint restituisce soltanto indicatori pubblicati e valori finali resi pubblici dall&apos;Osservatorio.
-          Non espone aree riservate, dati personali o contenuti redazionali non pubblicati.
+          Gli endpoint restituiscono soltanto indicatori pubblicati e valori finali resi pubblici dall&apos;Osservatorio.
+          Non espongono aree riservate, dati personali o contenuti redazionali non pubblicati.
         </p>
-        <code className="mt-5 block overflow-x-auto border border-black bg-neutral-50 p-4 text-sm">/api/open-data/indicators</code>
-        <a href="/api/open-data/indicators" className="mt-5 inline-block border border-black px-5 py-3 text-sm font-semibold">
-          Apri il dataset JSON →
-        </a>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <div className="border border-black p-5">
+            <h3 className="font-semibold text-black">JSON</h3>
+            <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators</code>
+            <a href="/api/open-data/indicators" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Apri JSON →</a>
+          </div>
+          <div className="border border-black p-5">
+            <h3 className="font-semibold text-black">CSV</h3>
+            <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators.csv</code>
+            <a href="/api/open-data/indicators.csv" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Scarica CSV →</a>
+          </div>
+        </div>
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
@@ -59,6 +67,7 @@ export default async function OpenDataPage() {
         <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
           <Link href="/dati-e-fonti" className="underline underline-offset-4">Fonti e metodologia →</Link>
           <Link href="/esplora/dati" className="underline underline-offset-4">Data Explorer →</Link>
+          <Link href="/fonti" className="underline underline-offset-4">Catalogo delle fonti →</Link>
         </div>
       </section>
     </main>
