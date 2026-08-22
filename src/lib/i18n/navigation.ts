@@ -19,6 +19,7 @@ const LOCALIZED_EXACT_PATHS = new Set([
   "/cerca",
   "/contribuisci",
   "/chi-siamo",
+  "/sostieni",
 ]);
 
 const LOCALIZED_DYNAMIC_PREFIXES = [
