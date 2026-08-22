@@ -12,6 +12,32 @@ function cleanQuery(value: string) {
   return value.trim().replaceAll("%", "").replaceAll(",", " ").slice(0, 160);
 }
 
+function relevanceScore(result: SearchResult, query: string) {
+  const q = query.toLocaleLowerCase("it");
+  const title = result.title.toLocaleLowerCase("it");
+  const excerpt = result.excerpt?.toLocaleLowerCase("it") ?? "";
+
+  let score = 0;
+  if (title === q) score += 120;
+  else if (title.startsWith(q)) score += 80;
+  else if (title.includes(q)) score += 55;
+  if (excerpt.includes(q)) score += 20;
+
+  const words = q.split(/\s+/).filter(Boolean);
+  for (const word of words) {
+    if (title.includes(word)) score += 8;
+    if (excerpt.includes(word)) score += 2;
+  }
+
+  if (result.kind === "indicator") score += 3;
+  if (result.publishedAt) {
+    const year = new Date(result.publishedAt).getFullYear();
+    if (Number.isFinite(year)) score += Math.max(0, Math.min(5, year - 2021));
+  }
+
+  return score;
+}
+
 export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]> {
   const q = cleanQuery(rawQuery);
   if (q.length < 2) return [];
@@ -78,5 +104,11 @@ export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]
     publishedAt: item.published_at,
   }));
 
-  return [...indicators, ...contents, ...events];
+  return [...indicators, ...contents, ...events].sort((a, b) => {
+    const scoreDiff = relevanceScore(b, q) - relevanceScore(a, q);
+    if (scoreDiff !== 0) return scoreDiff;
+    const aDate = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const bDate = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return bDate - aDate || a.title.localeCompare(b.title, "it");
+  });
 }
