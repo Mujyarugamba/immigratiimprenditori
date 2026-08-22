@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformLocale } from "@/lib/i18n/config";
 
 const ALLOWED_KINDS = new Set([
   "story",
@@ -43,11 +44,27 @@ function validHttpUrl(value: string | null) {
   }
 }
 
+function safeReturnPath(formData: FormData) {
+  const value = text(formData, "return_path");
+  if (!value || value === "/contribuisci") return "/contribuisci";
+  const parts = value.split("/").filter(Boolean);
+  if (parts.length === 2 && isPlatformLocale(parts[0]) && parts[0] !== "it" && parts[1] === "contribuisci") {
+    return `/${parts[0]}/contribuisci`;
+  }
+  return "/contribuisci";
+}
+
+function resultPath(base: string, key: "inviato" | "errore", value: string) {
+  return `${base}?${key}=${encodeURIComponent(value)}`;
+}
+
 export async function submitEditorialContributionAction(formData: FormData) {
+  const returnPath = safeReturnPath(formData);
+
   // Honeypot: humans never see or fill this field. Return a normal success page
   // rather than revealing to automated submitters that they were detected.
   if (text(formData, "website")) {
-    redirect("/contribuisci?inviato=1");
+    redirect(resultPath(returnPath, "inviato", "1"));
   }
 
   const submissionKind = text(formData, "submission_kind") ?? "";
@@ -79,7 +96,7 @@ export async function submitEditorialContributionAction(formData: FormData) {
     !validHttpUrl(originalUrl) ||
     !consentContact
   ) {
-    redirect("/contribuisci?errore=campi");
+    redirect(resultPath(returnPath, "errore", "campi"));
   }
 
   const supabase = await createClient();
@@ -101,8 +118,8 @@ export async function submitEditorialContributionAction(formData: FormData) {
   });
 
   if (error) {
-    redirect("/contribuisci?errore=invio");
+    redirect(resultPath(returnPath, "errore", "invio"));
   }
 
-  redirect("/contribuisci?inviato=1");
+  redirect(resultPath(returnPath, "inviato", "1"));
 }
