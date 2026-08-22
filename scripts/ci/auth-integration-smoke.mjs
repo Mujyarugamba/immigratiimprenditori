@@ -190,13 +190,25 @@ async function provisionAndLink(env, token, userId) {
   return accountId;
 }
 
-async function assertRoleBoundary(env, token, expected) {
+async function assertAccessBoundary(env, token, expected) {
   const isContributor = await rpc(env, token, "access_is_contributor");
+  const editorAssigned = await rpc(env, token, "access_is_editor_assigned");
   const isEditor = await rpc(env, token, "access_is_editor");
   const isAdmin = await rpc(env, token, "access_is_application_admin");
-  assert(isContributor === expected.contributor, `contributore boundary mismatch: expected ${expected.contributor}, got ${isContributor}`);
-  assert(isEditor === expected.editor, `redattore boundary mismatch: expected ${expected.editor}, got ${isEditor}`);
-  assert(isAdmin === false, "Ephemeral smoke user unexpectedly has amministratore_applicativo");
+
+  assert(
+    isContributor === expected.contributor,
+    `contributore boundary mismatch: expected ${expected.contributor}, got ${isContributor}`,
+  );
+  assert(
+    editorAssigned === expected.editorAssigned,
+    `redattore assignment mismatch: expected ${expected.editorAssigned}, got ${editorAssigned}`,
+  );
+  assert(
+    isEditor === expected.editorAuthorized,
+    `redattore authorization mismatch: expected ${expected.editorAuthorized}, got ${isEditor}`,
+  );
+  assert(isAdmin === false, "Ephemeral smoke user unexpectedly has amministratore_applicativo authorization");
 }
 
 async function main() {
@@ -221,6 +233,7 @@ async function main() {
     const editorJwt = decodeJwt(editorToken);
     assert(contributorJwt.sub === contributorId && contributorJwt.role === "authenticated", "Contributor JWT claims mismatch");
     assert(editorJwt.sub === editorId && editorJwt.role === "authenticated", "Editor JWT claims mismatch");
+    assert((editorJwt.aal ?? "aal1") === "aal1", `Fresh password session unexpectedly has ${editorJwt.aal}`);
 
     const contributorAccountId = await provisionAndLink(env, contributorToken, contributorId);
     const editorAccountId = await provisionAndLink(env, editorToken, editorId);
@@ -228,14 +241,26 @@ async function main() {
     await rpcService(env, "assign_application_role", { p_account_id: contributorAccountId, p_role_code: "contributore" });
     await rpcService(env, "assign_application_role", { p_account_id: editorAccountId, p_role_code: "redattore" });
 
-    await assertRoleBoundary(env, contributorToken, { contributor: true, editor: false });
-    await assertRoleBoundary(env, editorToken, { contributor: false, editor: true });
+    await assertAccessBoundary(env, contributorToken, {
+      contributor: true,
+      editorAssigned: false,
+      editorAuthorized: false,
+    });
+    await assertAccessBoundary(env, editorToken, {
+      contributor: false,
+      editorAssigned: true,
+      editorAuthorized: false,
+    });
 
     await expectRpcDenied(env, contributorToken, "assign_application_role", {
       p_account_id: contributorAccountId,
       p_role_code: "redattore",
     });
-    await assertRoleBoundary(env, contributorToken, { contributor: true, editor: false });
+    await assertAccessBoundary(env, contributorToken, {
+      contributor: true,
+      editorAssigned: false,
+      editorAuthorized: false,
+    });
 
     inboxId = await rpc(env, contributorToken, "submit_editorial_contribution", {
       p_submission_kind: "story",
@@ -265,18 +290,22 @@ async function main() {
     assert(contributorRows[0].status === "new", "Contributor proposal has unexpected initial status");
     assert(contributorRows[0].submitted_by_account_id === contributorAccountId, "Contributor proposal is not linked to its account");
 
-    const editorRows = await restSelect(
+    const editorRowsAtAal1 = await restSelect(
       env,
       editorToken,
       `editorial_inbox_items?id=eq.${inboxId}&select=id,source_kind,status,submitted_by_account_id`,
     );
-    assert(editorRows?.length === 1, "Redattore cannot read contributor proposal through editorial RLS");
+    assert(
+      Array.isArray(editorRowsAtAal1) && editorRowsAtAal1.length === 0,
+      "AAL1 redattore unexpectedly bypassed editorial RLS before MFA",
+    );
 
     console.log("AUTH_INTEGRATION_LOCAL_ONLY = PASS");
     console.log("AUTH_PASSWORD_LOGIN_REAL = PASS");
     console.log("AUTH_ACCOUNT_PROVISIONING = PASS");
     console.log("AUTH_JWT_RPC = PASS");
-    console.log("AUTH_ROLE_SEPARATION = PASS");
+    console.log("AUTH_ROLE_ASSIGNMENT_SEPARATION = PASS");
+    console.log("AUTH_EDITOR_AAL1_DENIED = PASS");
     console.log("AUTH_SELF_ELEVATION_DENIED = PASS");
     console.log("AUTH_CONTRIBUTOR_PROPOSAL_RLS = PASS");
   } finally {
