@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { ATLAS_COUNTRIES } from "@/lib/atlas/scope";
 import { getPublicSupabaseEnv } from "@/lib/env";
 import { PLATFORM_LOCALES } from "@/lib/i18n/config";
-import { ATLAS_COUNTRIES } from "@/lib/atlas/scope";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 
@@ -141,6 +141,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       routesResult,
       contentRoutesResult,
       eventRoutesResult,
+      territoriesResult,
+      sectorsResult,
     ] = await Promise.all([
       supabase
         .from("contents")
@@ -161,17 +163,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq("visibility_status", "public"),
       supabase
         .from("observatory_indicator_values")
-        .select("indicator_id, territory_code, country_code, updated_at, published_at")
+        .select("indicator_id, territory_code, country_code, business_sector_id, updated_at, published_at")
         .eq("status", "final")
         .is("withdrawn_at", null),
-      supabase.from("content_geographies").select("country_code, updated_at"),
-      supabase.from("event_geographies").select("country_code, updated_at"),
+      supabase.from("content_geographies").select("country_code, territory_id, updated_at"),
+      supabase.from("event_geographies").select("country_code, territory_id, updated_at"),
       supabase
         .from("migration_routes")
         .select("id, origin_country_code, destination_country_code, slug, updated_at")
         .eq("is_active", true),
       supabase.from("content_routes").select("route_id, updated_at"),
       supabase.from("event_routes").select("route_id, updated_at"),
+      supabase
+        .from("geo_territories")
+        .select("id, code, slug, updated_at")
+        .eq("is_active", true)
+        .in("level_kind", ["region", "province_state", "metropolitan_area", "municipality_city"]),
+      supabase
+        .from("business_sectors")
+        .select("id, slug, updated_at")
+        .eq("is_active", true),
     ]);
 
     const contents: MetadataRoute.Sitemap = (contentsResult.data ?? []).map((item) => ({
@@ -197,10 +208,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     const publishedIndicatorIds = new Set(indicatorRows.map((item) => item.id));
-    const atlasEvidence = new Map<string, string | undefined>();
+    const publicValues = (valuesResult.data ?? []).filter((value) =>
+      publishedIndicatorIds.has(value.indicator_id),
+    );
 
-    for (const value of valuesResult.data ?? []) {
-      if (!publishedIndicatorIds.has(value.indicator_id)) continue;
+    const atlasEvidence = new Map<string, string | undefined>();
+    for (const value of publicValues) {
       const country = atlasCountryFromCode(value.territory_code);
       if (!country) continue;
       atlasEvidence.set(
@@ -208,7 +221,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         newest(atlasEvidence.get(country.slug), value.updated_at ?? value.published_at),
       );
     }
-
     for (const row of contentGeoResult.data ?? []) {
       const country = atlasCountryFromCode(row.country_code);
       if (!country) continue;
@@ -240,8 +252,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const routesWithEvidence = (routesResult.data ?? []).filter((route) => {
       if (contentRouteEvidence.has(route.id) || eventRouteEvidence.has(route.id)) return true;
-      return (valuesResult.data ?? []).some((value) => {
-        if (!publishedIndicatorIds.has(value.indicator_id)) return false;
+      return publicValues.some((value) => {
         const origin = atlasCountryFromCode(value.country_code);
         const destination = atlasCountryFromCode(value.territory_code);
         return origin?.code === route.origin_country_code && destination?.code === route.destination_country_code;
@@ -257,10 +268,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.78,
     }));
-
     const routeIndex: MetadataRoute.Sitemap = routesWithEvidence.length
       ? [{ url: `${SITE_URL}/atlante/rotte`, changeFrequency: "weekly", priority: 0.8 }]
       : [];
+
+    const contentTerritoryIds = new Set(
+      (contentGeoResult.data ?? []).map((row) => row.territory_id).filter(Boolean),
+    );
+    const eventTerritoryIds = new Set(
+      (eventGeoResult.data ?? []).map((row) => row.territory_id).filter(Boolean),
+    );
+    const territoryEntries: MetadataRoute.Sitemap = (territoriesResult.data ?? [])
+      .filter((territory) => {
+        if (contentTerritoryIds.has(territory.id) || eventTerritoryIds.has(territory.id)) return true;
+        if (!territory.code) return false;
+        return publicValues.some((value) => value.territory_code === territory.code);
+      })
+      .map((territory) => ({
+        url: `${SITE_URL}/territori/${territory.slug}`,
+        lastModified: territory.updated_at ?? undefined,
+        changeFrequency: "monthly" as const,
+        priority: 0.76,
+      }));
+
+    const sectorValueEvidence = new Map<number, string | undefined>();
+    for (const value of publicValues) {
+      if (value.business_sector_id == null) continue;
+      sectorValueEvidence.set(
+        value.business_sector_id,
+        newest(sectorValueEvidence.get(value.business_sector_id), value.updated_at ?? value.published_at),
+      );
+    }
+    const sectorEntries: MetadataRoute.Sitemap = (sectorsResult.data ?? [])
+      .filter((sector) => sectorValueEvidence.has(sector.id))
+      .map((sector) => ({
+        url: `${SITE_URL}/settori/${sector.slug}`,
+        lastModified: newest(sector.updated_at ?? undefined, sectorValueEvidence.get(sector.id)),
+        changeFrequency: "monthly" as const,
+        priority: 0.76,
+      }));
 
     return [
       ...base,
@@ -270,6 +316,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...atlasCountries,
       ...routeIndex,
       ...routeEntries,
+      ...territoryEntries,
+      ...sectorEntries,
     ];
   } catch {
     return base;
