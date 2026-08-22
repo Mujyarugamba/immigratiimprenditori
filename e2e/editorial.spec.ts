@@ -146,7 +146,21 @@ test.describe("Authenticated editorial UI", () => {
     await page.goto("/app/redazione");
     await waitForEditorialMfaRedirect(page, 30_000);
 
+    const enrollResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/auth/v1/factors") &&
+        response.request().method() === "POST",
+      { timeout: 20_000 },
+    );
     await page.getByRole("button", { name: "Aggiungi autenticatore" }).click();
+    const enrollResponse = await enrollResponsePromise;
+    const enrollBody = await enrollResponse.text();
+    expect(
+      enrollResponse.ok(),
+      `MFA enroll failed (${enrollResponse.status()}): ${enrollBody.slice(0, 800)}`,
+    ).toBeTruthy();
+
+    await expect(page.locator("code")).toBeVisible({ timeout: 15_000 });
     const secret = (await page.locator("code").textContent())?.trim() ?? "";
     expect(secret.length).toBeGreaterThan(10);
 
