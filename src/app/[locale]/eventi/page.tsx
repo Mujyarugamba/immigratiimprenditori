@@ -5,6 +5,8 @@ import { listPublicEvents } from "@/lib/data/public/events";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
+import { languageAlternates } from "@/lib/i18n/seo";
 
 const descriptions = {
   en: "Events, conferences and initiatives relevant to migrant entrepreneurship, research and economic integration.",
@@ -20,7 +22,11 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
-  return { title: NAV_MESSAGES[locale].events, description: descriptions[locale], alternates: { canonical: `/${locale}/eventi` } };
+  return {
+    title: NAV_MESSAGES[locale].events,
+    description: descriptions[locale],
+    alternates: { canonical: `/${locale}/eventi`, languages: languageAlternates("/eventi") },
+  };
 }
 
 export default async function LocalizedEventsPage({ params }: Props) {
@@ -29,6 +35,7 @@ export default async function LocalizedEventsPage({ params }: Props) {
   const result = await listPublicEvents();
   const m = NAV_MESSAGES[locale];
   const core = CORE_MESSAGES[locale];
+  const open = COLLECTION_MESSAGES[locale].open;
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
@@ -46,7 +53,7 @@ export default async function LocalizedEventsPage({ params }: Props) {
             <h2 className="mt-2 text-xl font-semibold leading-7 text-black">{event.title}</h2>
             {event.summary ? <p className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{event.summary}</p> : <div className="flex-1" />}
             {event.next_edition ? <p className="mt-4 text-xs text-neutral-500">{new Date(event.next_edition.starts_at).toLocaleString(locale)}</p> : null}
-            <Link href={`/${locale}/eventi/${event.id}`} className="mt-5 text-sm font-semibold underline underline-offset-4">Open →</Link>
+            <Link href={`/${locale}/eventi/${event.id}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} →</Link>
           </article>
         ))}
       </div>
