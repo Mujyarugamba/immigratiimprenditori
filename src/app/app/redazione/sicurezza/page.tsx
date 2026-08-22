@@ -13,8 +13,9 @@ export default function EditorialSecurityPage() {
         <p className="text-ink-muted text-sm font-medium uppercase tracking-[0.12em]">Area riservata</p>
         <h1 className="text-ink mt-2 text-3xl font-semibold tracking-tight">Sicurezza account</h1>
         <p className="text-ink-muted mt-3 max-w-2xl text-sm leading-6">
-          Registrazione e verifica dell’autenticazione a più fattori per redattori e amministratori.
-          In questa fase la configurazione è disponibile ma non ancora obbligatoria.
+          Registrazione e gestione dell’autenticazione a più fattori. Per redattori e amministratori
+          una sessione AAL2 verificata tramite TOTP è obbligatoria prima di accedere alle funzioni
+          privilegiate.
         </p>
       </header>
       <MfaSecurityPanel />
