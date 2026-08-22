@@ -113,7 +113,7 @@ export default async function AtlasRouteDetailPage({ params }: PageProps) {
                   <p className="mt-2 text-sm leading-6 text-neutral-600">
                     {latest.country_label ?? detail.route.origin.name} → {latest.territory_label ?? detail.route.destination.name}
                   </p>
-                  <p className="mt-4 text-sm leading-6 text-neutral-700">{indicator.methodology_summary}</p>
+                  <p className="mt-4 text-sm leading-6 text-neutral-700">{indicator.description}</p>
                   <Link
                     href={`/osservatorio/${indicator.slug}`}
                     className="mt-5 inline-block text-sm font-semibold underline underline-offset-4"
