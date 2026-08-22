@@ -72,9 +72,11 @@ test.describe("Authenticated editorial UI", () => {
     await page.goto("/app/redazione");
     await expect(page).toHaveURL(/\/accedi\?error=role/, { timeout: 30_000 });
     await expect(page.getByRole("heading", { name: "Accesso redazione" })).toBeVisible();
-    await expect(page.getByRole("alert")).toContainText(
-      "Questo account non dispone del ruolo richiesto per questa area.",
-    );
+    await expect(
+      page.getByRole("alert").filter({
+        hasText: "Questo account non dispone del ruolo richiesto per questa area.",
+      }),
+    ).toBeVisible();
   });
 
   test("editor can log in, create a ready draft, publish it, and open the public page", async ({
@@ -116,12 +118,14 @@ test.describe("Authenticated editorial UI", () => {
 
     await page.locator('select[name="editorial_status"]').selectOption("ready");
     await page.getByRole("button", { name: "Salva modifiche" }).click();
-    await expect(page.getByRole("status")).toContainText("Contenuto aggiornato.");
+    await expect(
+      page.getByRole("status").filter({ hasText: "Contenuto aggiornato." }),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Pubblica", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("Contenuto pubblicato.", {
-      timeout: 30_000,
-    });
+    await expect(
+      page.getByRole("status").filter({ hasText: "Contenuto pubblicato." }),
+    ).toBeVisible({ timeout: 30_000 });
 
     await page.goto(`/contenuti/${slug}`);
     await expect(page.getByRole("heading", { name: title })).toBeVisible({
