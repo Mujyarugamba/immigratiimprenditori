@@ -1,6 +1,15 @@
 import { expect, test } from "@playwright/test";
 
 const corePublicPages = ["/", "/contribuisci", "/sostieni"] as const;
+const accessibilityPages = [
+  "/",
+  "/osservatorio",
+  "/atlante",
+  "/storie",
+  "/eventi",
+  "/open-data",
+  "/contribuisci",
+] as const;
 const localizedHomes = [
   ["it", "/", "ltr"],
   ["en", "/en", "ltr"],
@@ -31,6 +40,65 @@ test("homepage renders the institutional editorial surface", async ({ page }) =>
       (element) => getComputedStyle(element).backgroundImage,
     );
     expect(backgroundImage).toBe("none");
+  }
+});
+
+test("core public surfaces pass the automated accessibility structure gate", async ({ page }) => {
+  for (const path of accessibilityPages) {
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
+
+    const audit = await page.evaluate(() => {
+      const ids = Array.from(document.querySelectorAll<HTMLElement>("[id]"))
+        .map((element) => element.id)
+        .filter(Boolean);
+      const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+      const imagesWithoutAlt = document.querySelectorAll("img:not([alt])").length;
+
+      const controls = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          'input:not([type="hidden"]), select, textarea',
+        ),
+      );
+      const unlabeledControls = controls.filter((control) => {
+        if (control.getAttribute("aria-label")?.trim()) return false;
+        if (control.getAttribute("aria-labelledby")?.trim()) return false;
+        if (control.getAttribute("title")?.trim()) return false;
+        const id = control.id;
+        if (id && document.querySelector(`label[for="${CSS.escape(id)}"]`)) return false;
+        return !control.closest("label");
+      }).length;
+
+      const interactive = Array.from(
+        document.querySelectorAll<HTMLElement>('a[href], button, [role="button"]'),
+      );
+      const unnamedInteractive = interactive.filter((element) => {
+        if (element.getAttribute("aria-label")?.trim()) return false;
+        if (element.getAttribute("aria-labelledby")?.trim()) return false;
+        if (element.getAttribute("title")?.trim()) return false;
+        return !(element.textContent ?? "").trim();
+      }).length;
+
+      return {
+        duplicateIds: new Set(duplicateIds).size,
+        imagesWithoutAlt,
+        unlabeledControls,
+        unnamedInteractive,
+        mainCount: document.querySelectorAll("main").length,
+        h1Count: document.querySelectorAll("h1").length,
+        lang: document.documentElement.lang,
+        dir: document.documentElement.dir,
+      };
+    });
+
+    expect(audit.duplicateIds, `${path} has duplicate IDs`).toBe(0);
+    expect(audit.imagesWithoutAlt, `${path} has images without alt`).toBe(0);
+    expect(audit.unlabeledControls, `${path} has unlabeled form controls`).toBe(0);
+    expect(audit.unnamedInteractive, `${path} has unnamed links/buttons`).toBe(0);
+    expect(audit.mainCount, `${path} must expose one main landmark`).toBe(1);
+    expect(audit.h1Count, `${path} must expose one H1`).toBe(1);
+    expect(audit.lang, `${path} must expose document language`).toBeTruthy();
+    expect(["ltr", "rtl"], `${path} must expose writing direction`).toContain(audit.dir);
   }
 });
 
@@ -119,8 +187,8 @@ test("Arabic RTL remains usable across core localized pages", async ({ page }) =
   }
 });
 
-test("core public pages do not overflow mobile or tablet viewports", async ({ page }) => {
-  for (const width of [390, 768]) {
+test("core public pages reflow without horizontal overflow", async ({ page }) => {
+  for (const width of [320, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
     for (const path of corePublicPages) {
       await page.goto(path);
