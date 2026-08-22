@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getAtlasCountryBySlug } from "@/lib/atlas/scope";
 import { getAtlasCountryDetail } from "@/lib/data/public/atlas";
 import { formatExplorerValue } from "@/lib/data/public/explore";
+import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const canonical = `/atlante/${country.slug}`;
-  const description = `Dati, indicatori, analisi, storie ed eventi disponibili per ${country.name} nell'Atlante dell'imprenditoria migrante.`;
+  const description = `Dati, indicatori, rotte, analisi, storie ed eventi disponibili per ${country.name} nell'Atlante dell'imprenditoria migrante.`;
 
   return {
     title: `${country.name} | Atlante`,
@@ -44,8 +45,15 @@ export default async function AtlasCountryPage({ params }: PageProps) {
   const country = getAtlasCountryBySlug(slug);
   if (!country) notFound();
 
-  const detail = await getAtlasCountryDetail(country);
+  const [detail, routeSummaries] = await Promise.all([
+    getAtlasCountryDetail(country),
+    listPublishedRouteSummaries(),
+  ]);
   if (!detail.hasEvidence) notFound();
+
+  const relatedRoutes = routeSummaries.filter(
+    (item) => item.route.origin.code === country.code || item.route.destination.code === country.code,
+  );
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
@@ -68,7 +76,7 @@ export default async function AtlasCountryPage({ params }: PageProps) {
         </p>
       </header>
 
-      <section className="mt-8 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-8 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-5">
         <div className="bg-white p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Indicatori</p>
           <strong className="mt-2 block text-3xl text-black">{detail.indicatorCount}</strong>
@@ -76,6 +84,10 @@ export default async function AtlasCountryPage({ params }: PageProps) {
         <div className="bg-white p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Valori dati</p>
           <strong className="mt-2 block text-3xl text-black">{detail.dataValueCount}</strong>
+        </div>
+        <div className="bg-white p-5">
+          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Rotte</p>
+          <strong className="mt-2 block text-3xl text-black">{relatedRoutes.length}</strong>
         </div>
         <div className="bg-white p-5">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Analisi / storie</p>
@@ -135,6 +147,43 @@ export default async function AtlasCountryPage({ params }: PageProps) {
                 </article>
               );
             })}
+          </div>
+        </section>
+      ) : null}
+
+      {relatedRoutes.length > 0 ? (
+        <section className="mt-12">
+          <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black pb-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Relazioni tra Paesi</p>
+              <h2 className="mt-2 text-2xl font-semibold text-black">Rotte documentate</h2>
+            </div>
+            <Link href="/atlante/rotte" className="text-sm font-semibold underline underline-offset-4">
+              Tutte le rotte →
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-px border border-black bg-black md:grid-cols-2 lg:grid-cols-3">
+            {relatedRoutes.map((item) => (
+              <article key={item.route.id} className="bg-white p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                  {item.route.origin.code} → {item.route.destination.code}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-black">
+                  <Link href={`/atlante/rotte/${item.route.slug}`}>
+                    {item.route.origin.name} → {item.route.destination.name}
+                  </Link>
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-neutral-700">
+                  {item.dataValueCount} valori · {item.contentCount} analisi/storie · {item.eventCount} eventi
+                </p>
+                <Link
+                  href={`/atlante/rotte/${item.route.slug}`}
+                  className="mt-5 inline-block text-sm font-semibold underline underline-offset-4"
+                >
+                  Apri la rotta →
+                </Link>
+              </article>
+            ))}
           </div>
         </section>
       ) : null}
