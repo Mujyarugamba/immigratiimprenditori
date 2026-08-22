@@ -33,6 +33,10 @@ test.describe("Go-live local surfaces", () => {
     ).toBeGreaterThan(0);
 
     await page.goto("/storie");
+    expect(
+      await page.locator('article a[href^="/contenuti/"]').count(),
+      "Stories must expose at least one published navigable story, interview or testimony",
+    ).toBeGreaterThan(0);
     await expect(page.getByRole("link", { name: /Partecipa/i })).toBeVisible();
   });
 
