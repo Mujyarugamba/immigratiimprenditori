@@ -33,6 +33,12 @@ jobs:
       - name: Tests
         run: npm test
 
+      - name: Go-live functional source gates
+        run: node scripts/ci/go-live-functional-gates.mjs
+
+      - name: Production dependency vulnerability gate
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Supabase Auth deprecation guard
         shell: bash
         run: |
