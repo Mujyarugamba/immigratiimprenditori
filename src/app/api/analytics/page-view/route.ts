@@ -14,6 +14,24 @@ function noContent() {
   });
 }
 
+function externalRequestOrigin(request: Request) {
+  const requestUrl = new URL(request.url);
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const host = forwardedHost || request.headers.get("host")?.trim();
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol = forwardedProto || requestUrl.protocol.replace(":", "");
+
+  if (!host || (protocol !== "http" && protocol !== "https")) {
+    return requestUrl.origin;
+  }
+
+  try {
+    return new URL(`${protocol}://${host}`).origin;
+  } catch {
+    return requestUrl.origin;
+  }
+}
+
 export async function POST(request: Request) {
   // Fail closed until the production environment explicitly enables collection.
   // This keeps previews, local development and CI free of analytics writes.
@@ -23,7 +41,8 @@ export async function POST(request: Request) {
 
   const requestUrl = new URL(request.url);
   const origin = request.headers.get("origin");
-  if (origin && origin !== requestUrl.origin) {
+  const allowedOrigins = new Set([requestUrl.origin, externalRequestOrigin(request)]);
+  if (origin && !allowedOrigins.has(origin)) {
     return new Response("forbidden", { status: 403 });
   }
 
