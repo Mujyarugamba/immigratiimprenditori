@@ -16,20 +16,31 @@ on:
       - "supabase/migrations/**"
       - "scripts/ci/supabase-security-smoke.sql"
       - "scripts/ci/rate-limit-smoke.sql"
+      - "scripts/ci/go-live-db-smoke.sql"
+      - "scripts/ci/backup-archive-smoke.sh"
       - "scripts/ci/auth-integration-smoke.mjs"
       - "src/lib/auth/**"
       - "src/lib/supabase/**"
+      - "src/lib/export/**"
       - "src/lib/env.ts"
       - "src/components/app/MfaSecurityPanel.tsx"
+      - "src/components/analytics/**"
+      - "src/app/layout.tsx"
       - "src/app/accedi/**"
+      - "src/app/api/analytics/**"
+      - "src/app/api/open-data/**"
       - "src/app/app/mfa/**"
       - "src/app/app/redazione/**"
       - "e2e/editorial.spec.ts"
+      - "e2e/go-live-local.spec.ts"
       - "e2e/helpers/auth.ts"
       - "e2e/helpers/supabase.ts"
       - "playwright.auth-ci.config.ts"
       - "docs/roadmap/EXECUTION-MASTER.md"
+      - "docs/roadmap/ROADMAP-110-PRIORITIES.md"
       - "docs/security/PRODUCTION-READINESS.md"
+      - "docs/security/BACKUP-RECOVERY.md"
+      - ".github/workflows/production-backup.yml"
       - ".github/workflows/supabase-local-validation.yml"
 
 permissions:
@@ -160,6 +171,19 @@ jobs:
             -v ON_ERROR_STOP=1 \
             -f scripts/ci/rate-limit-smoke.sql
 
+      - name: Go-live audit and analytics smoke
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/ci/go-live-db-smoke.sql
+
+      - name: Backup archive integrity smoke
+        env:
+          PGPASSWORD: postgres
+        run: bash scripts/ci/backup-archive-smoke.sh
+
       - name: Auth integration smoke with local ephemeral users
         run: node scripts/ci/auth-integration-smoke.mjs
 
@@ -184,13 +208,17 @@ jobs:
           printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLIC_KEY" >> "$GITHUB_ENV"
           printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_KEY" >> "$GITHUB_ENV"
           printf 'NEXT_PUBLIC_SITE_URL=%s\n' 'http://127.0.0.1:3000' >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          printf 'PRIVACY_ANALYTICS_WRITE_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
           NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLIC_KEY" \
           SUPABASE_SERVICE_ROLE_KEY="$SERVICE_KEY" \
           NEXT_PUBLIC_SITE_URL="http://127.0.0.1:3000" \
+          NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED="true" \
+          PRIVACY_ANALYTICS_WRITE_ENABLED="true" \
           npm run build
 
-      - name: Authenticated browser E2E and login throttling
+      - name: Authenticated browser E2E, go-live surfaces and login throttling
         run: npx playwright test --config=playwright.auth-ci.config.ts
 
       - name: Stop ephemeral local stack
