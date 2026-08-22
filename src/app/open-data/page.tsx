@@ -46,6 +46,22 @@ export default async function OpenDataPage() {
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Accesso programmabile</p>
+            <h2 className="mt-2 text-2xl font-semibold text-black">API pubblica v1</h2>
+          </div>
+          <Link href="/open-data/api" className="text-sm font-semibold underline underline-offset-4">
+            Documentazione API →
+          </Link>
+        </div>
+        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
+          La versione <code>v1</code> espone indicatori dell&apos;Osservatorio, Paesi dell&apos;Atlante e rotte
+          origine-destinazione che dispongono di evidenze pubblicate. Il punto di discovery è <code>/api/v1</code>.
+        </p>
+      </section>
+
+      <section className="mt-10 border-t border-black pt-8">
         <h2 className="text-2xl font-semibold text-black">Dataset pubblico</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
           Gli endpoint restituiscono soltanto indicatori pubblicati e valori finali resi pubblici dall&apos;Osservatorio.
@@ -66,7 +82,7 @@ export default async function OpenDataPage() {
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Filtri degli endpoint</h2>
+        <h2 className="text-2xl font-semibold text-black">Filtri degli endpoint Open Data</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
           JSON e CSV accettano gli stessi parametri. I filtri possono essere combinati e coincidono con quelli del Data Explorer.
         </p>
