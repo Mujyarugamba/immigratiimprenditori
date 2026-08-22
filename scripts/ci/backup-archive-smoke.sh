@@ -37,9 +37,10 @@ grep -Eq 'TABLE( DATA)? public contents ' "$LIST_FILE"
 grep -Eq 'TABLE( DATA)? public observatory_indicators ' "$LIST_FILE"
 
 # Materialize the archive into SQL as a recovery-path integrity check. This does
-# not mutate the running ephemeral database.
+# not mutate the running ephemeral database. PostgreSQL 17 requires an explicit
+# output destination when pg_restore is not restoring directly into a database.
 docker exec -i "$DB_CONTAINER" \
-  pg_restore --no-owner --no-privileges \
+  pg_restore --no-owner --no-privileges --file=- \
   < "$DUMP_FILE" > "$RESTORE_SQL"
 
 test -s "$RESTORE_SQL"
