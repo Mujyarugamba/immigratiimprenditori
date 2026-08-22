@@ -8,6 +8,19 @@ Quando un dato o un'informazione deriva da una fonte esterna, il Centro Studi in
 
 Una fonte secondaria che commenta o riprende un dato non viene presentata come fonte primaria del dato stesso.
 
+## Tipologie di fonte
+
+Il Centro Studi mantiene distinta la natura delle fonti, perché autorevolezza, metodo e funzione informativa non sono equivalenti:
+
+- **fonti ufficiali e istituzionali**: enti statistici, registri pubblici, amministrazioni, istituzioni nazionali, europee e internazionali; sono la base preferenziale per dati ufficiali, norme e atti;
+- **ricerca accademica**: università, riviste scientifiche, working paper e centri di ricerca universitari; viene utilizzata per risultati di ricerca, interpretazioni e quadro teorico, indicando per quanto possibile pubblicazione e metodo;
+- **istituti e centri di ricerca indipendenti**: osservatori, fondazioni e organismi di ricerca non riconducibili a una fonte statistica ufficiale; i loro dati e stime restano identificati come elaborazioni della rispettiva organizzazione;
+- **fonti associative e professionali**: associazioni, reti imprenditoriali, camere, ordini e organizzazioni di rappresentanza; sono utilizzate per documentare attività, posizioni, servizi, indagini e fenomeni osservati dalla rispettiva comunità;
+- **stampa e fonti giornalistiche**: servono a documentare fatti, dichiarazioni e temi di attualità; non sostituiscono la fonte primaria di un dato quando questa è disponibile;
+- **testimonianze dirette**: interviste, storie, segnalazioni e contributi personali; descrivono esperienze e punti di vista e non vengono presentati come evidenza statistica generale.
+
+La tipologia della fonte non determina da sola la qualità di un contenuto. La redazione valuta pertinenza, tracciabilità, metodo, aggiornamento, copertura geografica e limiti prima dell'utilizzo.
+
 ## Dati e indicatori
 
 L'Osservatorio raccoglie e organizza indicatori e serie storiche mantenendo separati, per quanto possibile, il valore pubblicato dalla fonte, le elaborazioni del Centro Studi e le interpretazioni editoriali.
