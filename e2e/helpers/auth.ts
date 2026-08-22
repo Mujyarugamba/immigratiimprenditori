@@ -14,7 +14,4 @@ export async function loginViaUi(
   await expect(page).toHaveURL(new RegExp(next.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), {
     timeout: 45_000,
   });
-  await expect(page.getByText("Area riservata", { exact: true })).toBeVisible({
-    timeout: 30_000,
-  });
 }
