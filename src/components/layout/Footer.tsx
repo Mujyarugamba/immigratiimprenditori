@@ -54,7 +54,7 @@ export function Footer() {
         <div>
           <h2>{m.footerMethod}</h2>
           <Link href={localizedHref(locale, "/fonti")}>{core.sources}</Link>
-          <Link href="/dati-e-fonti">{m.sourcesMethod}</Link>
+          <Link href={localizedHref(locale, "/dati-e-fonti")}>{m.sourcesMethod}</Link>
           <Link href={localizedHref(locale, "/glossario")}>{m.glossary}</Link>
           <Link href="/politica-editoriale">{m.editorialPolicy}</Link>
           <Link href="/privacy">{m.privacy}</Link>
