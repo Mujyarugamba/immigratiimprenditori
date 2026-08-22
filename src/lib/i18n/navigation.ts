@@ -13,6 +13,7 @@ const LOCALIZED_EXACT_PATHS = new Set([
   "/esplora/settori",
   "/esplora/autori",
   "/fonti",
+  "/dati-e-fonti",
   "/glossario",
   "/open-data",
   "/cerca",
