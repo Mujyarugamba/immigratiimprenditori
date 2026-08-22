@@ -28,6 +28,8 @@ on:
       - "e2e/helpers/auth.ts"
       - "e2e/helpers/supabase.ts"
       - "playwright.auth-ci.config.ts"
+      - "docs/roadmap/EXECUTION-MASTER.md"
+      - "docs/security/PRODUCTION-READINESS.md"
       - ".github/workflows/supabase-local-validation.yml"
 
 permissions:
