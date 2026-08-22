@@ -20,6 +20,6 @@ test("database publication gate requires editor/admin and editorial ownership", 
 });
 
 test("database publication gate has no service-role publication bypass", () => {
-  assert.doesNotMatch(sql, /auth\.role\(\).*service_role/is);
+  assert.doesNotMatch(sql, /auth\.role\(\)[\s\S]*service_role/i);
   assert.match(sql, /before insert or update on public\.contents/i);
 });
