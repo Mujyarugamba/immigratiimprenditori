@@ -56,7 +56,9 @@ async function waitForEditorialMfaRedirect(page: Page, timeout: number) {
 
 async function waitForMfaEnrollmentUi(page: Page, timeout: number) {
   const secretCode = page.locator("code");
-  const alert = page.getByRole("alert").first();
+  // Next.js renders its own empty route announcer with role="alert". Restrict
+  // this branch to the actual MFA error paragraph rendered by MfaSecurityPanel.
+  const alert = page.locator('p[role="alert"]').first();
 
   await Promise.race([
     secretCode.waitFor({ state: "visible", timeout }),
