@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AtlasRouteMap } from "@/components/atlas/AtlasRouteMap";
 import { listAtlasCountrySummaries } from "@/lib/data/public/atlas";
+import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
 
 export const metadata: Metadata = {
   title: "Atlante dell'imprenditoria migrante",
   description:
-    "Paesi e territori letti attraverso dati, ricerche, storie ed eventi verificati dal Centro Studi Immigrati Imprenditori.",
+    "Paesi e territori letti attraverso dati, ricerche, storie, rotte ed eventi verificati dal Centro Studi Immigrati Imprenditori.",
   alternates: { canonical: "/atlante" },
 };
 
 export default async function AtlantePage() {
-  const summaries = await listAtlasCountrySummaries();
+  const [summaries, routes] = await Promise.all([
+    listAtlasCountrySummaries(),
+    listPublishedRouteSummaries(),
+  ]);
   const published = summaries.filter((item) => item.hasEvidence);
 
   return (
@@ -23,13 +28,34 @@ export default async function AtlantePage() {
           Atlante dell&apos;imprenditoria migrante
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Una lettura per Paese che riunisce soltanto evidenze già disponibili:
-          indicatori, analisi, storie ed eventi. Le schede vengono rese pubbliche
+          Una lettura geografica che riunisce soltanto evidenze già disponibili:
+          indicatori, analisi, storie, rotte ed eventi. Le schede vengono rese pubbliche
           quando esiste materiale sostanziale; non vengono create pagine vuote.
         </p>
       </header>
 
-      <section className="mt-10">
+      {published.length > 0 ? (
+        <section className="mt-10" aria-labelledby="atlas-map-heading">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                Geografia delle evidenze
+              </p>
+              <h2 id="atlas-map-heading" className="mt-2 text-2xl font-semibold text-black">
+                Paesi e rotte documentate
+              </h2>
+            </div>
+            {routes.length > 0 ? (
+              <Link href="/atlante/rotte" className="text-sm font-semibold underline underline-offset-4">
+                Esplora tutte le rotte →
+              </Link>
+            ) : null}
+          </div>
+          <AtlasRouteMap countries={published} routes={routes} />
+        </section>
+      ) : null}
+
+      <section className="mt-12">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black pb-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
