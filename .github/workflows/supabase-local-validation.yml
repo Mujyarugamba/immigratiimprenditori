@@ -12,6 +12,7 @@ on:
       - "supabase/migrations/**"
       - "scripts/ci/supabase-security-smoke.sql"
       - "scripts/ci/rate-limit-smoke.sql"
+      - "scripts/ci/auth-integration-smoke.mjs"
       - ".github/workflows/supabase-local-validation.yml"
 
 permissions:
@@ -24,6 +25,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v3
@@ -96,6 +102,9 @@ jobs:
           psql "postgresql://postgres@127.0.0.1:54322/postgres" \
             -v ON_ERROR_STOP=1 \
             -f scripts/ci/rate-limit-smoke.sql
+
+      - name: Auth integration smoke with local ephemeral users
+        run: node scripts/ci/auth-integration-smoke.mjs
 
       - name: Stop ephemeral local stack
         if: always()
