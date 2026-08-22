@@ -3,10 +3,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
+import { languageAlternates } from "@/lib/i18n/seo";
 import { listHomeContents } from "@/lib/data/public/contents";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const metrics = {
+  en: ["Indicators", "Data points", "Territories", "Sectors"],
+  fr: ["Indicateurs", "Valeurs", "Territoires", "Secteurs"],
+  es: ["Indicadores", "Valores", "Territorios", "Sectores"],
+  de: ["Indikatoren", "Datenpunkte", "Regionen", "Branchen"],
+  ar: ["المؤشرات", "نقاط البيانات", "الأقاليم", "القطاعات"],
+  zh: ["指标", "数据点", "地区", "行业"],
+} as const;
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -17,19 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: m.homeTitle,
     description: m.homeIntro,
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        it: SITE_URL,
-        en: `${SITE_URL}/en`,
-        fr: `${SITE_URL}/fr`,
-        es: `${SITE_URL}/es`,
-        de: `${SITE_URL}/de`,
-        ar: `${SITE_URL}/ar`,
-        zh: `${SITE_URL}/zh`,
-        "x-default": SITE_URL,
-      },
-    },
+    alternates: { canonical: `/${locale}`, languages: languageAlternates("/") },
   };
 }
 
@@ -37,6 +34,8 @@ export default async function LocalizedHomePage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = CORE_MESSAGES[locale];
+  const metricLabels = metrics[locale];
+  const open = COLLECTION_MESSAGES[locale].open;
   const [snapshot, contents] = await Promise.all([
     getExplorerSnapshot().catch(() => null),
     listHomeContents(6).catch(() => []),
@@ -58,10 +57,10 @@ export default async function LocalizedHomePage({ params }: Props) {
         <aside className="border border-black p-6">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Immigrati Imprenditori</p>
           <dl className="mt-5 grid grid-cols-2 gap-px bg-black">
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">Indicators</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.indicators.length ?? "—"}</dd></div>
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">Data points</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.values.length ?? "—"}</dd></div>
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">Territories</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.territories.length ?? "—"}</dd></div>
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">Sectors</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.sectors.length ?? "—"}</dd></div>
+            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[0]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.indicators.length ?? "—"}</dd></div>
+            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[1]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.values.length ?? "—"}</dd></div>
+            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[2]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.territories.length ?? "—"}</dd></div>
+            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[3]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.sectors.length ?? "—"}</dd></div>
           </dl>
         </aside>
       </section>
@@ -78,7 +77,7 @@ export default async function LocalizedHomePage({ params }: Props) {
               <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{item.type_code.replaceAll("_", " ")}</p>
               <h3 className="mt-2 text-lg font-semibold leading-6 text-black">{item.title}</h3>
               {item.abstract ? <p className="mt-3 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</p> : <div className="flex-1" />}
-              <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-4 text-sm font-semibold underline underline-offset-4">Open →</Link>
+              <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-4 text-sm font-semibold underline underline-offset-4">{open} →</Link>
             </article>
           ))}
         </div>
@@ -87,7 +86,7 @@ export default async function LocalizedHomePage({ params }: Props) {
       <section className="mt-10 grid gap-px border border-black bg-black sm:grid-cols-3">
         <Link href={`/${locale}/esplora`} className="bg-white p-6 text-lg font-semibold">{m.exploreTitle} →</Link>
         <Link href={`/${locale}/contribuisci`} className="bg-white p-6 text-lg font-semibold">{m.participateTitle} →</Link>
-        <Link href="/open-data" className="bg-white p-6 text-lg font-semibold">{m.openData} →</Link>
+        <Link href={`/${locale}/open-data`} className="bg-white p-6 text-lg font-semibold">{m.openData} →</Link>
       </section>
     </main>
   );
