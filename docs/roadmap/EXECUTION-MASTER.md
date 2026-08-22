@@ -67,7 +67,7 @@ Base di integrazione: `feature/institutional-identity`
 | 47 | Knowledge Graph | BASE PASS | Grafo pubblico derivato da evidenze operative; schema persistente preparato |
 | 48 | Pagine relazionali automatiche | BASE PASS | `/relazioni` operativo su Paesi, indicatori, settori e rotte documentati |
 | 49 | Timeline | BASE PASS | Vista integrata operativa; ampliare filtri Paese/tema/rotta |
-| 50 | Contributor account | BASE PASS | Login contributore + stato proprie proposte su RLS; completare provisioning/QA |
+| 50 | Contributor account | AUTH INTEGRATION PASS / BROWSER QA PENDING | Login password reale, provisioning, separazione contributore/redattore, JWT/RPC, proposta e RLS verificati nel laboratorio locale; resta E2E browser autenticato |
 | 51 | Profili contributor | BASE PASS | Editor profilo privato/pubblico + pagina pubblica evidence-gated; ampliare attribuzioni |
 | 52 | Workflow redazionale | IN CORSO AVANZATO | Assegnazione a sé, stati e cronologia attività; completare versioni/review |
 | 53 | Radar internazionale | IN CORSO AVANZATO | Core Radar review-only + sorgente EMN UE; continuare qualità parser/fonti |
@@ -79,7 +79,7 @@ Base di integrazione: `feature/institutional-identity`
 | 59 | Newsletter | DA FARE | Newsletter generale |
 | 60 | Newsletter tematiche | DA FARE | Paese/tema/settore |
 | 61 | Alert personalizzati | DA FARE | Preferenze account |
-| 62 | API pubblica | BASE PASS | `/api/v1` operativo con indicatori, Atlante, context e graph; rate limit prima go-live |
+| 62 | API pubblica | BASE PASS / HARDENING API PASS | `/api/*` limitata su Netlify a 60 req/min per IP+dominio; indicatori paginati con default 500 e massimo 1.000; mantenere QA prima go-live |
 | 63 | API docs | BASE PASS | Documentati endpoint dati, Atlas, contesto e grafo; estendere contratti |
 | 64 | Widget incorporabili | DA FARE | Grafici e indicatori embed |
 | 65 | Dataset Builder | DA FARE | Export personalizzato |
@@ -101,18 +101,28 @@ Base di integrazione: `feature/institutional-identity`
 | 81 | Responsive reale | BASE | QA umano desktop/tablet/mobile |
 | 82 | Performance | DA FARE | Lighthouse/caching/bundle |
 | 83 | Security headers/CSP | IN CORSO | CSP definitiva |
-| 84 | Rate limiting persistente | BLOCKER | Form/login/API |
-| 85 | Leaked Password Protection | BLOCKER | Supabase |
-| 86 | Hardening form pubblico | PREPARATO / LOCAL DB PASS | Validato localmente; production activation separata |
-| 87 | MFA amministratori | DA FARE | Prima del go-live |
+| 84 | Rate limiting persistente | API PASS / FORM LOCAL PASS / LOGIN PENDING | API Netlify 60 req/min PASS; form DB 5 invii/ora per email e 200/ora globali validato localmente; chiudere protezione login prima go-live |
+| 85 | Leaked Password Protection | NON DISPONIBILE SU FREE / TOTP MITIGATION | Funzione Supabase non disponibile sul piano Free; mitigazione prevista con MFA TOTP, da rendere obbligatoria prima go-live |
+| 86 | Hardening form pubblico | PREPARATO / LOCAL DB PASS | Chiavi rate-limit solo SHA-256 e sesto invio respinto nel smoke; production activation separata |
+| 87 | MFA amministratori | TOTP PREPARATA / VERIFY PASS / ENFORCEMENT PENDING | Enrollment, challenge e verify reali Supabase verificati; rendere obbligatoria per redattori/admin solo dopo QA anti-lockout |
 | 88 | Audit log | BASE / LOCAL DB PASS | Inbox activity presente; policy insert validata localmente, activation production separata |
 | 89 | Backup / recovery | DA FARE | Piano DB/media/documenti |
-| 90 | Test E2E | BLOCKER | Ruoli/login/contributi/pubblicazione |
+| 90 | Test E2E | AUTH INTEGRATION PASS / BROWSER AUTH BLOCKER | Auth/API locale reale PASS; resta il vero browser E2E autenticato per ruoli/login/contributi/pubblicazione |
 | 91 | Branch protection | BLOCKER | Prima del merge |
 | 92 | Registro correzioni | PREPARATO / LOCAL DB PASS | Schema validato localmente; pagina pubblica solo con avvisi reali |
 | 93 | Quality gate finale | BLOCKER | Security/a11y/responsive/performance/dati/legale |
 | 94 | Merge PR → main | BLOCCATO | Solo dopo gate |
 | 95 | Go-live completo | BLOCCATO | Ultimo passo |
+
+## Verifica sicurezza/autenticazione — 2026-08-22
+
+- Commit `43a3f46b0ab25ae13dc02830676893722fa74fed`: `Editorial v1 CI` completamente PASS, inclusi HTTP smoke e Public browser E2E Chromium.
+- Commit `f6a0cb8674b0373b5a1016375cd17b24aa5102fd`: `Supabase local migration validation` completamente PASS su stack locale effimero completo.
+- Cold-start standalone, lint PostgreSQL, publication/RLS security smoke e persistent rate-limit smoke: PASS.
+- Auth integration smoke: login password reale, provisioning account, JWT/RPC, separazione `contributore`/`redattore`, divieto di auto-elevazione, proposta contributore + RLS: PASS.
+- Cleanup utenti/account/proposta effimeri: PASS; nessuna identità di test conservata.
+- Il workflow Supabase è esposto anche sulle pull request per poter diventare in seguito un required check; la branch protection non è ancora attivata.
+- Nessuna migration è stata applicata al database production; nessun merge e nessun deploy production sono stati eseguiti.
 
 ## Sequenza vincolante
 
