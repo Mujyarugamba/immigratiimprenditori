@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
 
+const corePublicPages = ["/", "/contribuisci", "/sostieni"] as const;
+
 test("homepage renders the institutional editorial surface", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Immigrati Imprenditori/i);
   await expect(page.locator("#contenuto")).toBeVisible();
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.locator("img:not([alt])")).toHaveCount(0);
 
   await page.keyboard.press("Tab");
   const skipLink = page.getByRole("link", { name: "Vai al contenuto" });
@@ -25,7 +28,7 @@ test("homepage renders the institutional editorial surface", async ({ page }) =>
 test("contribution page exposes the reviewed intake flow without submitting", async ({ page }) => {
   await page.goto("/contribuisci");
 
-  await expect(page.getByRole("heading", { level: 1, name: "Partecipa al Centro Studi" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Partecipa al Centro Studi" })).toHaveCount(1);
   await expect(page.getByLabel(/Tipo di proposta/i)).toBeVisible();
   await expect(page.getByLabel(/Nome e cognome/i)).toBeVisible();
   await expect(page.getByLabel(/Email/i)).toBeVisible();
@@ -37,7 +40,7 @@ test("contribution page exposes the reviewed intake flow without submitting", as
 test("support page remains fail-closed while online payments are disabled", async ({ page }) => {
   await page.goto("/sostieni");
 
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(/Sostieni/i);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
   await expect(page.getByText(/pagamenti online/i)).toBeVisible();
   await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
 });
@@ -50,4 +53,21 @@ test("localized shells expose LTR and RTL directions", async ({ page }) => {
   await page.goto("/ar");
   await expect(page.locator('[data-platform-locale="ar"]')).toHaveAttribute("dir", "rtl");
   await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى" })).toHaveAttribute("href", "#contenuto-principale");
+});
+
+test("core public pages do not overflow mobile or tablet viewports", async ({ page }) => {
+  for (const width of [390, 768]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of corePublicPages) {
+      await page.goto(path);
+      const dimensions = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      expect(
+        dimensions.scrollWidth,
+        `${path} overflows horizontally at ${width}px`,
+      ).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+    }
+  }
 });
