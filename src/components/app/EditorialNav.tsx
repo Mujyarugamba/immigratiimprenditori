@@ -7,6 +7,7 @@ const links = [
   { href: "/app/redazione", label: "Dashboard Redazione", exact: true },
   { href: "/app/redazione/inbox", label: "Inbox" },
   { href: "/app/redazione/radar", label: "Radar" },
+  { href: "/app/redazione/ai", label: "AI redazionale" },
   { href: "/app/redazione/contenuti", label: "Contenuti" },
   { href: "/app/redazione/eventi", label: "Eventi" },
   { href: "/app/redazione/osservatorio", label: "Osservatorio" },
