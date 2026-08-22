@@ -12,6 +12,7 @@ const publicRoutes = [
   "/contenuti",
   "/ricerca",
   "/pubblicazioni",
+  "/bibliografia",
   "/storie",
   "/eventi",
   "/cultura",
@@ -27,6 +28,7 @@ const publicRoutes = [
   "/fonti",
   "/glossario",
   "/dati-e-fonti",
+  "/rss",
   "/contribuisci",
   "/chi-siamo",
   "/politica-editoriale",
@@ -151,7 +153,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select("slug, updated_at, published_at")
         .eq("editorial_status", "ready")
         .eq("publication_status", "published")
-        .eq("visibility_status", "public"),
+        .eq("visibility_status", "public")
+        .is("archived_at", null),
       supabase
         .from("observatory_indicators")
         .select("id, code, slug, updated_at, published_at")
@@ -162,7 +165,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select("id, updated_at, published_at")
         .eq("editorial_status", "ready")
         .eq("publication_status", "published")
-        .eq("visibility_status", "public"),
+        .eq("visibility_status", "public")
+        .is("archived_at", null),
       supabase
         .from("observatory_indicator_values")
         .select("indicator_id, territory_code, country_code, business_sector_id, updated_at, published_at")
