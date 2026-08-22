@@ -18,6 +18,18 @@ const STATUS_OPTIONS = [
   ["archived", "Archiviato"],
 ] as const;
 
+const STATUS_LABEL = Object.fromEntries(STATUS_OPTIONS) as Record<string, string>;
+
+function activityLabel(changes: Record<string, unknown>) {
+  if (changes.kind === "status_change") {
+    const from = typeof changes.from === "string" ? STATUS_LABEL[changes.from] ?? changes.from : "—";
+    const to = typeof changes.to === "string" ? STATUS_LABEL[changes.to] ?? changes.to : "—";
+    return `Stato: ${from} → ${to}`;
+  }
+  if (changes.kind === "assignment") return "Assegnazione redazionale aggiornata";
+  return "Attività redazionale";
+}
+
 export default async function InboxDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const item = await getEditorialInboxItemById(id);
@@ -87,6 +99,26 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
               </div>
             </section>
           ) : null}
+
+          <section className="border-t border-black pt-6">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-ink text-lg font-semibold">Cronologia redazionale</h2>
+              <span className="text-ink-muted text-xs">{item.activity.length}</span>
+            </div>
+            <div className="mt-3 divide-y divide-neutral-300">
+              {item.activity.map((entry) => (
+                <article key={entry.id} className="py-3">
+                  <p className="text-sm font-medium text-black">{activityLabel(entry.changes)}</p>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    {new Intl.DateTimeFormat("it-IT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(entry.created_at))}
+                  </p>
+                </article>
+              ))}
+              {item.activity.length === 0 ? (
+                <p className="py-4 text-sm text-neutral-500">Nessuna attività registrata per questo arrivo.</p>
+              ) : null}
+            </div>
+          </section>
         </div>
 
         <aside className="border-line border-t pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
