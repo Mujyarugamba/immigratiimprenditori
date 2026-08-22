@@ -17,6 +17,7 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     ...devices["Desktop Chrome"],
+    channel: "chrome",
   },
   webServer: {
     command: "npm run start -- -p 3000",

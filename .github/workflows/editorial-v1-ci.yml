@@ -47,8 +47,5 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npm run test:smoke
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
-
       - name: Public browser E2E
         run: npx playwright test --config=playwright.public.config.ts
