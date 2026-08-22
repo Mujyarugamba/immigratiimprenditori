@@ -40,6 +40,15 @@ async function expectText(path, snippets) {
   return { response, body };
 }
 
+function expectHeader(response, header, expected) {
+  const actual = response.headers.get(header) ?? "";
+  if (expected instanceof RegExp) {
+    if (!expected.test(actual)) fail(`${header}: unexpected value ${JSON.stringify(actual)}`);
+    return;
+  }
+  if (actual !== expected) fail(`${header}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
+}
+
 async function main() {
   const server = spawn(
     process.execPath,
@@ -73,6 +82,11 @@ async function main() {
       "Contribuisci al Centro Studi",
     ]);
     if (!home.body.includes("<h1")) fail("/: missing primary h1");
+    expectHeader(home.response, "x-content-type-options", "nosniff");
+    expectHeader(home.response, "x-frame-options", "DENY");
+    expectHeader(home.response, "strict-transport-security", /max-age=63072000/i);
+    expectHeader(home.response, "content-security-policy", /default-src 'self'/i);
+    expectHeader(home.response, "referrer-policy", "strict-origin-when-cross-origin");
 
     await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
     await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
@@ -115,6 +129,7 @@ async function main() {
       ok: true,
       checks: [
         "home",
+        "security response headers",
         "institutional transparency",
         "support fail-closed state",
         "robots",
