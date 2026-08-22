@@ -15,6 +15,11 @@ type PendingEnrollment = {
   secret: string;
 };
 
+type MfaSecurityPanelProps = {
+  required?: boolean;
+  nextPath?: string;
+};
+
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Operazione MFA non riuscita.";
 }
@@ -23,7 +28,10 @@ function validTotp(value: string) {
   return /^\d{6}$/.test(value.trim());
 }
 
-export function MfaSecurityPanel() {
+export function MfaSecurityPanel({
+  required = false,
+  nextPath = "/app/redazione",
+}: MfaSecurityPanelProps = {}) {
   const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -67,6 +75,20 @@ export function MfaSecurityPanel() {
       }
     })();
   }, [refresh]);
+
+  async function completeVerification(message: string) {
+    // Ensure the SSR cookie carries the new AAL2 session before navigating to
+    // the server-protected redazione layout.
+    const refreshed = await supabase.auth.refreshSession();
+    if (refreshed.error) throw refreshed.error;
+    await refresh();
+
+    if (required) {
+      window.location.assign(nextPath);
+      return;
+    }
+    setNotice(message);
+  }
 
   async function startEnrollment() {
     setBusy(true);
@@ -131,8 +153,9 @@ export function MfaSecurityPanel() {
 
       setPending(null);
       setEnrollCode("");
-      setNotice("Autenticatore TOTP verificato. La sessione corrente è stata elevata ad AAL2.");
-      await refresh();
+      await completeVerification(
+        "Autenticatore TOTP verificato. La sessione corrente è stata elevata ad AAL2.",
+      );
     } catch (cause) {
       setError(errorMessage(cause));
     } finally {
@@ -165,8 +188,7 @@ export function MfaSecurityPanel() {
       if (verify.error) throw verify.error;
 
       setChallengeCode("");
-      setNotice("Secondo fattore verificato. La sessione corrente è AAL2.");
-      await refresh();
+      await completeVerification("Secondo fattore verificato. La sessione corrente è AAL2.");
     } catch (cause) {
       setError(errorMessage(cause));
     } finally {
@@ -217,8 +239,9 @@ export function MfaSecurityPanel() {
           </div>
         </dl>
         <p className="text-ink-muted mt-3 text-sm">
-          L’MFA non è ancora obbligatorio per la redazione. L’enforcement verrà attivato solo dopo la
-          registrazione e la verifica dei fattori degli account autorizzati.
+          {required
+            ? "L’MFA TOTP è obbligatoria per accedere alle funzioni di redazione e amministrazione."
+            : "L’MFA TOTP è obbligatoria per le sessioni con ruolo redattore o amministratore."}
         </p>
       </div>
 
