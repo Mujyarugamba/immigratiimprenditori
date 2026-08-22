@@ -90,10 +90,6 @@ create policy search_documents_public_read
 on public.search_documents for select to public
 using (is_public or access_is_editor() or access_is_application_admin());
 
-for all in public.knowledge_nodes
--- placeholder is intentionally not used: policies below are explicit.
-;
-
 drop policy if exists knowledge_nodes_editor_all on public.knowledge_nodes;
 create policy knowledge_nodes_editor_all
 on public.knowledge_nodes for all to authenticated
