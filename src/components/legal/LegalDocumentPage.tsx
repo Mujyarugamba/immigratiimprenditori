@@ -10,7 +10,7 @@ type Props = {
   description: string;
 };
 
-export function LegalDocumentPage({ docId, title, description }: Props) {
+export function LegalDocumentPage({ docId, description }: Props) {
   const markdown = loadPublicLegalMarkdown(docId);
   return (
     <Section>
@@ -19,7 +19,6 @@ export function LegalDocumentPage({ docId, title, description }: Props) {
           <p className="text-ink-subtle text-xs font-medium tracking-[0.14em] uppercase">
             Metodo e fonti
           </p>
-          <h1 className="sr-only">{title}</h1>
           <p className="text-ink-muted text-sm leading-6">{description}</p>
         </header>
         <LegalMarkdown markdown={markdown} />
