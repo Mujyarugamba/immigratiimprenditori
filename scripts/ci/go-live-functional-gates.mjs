@@ -151,9 +151,14 @@ includes("src/app/api/analytics/page-view/route.ts", [
 file("src/app/accessibility.css");
 includes("src/components/public/PublicListLayout.tsx", ["<main>", "</main>"]);
 includes("src/app/responsive-overrides.css", [
-  "grid-template-columns: minmax(0, 1fr) auto",
-  "width: min(170px, 100%)",
-  "white-space: nowrap",
+  ".data-stories-grid,",
+  ".home-chart-head > *",
+  "flex-wrap: wrap",
+  "overflow: hidden",
+  ".institutional-bar,",
+  "overflow-x: clip",
+  "max-width: 100%",
+  "flex-direction: column",
 ]);
 includes("e2e/public-readonly.spec.ts", [
   "automated accessibility structure gate",
@@ -163,6 +168,7 @@ includes("e2e/public-readonly.spec.ts", [
   "reflow without horizontal overflow",
   "duplicate IDs",
   "unlabeled form controls",
+  "offenders=",
 ]);
 
 // Local go-live E2E must prove evidence-backed data surfaces and slow-network usability.
@@ -170,6 +176,7 @@ includes("e2e/go-live-local.spec.ts", [
   "Atlas must expose at least one navigable evidence-backed country",
   "Routes must expose at least one navigable evidence-backed origin-destination route",
   "Stories must expose at least one published navigable story, interview or testimony",
+  "published-types=",
   "Open Data exposes a valid XLSX archive",
   "privacy analytics endpoint aggregates a page view without cookies",
   "simulated high-latency delivery",
