@@ -171,7 +171,11 @@ test("go-live core interface renders across all seven platform languages", async
       expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       await expect(page.locator("html")).toHaveAttribute("dir", direction);
-      await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+      const h1Texts = await page.getByRole("heading", { level: 1 }).allTextContents();
+      expect(
+        h1Texts,
+        `${path} [${locale}] must expose exactly one H1; H1s=${JSON.stringify(h1Texts)}`,
+      ).toHaveLength(1);
       await expect(page.getByText(/Impossibile caricare/i)).toHaveCount(0);
 
       if (locale !== "it") {
