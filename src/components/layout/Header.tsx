@@ -4,7 +4,7 @@ const mainNav = [
   { label: "Ricerche e dati", href: "/osservatorio" },
   { label: "Analisi", href: "/contenuti" },
   { label: "Eventi", href: "/eventi" },
-  { label: "Fonti e metodologia", href: "/dati-e-fonti" },
+  { label: "Esplora", href: "/esplora" },
   { label: "Partecipa", href: "/contribuisci" },
 ] as const;
 
