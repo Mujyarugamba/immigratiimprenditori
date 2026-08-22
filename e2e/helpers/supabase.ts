@@ -63,7 +63,7 @@ function isLocalUrl(url: string) {
 }
 
 export function loadStatusEnv(): LocalEnv {
-  const raw = execSync("npx supabase status -o env", {
+  const raw = execSync("supabase status -o env", {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     timeout: 120_000,
@@ -238,6 +238,18 @@ export function cleanupContents(contentIds: string[]) {
     [
       `DELETE FROM public.content_authors WHERE content_id IN (${c});`,
       `DELETE FROM public.contents WHERE id IN (${c});`,
+    ].join(" "),
+  );
+}
+
+export function cleanupInboxItems(inboxIds: string[]) {
+  assertUuids(inboxIds);
+  if (!inboxIds.length) return;
+  const i = inboxIds.map((id) => `'${id}'`).join(",");
+  psql(
+    [
+      `DELETE FROM public.editorial_submissions WHERE inbox_item_id IN (${i});`,
+      `DELETE FROM public.editorial_inbox_items WHERE id IN (${i});`,
     ].join(" "),
   );
 }
