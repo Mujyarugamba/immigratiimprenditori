@@ -40,6 +40,15 @@ export type PublicContentOpportunityLink = {
   opportunity_id: string;
 };
 
+export type PublicContentAuthor = {
+  id: string;
+  role_kind: string;
+  display_label: string | null;
+  is_primary: boolean;
+  sort_order: number;
+  attribution_note: string | null;
+};
+
 export type PublicContentDetail = PublicContentListItem & {
   body: string;
   body_format: string;
@@ -49,6 +58,7 @@ export type PublicContentDetail = PublicContentListItem & {
   subject_links: PublicContentSubjectLink[];
   event_links: PublicContentEventLink[];
   opportunity_links: PublicContentOpportunityLink[];
+  authors: PublicContentAuthor[];
 };
 
 function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
@@ -76,6 +86,19 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     opportunity_id: l.opportunity_id,
   }));
 
+  const authors = (
+    (data.content_authors as PublicContentAuthor[] | null) ?? []
+  )
+    .map((author) => ({
+      id: author.id,
+      role_kind: author.role_kind,
+      display_label: author.display_label,
+      is_primary: author.is_primary,
+      sort_order: author.sort_order,
+      attribution_note: author.attribution_note,
+    }))
+    .sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order);
+
   return {
     id: data.id as string,
     slug: data.slug as string,
@@ -95,6 +118,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     subject_links,
     event_links,
     opportunity_links,
+    authors,
   };
 }
 
@@ -104,7 +128,8 @@ const DETAIL_SELECT = `
   publication_status, visibility_status,
   content_subject_links ( id, person_id, business_id, professional_profile_id ),
   content_event_links ( id, event_id ),
-  content_opportunity_links ( id, opportunity_id )
+  content_opportunity_links ( id, opportunity_id ),
+  content_authors ( id, role_kind, display_label, is_primary, sort_order, attribution_note )
 `;
 
 export async function listPublicContents(
