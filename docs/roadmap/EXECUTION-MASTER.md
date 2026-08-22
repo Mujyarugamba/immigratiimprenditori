@@ -21,7 +21,7 @@ Branch di lavoro: `feature/institutional-identity`
 | 3 | Identità visiva editoriale | BASE PASS | QA finale su nuove sezioni |
 | 4 | Homepage | BASE PASS | Integrare progressivamente nuovi moduli |
 | 5 | Navigazione principale | BASE PASS | Consolidare IA completa |
-| 6 | Partecipa | BASE PASS | Contributor workspace successivo |
+| 6 | Partecipa | BASE PASS | Integrare pienamente con area contributore |
 | 7 | Contatti istituzionali | PASS | Mantenere matrice canonica |
 | 8 | Privacy / Cookie / Termini | BASE PASS | Revisione legale finale |
 | 9 | Social istituzionali | PASS | Distribuzione contenuti |
@@ -46,7 +46,7 @@ Branch di lavoro: `feature/institutional-identity`
 | 28 | Analisi e ricerche | BASE PASS | Filtri, autori, raccolte |
 | 29 | Storie e voci | BASE PASS | Biblioteca storie/interviste |
 | 30 | Autori | BASE PASS / PROFILI PREPARATI | Applicare identità stabili, bio, affiliazione, ORCID dopo review DB |
-| 31 | Fonti | BASE PASS | Catalogo ora limitato alle fonti che sostengono dati pubblici |
+| 31 | Fonti | BASE PASS | Catalogo limitato alle fonti che sostengono dati pubblici |
 | 32 | Glossario scientifico | BASE PASS | Ampliare e tradurre |
 | 33 | Rapporti Centro Studi | ARCHITETTURA PREPARATA | Attivare collana solo con un rapporto reale del Centro Studi |
 | 34 | Working Papers | ARCHITETTURA PREPARATA | Attivare collana solo con un working paper reale |
@@ -59,26 +59,26 @@ Branch di lavoro: `feature/institutional-identity`
 | 41 | Eventi | BASE PASS | Filtri, speaker, materiali |
 | 42 | Calendar export | BASE PASS | Rifinire Outlook/Apple |
 | 43 | RSS | PASS | Feed generale + ricerca + pubblicazioni + storie + eventi |
-| 44 | Ricerca interna | BASE PASS | Filtri/ranking |
-| 45 | Ricerca semantica | DA FARE | Semantic search |
-| 46 | Chiedi al Centro Studi | DA FARE | RAG con sole fonti verificate |
-| 47 | Knowledge Graph | DA FARE | Entità e relazioni |
-| 48 | Pagine relazionali automatiche | DA FARE | Dopo Knowledge Graph |
-| 49 | Timeline | DA FARE | Paese/tema/indicatore/rotta |
-| 50 | Contributor account | DA FARE | Bozze e stato proposte |
-| 51 | Profili contributor | DA FARE | Ricercatori/esperti/enti |
-| 52 | Workflow redazionale | IN CORSO | Assegnazione/revisione/versioni |
-| 53 | Radar internazionale | IN CORSO | Fonti/parser/affidabilità |
-| 54 | Alert nuove fonti/dataset | DA FARE | Dopo Radar |
-| 55 | Controllo automatico fonti | DA FARE | Link/metodologia/aggiornamenti |
-| 56 | AI per redazione | DA FARE | Riassunti/classificazione/estrazione |
-| 57 | Traduzione assistita AI | DA FARE | Automatica → revisione → pubblicazione |
-| 58 | Trascrizioni/sottotitoli | DA FARE | Audio/video multilingua |
+| 44 | Ricerca interna | BASE PASS AVANZATO | Ranking per pertinenza + filtri tipo/anno; ampliare entità indicizzate |
+| 45 | Ricerca semantica | ARCHITETTURA PREPARATA | pgvector/search_documents pronti come migration; applicare e indicizzare solo dopo review DB |
+| 46 | Chiedi al Centro Studi | RETRIEVAL FOUNDATION | Endpoint contesto verificabile operativo; generazione AI resta disattivata finché RAG non è validato |
+| 47 | Knowledge Graph | BASE PASS | Grafo pubblico derivato da evidenze operative; schema persistente preparato |
+| 48 | Pagine relazionali automatiche | BASE PASS | `/relazioni` operativo su Paesi, indicatori, settori e rotte documentati |
+| 49 | Timeline | BASE PASS | Vista integrata operativa; ampliare filtri Paese/tema/rotta |
+| 50 | Contributor account | BASE PASS | Login contributore + stato proprie proposte su RLS; completare provisioning/QA |
+| 51 | Profili contributor | BASE PASS | Editor profilo privato/pubblico + pagina pubblica evidence-gated; ampliare attribuzioni |
+| 52 | Workflow redazionale | IN CORSO AVANZATO | Assegnazione a sé, stati e cronologia attività; completare versioni/review |
+| 53 | Radar internazionale | IN CORSO AVANZATO | Core Radar review-only + sorgente EMN UE; continuare qualità parser/fonti |
+| 54 | Alert nuove fonti/dataset | ARCHITETTURA PREPARATA | Tabelle/regole private pronte; attivare dopo migration verificata |
+| 55 | Controllo automatico fonti | SCRIPT/WORKFLOW PREPARATI | Esecuzione manuale non disponibile dal connector; validare al primo run schedulato/esterno |
+| 56 | AI per redazione | ARCHITETTURA PREPARATA | Audit provider/modello/prompt/review pronto; nessun output pubblico automatico |
+| 57 | Traduzione assistita AI | ARCHITETTURA PREPARATA | Coda machine draft → human review → approved; applicare solo dopo review DB |
+| 58 | Trascrizioni/sottotitoli | ARCHITETTURA PREPARATA | Asset transcript/subtitle con human review; attivare quando esistono media reali |
 | 59 | Newsletter | DA FARE | Newsletter generale |
 | 60 | Newsletter tematiche | DA FARE | Paese/tema/settore |
 | 61 | Alert personalizzati | DA FARE | Preferenze account |
-| 62 | API pubblica | BASE PASS | `/api/v1` operativo; rate limit prima del go-live |
-| 63 | API docs | BASE PASS | Estendere esempi e contratti endpoint |
+| 62 | API pubblica | BASE PASS | `/api/v1` operativo con indicatori, Atlante, context e graph; rate limit prima go-live |
+| 63 | API docs | BASE PASS | Documentati endpoint dati, Atlas, contesto e grafo; estendere contratti |
 | 64 | Widget incorporabili | DA FARE | Grafici e indicatori embed |
 | 65 | Dataset Builder | DA FARE | Export personalizzato |
 | 66 | Network ricercatori | DA FARE | Research Network |
@@ -103,7 +103,7 @@ Branch di lavoro: `feature/institutional-identity`
 | 85 | Leaked Password Protection | BLOCKER | Supabase |
 | 86 | Hardening form pubblico | PREPARATO | Migration da applicare dopo verifica |
 | 87 | MFA amministratori | DA FARE | Prima del go-live |
-| 88 | Audit log | DA FARE | Tracciare azioni editoriali |
+| 88 | Audit log | BASE / MIGRATION PREPARATA | Inbox activity leggibile; policy insert preparata e da applicare con review DB |
 | 89 | Backup / recovery | DA FARE | Piano DB/media/documenti |
 | 90 | Test E2E | BLOCKER | Ruoli/login/contributi/pubblicazione |
 | 91 | Branch protection | BLOCKER | Prima del merge |
