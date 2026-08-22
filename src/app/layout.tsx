@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { DEFAULT_LOCALE, getPlatformLanguage, isPlatformLocale } from "@/lib/i18n/config";
 import "./globals.css";
 import "./responsive-overrides.css";
+import "./editorial-identity.css";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
