@@ -15,6 +15,7 @@ export function Header() {
         <div className="site-container institutional-bar-inner">
           <p>Centro Studi sull&apos;imprenditoria migrante</p>
           <nav aria-label="Link istituzionali">
+            <Link href="/cerca">Cerca</Link>
             <Link href="/chi-siamo">Chi siamo</Link>
             <Link href="/politica-editoriale">Politica editoriale</Link>
             <Link href="/accedi">Accedi</Link>
