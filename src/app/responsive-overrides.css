@@ -6,13 +6,22 @@ svg {
 
 .primary-nav,
 .data-stories-grid,
+.data-stories-grid > *,
 .home-chart,
 .home-chart-head,
-.home-chart-head > * {
+.home-chart-head > *,
+.voices-panel,
+.voices-copy,
+.voices-grid,
+.voices-placeholder {
   min-width: 0;
 }
 
-.home-chart {
+.home-chart,
+.voices-panel,
+.voices-copy,
+.voices-grid,
+.voices-placeholder {
   width: 100%;
   max-width: 100%;
 }
@@ -87,6 +96,23 @@ svg {
     width: min(100% - 24px, 1180px);
   }
 
+  .institutional-bar nav {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    overflow-x: visible;
+  }
+
+  .institutional-bar nav > label {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .institutional-bar nav select {
+    width: min(100%, 180px);
+    max-width: 100%;
+  }
+
   .primary-header-inner {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
@@ -116,8 +142,17 @@ svg {
     line-height: 1.6;
   }
 
+  .voices-panel,
   .voices-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .voices-copy {
+    padding: 36px 24px;
+  }
+
+  .voices-placeholder {
+    overflow-wrap: anywhere;
   }
 
   .home-chart-head {
