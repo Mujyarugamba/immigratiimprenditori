@@ -45,14 +45,18 @@ test("support page remains fail-closed while online payments are disabled", asyn
   await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
 });
 
-test("localized shells expose LTR and RTL directions", async ({ page }) => {
+test("localized shells expose correct document and content directions", async ({ page }) => {
   await page.goto("/en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
   await expect(page.locator('[data-platform-locale="en"]')).toHaveAttribute("dir", "ltr");
-  await expect(page.getByRole("link", { name: "Skip to content" })).toHaveAttribute("href", "#contenuto-principale");
+  await expect(page.getByRole("link", { name: "Skip to content", exact: true })).toHaveAttribute("href", "#contenuto-principale");
 
   await page.goto("/ar");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.locator('[data-platform-locale="ar"]')).toHaveAttribute("dir", "rtl");
-  await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى" })).toHaveAttribute("href", "#contenuto-principale");
+  await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى", exact: true })).toHaveAttribute("href", "#contenuto-principale");
 });
 
 test("core public pages do not overflow mobile or tablet viewports", async ({ page }) => {
@@ -76,8 +80,8 @@ test("institutional and language navigation remains reachable on mobile", async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Cerca" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Chi siamo" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Accedi" })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Lingua" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cerca", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Chi siamo", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Accedi", exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Lingua", exact: true })).toBeVisible();
 });
