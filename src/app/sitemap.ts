@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { getPublicSupabaseEnv } from "@/lib/env";
+import { PLATFORM_LOCALES } from "@/lib/i18n/config";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 
@@ -30,15 +31,29 @@ const publicRoutes = [
   "/termini",
 ] as const;
 
+const fullyLocalizedCoreRoutes = ["", "/esplora", "/contribuisci", "/chi-siamo"] as const;
+
+function localizedUrl(locale: string, path: string) {
+  if (locale === "it") return `${SITE_URL}${path}`;
+  return path === "" ? `${SITE_URL}/${locale}` : `${SITE_URL}/${locale}${path}`;
+}
+
+function languageAlternates(path: string) {
+  return Object.fromEntries([
+    ...PLATFORM_LOCALES.map((locale) => [locale, localizedUrl(locale, path)]),
+    ["x-default", `${SITE_URL}${path}`],
+  ]);
+}
+
 function staticEntries(): MetadataRoute.Sitemap {
-  return publicRoutes.map((path) => ({
+  const italian = publicRoutes.map((path) => ({
     url: `${SITE_URL}${path}`,
     changeFrequency:
       path === ""
-        ? "daily"
+        ? ("daily" as const)
         : path === "/esplora/dati" || path === "/open-data"
-          ? "daily"
-          : "weekly",
+          ? ("daily" as const)
+          : ("weekly" as const),
     priority:
       path === ""
         ? 1
@@ -47,7 +62,21 @@ function staticEntries(): MetadataRoute.Sitemap {
           : path === "/esplora/dati" || path === "/open-data" || path === "/ricerca" || path === "/storie"
             ? 0.85
             : 0.7,
+    alternates: fullyLocalizedCoreRoutes.includes(path as (typeof fullyLocalizedCoreRoutes)[number])
+      ? { languages: languageAlternates(path) }
+      : undefined,
   }));
+
+  const localized: MetadataRoute.Sitemap = fullyLocalizedCoreRoutes.flatMap((path) =>
+    PLATFORM_LOCALES.filter((locale) => locale !== "it").map((locale) => ({
+      url: localizedUrl(locale, path),
+      changeFrequency: path === "" ? ("daily" as const) : ("weekly" as const),
+      priority: path === "" ? 0.95 : 0.8,
+      alternates: { languages: languageAlternates(path) },
+    })),
+  );
+
+  return [...italian, ...localized];
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
