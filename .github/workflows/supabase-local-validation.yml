@@ -56,8 +56,8 @@ jobs:
           cp supabase/baseline/00000000000003_auth_identity_gate.sql supabase/migrations/
 
           # Standalone editorial foundation. These repository versions are copied
-          # under their hosted chronological timestamps so the audit migration
-          # below is applied only after editorial_inbox_items exists.
+          # under their hosted chronological timestamps so the audit/contributor
+          # post-cutover migrations run only after editorial_inbox_items exists.
           cp /tmp/repository-migrations/20260819100000_grant_observatory_ingestion_writer.sql \
             supabase/migrations/20260819100000_grant_observatory_ingestion_writer.sql
           cp /tmp/repository-migrations/20260820170000_editorial_foundation_v1.sql \
@@ -66,6 +66,8 @@ jobs:
             supabase/migrations/20260819103031_editorial_submission_country_labels.sql
           cp supabase/standalone-evolutions/20260819141022_editorial_inbox_activity.sql \
             supabase/migrations/20260819141022_editorial_inbox_activity.sql
+          cp supabase/standalone-evolutions/20260819141338_editorial_contributor_hardening.sql \
+            supabase/migrations/20260819141338_editorial_contributor_hardening.sql
           cp /tmp/repository-migrations/20260820173000_harden_editorial_public_submission.sql \
             supabase/migrations/20260820173000_harden_editorial_public_submission.sql
 
