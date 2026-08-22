@@ -333,7 +333,7 @@ as $$
 declare
   v_assignment_id uuid;
 begin
-  if auth.role() is distinct from 'service_role' then
+  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
     raise exception 'not authorized' using errcode='42501';
   end if;
   if p_account_id is null or p_role_code is null then

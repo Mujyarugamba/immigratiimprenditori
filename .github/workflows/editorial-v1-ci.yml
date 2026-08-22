@@ -38,9 +38,10 @@ jobs:
         run: |
           set -euo pipefail
           matches="$(grep -R --line-number --include='*.sql' --fixed-strings 'auth.role()' \
-            supabase/baseline supabase/standalone-evolutions supabase/migrations || true)"
+            supabase/baseline supabase/standalone-evolutions supabase/migrations \
+            | grep -vE ':[0-9]+:[[:space:]]*--' || true)"
           if [[ -n "$matches" ]]; then
-            echo "Deprecated auth.role() usage found in canonical Supabase SQL:"
+            echo "Deprecated auth.role() usage found in executable Supabase SQL:"
             echo "$matches"
             exit 1
           fi
