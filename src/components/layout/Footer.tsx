@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { localeFromPathname, localizedHref } from "@/lib/i18n/navigation";
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
+import { CORE_MESSAGES } from "@/lib/i18n/pages";
 
 export function Footer() {
   const pathname = usePathname() || "/";
   const locale = localeFromPathname(pathname);
   const m = NAV_MESSAGES[locale];
+  const core = CORE_MESSAGES[locale];
 
   return (
     <footer className="site-footer">
@@ -29,9 +31,9 @@ export function Footer() {
         <div>
           <h2>{m.footerResearch}</h2>
           <Link href={localizedHref(locale, "/osservatorio")}>{m.observatory}</Link>
-          <Link href="/esplora/dati">Data Explorer</Link>
-          <Link href="/esplora/territori">{m.territories ?? "Territori"}</Link>
-          <Link href="/esplora/settori">{m.sectors ?? "Settori"}</Link>
+          <Link href="/esplora/dati">{core.dataExplorer}</Link>
+          <Link href="/esplora/territori">{core.territories}</Link>
+          <Link href="/esplora/settori">{core.sectors}</Link>
           <Link href="/open-data">{m.openData}</Link>
         </div>
 
