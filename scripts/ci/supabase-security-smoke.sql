@@ -2,7 +2,6 @@
 
 -- Local-only security smoke. It runs on the ephemeral Supabase database built
 -- from the standalone cold-start chain; it never connects to Production.
-
 do $$
 declare
   v_content_id uuid;
@@ -116,7 +115,26 @@ begin
   ) then
     raise exception 'SECURITY_SMOKE_PUBLICATION_TRIGGER_MISSING';
   end if;
+
+  -- MFA authorization helpers stay private to authenticated sessions. Public
+  -- RLS policies must not solve compatibility by granting these functions to anon.
+  if has_function_privilege('anon', 'public.access_is_editor()', 'EXECUTE') then
+    raise exception 'SECURITY_SMOKE_ANON_CAN_EXECUTE_EDITOR_HELPER';
+  end if;
+  if has_function_privilege('anon', 'public.access_is_application_admin()', 'EXECUTE') then
+    raise exception 'SECURITY_SMOKE_ANON_CAN_EXECUTE_ADMIN_HELPER';
+  end if;
 end;
 $$;
+
+-- Public geography/routes/authors must be queryable with the anon database role
+-- without evaluating privileged MFA helpers. Any permission error here fails CI.
+begin;
+set local role anon;
+select count(*) as anon_active_territories from public.geo_territories;
+select count(*) as anon_active_routes from public.migration_routes;
+select count(*) as anon_public_authors from public.author_profiles;
+reset role;
+rollback;
 
 select 'SUPABASE_LOCAL_SECURITY_SMOKE_PASS' as result;
