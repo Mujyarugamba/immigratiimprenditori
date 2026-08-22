@@ -31,7 +31,24 @@ const publicRoutes = [
   "/termini",
 ] as const;
 
-const fullyLocalizedCoreRoutes = ["", "/esplora", "/contribuisci", "/chi-siamo"] as const;
+const fullyLocalizedCoreRoutes = [
+  "",
+  "/osservatorio",
+  "/contenuti",
+  "/ricerca",
+  "/storie",
+  "/eventi",
+  "/esplora",
+  "/esplora/dati",
+  "/esplora/territori",
+  "/esplora/settori",
+  "/esplora/autori",
+  "/open-data",
+  "/fonti",
+  "/glossario",
+  "/contribuisci",
+  "/chi-siamo",
+] as const;
 
 function localizedUrl(locale: string, path: string) {
   if (locale === "it") return `${SITE_URL}${path}`;
@@ -70,8 +87,16 @@ function staticEntries(): MetadataRoute.Sitemap {
   const localized: MetadataRoute.Sitemap = fullyLocalizedCoreRoutes.flatMap((path) =>
     PLATFORM_LOCALES.filter((locale) => locale !== "it").map((locale) => ({
       url: localizedUrl(locale, path),
-      changeFrequency: path === "" ? ("daily" as const) : ("weekly" as const),
-      priority: path === "" ? 0.95 : 0.8,
+      changeFrequency:
+        path === "" || path === "/esplora/dati" || path === "/open-data"
+          ? ("daily" as const)
+          : ("weekly" as const),
+      priority:
+        path === ""
+          ? 0.95
+          : path === "/osservatorio" || path === "/contenuti" || path === "/esplora"
+            ? 0.85
+            : 0.8,
       alternates: { languages: languageAlternates(path) },
     })),
   );
