@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { centroStudiConfig } from "@immigrati/product-config";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { DEFAULT_LOCALE, getPlatformLanguage, isPlatformLocale } from "@/lib/i18n/config";
 import "./globals.css";
 import "./responsive-overrides.css";
 
@@ -58,47 +60,56 @@ export const metadata: Metadata = {
   },
 };
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: "Immigrati Imprenditori",
-      url: SITE_URL,
-      logo: `${SITE_URL}/logo-immigrati-imprenditori.png`,
-      parentOrganization: {
+function structuredData(locale: string) {
+  const searchPath = locale === DEFAULT_LOCALE ? "/cerca" : `/${locale}/cerca`;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
         "@type": "Organization",
-        name: "AIPEL",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Immigrati Imprenditori",
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo-immigrati-imprenditori.png`,
+        parentOrganization: {
+          "@type": "Organization",
+          name: "AIPEL",
+        },
+        email: "info@immigratiimprenditori.it",
       },
-      email: "info@immigratiimprenditori.it",
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: "Immigrati Imprenditori",
-      description: SITE_DESCRIPTION,
-      publisher: { "@id": `${SITE_URL}/#organization` },
-      inLanguage: "it",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${SITE_URL}/cerca?q={search_term_string}`,
-        "query-input": "required name=search_term_string",
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: "Immigrati Imprenditori",
+        description: SITE_DESCRIPTION,
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        inLanguage: locale,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${SITE_URL}${searchPath}?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
       },
-    },
-  ],
-};
+    ],
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const requestHeaders = await headers();
+  const rawLocale = requestHeaders.get("x-platform-locale") ?? DEFAULT_LOCALE;
+  const locale = isPlatformLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
+  const language = getPlatformLanguage(locale);
+  const schema = structuredData(locale);
+
   return (
-    <html lang="it">
+    <html lang={locale} dir={language.direction}>
       <body className="bg-surface text-ink min-h-screen antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
         <Header />
         {children}
