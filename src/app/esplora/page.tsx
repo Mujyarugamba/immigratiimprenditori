@@ -5,7 +5,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 export const metadata: Metadata = {
   title: "Esplora il Centro Studi",
   description:
-    "Esplora dati, mappe, territori, settori, autori, analisi, storie, eventi e fonti di Immigrati Imprenditori.",
+    "Esplora dati, mappe, territori, settori, autori, analisi, pubblicazioni, storie, eventi e fonti di Immigrati Imprenditori.",
   alternates: { canonical: "/esplora" },
 };
 
@@ -37,8 +37,13 @@ const modules = [
   },
   {
     title: "Analisi e ricerche",
-    text: "Rapporti, ricerche, analisi, interviste e approfondimenti verificati dalla redazione.",
+    text: "Ricerche, analisi, interviste e approfondimenti verificati dalla redazione.",
     href: "/contenuti",
+  },
+  {
+    title: "Pubblicazioni",
+    text: "Consulta rapporti e studi pubblicati con metadati bibliografici, fonte e strumenti di citazione.",
+    href: "/pubblicazioni",
   },
   {
     title: "Eventi",
@@ -70,7 +75,7 @@ export default async function EsploraPage() {
           Esplora
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Un unico punto di accesso a dati, mappe, analisi, territori, settori, persone, eventi e fonti.
+          Un unico punto di accesso a dati, mappe, analisi, pubblicazioni, territori, settori, persone, eventi e fonti.
           Ogni dato dell&apos;Osservatorio rimanda alla propria scheda metodologica e alla fonte.
         </p>
       </header>
