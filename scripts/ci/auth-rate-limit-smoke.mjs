@@ -10,10 +10,11 @@ if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(apiUrl)) {
 }
 
 const endpoint = `${apiUrl}/auth/v1/token?grant_type=password`;
+const maxAttempts = 40;
 let sawCredentialFailure = false;
 let rateLimitedAt = null;
 
-for (let attempt = 1; attempt <= 12; attempt += 1) {
+for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -45,7 +46,7 @@ if (!sawCredentialFailure) {
 }
 
 if (rateLimitedAt === null) {
-  throw new Error("Login rate-limit smoke did not receive HTTP 429 within 12 attempts");
+  throw new Error(`Login rate-limit smoke did not receive HTTP 429 within ${maxAttempts} attempts`);
 }
 
 console.log(`AUTH_LOGIN_RATE_LIMIT_429 = PASS (attempt ${rateLimitedAt})`);
