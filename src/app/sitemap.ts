@@ -14,6 +14,7 @@ const publicRoutes = [
   "/eventi",
   "/cultura",
   "/esplora",
+  "/atlante",
   "/esplora/dati",
   "/esplora/territori",
   "/esplora/settori",
@@ -69,13 +70,13 @@ function staticEntries(): MetadataRoute.Sitemap {
     changeFrequency:
       path === ""
         ? ("daily" as const)
-        : path === "/esplora/dati" || path === "/open-data"
+        : path === "/esplora/dati" || path === "/open-data" || path === "/atlante"
           ? ("daily" as const)
           : ("weekly" as const),
     priority:
       path === ""
         ? 1
-        : path === "/osservatorio" || path === "/contenuti" || path === "/esplora"
+        : path === "/osservatorio" || path === "/contenuti" || path === "/esplora" || path === "/atlante"
           ? 0.9
           : path === "/esplora/dati" || path === "/open-data" || path === "/ricerca" || path === "/storie"
             ? 0.85
