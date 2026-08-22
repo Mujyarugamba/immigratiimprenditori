@@ -141,6 +141,49 @@ export default async function EditorialLaunchPage() {
         </article>
       </section>
 
+      <section aria-labelledby="candidati-interviste" className="border-t border-black pt-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Inbox · needs_research</p>
+            <h2 id="candidati-interviste" className="mt-1 text-xl font-semibold text-black">
+              Candidati intervista
+            </h2>
+          </div>
+          <p className="text-xs text-neutral-600">{dashboard.interviewCandidates.length} proposte visibili alla redazione</p>
+        </div>
+        <div className="mt-4 grid gap-px border border-black bg-black md:grid-cols-2">
+          {dashboard.interviewCandidates.map((candidate) => {
+            const route = [candidate.originCountryCode, candidate.destinationCountryCode]
+              .filter(Boolean)
+              .join(" → ");
+            return (
+              <article key={candidate.id} className="bg-white p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                    {candidate.relevanceBand ?? "fascia non assegnata"}
+                  </p>
+                  <span className="text-xs text-neutral-600">priorità {candidate.priority}</span>
+                </div>
+                <h3 className="mt-2 text-lg font-semibold leading-6 text-black">
+                  <Link href={`/app/redazione/inbox/${candidate.id}`} className="underline underline-offset-4">
+                    {candidate.title}
+                  </Link>
+                </h3>
+                <dl className="mt-4 grid gap-2 text-xs text-neutral-600 sm:grid-cols-2">
+                  <div><dt>Rotta</dt><dd className="mt-1 text-black">{route || "—"}</dd></div>
+                  <div><dt>Fonte di partenza</dt><dd className="mt-1 text-black">{candidate.sourceLabel ?? "—"}</dd></div>
+                </dl>
+              </article>
+            );
+          })}
+          {dashboard.interviewCandidates.length === 0 ? (
+            <p className="bg-white p-5 text-sm text-neutral-600 md:col-span-2">
+              Nessuna proposta di intervista è attualmente in stato needs_research.
+            </p>
+          ) : null}
+        </div>
+      </section>
+
       <section aria-labelledby="pipeline-interviste" className="border-t border-black pt-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
