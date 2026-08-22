@@ -29,36 +29,36 @@ Branch di lavoro: `feature/institutional-identity`
 | 11 | 7 lingue prioritarie | PASS | IT EN FR ES DE AR ZH |
 | 12 | Multilingua — infrastruttura | IN CORSO | Chiudere routing, switch, RTL, fallback |
 | 13 | Multilingua — interfaccia | IN CORSO | Completare pagine pubbliche nelle 7 lingue |
-| 14 | Multilingua — traduzioni contenuti | DA FARE | Modello gruppi/versioni tradotte |
+| 14 | Multilingua — traduzioni contenuti | PREPARATO | Applicare modello gruppi/versioni dopo review DB |
 | 15 | SEO internazionale | IN CORSO | hreflang, canonical, sitemap, metadata |
 | 16 | Osservatorio — struttura | BASE PASS | Ampliare indicatori |
-| 17 | Osservatorio — popolamento | IN CORSO | Italia, Europa, mondo |
+| 17 | Osservatorio — popolamento | IN CORSO | Ampliare dati nel perimetro Atlante approvato |
 | 18 | Metodologia | BASE PASS | Glossario e comparabilità |
 | 19 | Data Explorer | BASE PASS | Filtri e grafici avanzati |
-| 20 | Open Data | BASE PASS | CSV/XLSX/API docs |
-| 21 | Download dati | IN CORSO | CSV, XLSX, dataset builder |
-| 22 | Territori | BASE PASS | Popolare Paesi/regioni/città |
-| 23 | Schede Paese | DA FARE | Pagine Paese complete |
-| 24 | Settori economici | BASE PASS | Schede e dati associati |
-| 25 | Rotte imprenditoriali | STRUTTURA PRONTA | Popolare origine → destinazione |
-| 26 | Atlante mondiale | DA FARE | Mappa Paesi e rotte |
-| 27 | GIS / mappe quantitative | DA FARE | Mappe territoriali |
+| 20 | Open Data | BASE PASS | XLSX e dataset builder |
+| 21 | Download dati | IN CORSO | XLSX, dataset builder |
+| 22 | Territori | BASE PASS | Applicare/popolare dataset territoriali verificati |
+| 23 | Schede Paese | BASE PASS | Ampliare evidenze reali per i 20 Paesi |
+| 24 | Settori economici | BASE PASS | Applicare dati settoriali verificati |
+| 25 | Rotte imprenditoriali | BASE PASS / DATI PREPARATI | Applicare dataset rotte dopo review DB |
+| 26 | Atlante mondiale | BASE PASS | Ampliare copertura senza superare perimetro approvato |
+| 27 | GIS / mappe quantitative | BASE PASS | QA cartografico e nuovi indicatori compatibili |
 | 28 | Analisi e ricerche | BASE PASS | Filtri, autori, raccolte |
 | 29 | Storie e voci | BASE PASS | Biblioteca storie/interviste |
-| 30 | Autori | BASE PASS | Bio, affiliazione, ORCID |
-| 31 | Fonti | BASE PASS | Schede fonte complete |
+| 30 | Autori | BASE PASS / PROFILI PREPARATI | Applicare identità stabili, bio, affiliazione, ORCID dopo review DB |
+| 31 | Fonti | BASE PASS | Catalogo ora limitato alle fonti che sostengono dati pubblici |
 | 32 | Glossario scientifico | BASE PASS | Ampliare e tradurre |
-| 33 | Rapporti Centro Studi | DA FARE | Collana e versionamento |
-| 34 | Working Papers | DA FARE | Collana scientifica |
-| 35 | Policy Brief | DA FARE | Collana istituzionale |
-| 36 | Dossier tematici | DA FARE | Raccolte tematiche |
-| 37 | Biblioteca / archivio | DA FARE | Archivio documentale |
-| 38 | Bibliografia scientifica | DA FARE | DOI/autori/abstract |
-| 39 | Citazioni bibliografiche | BASE PASS | APA/Chicago/export |
-| 40 | DOI / versionamento | DA FARE | Identificatori persistenti |
+| 33 | Rapporti Centro Studi | ARCHITETTURA PREPARATA | Attivare collana solo con un rapporto reale del Centro Studi |
+| 34 | Working Papers | ARCHITETTURA PREPARATA | Attivare collana solo con un working paper reale |
+| 35 | Policy Brief | ARCHITETTURA PREPARATA | Attivare collana solo con un policy brief reale |
+| 36 | Dossier tematici | ARCHITETTURA PREPARATA | Attivare collana solo con un dossier reale |
+| 37 | Biblioteca / archivio | BASE PASS | Pubblicazioni pubbliche operative; ampliare metadati |
+| 38 | Bibliografia scientifica | BASE PASS | Ampliare con nuovi titoli verificati |
+| 39 | Citazioni bibliografiche | BASE PASS | BibTeX + RIS operativi; valutare APA/Chicago |
+| 40 | DOI / versionamento | PREPARATO | Schema versioni/correzioni pronto; DOI solo con infrastruttura persistente |
 | 41 | Eventi | BASE PASS | Filtri, speaker, materiali |
 | 42 | Calendar export | BASE PASS | Rifinire Outlook/Apple |
-| 43 | RSS | BASE PASS | Feed tematici |
+| 43 | RSS | PASS | Feed generale + ricerca + pubblicazioni + storie + eventi |
 | 44 | Ricerca interna | BASE PASS | Filtri/ranking |
 | 45 | Ricerca semantica | DA FARE | Semantic search |
 | 46 | Chiedi al Centro Studi | DA FARE | RAG con sole fonti verificate |
@@ -77,8 +77,8 @@ Branch di lavoro: `feature/institutional-identity`
 | 59 | Newsletter | DA FARE | Newsletter generale |
 | 60 | Newsletter tematiche | DA FARE | Paese/tema/settore |
 | 61 | Alert personalizzati | DA FARE | Preferenze account |
-| 62 | API pubblica | BASE PASS | `/api/v1`, versioning, rate limit |
-| 63 | API docs | DA FARE | Documentazione pubblica |
+| 62 | API pubblica | BASE PASS | `/api/v1` operativo; rate limit prima del go-live |
+| 63 | API docs | BASE PASS | Estendere esempi e contratti endpoint |
 | 64 | Widget incorporabili | DA FARE | Grafici e indicatori embed |
 | 65 | Dataset Builder | DA FARE | Export personalizzato |
 | 66 | Network ricercatori | DA FARE | Research Network |
@@ -107,7 +107,7 @@ Branch di lavoro: `feature/institutional-identity`
 | 89 | Backup / recovery | DA FARE | Piano DB/media/documenti |
 | 90 | Test E2E | BLOCKER | Ruoli/login/contributi/pubblicazione |
 | 91 | Branch protection | BLOCKER | Prima del merge |
-| 92 | Registro correzioni | DA FARE | Trasparenza editoriale |
+| 92 | Registro correzioni | PREPARATO | Schema predisposto; pagina pubblica solo con avvisi reali |
 | 93 | Quality gate finale | BLOCKER | SEO/security/a11y/responsive/dati/legale |
 | 94 | Merge PR → main | BLOCCATO | Solo dopo gate |
 | 95 | Go-live completo | BLOCCATO | Ultimo passo |
