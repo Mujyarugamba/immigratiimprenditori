@@ -91,9 +91,8 @@ declare
   v_email text := lower(btrim(coalesce(new.submitter_email, '')));
 begin
   -- Trusted service operations and editorial users are not anonymous intake.
-  -- The JWT role claim is signed by Supabase Auth; unlike auth.role(), this
-  -- remains compatible with current Supabase guidance while keeping the
-  -- SECURITY DEFINER function's current_user out of the authorization check.
+  -- The JWT role claim is signed by Supabase Auth; the current claim-based
+  -- check keeps this SECURITY DEFINER function's current_user out of authorization.
   if coalesce(auth.jwt()->>'role', '') = 'service_role'
      or public.access_is_editor()
      or public.access_is_application_admin() then
