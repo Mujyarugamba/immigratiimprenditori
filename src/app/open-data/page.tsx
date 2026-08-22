@@ -4,7 +4,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 
 export const metadata: Metadata = {
   title: "Open data | Immigrati Imprenditori",
-  description: "Accesso ai dati pubblicati dall'Osservatorio di Immigrati Imprenditori in formato consultabile, JSON e CSV.",
+  description: "Accesso ai dati pubblicati dall'Osservatorio di Immigrati Imprenditori in formato consultabile, JSON, CSV e XLSX.",
   alternates: { canonical: "/open-data" },
 };
 
@@ -41,7 +41,7 @@ export default async function OpenDataPage() {
         </div>
         <div className="bg-white p-6">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Formati</p>
-          <strong className="mt-2 block text-3xl">JSON · CSV</strong>
+          <strong className="mt-2 block text-3xl">JSON · CSV · XLSX</strong>
         </div>
       </section>
 
@@ -67,7 +67,7 @@ export default async function OpenDataPage() {
           Gli endpoint restituiscono soltanto indicatori pubblicati e valori finali resi pubblici dall&apos;Osservatorio.
           Non espongono aree riservate, dati personali o contenuti redazionali non pubblicati.
         </p>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
           <div className="border border-black p-5">
             <h3 className="font-semibold text-black">JSON</h3>
             <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators</code>
@@ -78,13 +78,18 @@ export default async function OpenDataPage() {
             <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators.csv</code>
             <a href="/api/open-data/indicators.csv" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Scarica CSV →</a>
           </div>
+          <div className="border border-black p-5">
+            <h3 className="font-semibold text-black">XLSX</h3>
+            <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators.xlsx</code>
+            <a href="/api/open-data/indicators.xlsx" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Scarica Excel →</a>
+          </div>
         </div>
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
         <h2 className="text-2xl font-semibold text-black">Filtri degli endpoint Open Data</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          JSON e CSV accettano gli stessi parametri. I filtri possono essere combinati e coincidono con quelli del Data Explorer.
+          JSON, CSV e XLSX accettano gli stessi parametri. I filtri possono essere combinati e coincidono con quelli del Data Explorer.
         </p>
         <div className="mt-5 overflow-x-auto border border-black">
           <table className="min-w-full border-collapse text-left text-sm">
@@ -107,7 +112,7 @@ export default async function OpenDataPage() {
           </table>
         </div>
         <code className="mt-5 block overflow-x-auto bg-neutral-50 p-4 text-sm">
-          /api/open-data/indicators.csv?indicatore=imprese-straniere-registrate&amp;territorio=IT-25&amp;anno=2025
+          /api/open-data/indicators.xlsx?indicatore=imprese-straniere-registrate&amp;territorio=IT-25&amp;anno=2025
         </code>
       </section>
 
