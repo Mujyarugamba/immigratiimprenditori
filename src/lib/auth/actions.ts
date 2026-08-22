@@ -68,10 +68,13 @@ export async function signInEditorialAction(formData: FormData): Promise<void> {
     redirect(`/accedi?error=credentials&next=${encodeURIComponent(next)}`);
   }
 
-  const [active, editor, admin, contributor] = await Promise.all([
+  // Assigned-role helpers intentionally do not authorize privileged work: they
+  // let us identify the role while the freshly password-authenticated session is
+  // still AAL1 and route it into the mandatory MFA step.
+  const [active, editorAssigned, adminAssigned, contributor] = await Promise.all([
     supabase.rpc("access_is_active_account"),
-    supabase.rpc("access_is_editor"),
-    supabase.rpc("access_is_application_admin"),
+    supabase.rpc("access_is_editor_assigned"),
+    supabase.rpc("access_is_application_admin_assigned"),
     supabase.rpc("access_is_contributor"),
   ]);
 
@@ -82,11 +85,20 @@ export async function signInEditorialAction(formData: FormData): Promise<void> {
 
   const allowed = contributorTarget
     ? !contributor.error && Boolean(contributor.data)
-    : !editor.error && !admin.error && Boolean(editor.data || admin.data);
+    : !editorAssigned.error &&
+      !adminAssigned.error &&
+      Boolean(editorAssigned.data || adminAssigned.data);
 
   if (!allowed) {
     await supabase.auth.signOut();
     redirect(`/accedi?error=role&next=${encodeURIComponent(next)}`);
+  }
+
+  if (!contributorTarget) {
+    const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assurance.error || assurance.data.currentLevel !== "aal2") {
+      redirect(`/app/mfa?next=${encodeURIComponent(next)}`);
+    }
   }
 
   redirect(next);
