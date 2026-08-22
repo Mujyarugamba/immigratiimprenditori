@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const MAX_INSERTS_PER_RUN = 30;
-const USER_AGENT = "ImmigratiImprenditori-Radar/1.0 (+https://immigratiimprenditori.it)";
+const RECENT_FINGERPRINT_WINDOW = 1000;
+const USER_AGENT = "ImmigratiImprenditori-Radar/1.1 (+https://immigratiimprenditori.it)";
 const TIMEOUT_MS = 20000;
 
 const KEYWORDS = [
@@ -21,6 +23,39 @@ const KEYWORDS = [
   "diaspora",
   "business owner",
   "business ownership",
+];
+
+const STRONG_SIGNALS = [
+  "foreign entrepreneur",
+  "migrant entrepreneur",
+  "immigrant entrepreneur",
+  "diaspora entrepreneur",
+  "imprenditoria immigrata",
+  "imprenditoria straniera",
+  "imprese straniere",
+  "foreign-owned business",
+  "migrant-owned business",
+];
+
+const DOCUMENT_SIGNALS = [
+  "dataset",
+  "open data",
+  "statistics",
+  "statistical",
+  "report",
+  "rapporto",
+  "study",
+  "studio",
+  "research",
+  "ricerca",
+  "working paper",
+  "policy",
+  "regulation",
+  "law",
+  "legge",
+  "event",
+  "conference",
+  "convegno",
 ];
 
 const SOURCES = [
@@ -97,9 +132,50 @@ function textOnly(value) {
     .trim();
 }
 
-function relevant(title, url) {
+function normalizedText(value) {
+  return value
+    .toLocaleLowerCase("en")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function titleFingerprint(sourceLabel, title) {
+  return createHash("sha256")
+    .update(`${normalizedText(sourceLabel)}|${normalizedText(title)}`)
+    .digest("hex")
+    .slice(0, 24);
+}
+
+function relevanceScore(title, url) {
   const haystack = `${title} ${url}`.toLowerCase();
-  return KEYWORDS.some((keyword) => haystack.includes(keyword));
+  let score = 0;
+
+  const strongMatches = STRONG_SIGNALS.filter((signal) => haystack.includes(signal));
+  score += strongMatches.length * 35;
+
+  const keywordMatches = KEYWORDS.filter((keyword) => haystack.includes(keyword));
+  score += Math.min(keywordMatches.length, 5) * 10;
+
+  const documentMatches = DOCUMENT_SIGNALS.filter((signal) => haystack.includes(signal));
+  score += Math.min(documentMatches.length, 3) * 4;
+
+  if (/entrepreneur|imprenditor|self[- ]?employ|business owner/.test(haystack)) score += 12;
+  if (/migrant|migration|immigrant|immigraz|stranier|diaspora|foreign/.test(haystack)) score += 12;
+
+  return Math.min(score, 100);
+}
+
+function priorityForScore(score) {
+  if (score >= 70) return "high";
+  if (score >= 40) return "normal";
+  return "low";
+}
+
+function relevant(title, url) {
+  return relevanceScore(title, url) >= 20;
 }
 
 function classify(title, url, fallback) {
@@ -110,7 +186,10 @@ function classify(title, url, fallback) {
   if (/event|conference|convegno|seminar|webinar/.test(haystack)) {
     return "event";
   }
-  if (/law|regulation|policy|normativ|decreto|legge/.test(haystack)) {
+  if (/law|regulation|normativ|decreto|legge/.test(haystack)) {
+    return "law_regulation";
+  }
+  if (/policy|politic[ah] pubblic/.test(haystack)) {
     return "policy";
   }
   if (/paper|academic|journal|working paper/.test(haystack)) {
@@ -127,6 +206,9 @@ function normalizeUrl(href, baseUrl, allowedHosts) {
     const url = new URL(href, baseUrl);
     if (url.protocol !== "https:") return null;
     url.hash = "";
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^(utm_|fbclid|gclid)/i.test(key)) url.searchParams.delete(key);
+    }
     if (!allowedHosts.includes(url.hostname.toLowerCase())) return null;
     return url.toString();
   } catch {
@@ -145,6 +227,9 @@ function extractCandidates(html, source) {
     if (title.length < 8 || title.length > 280) continue;
     const url = normalizeUrl(match[1] ?? "", source.indexUrl, source.allowedHosts);
     if (!url || seen.has(url) || !relevant(title, url)) continue;
+
+    const score = relevanceScore(title, url);
+    const fingerprint = titleFingerprint(source.sourceLabel, title);
     seen.add(url);
     candidates.push({
       title,
@@ -152,19 +237,28 @@ function extractCandidates(html, source) {
       source_label: source.sourceLabel,
       item_kind: classify(title, url, source.defaultKind),
       relevance_band: source.relevanceBand,
-      priority: "normal",
+      priority: priorityForScore(score),
       status: "new",
       raw_metadata: {
         radar_source_code: source.code,
         radar_index_url: source.indexUrl,
         radar_discovered_at: new Date().toISOString(),
         radar_mode: "metadata_link_only",
+        radar_relevance_score: score,
+        radar_title_fingerprint: fingerprint,
+        radar_version: "1.1",
         auto_publish: false,
       },
     });
   }
 
-  return candidates.slice(0, 15);
+  return candidates
+    .sort(
+      (a, b) =>
+        b.raw_metadata.radar_relevance_score - a.raw_metadata.radar_relevance_score ||
+        a.title.localeCompare(b.title),
+    )
+    .slice(0, 20);
 }
 
 async function fetchIndex(source) {
@@ -203,7 +297,12 @@ async function main() {
       const html = await fetchIndex(source);
       const candidates = extractCandidates(html, source);
       discovered.push(...candidates);
-      sourceResults.push({ source: source.code, ok: true, candidates: candidates.length });
+      sourceResults.push({
+        source: source.code,
+        ok: true,
+        candidates: candidates.length,
+        highPriority: candidates.filter((candidate) => candidate.priority === "high").length,
+      });
     } catch (error) {
       sourceResults.push({
         source: source.code,
@@ -215,7 +314,13 @@ async function main() {
 
   const byUrl = new Map();
   for (const candidate of discovered) {
-    if (!byUrl.has(candidate.original_url)) byUrl.set(candidate.original_url, candidate);
+    const existing = byUrl.get(candidate.original_url);
+    if (
+      !existing ||
+      candidate.raw_metadata.radar_relevance_score > existing.raw_metadata.radar_relevance_score
+    ) {
+      byUrl.set(candidate.original_url, candidate);
+    }
   }
   const unique = [...byUrl.values()];
 
@@ -234,8 +339,42 @@ async function main() {
     }
   }
 
+  const { data: recentRadar, error: recentError } = await supabase
+    .from("editorial_inbox_items")
+    .select("title, source_label, raw_metadata")
+    .eq("source_kind", "radar")
+    .order("received_at", { ascending: false })
+    .limit(RECENT_FINGERPRINT_WINDOW);
+  if (recentError) throw recentError;
+
+  const existingFingerprints = new Set();
+  for (const row of recentRadar ?? []) {
+    const stored = row.raw_metadata?.radar_title_fingerprint;
+    if (typeof stored === "string" && stored) {
+      existingFingerprints.add(stored);
+      continue;
+    }
+    if (row.title) {
+      existingFingerprints.add(titleFingerprint(row.source_label ?? "", row.title));
+    }
+  }
+
+  const candidateFingerprints = new Set();
   const fresh = unique
-    .filter((item) => !existingUrls.has(item.original_url))
+    .sort(
+      (a, b) =>
+        b.raw_metadata.radar_relevance_score - a.raw_metadata.radar_relevance_score ||
+        a.title.localeCompare(b.title),
+    )
+    .filter((item) => {
+      if (existingUrls.has(item.original_url)) return false;
+      const fingerprint = item.raw_metadata.radar_title_fingerprint;
+      if (existingFingerprints.has(fingerprint) || candidateFingerprints.has(fingerprint)) {
+        return false;
+      }
+      candidateFingerprints.add(fingerprint);
+      return true;
+    })
     .slice(0, MAX_INSERTS_PER_RUN)
     .map((item) => ({ source_kind: "radar", ...item }));
 
@@ -254,10 +393,18 @@ async function main() {
       {
         mode: "review_only",
         autoPublish: false,
+        radarVersion: "1.1",
         sources: sourceResults,
-        discovered: unique.length,
-        alreadyKnown: existingUrls.size,
+        discovered: discovered.length,
+        uniqueUrls: unique.length,
+        alreadyKnownUrls: existingUrls.size,
+        recentFingerprints: existingFingerprints.size,
         inserted,
+        insertedByPriority: {
+          high: fresh.filter((item) => item.priority === "high").length,
+          normal: fresh.filter((item) => item.priority === "normal").length,
+          low: fresh.filter((item) => item.priority === "low").length,
+        },
         maxInserts: MAX_INSERTS_PER_RUN,
       },
       null,
