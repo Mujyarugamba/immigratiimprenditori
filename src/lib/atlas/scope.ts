@@ -1,33 +1,35 @@
 export const ATLAS_CORE_COUNTRIES = [
-  { code: "IT", slug: "italia", name: "Italia" },
-  { code: "DE", slug: "germania", name: "Germania" },
-  { code: "FR", slug: "francia", name: "Francia" },
-  { code: "ES", slug: "spagna", name: "Spagna" },
-  { code: "GB", slug: "regno-unito", name: "Regno Unito" },
-  { code: "NL", slug: "paesi-bassi", name: "Paesi Bassi" },
-  { code: "US", slug: "stati-uniti", name: "Stati Uniti" },
-  { code: "CA", slug: "canada", name: "Canada" },
-  { code: "MA", slug: "marocco", name: "Marocco" },
-  { code: "RO", slug: "romania", name: "Romania" },
-  { code: "CN", slug: "cina", name: "Cina" },
-  { code: "IN", slug: "india", name: "India" },
+  { code: "IT", iso3: "ITA", slug: "italia", name: "Italia" },
+  { code: "DE", iso3: "DEU", slug: "germania", name: "Germania" },
+  { code: "FR", iso3: "FRA", slug: "francia", name: "Francia" },
+  { code: "ES", iso3: "ESP", slug: "spagna", name: "Spagna" },
+  { code: "GB", iso3: "GBR", slug: "regno-unito", name: "Regno Unito" },
+  { code: "NL", iso3: "NLD", slug: "paesi-bassi", name: "Paesi Bassi" },
+  { code: "US", iso3: "USA", slug: "stati-uniti", name: "Stati Uniti" },
+  { code: "CA", iso3: "CAN", slug: "canada", name: "Canada" },
+  { code: "MA", iso3: "MAR", slug: "marocco", name: "Marocco" },
+  { code: "RO", iso3: "ROU", slug: "romania", name: "Romania" },
+  { code: "CN", iso3: "CHN", slug: "cina", name: "Cina" },
+  { code: "IN", iso3: "IND", slug: "india", name: "India" },
 ] as const;
 
 export const ATLAS_EXPANSION_COUNTRIES = [
-  { code: "BE", slug: "belgio", name: "Belgio" },
-  { code: "PT", slug: "portogallo", name: "Portogallo" },
-  { code: "AL", slug: "albania", name: "Albania" },
-  { code: "TN", slug: "tunisia", name: "Tunisia" },
-  { code: "SN", slug: "senegal", name: "Senegal" },
-  { code: "BD", slug: "bangladesh", name: "Bangladesh" },
-  { code: "TR", slug: "turchia", name: "Turchia" },
-  { code: "UA", slug: "ucraina", name: "Ucraina" },
+  { code: "BE", iso3: "BEL", slug: "belgio", name: "Belgio" },
+  { code: "PT", iso3: "PRT", slug: "portogallo", name: "Portogallo" },
+  { code: "AL", iso3: "ALB", slug: "albania", name: "Albania" },
+  { code: "TN", iso3: "TUN", slug: "tunisia", name: "Tunisia" },
+  { code: "SN", iso3: "SEN", slug: "senegal", name: "Senegal" },
+  { code: "BD", iso3: "BGD", slug: "bangladesh", name: "Bangladesh" },
+  { code: "TR", iso3: "TUR", slug: "turchia", name: "Turchia" },
+  { code: "UA", iso3: "UKR", slug: "ucraina", name: "Ucraina" },
 ] as const;
 
 export const ATLAS_COUNTRIES = [
   ...ATLAS_CORE_COUNTRIES,
   ...ATLAS_EXPANSION_COUNTRIES,
 ] as const;
+
+export type AtlasCountry = (typeof ATLAS_COUNTRIES)[number];
 
 export const ITALIAN_REGIONS = [
   "Abruzzo",
@@ -75,7 +77,21 @@ export const FOREIGN_SUBNATIONAL_PRIORITY = [
 export const ATLAS_SCOPE_VERSION = "2026-08-22-v1";
 
 export function isAtlasCountry(code: string) {
-  return ATLAS_COUNTRIES.some((country) => country.code === code.toUpperCase());
+  const normalized = code.toUpperCase();
+  return ATLAS_COUNTRIES.some(
+    (country) => country.code === normalized || country.iso3 === normalized,
+  );
+}
+
+export function getAtlasCountryBySlug(slug: string): AtlasCountry | undefined {
+  return ATLAS_COUNTRIES.find((country) => country.slug === slug);
+}
+
+export function getAtlasCountryByCode(code: string): AtlasCountry | undefined {
+  const normalized = code.toUpperCase();
+  return ATLAS_COUNTRIES.find(
+    (country) => country.code === normalized || country.iso3 === normalized,
+  );
 }
 
 /**
