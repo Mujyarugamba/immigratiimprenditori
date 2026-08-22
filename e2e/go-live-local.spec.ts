@@ -1,28 +1,10 @@
 import { expect, test } from "@playwright/test";
-import {
-  cleanupUsers,
-  createConfirmedUser,
-  loadStatusEnv,
-  provisionActiveAccount,
-  psql,
-} from "./helpers/supabase";
-
-const PASS = "P6E2E!pass9";
+import { psql } from "./helpers/supabase";
 
 test.describe("Go-live local surfaces", () => {
-  const users: string[] = [];
-
-  test.afterEach(() => {
-    try {
-      cleanupUsers(users.splice(0));
-    } catch {
-      /* local stack is discarded after CI */
-    }
-  });
-
   test("Observatory, Atlas, routes and stories render as real public surfaces", async ({ page }) => {
     const pages = [
-      ["/osservatorio", /Osservatorio/i],
+      ["/osservatorio", /Ricerche e dati/i],
       ["/atlante", /Atlante dell.imprenditoria migrante/i],
       ["/atlante/rotte", /Rotte imprenditoriali/i],
       ["/storie", /Storie e voci/i],
@@ -43,32 +25,42 @@ test.describe("Go-live local surfaces", () => {
   });
 
   test("public author profile is evidence-gated and renderable", async ({ page }) => {
-    const env = loadStatusEnv();
     const stamp = Date.now();
-    const email = `go-live-author-${stamp}@example.invalid`;
     const slug = `ci-research-author-${stamp}`;
-    const uid = await createConfirmedUser(env, email, PASS);
-    users.push(uid);
-
-    await provisionActiveAccount(env, uid, email, PASS);
     psql(`
-      update public.profiles
-      set display_name = 'CI Research Author',
-          slug = '${slug}',
-          bio = 'Profilo locale effimero usato esclusivamente per il gate E2E.',
-          role_description = 'Ricercatore',
-          is_public = true,
-          is_active = true,
-          deleted_at = null,
-          published_at = now()
-      where id = '${uid}';
+      insert into public.author_profiles (
+        slug, display_name, profile_kind, bio, affiliation, orcid, website_url, is_public
+      ) values (
+        '${slug}',
+        'CI Research Author',
+        'person',
+        'Profilo locale effimero usato esclusivamente per il gate E2E.',
+        'CI Research Institute',
+        '0000-0002-1825-0097',
+        'https://example.invalid/author',
+        true
+      );
     `);
 
-    const response = await page.goto(`/contributori/${slug}`);
-    expect(response?.ok()).toBeTruthy();
-    await expect(page.getByRole("heading", { level: 1, name: "CI Research Author" })).toBeVisible();
-    await expect(page.getByText("Ricercatore", { exact: true })).toBeVisible();
-    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(2);
+    try {
+      const response = await page.goto(`/autori/${slug}`);
+      expect(response?.ok()).toBeTruthy();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "CI Research Author" }),
+      ).toBeVisible();
+      await expect(page.getByText("CI Research Institute", { exact: true })).toBeVisible();
+      await expect(page.getByText("0000-0002-1825-0097", { exact: false })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 2, name: "Pubblicazioni e contributi" })).toBeVisible();
+      await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(2);
+
+      await page.goto("/esplora/autori");
+      await expect(page.getByRole("link", { name: "CI Research Author" })).toHaveAttribute(
+        "href",
+        `/autori/${slug}`,
+      );
+    } finally {
+      psql(`delete from public.author_profiles where slug = '${slug}';`);
+    }
   });
 
   test("Open Data exposes a valid XLSX archive", async ({ request }) => {
@@ -83,14 +75,24 @@ test.describe("Go-live local surfaces", () => {
     expect(body.includes(Buffer.from("xl/worksheets/sheet1.xml"))).toBeTruthy();
   });
 
-  test("privacy analytics endpoint aggregates a page view without cookies", async ({ request }) => {
+  test("privacy analytics endpoint aggregates a page view without cookies", async ({ page }) => {
     const path = `/ci-analytics-${Date.now()}`;
-    const response = await request.post("/api/analytics/page-view", {
-      data: { path, locale: "it" },
-      headers: { origin: "http://127.0.0.1:3000" },
-    });
-    expect(response.status()).toBe(204);
-    expect(response.headers()["set-cookie"]).toBeUndefined();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const beforeCookies = await page.context().cookies();
+
+    const status = await page.evaluate(async (analyticsPath) => {
+      const response = await fetch("/api/analytics/page-view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: analyticsPath, locale: "it" }),
+        credentials: "same-origin",
+      });
+      return response.status;
+    }, path);
+
+    expect(status).toBe(204);
+    const afterCookies = await page.context().cookies();
+    expect(afterCookies).toEqual(beforeCookies);
 
     const result = psql(`
       select view_count
