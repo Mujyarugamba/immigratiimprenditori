@@ -16,6 +16,7 @@ export async function listPublishedContentsByTypes(
     .eq("editorial_status", "ready")
     .eq("publication_status", "published")
     .eq("visibility_status", "public")
+    .is("archived_at", null)
     .order("is_featured", { ascending: false })
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(limit);
@@ -33,6 +34,8 @@ export const RESEARCH_CONTENT_TYPES = [
   "report",
   "research",
   "research_report",
+  "working_paper",
+  "dossier",
 ] as const;
 
 export const VOICE_CONTENT_TYPES = [
