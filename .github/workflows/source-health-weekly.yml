@@ -1,0 +1,53 @@
+name: Observatory Source Health
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: observatory-source-health
+  cancel-in-progress: false
+
+jobs:
+  source-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Observatory source URLs
+        id: source_health
+        continue-on-error: true
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/external-data/source-health-check.mjs
+
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observatory-source-health
+          path: artifacts/source-health.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Fail when source issues are detected
+        if: steps.source_health.outcome == 'failure'
+        run: |
+          echo "One or more Observatory sources require review. See the uploaded source-health artifact."
+          exit 1
