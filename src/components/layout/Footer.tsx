@@ -47,7 +47,7 @@ export function Footer() {
           <Link href={localizedHref(locale, "/eventi")}>{m.events}</Link>
           <Link href={localizedHref(locale, "/contribuisci")}>{m.participate}</Link>
           <Link href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
-          <Link href="/sostieni">{m.support}</Link>
+          <Link href={localizedHref(locale, "/sostieni")}>{m.support}</Link>
           <a href="mailto:info@immigratiimprenditori.it">{m.contacts}</a>
         </div>
 
