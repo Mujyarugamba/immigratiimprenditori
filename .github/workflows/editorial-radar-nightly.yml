@@ -47,9 +47,16 @@ jobs:
         if: steps.local_time.outputs.run == 'true'
         run: npm ci
 
-      - name: Run review-only radar
+      - name: Run core review-only radar
         if: steps.local_time.outputs.run == 'true'
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/external-data/radar-nightly.mjs
+
+      - name: Run EMN review-only radar
+        if: steps.local_time.outputs.run == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/external-data/radar-emn.mjs
