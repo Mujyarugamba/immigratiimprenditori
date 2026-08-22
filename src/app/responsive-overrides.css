@@ -13,6 +13,7 @@ svg {
 }
 
 .home-chart {
+  width: 100%;
   max-width: 100%;
 }
 
@@ -24,10 +25,16 @@ svg {
   overflow: hidden;
 }
 
+@media (max-width: 1050px) {
+  .data-stories-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 820px) {
   .institutional-bar,
   .institutional-bar-inner {
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   .institutional-bar-inner {
