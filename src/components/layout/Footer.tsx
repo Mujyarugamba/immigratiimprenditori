@@ -34,6 +34,7 @@ export function Footer() {
           <h2>{m.footerResearch}</h2>
           <Link href={localizedHref(locale, "/osservatorio")}>{m.observatory}</Link>
           {locale === "it" ? <Link href="/atlante">Atlante</Link> : null}
+          {locale === "it" ? <Link href="/relazioni">Relazioni</Link> : null}
           {locale === "it" ? <Link href="/timeline">Timeline</Link> : null}
           <Link href={localizedHref(locale, "/esplora/dati")}>{core.dataExplorer}</Link>
           <Link href={localizedHref(locale, "/esplora/territori")}>{core.territories}</Link>
