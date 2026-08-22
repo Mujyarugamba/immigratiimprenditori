@@ -107,6 +107,20 @@ function staticEntries(): MetadataRoute.Sitemap {
   return [...italian, ...localized];
 }
 
+function atlasCountryFromCode(code: string | null | undefined) {
+  const normalized = code?.toUpperCase();
+  if (!normalized) return undefined;
+  return ATLAS_COUNTRIES.find(
+    (candidate) => candidate.code === normalized || candidate.iso3 === normalized,
+  );
+}
+
+function newest(previous: string | undefined, candidate: string | null | undefined) {
+  if (!candidate) return previous;
+  if (!previous || candidate > previous) return candidate;
+  return previous;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = staticEntries();
 
@@ -116,7 +130,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const [contentsResult, indicatorsResult, eventsResult, valuesResult] = await Promise.all([
+    const [
+      contentsResult,
+      indicatorsResult,
+      eventsResult,
+      valuesResult,
+      contentGeoResult,
+      eventGeoResult,
+      routesResult,
+      contentRoutesResult,
+      eventRoutesResult,
+    ] = await Promise.all([
       supabase
         .from("contents")
         .select("slug, updated_at, published_at")
@@ -125,7 +149,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq("visibility_status", "public"),
       supabase
         .from("observatory_indicators")
-        .select("id, slug, updated_at, published_at")
+        .select("id, code, slug, updated_at, published_at")
         .eq("publication_status", "published")
         .in("operational_status", ["active", "deprecated"]),
       supabase
@@ -136,9 +160,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq("visibility_status", "public"),
       supabase
         .from("observatory_indicator_values")
-        .select("indicator_id, territory_code, updated_at, published_at")
+        .select("indicator_id, territory_code, country_code, updated_at, published_at")
         .eq("status", "final")
         .is("withdrawn_at", null),
+      supabase.from("content_geographies").select("country_code, updated_at"),
+      supabase.from("event_geographies").select("country_code, updated_at"),
+      supabase
+        .from("migration_routes")
+        .select("id, origin_country_code, destination_country_code, slug, updated_at")
+        .eq("is_active", true),
+      supabase.from("content_routes").select("route_id, updated_at"),
+      supabase.from("event_routes").select("route_id, updated_at"),
     ]);
 
     const contents: MetadataRoute.Sitemap = (contentsResult.data ?? []).map((item) => ({
@@ -165,19 +197,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const publishedIndicatorIds = new Set(indicatorRows.map((item) => item.id));
     const atlasEvidence = new Map<string, string | undefined>();
+
     for (const value of valuesResult.data ?? []) {
       if (!publishedIndicatorIds.has(value.indicator_id)) continue;
-      const code = value.territory_code?.toUpperCase();
-      if (!code) continue;
-      const country = ATLAS_COUNTRIES.find(
-        (candidate) => candidate.code === code || candidate.iso3 === code,
-      );
+      const country = atlasCountryFromCode(value.territory_code);
       if (!country) continue;
-      const modified = value.updated_at ?? value.published_at ?? undefined;
-      const previous = atlasEvidence.get(country.slug);
-      if (!previous || (modified && modified > previous)) {
-        atlasEvidence.set(country.slug, modified);
-      }
+      atlasEvidence.set(
+        country.slug,
+        newest(atlasEvidence.get(country.slug), value.updated_at ?? value.published_at),
+      );
+    }
+
+    for (const row of contentGeoResult.data ?? []) {
+      const country = atlasCountryFromCode(row.country_code);
+      if (!country) continue;
+      atlasEvidence.set(country.slug, newest(atlasEvidence.get(country.slug), row.updated_at));
+    }
+    for (const row of eventGeoResult.data ?? []) {
+      const country = atlasCountryFromCode(row.country_code);
+      if (!country) continue;
+      atlasEvidence.set(country.slug, newest(atlasEvidence.get(country.slug), row.updated_at));
     }
 
     const atlasCountries: MetadataRoute.Sitemap = Array.from(atlasEvidence).map(
@@ -189,7 +228,48 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     );
 
-    return [...base, ...contents, ...indicators, ...events, ...atlasCountries];
+    const contentRouteEvidence = new Map<string, string | undefined>();
+    for (const row of contentRoutesResult.data ?? []) {
+      contentRouteEvidence.set(row.route_id, newest(contentRouteEvidence.get(row.route_id), row.updated_at));
+    }
+    const eventRouteEvidence = new Map<string, string | undefined>();
+    for (const row of eventRoutesResult.data ?? []) {
+      eventRouteEvidence.set(row.route_id, newest(eventRouteEvidence.get(row.route_id), row.updated_at));
+    }
+
+    const routesWithEvidence = (routesResult.data ?? []).filter((route) => {
+      if (contentRouteEvidence.has(route.id) || eventRouteEvidence.has(route.id)) return true;
+      return (valuesResult.data ?? []).some((value) => {
+        if (!publishedIndicatorIds.has(value.indicator_id)) return false;
+        const origin = atlasCountryFromCode(value.country_code);
+        const destination = atlasCountryFromCode(value.territory_code);
+        return origin?.code === route.origin_country_code && destination?.code === route.destination_country_code;
+      });
+    });
+
+    const routeEntries: MetadataRoute.Sitemap = routesWithEvidence.map((route) => ({
+      url: `${SITE_URL}/atlante/rotte/${route.slug}`,
+      lastModified: newest(
+        newest(route.updated_at ?? undefined, contentRouteEvidence.get(route.id)),
+        eventRouteEvidence.get(route.id),
+      ),
+      changeFrequency: "monthly",
+      priority: 0.78,
+    }));
+
+    const routeIndex: MetadataRoute.Sitemap = routesWithEvidence.length
+      ? [{ url: `${SITE_URL}/atlante/rotte`, changeFrequency: "weekly", priority: 0.8 }]
+      : [];
+
+    return [
+      ...base,
+      ...contents,
+      ...indicators,
+      ...events,
+      ...atlasCountries,
+      ...routeIndex,
+      ...routeEntries,
+    ];
   } catch {
     return base;
   }
