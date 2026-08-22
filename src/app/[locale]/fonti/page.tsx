@@ -54,7 +54,7 @@ export default async function LocalizedSourcesPage({ params }: Props) {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-5 text-sm font-semibold">
-        <Link href="/dati-e-fonti" className="underline underline-offset-4">{m.method} →</Link>
+        <Link href={`/${locale}/dati-e-fonti`} className="underline underline-offset-4">{m.method} →</Link>
         <Link href={`/${locale}/glossario`} className="underline underline-offset-4">{m.glossary} →</Link>
       </div>
     </main>
