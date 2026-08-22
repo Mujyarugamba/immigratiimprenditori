@@ -12,6 +12,16 @@ import "./editorial-identity.css";
 const SITE_URL = "https://immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
 
+const SKIP_LINK_LABELS = {
+  it: "Vai al contenuto",
+  en: "Skip to content",
+  fr: "Aller au contenu",
+  es: "Ir al contenido",
+  de: "Zum Inhalt springen",
+  ar: "الانتقال إلى المحتوى",
+  zh: "跳至主要内容",
+} as const;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: "Immigrati Imprenditori",
@@ -109,6 +119,7 @@ export default async function RootLayout({
   const locale = isPlatformLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
   const language = getPlatformLanguage(locale);
   const schema = structuredData(locale);
+  const skipLinkLabel = SKIP_LINK_LABELS[locale];
 
   return (
     <html lang={locale} dir={language.direction}>
@@ -117,6 +128,12 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
+        <a
+          href="#contenuto"
+          className="fixed left-3 top-3 z-[100] -translate-y-24 border border-black bg-white px-4 py-2 text-sm font-semibold text-black shadow-none transition-transform focus:translate-y-0 focus:outline focus:outline-2 focus:outline-offset-2"
+        >
+          {skipLinkLabel}
+        </a>
         <Header />
         {children}
         <Footer />
