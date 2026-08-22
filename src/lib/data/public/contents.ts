@@ -145,6 +145,10 @@ export async function listPublicContents(
   let query = supabase
     .from("contents")
     .select(LIST_SELECT, { count: "exact" })
+    .eq("editorial_status", "ready")
+    .eq("publication_status", "published")
+    .eq("visibility_status", "public")
+    .is("archived_at", null)
     .order("is_featured", { ascending: false })
     .order("published_at", { ascending: false, nullsFirst: false })
     .range(from, to);
@@ -181,6 +185,10 @@ export async function getPublicContentBySlug(
       .from("contents")
       .select(DETAIL_SELECT)
       .eq("slug", slug)
+      .eq("editorial_status", "ready")
+      .eq("publication_status", "published")
+      .eq("visibility_status", "public")
+      .is("archived_at", null)
       .maybeSingle();
 
     if (error || !data) return null;
@@ -195,6 +203,10 @@ export async function listHomeContents(limit = 3) {
   const { data, error } = await supabase
     .from("contents")
     .select(LIST_SELECT)
+    .eq("editorial_status", "ready")
+    .eq("publication_status", "published")
+    .eq("visibility_status", "public")
+    .is("archived_at", null)
     .order("is_featured", { ascending: false })
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(limit);
