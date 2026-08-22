@@ -127,6 +127,10 @@ export async function listPublicEvents(
     .select(`${LIST_SELECT}, event_editions ( ${EDITION_SELECT} )`, {
       count: "exact",
     })
+    .eq("editorial_status", "ready")
+    .eq("publication_status", "published")
+    .eq("visibility_status", "public")
+    .is("archived_at", null)
     .order("title", { ascending: true })
     .range(from, to);
 
@@ -179,6 +183,10 @@ export async function getPublicEventById(
     `,
     )
     .eq("id", id)
+    .eq("editorial_status", "ready")
+    .eq("publication_status", "published")
+    .eq("visibility_status", "public")
+    .is("archived_at", null)
     .maybeSingle();
 
   if (error) throw new Error(error.message);
@@ -213,6 +221,10 @@ export async function listHomeEvents(limit = 3) {
   const { data, error } = await supabase
     .from("events")
     .select(`${LIST_SELECT}, event_editions ( ${EDITION_SELECT} )`)
+    .eq("editorial_status", "ready")
+    .eq("publication_status", "published")
+    .eq("visibility_status", "public")
+    .is("archived_at", null)
     .order("title", { ascending: true })
     .limit(limit);
   if (error) throw new Error(error.message);

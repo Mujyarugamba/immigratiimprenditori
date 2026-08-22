@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { LegalDocumentPage } from "@/components/legal/LegalDocumentPage";
 
 export const metadata: Metadata = {
-  title: "Dati e fonti esterne",
+  title: "Fonti e metodologia",
   description:
-    "Informativa e disclaimer su dati, open data, opportunità e fonti esterne.",
+    "Fonti, metodologia, limiti e criteri di utilizzo dei dati pubblicati da Immigrati Imprenditori.",
 };
 
 export default function DatiEFontiPage() {
   return (
     <LegalDocumentPage
       docId="datiEFonti"
-      title="Dati e fonti esterne"
-      description="Provenienza, limiti e riuso di dati e fonti esterne."
+      title="Fonti e metodologia"
+      description="Fonti, criteri, limiti e metodologia dei dati e dei contenuti pubblicati."
     />
   );
 }

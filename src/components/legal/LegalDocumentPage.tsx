@@ -17,7 +17,7 @@ export function LegalDocumentPage({ docId, title, description }: Props) {
       <Container className="max-w-3xl space-y-8">
         <header className="space-y-2">
           <p className="text-ink-subtle text-xs font-medium tracking-[0.14em] uppercase">
-            Documenti legali
+            Metodo e fonti
           </p>
           <h1 className="sr-only">{title}</h1>
           <p className="text-ink-muted text-sm leading-6">{description}</p>

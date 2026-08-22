@@ -20,12 +20,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const indicator = await getPublicIndicatorBySlug(slug);
   if (!indicator) {
-    return { title: "Non trovato" };
+    return { title: "Non trovato", robots: { index: false, follow: false } };
   }
+
+  const canonical = `/osservatorio/${indicator.slug}`;
   return {
     title: indicator.title,
     description: indicator.description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title: indicator.title,
+      description: indicator.description,
+    },
+    twitter: {
+      card: "summary",
+      title: indicator.title,
+      description: indicator.description,
+    },
   };
+}
+
+function formatIndicatorValue(value: number, unitCode: string) {
+  const maximumFractionDigits = Number.isInteger(value) ? 0 : 2;
+  const formatted = new Intl.NumberFormat("it-IT", {
+    maximumFractionDigits,
+  }).format(value);
+
+  if (unitCode === "percent") return `${formatted} %`;
+  if (unitCode === "eur") return `${formatted} €`;
+  if (unitCode === "eur_thousands") return `${formatted} mila €`;
+  if (unitCode === "index_points") return `${formatted} punti`;
+  return formatted;
 }
 
 export default async function IndicatoreDetailPage({ params }: PageProps) {
@@ -86,7 +113,7 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
         {indicator.values.length > 0 ? (
           <section className="space-y-4">
             <h2 className="text-ink text-xl font-semibold">Valori</h2>
-            <div className="overflow-x-auto">
+            <div className="table-scroll">
               <table className="border-line w-full min-w-[640px] border text-left text-sm">
                 <thead className="bg-surface-muted">
                   <tr>
@@ -116,13 +143,7 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
                         {formatItalianDate(value.period_end)}
                       </td>
                       <td className="border-line border px-3 py-2 font-medium">
-                        {value.numeric_value}
-                        {indicator.methodology_summary.includes("THS_PER") ? (
-                          <span className="text-ink-muted font-normal">
-                            {" "}
-                            (migliaia)
-                          </span>
-                        ) : null}
+                        {formatIndicatorValue(value.numeric_value, indicator.unit_code)}
                       </td>
                       <td className="border-line text-ink-muted border px-3 py-2">
                         {value.territory_label ?? "—"}

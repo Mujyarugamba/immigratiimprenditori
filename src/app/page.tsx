@@ -1,123 +1,408 @@
-import { PageFrame } from "@immigrati/ui-foundation";
-import { centroStudiConfig } from "@immigrati/product-config";
-import { csPrimaryNav } from "@/data/cs-navigation";
 import Link from "next/link";
+import {
+  getPublicIndicatorBySlug,
+  listHomeIndicators,
+  type PublicIndicatorDetail,
+} from "@/lib/data/public/observatory";
+import {
+  listHomeContents,
+  type PublicContentListItem,
+} from "@/lib/data/public/contents";
+import {
+  listHomeEvents,
+  type PublicEventListItem,
+} from "@/lib/data/public/events";
 
-const pillars = [
-  {
-    title: "Dati",
-    text: "Indicatori, statistiche, territori e settori per misurare l'imprenditoria migrante.",
-    href: "/osservatorio",
-  },
-  {
-    title: "Analisi",
-    text: "Ricerche, approfondimenti, politiche e fonti per interpretare i fenomeni economici.",
-    href: "/contenuti",
-  },
-  {
-    title: "Voci",
-    text: "Storie, interviste e testimonianze di chi fa impresa fuori dal proprio Paese d'origine.",
-    href: "/contribuisci",
-  },
-] as const;
+const typeLabels: Record<string, string> = {
+  analysis: "Analisi",
+  article: "Analisi",
+  insight: "Approfondimento",
+  data_note: "Nota dati",
+  policy_brief: "Policy brief",
+  institutional_page: "Documento istituzionale",
+  report: "Rapporto",
+  research: "Ricerca",
+  research_report: "Rapporto di ricerca",
+  interview: "Intervista",
+  business_story: "Storia d'impresa",
+  testimony: "Testimonianza",
+  personal_story: "Storia",
+  guide: "Guida",
+  video: "Video",
+  podcast: "Podcast",
+};
 
-export default function HomePage() {
+async function safeLoad<T>(loader: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await loader();
+  } catch {
+    return fallback;
+  }
+}
+
+function contentLabel(item: PublicContentListItem) {
+  return typeLabels[item.type_code] ?? "Approfondimento";
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatMetric(value: number) {
+  return new Intl.NumberFormat("it-IT", {
+    maximumFractionDigits: Number.isInteger(value) ? 0 : 1,
+  }).format(value);
+}
+
+function formatMetricUnit(indicator: PublicIndicatorDetail) {
+  switch (indicator.unit_code) {
+    case "percent":
+      return "%";
+    case "eur":
+      return "euro";
+    case "eur_thousands":
+      return "migliaia di euro";
+    case "ratio":
+      return "rapporto";
+    case "index_points":
+      return "punti indice";
+    case "units":
+      return "unità";
+    default:
+      return indicator.unit_code || "valore indicatore";
+  }
+}
+
+function metricContext(value: PublicIndicatorDetail["values"][number]) {
+  return [value.territory_label, value.country_label].filter(Boolean).join(" · ");
+}
+
+function imageStyle(url: string | null | undefined) {
+  if (!url) return undefined;
+  return {
+    backgroundImage: `url("${url.replaceAll('"', "%22")}")`,
+  };
+}
+
+function scopeKey(value: PublicIndicatorDetail["values"][number]) {
+  return [
+    value.territory_level ?? "",
+    value.territory_code ?? "",
+    value.country_code ?? "",
+    value.territory_label ?? "",
+    value.country_label ?? "",
+  ].join("|");
+}
+
+function comparableSeries(indicator: PublicIndicatorDetail | undefined) {
+  if (!indicator?.values.length) return [];
+  const latest = indicator.values[0];
+  const key = scopeKey(latest);
+  return indicator.values
+    .filter((value) => scopeKey(value) === key)
+    .sort(
+      (a, b) =>
+        new Date(a.period_start).getTime() - new Date(b.period_start).getTime(),
+    );
+}
+
+function MiniTrend({
+  indicator,
+}: {
+  indicator: PublicIndicatorDetail | undefined;
+}) {
+  const series = comparableSeries(indicator);
+  if (series.length < 2) {
+    return (
+      <div className="home-chart-empty">
+        <span>Serie storica non disponibile per questa selezione</span>
+      </div>
+    );
+  }
+
+  const values = series.map((item) => item.numeric_value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const points = series
+    .map((item, index) => {
+      const x = (index / Math.max(series.length - 1, 1)) * 100;
+      const y = 88 - ((item.numeric_value - min) / range) * 72;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  const first = series[0];
+  const last = series[series.length - 1];
+
   return (
-    <PageFrame>
-      <main id="contenuto" className="mx-auto max-w-5xl py-12 sm:py-16">
-        <header className="max-w-4xl border-b border-black pb-10">
-          <p className="text-ink-muted text-xs font-semibold uppercase tracking-[0.16em]">
-            Osservatorio e Centro Studi
-          </p>
-          <h1 className="text-ink mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-            {centroStudiConfig.name}
-          </h1>
-          <p className="text-ink mt-5 max-w-3xl text-xl leading-8">
-            Osservatorio sull&apos;imprenditoria migrante.
-          </p>
-          <p className="text-ink-muted mt-4 max-w-3xl text-base leading-7">
-            Studiamo, misuriamo e raccontiamo le persone che fanno impresa fuori
-            dal proprio Paese d&apos;origine e il contributo economico, sociale e
-            culturale che producono nei territori in cui vivono e lavorano.
-          </p>
+    <div className="home-chart">
+      <div className="home-chart-head">
+        <div>
+          <p className="eyebrow">Trend in evidenza</p>
+          <h3>{indicator?.title}</h3>
+        </div>
+        <Link href={`/osservatorio/${indicator?.slug}`}>Vedi il dato →</Link>
+      </div>
+      <svg
+        className="home-chart-svg"
+        viewBox="0 0 100 100"
+        role="img"
+        aria-label={`Andamento di ${indicator?.title ?? "indicatore"}`}
+        preserveAspectRatio="none"
+      >
+        <line x1="0" y1="88" x2="100" y2="88" className="chart-axis" />
+        <polyline points={points} className="chart-line" />
+        {points.split(" ").map((point, index) => {
+          const [cx, cy] = point.split(",");
+          return (
+            <circle
+              key={`${cx}-${cy}-${index}`}
+              cx={cx}
+              cy={cy}
+              r="1.8"
+              className="chart-dot"
+            />
+          );
+        })}
+      </svg>
+      <div className="home-chart-foot">
+        <span>{new Date(first.period_start).getFullYear()}</span>
+        <span>
+          {last.source_name ? `Fonte: ${last.source_name}` : "Fonte nella scheda indicatore"}
+        </span>
+        <span>{new Date(last.period_start).getFullYear()}</span>
+      </div>
+    </div>
+  );
+}
 
-          <nav className="mt-8" aria-label="Sezioni principali">
-            <ul className="flex flex-wrap gap-x-5 gap-y-3 text-sm">
-              {csPrimaryNav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-ink underline-offset-4 hover:underline"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </header>
+export default async function HomePage() {
+  const [contents, indicators, events] = await Promise.all([
+    safeLoad(() => listHomeContents(8), [] as PublicContentListItem[]),
+    safeLoad(() => listHomeIndicators(4), []),
+    safeLoad(() => listHomeEvents(2), [] as PublicEventListItem[]),
+  ]);
 
-        <section className="grid border-b border-black md:grid-cols-3" aria-labelledby="pilastri-heading">
-          <h2 id="pilastri-heading" className="sr-only">
-            I tre pilastri dell&apos;Osservatorio
-          </h2>
-          {pillars.map((pillar, index) => (
-            <article
-              key={pillar.title}
-              className={`py-8 md:px-6 ${index > 0 ? "border-t border-black md:border-l md:border-t-0" : ""} ${index === 0 ? "md:pl-0" : ""}`}
-            >
-              <p className="text-ink-muted text-xs font-semibold uppercase tracking-[0.14em]">
-                0{index + 1}
-              </p>
-              <h3 className="text-ink mt-2 text-2xl font-semibold">{pillar.title}</h3>
-              <p className="text-ink-muted mt-3 text-sm leading-6">{pillar.text}</p>
-              <Link
-                href={pillar.href}
-                className="text-ink mt-5 inline-block text-sm font-medium underline underline-offset-4"
-              >
-                Approfondisci
+  const indicatorDetails = await Promise.all(
+    indicators.map((indicator) =>
+      safeLoad(
+        () => getPublicIndicatorBySlug(indicator.slug),
+        null,
+      ),
+    ),
+  );
+
+  const metrics = indicatorDetails.filter(
+    (item): item is PublicIndicatorDetail => Boolean(item?.values.length),
+  );
+  const hero = contents[0];
+  const featuredContents = contents.slice(1, 4);
+  const storyContents = contents.slice(4, 8);
+  const firstEvent = events[0];
+  const firstEventContext =
+    firstEvent?.next_edition?.city_text ??
+    firstEvent?.external_organization_label ??
+    null;
+  const trendIndicator =
+    metrics.find((indicator) => comparableSeries(indicator).length >= 2) ??
+    metrics[0];
+
+  return (
+    <main id="contenuto" className="home-page">
+      <section
+        className={`home-hero ${hero?.cover_url ? "has-cover" : ""}`}
+        style={imageStyle(hero?.cover_url)}
+      >
+        <div className="home-hero-overlay" />
+        <div className="site-container home-hero-inner">
+          <div className="home-hero-copy">
+            <p className="hero-kicker">Conoscenza. Dati. Persone.</p>
+            <h1>
+              Migrazioni legali e imprenditoria
+              <br />
+              per una società <span>inclusiva</span>
+              <br />
+              e competitiva.
+            </h1>
+            <p className="hero-intro">
+              Ricerca indipendente, dati verificati e testimonianze per capire
+              come l&apos;imprenditoria migrante trasforma economie, territori e
+              relazioni, nei singoli Paesi e tra Paesi.
+            </p>
+            <div className="hero-actions">
+              <Link href="/osservatorio" className="button button-gold">
+                Esplora l&apos;Osservatorio <span aria-hidden="true">→</span>
               </Link>
-            </article>
-          ))}
-        </section>
-
-        <section className="grid gap-8 border-b border-black py-10 md:grid-cols-[1.2fr_0.8fr]" aria-labelledby="voci-heading">
-          <div>
-            <p className="text-ink-muted text-xs font-semibold uppercase tracking-[0.14em]">
-              Le voci dell&apos;imprenditoria migrante
-            </p>
-            <h2 id="voci-heading" className="text-ink mt-3 text-3xl font-semibold tracking-tight">
-              Una storia può diventare una fonte.
-            </h2>
-            <p className="text-ink-muted mt-4 max-w-2xl leading-7">
-              Interviste e testimonianze sono parte centrale dell&apos;Osservatorio:
-              non soltanto storie di successo, ma anche ostacoli, fallimenti,
-              accesso al credito, passaggi generazionali, relazioni tra Paesi e
-              impatto sulle comunità.
-            </p>
+              <Link href="/chi-siamo" className="button button-ghost">
+                Chi siamo
+              </Link>
+            </div>
           </div>
-          <div className="md:border-l md:border-black md:pl-8">
-            <h3 className="text-ink text-lg font-semibold">Conosci una storia?</h3>
-            <p className="text-ink-muted mt-2 text-sm leading-6">
-              Imprenditori, ricercatori, associazioni e cittadini possono proporre
-              una testimonianza, un&apos;intervista, un evento o una ricerca. Non serve
-              registrarsi e nulla viene pubblicato automaticamente.
+
+          <article className="hero-feature">
+            <p className="eyebrow eyebrow-gold">
+              {hero ? contentLabel(hero) : "Centro Studi AIPEL"}
             </p>
-            <Link
-              href="/contribuisci"
-              className="mt-5 inline-block border border-black bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-white hover:text-black"
-            >
-              Contribuisci all&apos;Osservatorio
+            <h2>
+              {hero?.title ??
+                "Dati, analisi e voci sull'imprenditoria migrante"}
+            </h2>
+            <p>
+              {hero?.abstract ??
+                "Un Centro Studi per leggere i fenomeni economici senza perdere le storie delle persone."}
+            </p>
+            <Link href={hero ? `/contenuti/${hero.slug}` : "/contenuti"}>
+              {hero ? "Leggi l'approfondimento" : "Esplora analisi e ricerche"} →
+            </Link>
+          </article>
+        </div>
+      </section>
+
+      <section className="home-featured">
+        <div className="site-container">
+          <div className="section-heading-line">
+            <h2>In evidenza</h2>
+            <Link href="/contenuti">Vedi tutti →</Link>
+          </div>
+          <div className="featured-grid">
+            {featuredContents.map((item) => (
+              <article key={item.id} className="editorial-card">
+                <div
+                  className={`editorial-card-media ${item.cover_url ? "has-image" : ""}`}
+                  style={imageStyle(item.cover_url)}
+                  aria-hidden="true"
+                />
+                <div className="editorial-card-body">
+                  <p className="eyebrow">{contentLabel(item)}</p>
+                  <h3>
+                    <Link href={`/contenuti/${item.slug}`}>{item.title}</Link>
+                  </h3>
+                  {item.abstract ? <p>{item.abstract}</p> : null}
+                  <div className="editorial-card-meta">
+                    <span>{formatDate(item.published_at)}</span>
+                    <Link href={`/contenuti/${item.slug}`}>Leggi →</Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            {firstEvent ? (
+              <article className="editorial-card editorial-card-event">
+                <div className="editorial-card-body">
+                  <p className="eyebrow">Evento</p>
+                  <h3>
+                    <Link href={`/eventi/${firstEvent.id}`}>
+                      {firstEvent.title}
+                    </Link>
+                  </h3>
+                  {firstEvent.summary ? <p>{firstEvent.summary}</p> : null}
+                  <div className="event-date-block">
+                    <span>{formatDate(firstEvent.next_edition?.starts_at)}</span>
+                    {firstEventContext ? <span>{firstEventContext}</span> : null}
+                  </div>
+                  <Link href={`/eventi/${firstEvent.id}`} className="card-link">
+                    Scopri l&apos;evento →
+                  </Link>
+                </div>
+              </article>
+            ) : null}
+
+            {featuredContents.length === 0 && !firstEvent ? (
+              <div className="featured-empty">
+                <p className="eyebrow">In evidenza</p>
+                <h3>Nessun contenuto disponibile in questa selezione.</h3>
+                <p>
+                  Consulta Analisi e ricerche per esplorare i contenuti pubblicati dal Centro Studi.
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="metrics-section">
+        <div className="site-container metrics-layout">
+          <div className="metrics-intro">
+            <p className="eyebrow">Osservatorio</p>
+            <h2>I numeri chiave</h2>
+            <p>
+              Ogni indicatore rimanda a fonte, periodo, territorio e metodologia.
+            </p>
+            <Link href="/osservatorio" className="button button-outline-light">
+              Esplora tutti i dati →
             </Link>
           </div>
-        </section>
 
-        <section className="py-8">
-          <p className="text-ink-muted max-w-3xl text-sm leading-6">
-            {centroStudiConfig.description}
-          </p>
-        </section>
-      </main>
-    </PageFrame>
+          <div className="metrics-grid">
+            {metrics.slice(0, 4).map((indicator) => {
+              const latest = indicator.values[0];
+              const context = metricContext(latest);
+              return (
+                <article key={indicator.id} className="metric-card">
+                  <p>{indicator.title}</p>
+                  <strong>{formatMetric(latest.numeric_value)}</strong>
+                  <span className="metric-unit">
+                    {formatMetricUnit(indicator)}
+                  </span>
+                  <span className="metric-source">
+                    {new Date(latest.period_start).getFullYear()}
+                    {context ? ` · ${context}` : ""}
+                    {latest.source_name ? ` · ${latest.source_name}` : ""}
+                  </span>
+                </article>
+              );
+            })}
+
+            {metrics.length === 0 ? (
+              <div className="metrics-empty">
+                Nessun indicatore disponibile in questa selezione.
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="data-stories-section">
+        <div className="site-container data-stories-grid">
+          <MiniTrend indicator={trendIndicator} />
+
+          <div className="voices-panel">
+            <div className="voices-copy">
+              <p className="eyebrow eyebrow-gold">Storie e voci</p>
+              <h2>Persone, idee, imprese.</h2>
+              <p>
+                Le esperienze individuali completano i numeri: origini,
+                destinazioni, settori, ostacoli, innovazione e impatto.
+              </p>
+              <Link href="/contenuti">Leggi le storie →</Link>
+            </div>
+            <div className="voices-grid">
+              {storyContents.slice(0, 4).map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/contenuti/${item.slug}`}
+                  className={`voice-tile ${item.cover_url ? "has-image" : ""}`}
+                  style={imageStyle(item.cover_url)}
+                  aria-label={item.title}
+                >
+                  <span>{item.title}</span>
+                </Link>
+              ))}
+              {storyContents.length === 0 ? (
+                <div className="voices-placeholder">
+                  Nessuna storia o intervista disponibile in questa selezione.
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

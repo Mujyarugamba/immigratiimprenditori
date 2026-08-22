@@ -16,6 +16,7 @@ const section = sections.osservatorio;
 export const metadata: Metadata = {
   title: section.title,
   description: section.description,
+  alternates: { canonical: "/osservatorio" },
 };
 
 type PageProps = {

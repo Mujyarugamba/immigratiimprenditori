@@ -3,12 +3,15 @@
 Stato: **CANONICO v1**  
 Ente promotore: **AIPEL**  
 Direzione editoriale: **Ing. Augustin Mujyarugamba, Presidente AIPEL**  
-Forma iniziale: **Osservatorio e Centro Studi dell'associazione AIPEL**  
-Testata giornalistica: **NO, non nella fase iniziale**
+Forma: **Centro Studi di AIPEL**  
+Osservatorio: **sezione del Centro Studi dedicata a dati, indicatori e metodologia**  
+Testata giornalistica: **NO**
 
 ## 1. Identità
 
-**Immigrati Imprenditori — Osservatorio sull'imprenditoria migrante** è un osservatorio internazionale e centro studi dedicato all'imprenditoria generata dalle migrazioni.
+**Immigrati Imprenditori — Centro Studi sull'imprenditoria migrante** studia, misura, documenta e racconta l'imprenditoria generata dalle migrazioni.
+
+Il **Centro Studi** è la struttura complessiva del progetto. L'**Osservatorio** è la funzione dedicata a dati, indicatori, serie storiche, confronti territoriali e metodologia. La **redazione** è il gruppo di persone responsabile della selezione, verifica e pubblicazione dei contenuti.
 
 Non studia soltanto gli immigrati in Italia. L'oggetto di studio è la persona che fa impresa fuori dal proprio Paese d'origine e il contributo economico, sociale e culturale che produce nel territorio di destinazione, in qualunque direzione geografica.
 
@@ -52,7 +55,7 @@ La consultazione pubblica del sito non richiede account.
 
 ## 4. Equilibrio geografico editoriale
 
-La copertura è potenzialmente globale, ma la produzione editoriale è selettiva e sostenibile. Come bussola iniziale si adotta un equilibrio indicativo:
+La copertura è potenzialmente globale, ma la produzione editoriale è selettiva e sostenibile. Come bussola editoriale si adotta un equilibrio indicativo:
 
 - **20% Lombardia**;
 - **20% Italia**;
@@ -133,11 +136,12 @@ Gli eventi seguono lo stesso equilibrio geografico dell'intero progetto. La rile
 
 Una persona può, senza creare un account, inviare:
 
-- “Racconta la tua storia”;
+- “Racconta la tua storia d'impresa”;
 - “Proponi un'intervista”;
 - “Segnala un evento”;
 - “Segnala una ricerca”;
-- “Invia un rapporto o una pubblicazione”.
+- “Invia un rapporto o una pubblicazione”;
+- video o altro materiale pertinente.
 
 La proposta entra sempre in una coda redazionale e **non viene mai pubblicata automaticamente**.
 
@@ -152,7 +156,7 @@ Chi collabora regolarmente può avere un account `contributore` per:
 
 La pubblicazione resta sotto controllo della redazione.
 
-### Ruoli interni iniziali
+### Ruoli interni
 
 - amministratore;
 - redattore;
@@ -168,7 +172,7 @@ Ogni contenuto pubblicato deve avere una provenienza chiara, un autore/responsab
 
 ## 11. Radar mondiale e Inbox redazionale
 
-Il progetto deve avere un sistema automatico di monitoraggio che raccolga periodicamente, idealmente ogni notte:
+Il progetto utilizza un sistema automatico di monitoraggio periodico per raccogliere:
 
 - notizie;
 - nuovi rapporti;
@@ -179,7 +183,7 @@ Il progetto deve avere un sistema automatico di monitoraggio che raccolga period
 - pubblicazioni istituzionali;
 - storie o segnali rilevanti.
 
-Le fonti iniziali includono, tra le altre, ISMU, PIM, EMN, Futurae e fonti istituzionali, statistiche e accademiche pertinenti in Italia e all'estero.
+Le fonti monitorate includono, tra le altre, ISMU, PIM, EMN, Futurae e fonti istituzionali, statistiche e accademiche pertinenti in Italia e all'estero.
 
 Il sistema **non pubblica automaticamente**. Inserisce record in una pagina privata autenticata, denominata **Inbox redazionale**, con almeno:
 
@@ -223,41 +227,53 @@ Il sito deve distinguere chiaramente una fonte primaria da un articolo che la co
 
 ## 13. Social e audiovisivo
 
-Canali istituzionali previsti:
+Canali istituzionali:
 
 - **LinkedIn** — ricerca, rapporti, partnership, contenuti istituzionali;
 - **X/Twitter** — notizie, dati, segnalazioni, aggiornamenti;
 - **YouTube** — interviste, testimonianze selezionate, convegni, presentazioni.
 
-Instagram non è parte della strategia iniziale.
+Instagram non rientra nei canali istituzionali del progetto.
 
 Il sito `immigratiimprenditori.it` resta la fonte originale e l'archivio autorevole. I social distribuiscono e rimandano al sito.
 
 ## 14. Sostegno economico
 
-È prevista una sezione discreta **“Sostieni l'Osservatorio”**.
+La sezione **“Sostieni il Centro Studi”** ha una presenza discreta. Nel sito pubblico il collegamento è collocato nel footer e non deve dominare la navigazione o la homepage.
 
 Non deve avere estetica o linguaggio aggressivo di raccolta fondi. Deve spiegare cosa viene sostenuto: ricerca, dati, interviste, rapporti, archivio e produzione audiovisiva.
 
-Canali potenziali di sostenibilità:
+Canali di sostenibilità compatibili con l'indipendenza editoriale possono includere:
 
-- donazioni;
+- sostegni economici;
 - rapporti e ricerche commissionate;
 - partnership;
 - progetti;
 - sponsorizzazioni compatibili con l'indipendenza editoriale.
 
-Le eventuali dichiarazioni fiscali su deducibilità/detraibilità saranno pubblicate solo dopo verifica della posizione giuridico-fiscale di AIPEL.
+**Modalità di pagamento, donazione o raccolta fondi non vengono mostrate nel sito finché non sono operative, verificate e amministrativamente pronte.** Non si pubblicano placeholder, messaggi “in arrivo” o descrizioni di funzioni non disponibili.
+
+Le dichiarazioni fiscali su deducibilità o detraibilità sono pubblicate soltanto quando risultano verificate e applicabili.
 
 ## 15. Forma editoriale e governance
 
-Nella fase iniziale Immigrati Imprenditori è **Osservatorio e Centro Studi di AIPEL**, non testata giornalistica registrata.
+Immigrati Imprenditori è il **Centro Studi di AIPEL**. L'Osservatorio è la sezione dedicata ai dati e alla metodologia. Il progetto non è una testata giornalistica registrata.
 
-AIPEL è l'ente promotore e proprietario del progetto. Il Presidente AIPEL svolge la direzione editoriale.
+AIPEL è l'ente promotore e titolare del progetto. Il Presidente AIPEL svolge la direzione editoriale.
 
-Nel footer e nelle pagine istituzionali saranno inseriti successivamente la denominazione completa di AIPEL, sede, dati fiscali, contatti e altri dati amministrativi.
+Le pagine HTML pubbliche utilizzano la sigla **AIPEL**. La denominazione completa e la sede non vengono esposte nelle pagine HTML finché non sono aggiornate e stabilizzate. Il codice fiscale **97342380157** e la PEC **direzione@pec.aipel.it** possono comparire nelle pagine legali in cui sono pertinenti, in particolare Privacy Policy e Termini di utilizzo.
 
-L'eventuale trasformazione futura in testata giornalistica sarà una decisione separata e non è necessaria per la v1.
+Matrice dei recapiti pubblici:
+
+- **info@immigratiimprenditori.it** — contatto generale del Centro Studi, Chi siamo e footer;
+- **direzione@immigratiimprenditori.it** — rapporti istituzionali, partnership e sostegno istituzionale;
+- **redazione@immigratiimprenditori.it** — storie, interviste, segnalazioni, fonti e richieste di correzione editoriale;
+- **info@aipel.it** — richieste privacy e informazioni istituzionali su AIPEL quando pertinenti;
+- **direzione@pec.aipel.it** — comunicazioni formali e PEC;
+- **termini@aipel.it** — richieste relative ai Termini di utilizzo;
+- **cookies@aipel.it** — richieste relative alla Cookie Policy.
+
+Gli indirizzi email vengono pubblicati in minuscolo e ogni collegamento `mailto:` deve corrispondere all'indirizzo mostrato.
 
 ## 16. Identità visiva
 
@@ -287,5 +303,9 @@ Obiettivo percettivo: **serietà, autorevolezza, chiarezza, indipendenza**.
 6. **Copertura globale, approfondimento selettivo.**
 7. **Correzioni e aggiornamenti devono essere tracciabili.**
 8. **La partecipazione è incoraggiata, ma la pubblicazione è sempre redazionalmente curata.**
+9. **Continuità istituzionale:** Immigrati Imprenditori è un progetto preesistente. Le pagine pubbliche non usano formule come “nasce”, “numero zero”, “fase iniziale”, “stiamo iniziando”, “in preparazione”, “prossimamente”, “quando sarà pronto” o equivalenti per presentare il progetto come nuovo.
+10. **Solo funzioni operative:** una funzione, un servizio, un canale di pagamento o un'attività viene descritta al pubblico solo quando esiste ed è utilizzabile; niente placeholder pubblici per funzioni non disponibili.
+11. **Terminologia stabile:** “Immigrati Imprenditori” è il progetto; “Centro Studi” è la struttura complessiva; “Osservatorio” è la sezione dati; “redazione” indica le persone responsabili dei contenuti.
+12. **Gate pubblicazione:** ogni modifica pubblica deve essere verificata anche per SEO, sicurezza, accessibilità e responsive su desktop, tablet e mobile, oltre che per coerenza editoriale e continuità istituzionale.
 
 `EDITORIAL_FOUNDATION = PASS`

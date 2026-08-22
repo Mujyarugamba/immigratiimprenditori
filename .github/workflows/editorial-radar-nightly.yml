@@ -1,0 +1,62 @@
+name: Editorial Radar Nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub cron is UTC. Running at both candidate UTC hours and checking
+    # Europe/Rome locally keeps the effective schedule at 00:05 across DST.
+    - cron: "5 22 * * *"
+    - cron: "5 23 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editorial-radar-nightly
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check Europe/Rome midnight window
+        id: local_time
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          elif [ "$(TZ=Europe/Rome date +%H:%M)" = "00:05" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.local_time.outputs.run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: steps.local_time.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.local_time.outputs.run == 'true'
+        run: npm ci
+
+      - name: Run core review-only radar
+        if: steps.local_time.outputs.run == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/external-data/radar-nightly.mjs
+
+      - name: Run EMN review-only radar
+        if: steps.local_time.outputs.run == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/external-data/radar-emn.mjs

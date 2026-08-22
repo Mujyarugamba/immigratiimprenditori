@@ -3,10 +3,15 @@ import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { signInEditorialAction } from "@/lib/auth/actions";
 import { getApplicationSession } from "@/lib/session/get-application-session";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Accesso redazione",
-  description: "Accesso riservato alla redazione del Centro Studi.",
+  title: "Accesso area riservata",
+  description: "Accesso riservato agli utenti autorizzati del Centro Studi.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 type PageProps = {
@@ -16,38 +21,45 @@ type PageProps = {
 const errorMessages: Record<string, string> = {
   missing: "Inserisci email e password.",
   credentials: "Credenziali non valide.",
-  account: "L’account redazionale non è ancora operativo.",
-  role: "Questo account non dispone di un ruolo redazionale.",
+  account: "L’account non è abilitato.",
+  role: "Questo account non dispone del ruolo richiesto per questa area.",
 };
 
 function safeNextPath(raw: string | undefined): string {
   const value = (raw ?? "").trim();
-  if (!value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
-    return "/app/redazione";
-  }
-  return value;
+  if (value === "/app/contributore" || value.startsWith("/app/contributore/")) return value;
+  if (value === "/app/redazione" || value.startsWith("/app/redazione/")) return value;
+  return "/app/redazione";
 }
 
 export default async function AccediPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const next = safeNextPath(params.next);
+  const contributorTarget = next.startsWith("/app/contributore");
   const session = await getApplicationSession();
 
-  if (session?.isActiveAccount && (session.isEditor || session.isApplicationAdmin)) {
-    redirect("/app/redazione");
+  if (session?.isActiveAccount) {
+    if (!contributorTarget && (session.isEditor || session.isApplicationAdmin)) {
+      redirect(next);
+    }
+    if (contributorTarget) {
+      const supabase = await createClient();
+      const { data: isContributor } = await supabase.rpc("access_is_contributor");
+      if (isContributor) redirect(next);
+    }
   }
 
   const errorMessage = params.error ? errorMessages[params.error] : null;
+  const title = contributorTarget ? "Accesso contributore" : "Accesso redazione";
+  const description = contributorTarget
+    ? "Area riservata ai contributori autorizzati del Centro Studi."
+    : "Area riservata ai redattori autorizzati del Centro Studi.";
 
   return (
     <Container className="py-12 sm:py-16">
       <div className="border-line bg-surface-elevated mx-auto max-w-md rounded-md border p-6 shadow-soft sm:p-8">
-        <h1 className="text-ink text-2xl font-semibold tracking-tight">
-          Accesso redazione
-        </h1>
-        <p className="text-ink-muted mt-2 text-sm">
-          Area riservata ai redattori autorizzati del Centro Studi.
-        </p>
+        <h1 className="text-ink text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="text-ink-muted mt-2 text-sm">{description}</p>
 
         {errorMessage ? (
           <p className="mt-4 rounded-md border px-3 py-2 text-sm" role="alert">
