@@ -8,6 +8,7 @@ import { enabledInstitutionalSocialChannels } from "@/lib/social/channels";
 import "./globals.css";
 import "./responsive-overrides.css";
 import "./editorial-identity.css";
+import "./accessibility.css";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
@@ -129,13 +130,15 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
         <a
-          href="#contenuto"
+          href="#contenuto-principale"
           className="fixed left-3 top-3 z-[100] -translate-y-24 border border-black bg-white px-4 py-2 text-sm font-semibold text-black shadow-none transition-transform focus:translate-y-0 focus:outline focus:outline-2 focus:outline-offset-2"
         >
           {skipLinkLabel}
         </a>
         <Header />
-        {children}
+        <div id="contenuto-principale" tabIndex={-1}>
+          {children}
+        </div>
         <Footer />
       </body>
     </html>
