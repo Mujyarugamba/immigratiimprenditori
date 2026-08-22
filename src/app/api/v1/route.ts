@@ -15,6 +15,7 @@ export async function GET() {
         atlas_countries: "/api/v1/atlas/countries",
         atlas_routes: "/api/v1/atlas/routes",
         research_context: "/api/v1/context?q=termine",
+        knowledge_graph: "/api/v1/graph",
       },
     },
     {
