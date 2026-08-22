@@ -125,6 +125,17 @@ async function main() {
       fail(`/rotte: unexpected redirect location ${location}`);
     }
 
+    const protectedLaunch = await fetch(`${ORIGIN}/app/redazione/lancio`, {
+      redirect: "manual",
+    });
+    if (![307, 308].includes(protectedLaunch.status)) {
+      fail(`/app/redazione/lancio: expected auth redirect, received ${protectedLaunch.status}`);
+    }
+    const protectedLaunchLocation = protectedLaunch.headers.get("location") ?? "";
+    if (!protectedLaunchLocation.includes("/accedi")) {
+      fail(`/app/redazione/lancio: unexpected auth redirect ${protectedLaunchLocation}`);
+    }
+
     console.log(JSON.stringify({
       ok: true,
       checks: [
@@ -136,6 +147,7 @@ async function main() {
         "primary sitemap",
         "contributor sitemap",
         "legacy route canonical redirect",
+        "protected number-zero editorial dashboard",
       ],
     }, null, 2));
   } finally {
