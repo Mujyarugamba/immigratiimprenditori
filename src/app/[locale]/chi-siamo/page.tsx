@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { languageAlternates } from "@/lib/i18n/seo";
 
 const sectionText = {
   en: {
@@ -61,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = CORE_MESSAGES[locale];
-  return { title: m.aboutTitle, description: m.aboutIntro, alternates: { canonical: `/${locale}/chi-siamo` } };
+  return { title: m.aboutTitle, description: m.aboutIntro, alternates: { canonical: `/${locale}/chi-siamo`, languages: languageAlternates("/chi-siamo") } };
 }
 
 export default async function LocalizedAboutPage({ params }: Props) {
