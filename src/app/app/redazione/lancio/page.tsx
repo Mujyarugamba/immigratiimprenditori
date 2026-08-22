@@ -1,11 +1,29 @@
 import Link from "next/link";
-import { getNumberZeroDashboard } from "@/lib/data/editorial/launch";
+import {
+  getNumberZeroDashboard,
+  INTERVIEW_WORKFLOW_STATUSES,
+} from "@/lib/data/editorial/launch";
 
 export const dynamic = "force-dynamic";
+
+const INTERVIEW_STATUS_LABELS: Record<(typeof INTERVIEW_WORKFLOW_STATUSES)[number], string> = {
+  candidate: "Candidato",
+  contacted: "Contattato",
+  scheduled: "Programmato",
+  interviewed: "Intervistato",
+  fact_check: "Fact-check",
+  approved: "Approvato",
+  declined: "Rifiutato",
+  closed: "Chiuso",
+};
 
 export default async function EditorialLaunchPage() {
   const dashboard = await getNumberZeroDashboard();
   const { readiness, snapshot } = dashboard;
+  const activeWorkflowCount = INTERVIEW_WORKFLOW_STATUSES.reduce(
+    (total, status) => total + dashboard.interviewWorkflowByStatus[status],
+    0,
+  );
 
   return (
     <main id="contenuto" className="space-y-8 pb-12">
@@ -104,7 +122,7 @@ export default async function EditorialLaunchPage() {
             </p>
           )}
           <p className="mt-4 text-xs text-neutral-600">
-            Pipeline: {snapshot.interviewCandidatesInResearch} proposte di intervista in ricerca.
+            Inbox: {snapshot.interviewCandidatesInResearch} proposte di intervista in ricerca.
           </p>
           <Link href="/app/redazione/inbox" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">
             Apri Inbox →
@@ -121,6 +139,33 @@ export default async function EditorialLaunchPage() {
             Apri eventi →
           </Link>
         </article>
+      </section>
+
+      <section aria-labelledby="pipeline-interviste" className="border-t border-black pt-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Produzione editoriale</p>
+            <h2 id="pipeline-interviste" className="mt-1 text-xl font-semibold text-black">
+              Pipeline delle interviste
+            </h2>
+          </div>
+          <p className="text-xs text-neutral-600">{activeWorkflowCount} workflow attivi/registrati</p>
+        </div>
+        <div className="mt-4 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-4">
+          {INTERVIEW_WORKFLOW_STATUSES.map((status) => (
+            <div key={status} className="bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.12em] text-neutral-500">
+                {INTERVIEW_STATUS_LABELS[status]}
+              </p>
+              <strong className="mt-2 block text-2xl text-black">
+                {dashboard.interviewWorkflowByStatus[status]}
+              </strong>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 max-w-3xl text-xs leading-5 text-neutral-600">
+          Le proposte presenti nella Inbox non entrano automaticamente in questa pipeline: il workflow nasce solo quando la redazione apre una vera bozza/intervista. Nessuno stato della pipeline equivale da solo a pubblicazione.
+        </p>
       </section>
 
       <section className="border-t border-black pt-6">
