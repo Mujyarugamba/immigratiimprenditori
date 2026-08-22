@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/open-data" },
 };
 
+const FILTERS = [
+  ["indicatore", "slug dell'indicatore", "imprese-straniere-registrate"],
+  ["territorio", "codice territorio", "IT-25"],
+  ["anno", "anno del periodo", "2025"],
+  ["settore", "ID numerico del settore canonico", "12"],
+  ["categoria", "codice del gruppo/categoria della fonte", "FB"],
+] as const;
+
 export default async function OpenDataPage() {
   const snapshot = await getExplorerSnapshot();
 
@@ -58,11 +66,42 @@ export default async function OpenDataPage() {
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Uso corretto</h2>
+        <h2 className="text-2xl font-semibold text-black">Filtri degli endpoint</h2>
+        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
+          JSON e CSV accettano gli stessi parametri. I filtri possono essere combinati e coincidono con quelli del Data Explorer.
+        </p>
+        <div className="mt-5 overflow-x-auto border border-black">
+          <table className="min-w-full border-collapse text-left text-sm">
+            <thead className="bg-neutral-100">
+              <tr>
+                <th className="border-b border-black px-4 py-3">Parametro</th>
+                <th className="border-b border-black px-4 py-3">Significato</th>
+                <th className="border-b border-black px-4 py-3">Esempio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {FILTERS.map(([name, meaning, example]) => (
+                <tr key={name} className="border-b border-neutral-300 last:border-b-0">
+                  <td className="px-4 py-3"><code>{name}</code></td>
+                  <td className="px-4 py-3">{meaning}</td>
+                  <td className="px-4 py-3"><code>{example}</code></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <code className="mt-5 block overflow-x-auto bg-neutral-50 p-4 text-sm">
+          /api/open-data/indicators.csv?indicatore=imprese-straniere-registrate&amp;territorio=IT-25&amp;anno=2025
+        </code>
+      </section>
+
+      <section className="mt-10 border-t border-black pt-8">
+        <h2 className="text-2xl font-semibold text-black">Uso corretto e condizioni di riuso</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
           Un valore non va separato dalla definizione dell&apos;indicatore. In particolare cittadinanza, luogo di nascita,
           impresa straniera e lavoro autonomo non sono categorie equivalenti. Prima di riutilizzare o confrontare i dati,
-          consulta la metodologia e la fonte originale.
+          consulta la metodologia e la fonte originale. Le condizioni di riuso e le licenze possono dipendere dalla fonte primaria:
+          la presenza nell&apos;endpoint del Centro Studi non sostituisce i termini della fonte originaria.
         </p>
         <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
           <Link href="/dati-e-fonti" className="underline underline-offset-4">Fonti e metodologia →</Link>
