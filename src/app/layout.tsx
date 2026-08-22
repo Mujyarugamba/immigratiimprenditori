@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { centroStudiConfig } from "@immigrati/product-config";
+import { PrivacyFriendlyAnalytics } from "@/components/analytics/PrivacyFriendlyAnalytics";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SkipLink } from "@/components/layout/SkipLink";
@@ -125,6 +126,7 @@ export default async function RootLayout({
           {children}
         </div>
         <Footer />
+        <PrivacyFriendlyAnalytics />
       </body>
     </html>
   );
