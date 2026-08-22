@@ -33,6 +33,19 @@ jobs:
       - name: Tests
         run: npm test
 
+      - name: Supabase Auth deprecation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(grep -R --line-number --include='*.sql' --fixed-strings 'auth.role()' \
+            supabase/baseline supabase/standalone-evolutions supabase/migrations || true)"
+          if [[ -n "$matches" ]]; then
+            echo "Deprecated auth.role() usage found in canonical Supabase SQL:"
+            echo "$matches"
+            exit 1
+          fi
+          echo "SUPABASE_AUTH_DEPRECATION_GUARD = PASS"
+
       - name: Next build
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co

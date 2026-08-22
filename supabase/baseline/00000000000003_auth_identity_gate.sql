@@ -45,7 +45,7 @@ AS $function$
 DECLARE
   v_account_id uuid;
 BEGIN
-  IF auth.role() IS DISTINCT FROM 'service_role' THEN
+  IF coalesce(auth.jwt()->>'role', '') <> 'service_role' THEN
     RAISE EXCEPTION 'not authorized' USING errcode = '42501';
   END IF;
   IF p_auth_user_id IS NULL THEN
@@ -80,7 +80,7 @@ SECURITY DEFINER
 SET search_path TO ''
 AS $function$
 DECLARE
-  v_is_svc boolean := (auth.role() is not distinct from 'service_role');
+  v_is_svc boolean := (coalesce(auth.jwt()->>'role', '') = 'service_role');
   v_is_adm boolean := public.access_is_application_admin();
   v_uid uuid := auth.uid();
   v_account public.accounts%rowtype;
@@ -162,7 +162,7 @@ SECURITY DEFINER
 SET search_path TO ''
 AS $function$
 DECLARE
-  v_is_svc boolean := (auth.role() is not distinct from 'service_role');
+  v_is_svc boolean := (coalesce(auth.jwt()->>'role', '') = 'service_role');
   v_is_adm boolean := public.access_is_application_admin();
   v_actor_account_id uuid := public.access_current_account_id();
   v_assignment_id uuid;
