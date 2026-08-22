@@ -192,13 +192,40 @@ test("core public pages reflow without horizontal overflow", async ({ page }) =>
     await page.setViewportSize({ width, height: 844 });
     for (const path of corePublicPages) {
       await page.goto(path);
-      const dimensions = await page.evaluate(() => ({
-        clientWidth: document.documentElement.clientWidth,
-        scrollWidth: document.documentElement.scrollWidth,
-      }));
+      const dimensions = await page.evaluate(() => {
+        const viewportWidth = document.documentElement.clientWidth;
+        const offenders = Array.from(document.querySelectorAll<HTMLElement>("body *"))
+          .map((element) => {
+            const rect = element.getBoundingClientRect();
+            return {
+              tag: element.tagName.toLowerCase(),
+              id: element.id,
+              classes: element.className?.toString().slice(0, 120) ?? "",
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+              scrollWidth: element.scrollWidth,
+              text: (element.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 80),
+            };
+          })
+          .filter(
+            (item) =>
+              item.right > viewportWidth + 1 ||
+              item.left < -1 ||
+              item.scrollWidth > item.width + 1,
+          )
+          .sort((a, b) => Math.max(b.right - viewportWidth, b.scrollWidth - b.width) - Math.max(a.right - viewportWidth, a.scrollWidth - a.width))
+          .slice(0, 12);
+
+        return {
+          clientWidth: viewportWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          offenders,
+        };
+      });
       expect(
         dimensions.scrollWidth,
-        `${path} overflows horizontally at ${width}px`,
+        `${path} overflows horizontally at ${width}px; offenders=${JSON.stringify(dimensions.offenders)}`,
       ).toBeLessThanOrEqual(dimensions.clientWidth + 1);
     }
   }
