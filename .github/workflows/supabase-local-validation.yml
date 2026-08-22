@@ -92,8 +92,8 @@ jobs:
           echo "Standalone cold-start chain:"
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort
 
-      - name: Replay standalone chain on a fresh local database
-        run: supabase db start
+      - name: Replay standalone chain and start fresh local Supabase stack
+        run: supabase start
 
       - name: Lint PostgreSQL functions and schema
         run: supabase db lint --level error --fail-on error
