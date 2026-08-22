@@ -88,6 +88,49 @@ begin
 end;
 $$;
 
+-- Atlas route evidence must survive a standalone cold start. The source row is
+-- provenance, while the 11 values are the exact official values already encoded
+-- for the first origin->Italy route perimeter.
+do $$
+declare
+  v_source_id uuid;
+  v_count bigint;
+begin
+  select id into v_source_id
+  from public.observatory_statistical_sources
+  where external_identifier = 'mlps:futurae:imprenditoria-straniera:2025h1'
+    and lifecycle_status = 'active';
+
+  if v_source_id is null then
+    raise exception 'GO_LIVE_ATLAS_FUTURAE_SOURCE_MISSING';
+  end if;
+
+  select count(*) into v_count
+  from public.observatory_indicator_values v
+  join public.observatory_indicators i on i.id = v.indicator_id
+  where i.code = 'OBS-IT-IND-FIRM-BIRTH-ATLAS'
+    and v.source_id = v_source_id
+    and v.status = 'final'
+    and v.territory_code = 'IT'
+    and v.country_code in ('MA','RO','CN','AL','BD','SN','DE','TN','IN','UA','FR')
+    and v.withdrawn_at is null;
+
+  if v_count <> 11 then
+    raise exception 'GO_LIVE_ATLAS_ROUTE_EVIDENCE_COUNT_FAILED: %', v_count;
+  end if;
+
+  select count(*) into v_count
+  from public.migration_routes r
+  where r.is_active
+    and r.destination_country_code = 'IT'
+    and r.origin_country_code in ('MA','RO','CN','AL','BD','SN','DE','TN','IN','UA','FR');
+
+  if v_count <> 11 then
+    raise exception 'GO_LIVE_ATLAS_ROUTE_COUNT_FAILED: %', v_count;
+  end if;
+end;
+$$;
+
 -- Private operational tables must never be directly readable by anon.
 do $$
 begin
