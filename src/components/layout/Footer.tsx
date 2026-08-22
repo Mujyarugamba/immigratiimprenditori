@@ -5,12 +5,14 @@ import { usePathname } from "next/navigation";
 import { localeFromPathname, localizedHref } from "@/lib/i18n/navigation";
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
 
 export function Footer() {
   const pathname = usePathname() || "/";
   const locale = localeFromPathname(pathname);
   const m = NAV_MESSAGES[locale];
   const core = CORE_MESSAGES[locale];
+  const collections = COLLECTION_MESSAGES[locale];
 
   return (
     <footer className="site-footer">
@@ -31,15 +33,17 @@ export function Footer() {
         <div>
           <h2>{m.footerResearch}</h2>
           <Link href={localizedHref(locale, "/osservatorio")}>{m.observatory}</Link>
-          <Link href="/esplora/dati">{core.dataExplorer}</Link>
-          <Link href="/esplora/territori">{core.territories}</Link>
-          <Link href="/esplora/settori">{core.sectors}</Link>
-          <Link href="/open-data">{m.openData}</Link>
+          <Link href={localizedHref(locale, "/esplora/dati")}>{core.dataExplorer}</Link>
+          <Link href={localizedHref(locale, "/esplora/territori")}>{core.territories}</Link>
+          <Link href={localizedHref(locale, "/esplora/settori")}>{core.sectors}</Link>
+          <Link href={localizedHref(locale, "/open-data")}>{m.openData}</Link>
         </div>
 
         <div>
           <h2>{m.footerCenter}</h2>
           <Link href={localizedHref(locale, "/contenuti")}>{m.analysis}</Link>
+          <Link href={localizedHref(locale, "/ricerca")}>{collections.researchTitle}</Link>
+          <Link href={localizedHref(locale, "/storie")}>{collections.storiesTitle}</Link>
           <Link href={localizedHref(locale, "/eventi")}>{m.events}</Link>
           <Link href={localizedHref(locale, "/contribuisci")}>{m.participate}</Link>
           <Link href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
@@ -49,8 +53,9 @@ export function Footer() {
 
         <div>
           <h2>{m.footerMethod}</h2>
+          <Link href={localizedHref(locale, "/fonti")}>{core.sources}</Link>
           <Link href="/dati-e-fonti">{m.sourcesMethod}</Link>
-          <Link href="/glossario">{m.glossary}</Link>
+          <Link href={localizedHref(locale, "/glossario")}>{m.glossary}</Link>
           <Link href="/politica-editoriale">{m.editorialPolicy}</Link>
           <Link href="/privacy">{m.privacy}</Link>
           <Link href="/cookie">{m.cookie}</Link>
