@@ -6,12 +6,12 @@ import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 
 const labels = {
-  en: { back: "Back to analysis", text: "Text", source: "Source", cite: "How to cite" },
-  fr: { back: "Retour aux analyses", text: "Texte", source: "Source", cite: "Comment citer" },
-  es: { back: "Volver a análisis", text: "Texto", source: "Fuente", cite: "Cómo citar" },
-  de: { back: "Zurück zu Analysen", text: "Text", source: "Quelle", cite: "Zitierempfehlung" },
-  ar: { back: "العودة إلى التحليلات", text: "النص", source: "المصدر", cite: "طريقة الاستشهاد" },
-  zh: { back: "返回分析", text: "正文", source: "来源", cite: "引用方式" },
+  en: { back: "Back to analysis", text: "Text", source: "Source", cite: "How to cite", open: "Open original source" },
+  fr: { back: "Retour aux analyses", text: "Texte", source: "Source", cite: "Comment citer", open: "Ouvrir la source originale" },
+  es: { back: "Volver a análisis", text: "Texto", source: "Fuente", cite: "Cómo citar", open: "Abrir fuente original" },
+  de: { back: "Zurück zu Analysen", text: "Text", source: "Quelle", cite: "Zitierempfehlung", open: "Originalquelle öffnen" },
+  ar: { back: "العودة إلى التحليلات", text: "النص", source: "المصدر", cite: "طريقة الاستشهاد", open: "فتح المصدر الأصلي" },
+  zh: { back: "返回分析", text: "正文", source: "来源", cite: "引用方式", open: "打开原始来源" },
 } as const;
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -24,7 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: content.title,
     description: content.abstract ?? undefined,
-    alternates: { canonical: `/${locale}/contenuti/${content.slug}` },
+    alternates: { canonical: `/contenuti/${content.slug}` },
+    robots: { index: false, follow: true },
   };
 }
 
@@ -60,7 +61,7 @@ export default async function LocalizedContentPage({ params }: Props) {
       {content.source_url ? (
         <section className="mt-8 border-t border-black pt-6">
           <h2 className="text-xl font-semibold text-black">{l.source}</h2>
-          <a href={content.source_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-semibold underline underline-offset-4">Open ↗</a>
+          <a href={content.source_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-semibold underline underline-offset-4">{l.open} ↗</a>
         </section>
       ) : null}
 
