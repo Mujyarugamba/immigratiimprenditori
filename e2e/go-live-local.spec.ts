@@ -33,9 +33,24 @@ test.describe("Go-live local surfaces", () => {
     ).toBeGreaterThan(0);
 
     await page.goto("/storie");
+    const storyCount = await page.locator('article a[href^="/contenuti/"]').count();
+    const publishedTypeSummary = psql(`
+      select type_code || ':' || count(*)::text
+      from public.contents
+      where editorial_status = 'ready'
+        and publication_status = 'published'
+        and visibility_status = 'public'
+        and archived_at is null
+      group by type_code
+      order by type_code;
+    `)
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.includes(":"))
+      .join(", ");
     expect(
-      await page.locator('article a[href^="/contenuti/"]').count(),
-      "Stories must expose at least one published navigable story, interview or testimony",
+      storyCount,
+      `Stories must expose at least one published navigable story, interview or testimony; published-types=${publishedTypeSummary || "none"}`,
     ).toBeGreaterThan(0);
     await expect(page.getByRole("link", { name: /Partecipa/i })).toBeVisible();
   });
