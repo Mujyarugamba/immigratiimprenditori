@@ -162,9 +162,21 @@ async function challengeAndVerify(
     });
     if (verify.error) throw verify.error;
 
-    // verify() promotes the current session and @supabase/ssr persists the new
-    // AAL2 access/refresh tokens through this Server Action's response cookies.
-    return { ok: true, state: await readStateFromClient(supabase) };
+    // Supabase promotes the current session to AAL2 after successful MFA and
+    // refreshes it internally. Refresh once more inside this Server Action so
+    // @supabase/ssr deterministically writes the promoted access/refresh pair to
+    // the response cookies before the browser performs a full navigation.
+    const refreshed = await supabase.auth.refreshSession();
+    if (refreshed.error || !refreshed.data.session) {
+      throw refreshed.error ?? new Error("MFA_AAL2_SESSION_REFRESH_FAILED");
+    }
+
+    const state = await readStateFromClient(supabase);
+    if (state.currentLevel !== "aal2") {
+      throw new Error("MFA_AAL2_NOT_PERSISTED");
+    }
+
+    return { ok: true, state };
   } catch (cause) {
     logMfaFailure("verify", cause);
     return { ok: false, error: publicFailure("Codice TOTP non valido o scaduto.") };
