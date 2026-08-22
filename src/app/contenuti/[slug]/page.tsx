@@ -83,7 +83,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
   const authorNames = content.authors.map((author) => author.display_label).filter(Boolean) as string[];
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": ["report", "research_report", "policy_brief"].includes(content.type_code) ? "Report" : "Article",
+    "@type": ["report", "research_report", "policy_brief", "working_paper", "dossier"].includes(content.type_code) ? "Report" : "Article",
     headline: content.title,
     description: content.abstract ?? undefined,
     datePublished: content.published_at ?? undefined,
@@ -165,9 +165,14 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
           <p className="border-line bg-surface-elevated rounded-md border p-4 text-sm leading-6 text-neutral-700">
             {citationText(content)}
           </p>
-          <a href={`/contenuti/${content.slug}/citation.bib`} className="inline-block text-sm font-semibold underline underline-offset-4">
-            Scarica BibTeX →
-          </a>
+          <div className="flex flex-wrap gap-4 text-sm font-semibold">
+            <a href={`/contenuti/${content.slug}/citation.bib`} className="underline underline-offset-4">
+              Scarica BibTeX →
+            </a>
+            <a href={`/contenuti/${content.slug}/citation.ris`} className="underline underline-offset-4">
+              Scarica RIS →
+            </a>
+          </div>
         </section>
 
         <RelatedLinks groups={related} />
