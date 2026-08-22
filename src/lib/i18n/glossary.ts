@@ -1,0 +1,147 @@
+import type { PlatformLocale } from "@/lib/i18n/config";
+
+export type GlossaryEntry = { term: string; text: string };
+export type GlossaryMessages = {
+  kicker: string;
+  title: string;
+  intro: string;
+  note: string;
+  methodologyLink: string;
+  entries: readonly GlossaryEntry[];
+};
+
+export const GLOSSARY_MESSAGES: Record<PlatformLocale, GlossaryMessages> = {
+  it: {
+    kicker: "Fonti e metodologia",
+    title: "Glossario",
+    intro: "Termini simili possono misurare fenomeni diversi. Il glossario aiuta a mantenere separati concetti editoriali, categorie statistiche e definizioni adottate dalle singole fonti.",
+    note: "Le definizioni specifiche indicate nelle singole schede dell'Osservatorio prevalgono sulle sintesi generali del glossario.",
+    methodologyLink: "Leggi Fonti e metodologia",
+    entries: [
+      { term: "Imprenditore migrante", text: "Espressione editoriale generale usata dal Centro Studi per descrivere una persona che svolge attività imprenditoriale in relazione a un percorso migratorio. Non coincide automaticamente con una categoria statistica ufficiale." },
+      { term: "Impresa straniera", text: "Categoria utilizzata da fonti camerali secondo proprie regole di classificazione. Misura imprese, non persone, e non va usata come sinonimo di imprenditore migrante." },
+      { term: "Lavoratore autonomo", text: "Categoria statistica riferita a persone occupate in una determinata condizione professionale. Non equivale al numero di imprese registrate." },
+      { term: "Cittadino straniero", text: "Persona classificata in base alla cittadinanza. La cittadinanza è distinta dal luogo di nascita e non consente, da sola, di ricostruire un percorso migratorio individuale." },
+      { term: "Persona nata all'estero", text: "Persona classificata in base al luogo di nascita. È una variabile diversa dalla cittadinanza e può includere cittadini del Paese di residenza." },
+      { term: "Paese di origine", text: "Nel modello editoriale indica il Paese di partenza o di origine rilevante per la storia, la ricerca o la rotta analizzata. Il significato preciso dipende dalla fonte o dal contenuto." },
+      { term: "Paese di destinazione", text: "Paese nel quale la persona o l'attività economica opera nel contesto della rotta considerata. L'Italia non è assunta come destinazione obbligatoria." },
+      { term: "Rotta imprenditoriale", text: "Relazione analitica origine → destinazione utilizzata dal Centro Studi per collegare dati, storie, ricerche ed eventi tra due Paesi o territori." },
+      { term: "Elaborazione del Centro Studi", text: "Trasformazione documentata di un valore di fonte, per esempio una conversione di unità. Deve restare distinguibile dal valore direttamente pubblicato dalla fonte originale." },
+      { term: "Fonte primaria", text: "Fonte che produce o pubblica originariamente il dato, il documento o l'informazione utilizzata. Una fonte secondaria che commenta il dato non viene presentata come fonte primaria." },
+    ],
+  },
+  en: {
+    kicker: "Sources & methodology",
+    title: "Glossary",
+    intro: "Similar terms can measure different phenomena. The glossary keeps editorial concepts, statistical categories and source-specific definitions distinct.",
+    note: "Specific definitions stated on individual Observatory indicator pages take precedence over the glossary's general summaries.",
+    methodologyLink: "Read Sources & methodology",
+    entries: [
+      { term: "Migrant entrepreneur", text: "A general editorial term used by the Research Centre for a person engaged in entrepreneurship in connection with a migration experience. It does not automatically correspond to an official statistical category." },
+      { term: "Foreign enterprise", text: "A category used by business-register or chamber sources under their own classification rules. It measures enterprises, not people, and is not a synonym for migrant entrepreneur." },
+      { term: "Self-employed person", text: "A statistical category referring to people in a specific employment status. It is not equivalent to the number of registered enterprises." },
+      { term: "Foreign citizen", text: "A person classified by citizenship. Citizenship differs from place of birth and, by itself, does not reconstruct an individual's migration history." },
+      { term: "Foreign-born person", text: "A person classified by place of birth. This variable differs from citizenship and may include citizens of the country of residence." },
+      { term: "Country of origin", text: "In the editorial model, the country of departure or origin relevant to the story, research or route being analysed. Its precise meaning depends on the source or content." },
+      { term: "Country of destination", text: "The country in which the person or economic activity operates within the route being considered. Italy is not assumed to be the mandatory destination." },
+      { term: "Entrepreneurial migration route", text: "An origin → destination analytical relationship used by the Research Centre to connect data, stories, research and events between two countries or territories." },
+      { term: "Research Centre processing", text: "A documented transformation of a source value, such as a unit conversion. It must remain distinguishable from the value published directly by the original source." },
+      { term: "Primary source", text: "A source that originally produces or publishes the data, document or information used. A secondary source commenting on the data is not presented as the primary source." },
+    ],
+  },
+  fr: {
+    kicker: "Sources et méthodologie",
+    title: "Glossaire",
+    intro: "Des termes proches peuvent mesurer des phénomènes différents. Le glossaire distingue les concepts éditoriaux, les catégories statistiques et les définitions propres aux sources.",
+    note: "Les définitions spécifiques indiquées dans les fiches de l'Observatoire prévalent sur les synthèses générales du glossaire.",
+    methodologyLink: "Lire Sources et méthodologie",
+    entries: [
+      { term: "Entrepreneur migrant", text: "Expression éditoriale générale utilisée par le Centre d'études pour désigner une personne exerçant une activité entrepreneuriale en lien avec une expérience migratoire. Elle ne correspond pas automatiquement à une catégorie statistique officielle." },
+      { term: "Entreprise étrangère", text: "Catégorie utilisée par des sources consulaires ou des registres d'entreprises selon leurs propres règles de classement. Elle mesure des entreprises, non des personnes, et n'est pas synonyme d'entrepreneur migrant." },
+      { term: "Travailleur indépendant", text: "Catégorie statistique concernant des personnes ayant un statut professionnel déterminé. Elle n'équivaut pas au nombre d'entreprises enregistrées." },
+      { term: "Citoyen étranger", text: "Personne classée selon sa citoyenneté. La citoyenneté est distincte du lieu de naissance et ne permet pas, à elle seule, de reconstituer un parcours migratoire individuel." },
+      { term: "Personne née à l'étranger", text: "Personne classée selon son lieu de naissance. Cette variable diffère de la citoyenneté et peut inclure des citoyens du pays de résidence." },
+      { term: "Pays d'origine", text: "Dans le modèle éditorial, pays de départ ou d'origine pertinent pour l'histoire, la recherche ou la route analysée. Le sens précis dépend de la source ou du contenu." },
+      { term: "Pays de destination", text: "Pays dans lequel la personne ou l'activité économique opère dans le cadre de la route considérée. L'Italie n'est pas supposée être la destination obligatoire." },
+      { term: "Route entrepreneuriale migratoire", text: "Relation analytique origine → destination utilisée par le Centre d'études pour relier données, histoires, recherches et événements entre deux pays ou territoires." },
+      { term: "Traitement du Centre d'études", text: "Transformation documentée d'une valeur de source, par exemple une conversion d'unité. Elle doit rester distincte de la valeur publiée directement par la source originale." },
+      { term: "Source primaire", text: "Source qui produit ou publie initialement la donnée, le document ou l'information utilisée. Une source secondaire qui commente la donnée n'est pas présentée comme source primaire." },
+    ],
+  },
+  es: {
+    kicker: "Fuentes y metodología",
+    title: "Glosario",
+    intro: "Términos parecidos pueden medir fenómenos distintos. El glosario mantiene separados los conceptos editoriales, las categorías estadísticas y las definiciones propias de cada fuente.",
+    note: "Las definiciones específicas indicadas en las fichas del Observatorio prevalecen sobre los resúmenes generales del glosario.",
+    methodologyLink: "Leer Fuentes y metodología",
+    entries: [
+      { term: "Emprendedor migrante", text: "Expresión editorial general utilizada por el Centro de Estudios para describir a una persona que desarrolla una actividad empresarial vinculada a una experiencia migratoria. No coincide automáticamente con una categoría estadística oficial." },
+      { term: "Empresa extranjera", text: "Categoría utilizada por registros empresariales o cámaras según sus propias reglas de clasificación. Mide empresas, no personas, y no debe usarse como sinónimo de emprendedor migrante." },
+      { term: "Trabajador autónomo", text: "Categoría estadística referida a personas ocupadas con una determinada situación profesional. No equivale al número de empresas registradas." },
+      { term: "Ciudadano extranjero", text: "Persona clasificada por ciudadanía. La ciudadanía es distinta del lugar de nacimiento y, por sí sola, no permite reconstruir una trayectoria migratoria individual." },
+      { term: "Persona nacida en el extranjero", text: "Persona clasificada por lugar de nacimiento. Es una variable distinta de la ciudadanía y puede incluir ciudadanos del país de residencia." },
+      { term: "País de origen", text: "En el modelo editorial, país de partida u origen relevante para la historia, investigación o ruta analizada. Su significado preciso depende de la fuente o del contenido." },
+      { term: "País de destino", text: "País en el que la persona o la actividad económica opera dentro de la ruta considerada. Italia no se asume como destino obligatorio." },
+      { term: "Ruta empresarial migratoria", text: "Relación analítica origen → destino utilizada por el Centro de Estudios para conectar datos, historias, investigaciones y eventos entre dos países o territorios." },
+      { term: "Elaboración del Centro de Estudios", text: "Transformación documentada de un valor de fuente, por ejemplo una conversión de unidades. Debe seguir siendo distinguible del valor publicado directamente por la fuente original." },
+      { term: "Fuente primaria", text: "Fuente que produce o publica originalmente el dato, documento o información utilizada. Una fuente secundaria que comenta el dato no se presenta como fuente primaria." },
+    ],
+  },
+  de: {
+    kicker: "Quellen & Methodik",
+    title: "Glossar",
+    intro: "Ähnliche Begriffe können unterschiedliche Phänomene messen. Das Glossar trennt redaktionelle Konzepte, statistische Kategorien und quellspezifische Definitionen.",
+    note: "Spezifische Definitionen auf einzelnen Indikatorseiten des Observatoriums haben Vorrang vor den allgemeinen Zusammenfassungen des Glossars.",
+    methodologyLink: "Quellen & Methodik lesen",
+    entries: [
+      { term: "Migrantischer Unternehmer", text: "Allgemeiner redaktioneller Begriff des Studienzentrums für eine Person, die im Zusammenhang mit einer Migrationserfahrung unternehmerisch tätig ist. Er entspricht nicht automatisch einer amtlichen statistischen Kategorie." },
+      { term: "Ausländisches Unternehmen", text: "Kategorie, die von Unternehmensregistern oder Kammern nach eigenen Klassifikationsregeln verwendet wird. Sie misst Unternehmen, nicht Personen, und ist kein Synonym für migrantischer Unternehmer." },
+      { term: "Selbstständige Person", text: "Statistische Kategorie für Personen mit einem bestimmten Erwerbsstatus. Sie entspricht nicht der Zahl registrierter Unternehmen." },
+      { term: "Ausländischer Staatsangehöriger", text: "Person, die nach Staatsangehörigkeit klassifiziert wird. Staatsangehörigkeit und Geburtsort sind unterschiedliche Merkmale; die Staatsangehörigkeit allein bildet keine individuelle Migrationsgeschichte ab." },
+      { term: "Im Ausland geborene Person", text: "Person, die nach Geburtsort klassifiziert wird. Dieses Merkmal unterscheidet sich von der Staatsangehörigkeit und kann Staatsangehörige des Wohnsitzlandes umfassen." },
+      { term: "Herkunftsland", text: "Im redaktionellen Modell das Ausgangs- oder Herkunftsland, das für die analysierte Geschichte, Forschung oder Route relevant ist. Die genaue Bedeutung hängt von Quelle oder Inhalt ab." },
+      { term: "Zielland", text: "Land, in dem die Person oder wirtschaftliche Tätigkeit im Rahmen der betrachteten Route tätig ist. Italien wird nicht als zwingendes Zielland vorausgesetzt." },
+      { term: "Unternehmerische Migrationsroute", text: "Analytische Beziehung Herkunft → Ziel, mit der das Studienzentrum Daten, Geschichten, Forschung und Veranstaltungen zwischen zwei Ländern oder Regionen verknüpft." },
+      { term: "Aufbereitung des Studienzentrums", text: "Dokumentierte Transformation eines Quellenwerts, etwa eine Einheitenumrechnung. Sie muss vom direkt durch die Originalquelle veröffentlichten Wert unterscheidbar bleiben." },
+      { term: "Primärquelle", text: "Quelle, die die verwendeten Daten, Dokumente oder Informationen ursprünglich erzeugt oder veröffentlicht. Eine Sekundärquelle, die Daten kommentiert, wird nicht als Primärquelle dargestellt." },
+    ],
+  },
+  ar: {
+    kicker: "المصادر والمنهجية",
+    title: "المعجم",
+    intro: "قد تقيس المصطلحات المتشابهة ظواهر مختلفة. يساعد المعجم على الفصل بين المفاهيم التحريرية والفئات الإحصائية والتعريفات الخاصة بكل مصدر.",
+    note: "تتقدم التعريفات المحددة الواردة في صفحات مؤشرات المرصد على الملخصات العامة في المعجم.",
+    methodologyLink: "اقرأ المصادر والمنهجية",
+    entries: [
+      { term: "رائد أعمال مهاجر", text: "تعبير تحريري عام يستخدمه مركز الدراسات لوصف شخص يمارس نشاطاً ريادياً مرتبطاً بتجربة هجرة. ولا يطابق تلقائياً فئة إحصائية رسمية." },
+      { term: "منشأة أجنبية", text: "فئة تستخدمها سجلات الأعمال أو الغرف وفق قواعد التصنيف الخاصة بها. وهي تقيس المنشآت لا الأشخاص، ولا تُستخدم مرادفاً لرائد الأعمال المهاجر." },
+      { term: "عامل لحسابه الخاص", text: "فئة إحصائية تشير إلى أشخاص يعملون ضمن وضع مهني محدد. ولا تعادل عدد المنشآت المسجلة." },
+      { term: "مواطن أجنبي", text: "شخص مصنف وفق الجنسية. تختلف الجنسية عن مكان الميلاد، ولا تكفي وحدها لإعادة بناء مسار هجرة فردي." },
+      { term: "شخص مولود في الخارج", text: "شخص مصنف وفق مكان الميلاد. وهو متغير مختلف عن الجنسية وقد يشمل مواطنين في بلد الإقامة." },
+      { term: "بلد المنشأ", text: "في النموذج التحريري، بلد الانطلاق أو المنشأ ذي الصلة بالقصة أو البحث أو المسار محل التحليل. ويتوقف المعنى الدقيق على المصدر أو المحتوى." },
+      { term: "بلد الوجهة", text: "البلد الذي يعمل فيه الشخص أو النشاط الاقتصادي ضمن المسار المدروس. ولا تُفترض إيطاليا وجهة إلزامية." },
+      { term: "مسار ريادة الأعمال المهاجرة", text: "علاقة تحليلية منشأ → وجهة يستخدمها مركز الدراسات لربط البيانات والقصص والأبحاث والفعاليات بين بلدين أو إقليمين." },
+      { term: "معالجة مركز الدراسات", text: "تحويل موثق لقيمة مصدر، مثل تحويل وحدة القياس. ويجب أن تبقى متميزة عن القيمة المنشورة مباشرة من المصدر الأصلي." },
+      { term: "مصدر أولي", text: "المصدر الذي ينتج أو ينشر أصلاً البيانات أو الوثيقة أو المعلومة المستخدمة. ولا يُعرض المصدر الثانوي الذي يعلق على البيانات باعتباره المصدر الأولي." },
+    ],
+  },
+  zh: {
+    kicker: "来源与方法",
+    title: "术语表",
+    intro: "相似术语可能衡量不同现象。本术语表用于区分编辑概念、统计类别以及各来源采用的具体定义。",
+    note: "观察站各指标页面中的具体定义优先于本术语表中的一般性概述。",
+    methodologyLink: "阅读来源与方法",
+    entries: [
+      { term: "移民企业家", text: "研究中心使用的一般编辑性表述，指与迁移经历相关并从事创业活动的人。它并不自动对应某一官方统计类别。" },
+      { term: "外资/外国企业", text: "企业登记或商会来源依据自身分类规则使用的类别。它衡量的是企业而非个人，不应作为“移民企业家”的同义词。" },
+      { term: "自雇人员", text: "指处于特定就业身份的个人的统计类别，并不等同于已登记企业数量。" },
+      { term: "外国公民", text: "按国籍分类的人。国籍与出生地不同，仅凭国籍无法重建个人迁移经历。" },
+      { term: "境外出生人口", text: "按出生地分类的人。这一变量不同于国籍，并可能包括居住国本国公民。" },
+      { term: "原籍国", text: "在编辑模型中，指与所分析的故事、研究或迁移路线相关的出发国或原籍国。具体含义取决于来源或内容。" },
+      { term: "目的国", text: "在所研究路线中，个人或经济活动实际开展的国家。研究中心并不默认意大利必须是目的国。" },
+      { term: "创业迁移路线", text: "研究中心用于连接两个国家或地区之间的数据、故事、研究和活动的“原籍 → 目的地”分析关系。" },
+      { term: "研究中心处理", text: "对来源数值进行有记录的转换，例如单位换算。必须能够与原始来源直接发布的数值区分。" },
+      { term: "第一手来源", text: "最初产生或发布所使用数据、文件或信息的来源。对数据进行评论的第二手来源不会被标示为第一手来源。" },
+    ],
+  },
+};
