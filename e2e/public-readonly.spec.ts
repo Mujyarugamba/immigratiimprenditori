@@ -1,6 +1,15 @@
 import { expect, test } from "@playwright/test";
 
 const corePublicPages = ["/", "/contribuisci", "/sostieni"] as const;
+const localizedHomes = [
+  ["it", "/", "ltr"],
+  ["en", "/en", "ltr"],
+  ["fr", "/fr", "ltr"],
+  ["es", "/es", "ltr"],
+  ["de", "/de", "ltr"],
+  ["ar", "/ar", "rtl"],
+  ["zh", "/zh", "ltr"],
+] as const;
 
 test("homepage renders the institutional editorial surface", async ({ page }) => {
   await page.goto("/");
@@ -45,18 +54,69 @@ test("support page remains fail-closed while online payments are disabled", asyn
   await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
 });
 
-test("localized shells expose correct document and content directions", async ({ page }) => {
+test("all seven platform languages expose the correct document direction", async ({ page }) => {
+  for (const [locale, path, direction] of localizedHomes) {
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    expect(response?.ok(), `${locale} home did not return 2xx`).toBeTruthy();
+    await expect(page.locator("html")).toHaveAttribute("lang", locale);
+    await expect(page.locator("html")).toHaveAttribute("dir", direction);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+
+    if (locale !== "it") {
+      await expect(page.locator(`[data-platform-locale="${locale}"]`)).toHaveAttribute(
+        "dir",
+        direction,
+      );
+    }
+  }
+
   await page.goto("/en");
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
-  await expect(page.locator('[data-platform-locale="en"]')).toHaveAttribute("dir", "ltr");
-  await expect(page.getByRole("link", { name: "Skip to content", exact: true })).toHaveAttribute("href", "#contenuto-principale");
+  await expect(page.getByRole("link", { name: "Skip to content", exact: true })).toHaveAttribute(
+    "href",
+    "#contenuto-principale",
+  );
 
   await page.goto("/ar");
-  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
-  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.locator('[data-platform-locale="ar"]')).toHaveAttribute("dir", "rtl");
-  await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى", exact: true })).toHaveAttribute("href", "#contenuto-principale");
+  await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى", exact: true })).toHaveAttribute(
+    "href",
+    "#contenuto-principale",
+  );
+});
+
+test("localized homes publish canonical and hreflang metadata", async ({ page }) => {
+  for (const [locale, path] of localizedHomes.filter(([locale]) => locale !== "it")) {
+    await page.goto(path);
+
+    const canonical = page.locator('link[rel="canonical"]');
+    await expect(canonical).toHaveCount(1);
+    await expect(canonical).toHaveAttribute("href", new RegExp(`/${locale}/?$`));
+
+    const currentAlternate = page.locator(`link[rel="alternate"][hreflang="${locale}"]`);
+    const italianAlternate = page.locator('link[rel="alternate"][hreflang="it"]');
+    await expect(currentAlternate).toHaveCount(1);
+    await expect(italianAlternate).toHaveCount(1);
+  }
+});
+
+test("Arabic RTL remains usable across core localized pages", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const path of ["/ar", "/ar/chi-siamo", "/ar/esplora"]) {
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.locator('[data-platform-locale="ar"]')).toHaveAttribute("dir", "rtl");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+
+    const dimensions = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(
+      dimensions.scrollWidth,
+      `${path} overflows horizontally in RTL mobile view`,
+    ).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+  }
 });
 
 test("core public pages do not overflow mobile or tablet viewports", async ({ page }) => {
