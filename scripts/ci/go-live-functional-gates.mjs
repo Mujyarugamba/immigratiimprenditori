@@ -88,6 +88,17 @@ includes("supabase/migrations/20260822211500_fix_public_rls_mfa_compatibility.sq
   "using (is_public)",
   "revoke all on function public.access_is_editor() from anon",
 ]);
+includes("supabase/migrations/20260822212000_backfill_futurae_route_evidence.sql", [
+  "mlps:futurae:imprenditoria-straniera:2025h1",
+  "OBS-IT-IND-FIRM-BIRTH-ATLAS",
+  "56642::numeric",
+  "5515::numeric",
+]);
+includes("scripts/ci/go-live-db-smoke.sql", [
+  "GO_LIVE_ATLAS_FUTURAE_SOURCE_MISSING",
+  "GO_LIVE_ATLAS_ROUTE_EVIDENCE_COUNT_FAILED",
+  "GO_LIVE_ATLAS_ROUTE_COUNT_FAILED",
+]);
 
 includes(".github/workflows/production-backup.yml", [
   "postgres:17-alpine",
@@ -101,7 +112,6 @@ includes(".github/workflows/production-backup.yml", [
 
 file("docs/security/BACKUP-RECOVERY.md");
 file("scripts/ci/backup-archive-smoke.sh");
-file("scripts/ci/go-live-db-smoke.sql");
 file("e2e/go-live-local.spec.ts");
 file("e2e/public-readonly.spec.ts");
 file("e2e/public-smoke.spec.ts");
@@ -139,7 +149,12 @@ includes("src/app/api/analytics/page-view/route.ts", [
 
 // Accessibility, language, international SEO and RTL are enforced by browser gates.
 file("src/app/accessibility.css");
-file("src/app/responsive-overrides.css");
+includes("src/components/public/PublicListLayout.tsx", ["<main>", "</main>"]);
+includes("src/app/responsive-overrides.css", [
+  "grid-template-columns: minmax(0, 1fr) auto",
+  "width: min(170px, 100%)",
+  "white-space: nowrap",
+]);
 includes("e2e/public-readonly.spec.ts", [
   "automated accessibility structure gate",
   "all seven platform languages",
@@ -154,6 +169,7 @@ includes("e2e/public-readonly.spec.ts", [
 includes("e2e/go-live-local.spec.ts", [
   "Atlas must expose at least one navigable evidence-backed country",
   "Routes must expose at least one navigable evidence-backed origin-destination route",
+  "Stories must expose at least one published navigable story, interview or testimony",
   "Open Data exposes a valid XLSX archive",
   "privacy analytics endpoint aggregates a page view without cookies",
   "simulated high-latency delivery",
