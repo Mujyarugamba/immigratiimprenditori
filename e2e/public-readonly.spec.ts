@@ -80,8 +80,10 @@ test("institutional and language navigation remains reachable on mobile", async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Cerca", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Chi siamo", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Accedi", exact: true })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Lingua", exact: true })).toBeVisible();
+  const institutionalNav = page.getByRole("navigation", { name: "Institutional links" });
+  await expect(institutionalNav).toBeVisible();
+  await expect(institutionalNav.getByRole("link", { name: "Cerca", exact: true })).toBeVisible();
+  await expect(institutionalNav.getByRole("link", { name: "Chi siamo", exact: true })).toBeVisible();
+  await expect(institutionalNav.getByRole("link", { name: "Accedi", exact: true })).toBeVisible();
+  await expect(institutionalNav.getByRole("combobox", { name: "Lingua", exact: true })).toBeVisible();
 });
