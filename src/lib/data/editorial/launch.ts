@@ -12,6 +12,17 @@ const STORY_VOICE_TYPES = [
   "testimony",
 ] as const;
 
+export const INTERVIEW_WORKFLOW_STATUSES = [
+  "candidate",
+  "contacted",
+  "scheduled",
+  "interviewed",
+  "fact_check",
+  "approved",
+  "declined",
+  "closed",
+] as const;
+
 const ITALY_TERRITORY_CODES = new Set(["IT", "ITA"]);
 const AGGREGATE_TERRITORY_CODES = new Set(["OECD37", "OECD"]);
 
@@ -23,6 +34,7 @@ export type NumberZeroDashboard = {
   storyVoiceTitles: string[];
   eventTitles: string[];
   internationalTerritories: string[];
+  interviewWorkflowByStatus: Record<(typeof INTERVIEW_WORKFLOW_STATUSES)[number], number>;
   errors: string[];
 };
 
@@ -54,52 +66,70 @@ function strongestInternationalComparison(
   return strongest;
 }
 
+function emptyInterviewWorkflowCounts() {
+  return Object.fromEntries(
+    INTERVIEW_WORKFLOW_STATUSES.map((status) => [status, 0]),
+  ) as Record<(typeof INTERVIEW_WORKFLOW_STATUSES)[number], number>;
+}
+
 export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
   const supabase = await createClient();
   const errors: string[] = [];
 
-  const [indicatorsResult, reportsResult, storiesResult, eventsResult, interviewResult] =
-    await Promise.all([
-      supabase
-        .from("observatory_indicators")
-        .select("id")
-        .eq("publication_status", "published")
-        .in("operational_status", ["active", "deprecated"]),
-      supabase
-        .from("contents")
-        .select("id, title", { count: "exact" })
-        .eq("editorial_status", "ready")
-        .eq("publication_status", "published")
-        .eq("visibility_status", "public")
-        .is("archived_at", null)
-        .eq("type_code", "research_report"),
-      supabase
-        .from("contents")
-        .select("id, title", { count: "exact" })
-        .eq("editorial_status", "ready")
-        .eq("publication_status", "published")
-        .eq("visibility_status", "public")
-        .is("archived_at", null)
-        .in("type_code", [...STORY_VOICE_TYPES]),
-      supabase
-        .from("events")
-        .select("id, title", { count: "exact" })
-        .eq("editorial_status", "ready")
-        .eq("publication_status", "published")
-        .eq("visibility_status", "public")
-        .is("archived_at", null),
-      supabase
-        .from("editorial_inbox_items")
-        .select("id", { count: "exact", head: true })
-        .eq("item_kind", "interview_proposal")
-        .eq("status", "needs_research"),
-    ]);
+  const [
+    indicatorsResult,
+    reportsResult,
+    storiesResult,
+    eventsResult,
+    interviewResult,
+    interviewWorkflowResult,
+  ] = await Promise.all([
+    supabase
+      .from("observatory_indicators")
+      .select("id")
+      .eq("publication_status", "published")
+      .in("operational_status", ["active", "deprecated"]),
+    supabase
+      .from("contents")
+      .select("id, title", { count: "exact" })
+      .eq("editorial_status", "ready")
+      .eq("publication_status", "published")
+      .eq("visibility_status", "public")
+      .is("archived_at", null)
+      .eq("type_code", "research_report"),
+    supabase
+      .from("contents")
+      .select("id, title", { count: "exact" })
+      .eq("editorial_status", "ready")
+      .eq("publication_status", "published")
+      .eq("visibility_status", "public")
+      .is("archived_at", null)
+      .in("type_code", [...STORY_VOICE_TYPES]),
+    supabase
+      .from("events")
+      .select("id, title", { count: "exact" })
+      .eq("editorial_status", "ready")
+      .eq("publication_status", "published")
+      .eq("visibility_status", "public")
+      .is("archived_at", null),
+    supabase
+      .from("editorial_inbox_items")
+      .select("id", { count: "exact", head: true })
+      .eq("item_kind", "interview_proposal")
+      .eq("status", "needs_research"),
+    supabase
+      .from("content_interview_workflow")
+      .select("workflow_status"),
+  ]);
 
   if (indicatorsResult.error) errors.push(`indicatori: ${indicatorsResult.error.message}`);
   if (reportsResult.error) errors.push(`rapporti: ${reportsResult.error.message}`);
   if (storiesResult.error) errors.push(`storie: ${storiesResult.error.message}`);
   if (eventsResult.error) errors.push(`eventi: ${eventsResult.error.message}`);
-  if (interviewResult.error) errors.push(`pipeline interviste: ${interviewResult.error.message}`);
+  if (interviewResult.error) errors.push(`pipeline interviste Inbox: ${interviewResult.error.message}`);
+  if (interviewWorkflowResult.error) {
+    errors.push(`workflow interviste: ${interviewWorkflowResult.error.message}`);
+  }
 
   const indicatorIds = (indicatorsResult.data ?? []).map((row) => row.id as string);
   let values: Array<{ indicator_id: string; territory_code: string | null }> = [];
@@ -123,6 +153,13 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
   }
 
   const internationalTerritories = strongestInternationalComparison(values);
+  const interviewWorkflowByStatus = emptyInterviewWorkflowCounts();
+  for (const row of interviewWorkflowResult.data ?? []) {
+    const status = row.workflow_status as (typeof INTERVIEW_WORKFLOW_STATUSES)[number];
+    if (status in interviewWorkflowByStatus) {
+      interviewWorkflowByStatus[status] += 1;
+    }
+  }
 
   const snapshot: NumberZeroSnapshot = {
     lombardyDataValues: values.filter((value) => value.territory_code === "IT-25").length,
@@ -149,6 +186,7 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
     storyVoiceTitles: (storiesResult.data ?? []).map((row) => row.title as string),
     eventTitles: (eventsResult.data ?? []).map((row) => row.title as string),
     internationalTerritories,
+    interviewWorkflowByStatus,
     errors,
   };
 }
