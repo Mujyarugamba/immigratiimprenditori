@@ -17,6 +17,7 @@ on:
       - "scripts/ci/supabase-security-smoke.sql"
       - "scripts/ci/rate-limit-smoke.sql"
       - "scripts/ci/auth-integration-smoke.mjs"
+      - "scripts/ci/auth-rate-limit-smoke.mjs"
       - "e2e/editorial.spec.ts"
       - "e2e/helpers/auth.ts"
       - "e2e/helpers/supabase.ts"
@@ -46,7 +47,28 @@ jobs:
           version: latest
 
       - name: Initialize ephemeral local config
-        run: supabase init
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase init
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("supabase/config.toml")
+          text = path.read_text()
+          setting = "sign_in_sign_ups = 5"
+
+          if re.search(r"(?m)^\s*sign_in_sign_ups\s*=.*$", text):
+              text = re.sub(r"(?m)^\s*sign_in_sign_ups\s*=.*$", setting, text, count=1)
+          elif "[auth.rate_limit]" in text:
+              text = text.replace("[auth.rate_limit]", f"[auth.rate_limit]\n{setting}", 1)
+          else:
+              text = text.rstrip() + f"\n\n[auth.rate_limit]\n{setting}\n"
+
+          path.write_text(text)
+          PY
+          grep -n -A12 '^\[auth.rate_limit\]' supabase/config.toml
 
       - name: Assemble standalone Centro Studi migration chain
         shell: bash
@@ -140,6 +162,9 @@ jobs:
 
       - name: Authenticated browser E2E
         run: npx playwright test --config=playwright.auth-ci.config.ts
+
+      - name: Auth login rate-limit smoke
+        run: node scripts/ci/auth-rate-limit-smoke.mjs
 
       - name: Stop ephemeral local stack
         if: always()
