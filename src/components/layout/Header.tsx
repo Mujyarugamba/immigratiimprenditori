@@ -25,7 +25,7 @@ export function Header() {
         <div className="site-container institutional-bar-inner">
           <p>{m.institutional}</p>
           <nav aria-label="Institutional links">
-            <Link href="/cerca">{m.search}</Link>
+            <Link href={localizedHref(locale, "/cerca")}>{m.search}</Link>
             <Link href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
             <Link href="/politica-editoriale">{m.editorialPolicy}</Link>
             <Link href="/accedi">{m.login}</Link>
