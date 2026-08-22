@@ -11,12 +11,14 @@ const publicRoutes = [
   "/osservatorio",
   "/contenuti",
   "/ricerca",
+  "/pubblicazioni",
   "/storie",
   "/eventi",
   "/cultura",
   "/esplora",
   "/atlante",
   "/esplora/dati",
+  "/esplora/mappa",
   "/esplora/territori",
   "/esplora/settori",
   "/esplora/autori",
@@ -80,7 +82,7 @@ function staticEntries(): MetadataRoute.Sitemap {
         ? 1
         : path === "/osservatorio" || path === "/contenuti" || path === "/esplora" || path === "/atlante"
           ? 0.9
-          : path === "/esplora/dati" || path === "/open-data" || path === "/ricerca" || path === "/storie"
+          : path === "/esplora/dati" || path === "/open-data" || path === "/ricerca" || path === "/pubblicazioni" || path === "/storie"
             ? 0.85
             : 0.7,
     alternates: fullyLocalizedCoreRoutes.includes(path as (typeof fullyLocalizedCoreRoutes)[number])
