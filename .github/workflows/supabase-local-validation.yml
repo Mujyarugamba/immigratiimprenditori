@@ -2,6 +2,18 @@ name: Supabase local migration validation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - feature/institutional-identity
+    paths:
+      - "supabase/baseline/**"
+      - "supabase/standalone-evolutions/**"
+      - "supabase/migrations/**"
+      - "scripts/ci/supabase-security-smoke.sql"
+      - "scripts/ci/rate-limit-smoke.sql"
+      - "scripts/ci/auth-integration-smoke.mjs"
+      - ".github/workflows/supabase-local-validation.yml"
   push:
     branches:
       - main
