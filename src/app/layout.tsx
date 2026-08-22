@@ -4,6 +4,7 @@ import { centroStudiConfig } from "@immigrati/product-config";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { DEFAULT_LOCALE, getPlatformLanguage, isPlatformLocale } from "@/lib/i18n/config";
+import { enabledInstitutionalSocialChannels } from "@/lib/social/channels";
 import "./globals.css";
 import "./responsive-overrides.css";
 import "./editorial-identity.css";
@@ -63,6 +64,9 @@ export const metadata: Metadata = {
 
 function structuredData(locale: string) {
   const searchPath = locale === DEFAULT_LOCALE ? "/cerca" : `/${locale}/cerca`;
+  const verifiedSocialUrls = enabledInstitutionalSocialChannels().map(
+    (channel) => channel.plannedUrl,
+  );
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -77,6 +81,7 @@ function structuredData(locale: string) {
           name: "AIPEL",
         },
         email: "info@immigratiimprenditori.it",
+        sameAs: verifiedSocialUrls.length ? verifiedSocialUrls : undefined,
       },
       {
         "@type": "WebSite",
