@@ -6,14 +6,6 @@ on:
     branches:
       - main
       - feature/institutional-identity
-    paths:
-      - "supabase/baseline/**"
-      - "supabase/standalone-evolutions/**"
-      - "supabase/migrations/**"
-      - "scripts/ci/supabase-security-smoke.sql"
-      - "scripts/ci/rate-limit-smoke.sql"
-      - "scripts/ci/auth-integration-smoke.mjs"
-      - ".github/workflows/supabase-local-validation.yml"
   push:
     branches:
       - main
@@ -25,6 +17,10 @@ on:
       - "scripts/ci/supabase-security-smoke.sql"
       - "scripts/ci/rate-limit-smoke.sql"
       - "scripts/ci/auth-integration-smoke.mjs"
+      - "e2e/editorial.spec.ts"
+      - "e2e/helpers/auth.ts"
+      - "e2e/helpers/supabase.ts"
+      - "playwright.auth-ci.config.ts"
       - ".github/workflows/supabase-local-validation.yml"
 
 permissions:
@@ -42,6 +38,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v3
@@ -117,6 +114,32 @@ jobs:
 
       - name: Auth integration smoke with local ephemeral users
         run: node scripts/ci/auth-integration-smoke.mjs
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Build application against local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          PUBLIC_KEY="${PUBLISHABLE_KEY:-${ANON_KEY:-}}"
+          test -n "${API_URL:-}"
+          test -n "$PUBLIC_KEY"
+          case "$API_URL" in
+            http://127.0.0.1:*|http://localhost:*) ;;
+            *) echo "Refusing non-local Supabase API_URL: $API_URL" >&2; exit 1 ;;
+          esac
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLIC_KEY" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SITE_URL=%s\n' 'http://127.0.0.1:3000' >> "$GITHUB_ENV"
+          NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLIC_KEY" \
+          NEXT_PUBLIC_SITE_URL="http://127.0.0.1:3000" \
+          npm run build
+
+      - name: Authenticated browser E2E
+        run: npx playwright test --config=playwright.auth-ci.config.ts
 
       - name: Stop ephemeral local stack
         if: always()
