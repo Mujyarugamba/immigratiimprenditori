@@ -6,6 +6,15 @@ type PrivacyNavigator = Navigator & {
   globalPrivacyControl?: boolean;
 };
 
+type IdleWindow = Window &
+  typeof globalThis & {
+    requestIdleCallback?: (
+      callback: IdleRequestCallback,
+      options?: IdleRequestOptions,
+    ) => number;
+    cancelIdleCallback?: (handle: number) => void;
+  };
+
 function analyticsAllowed() {
   const navigatorWithPrivacy = navigator as PrivacyNavigator;
   if (navigatorWithPrivacy.globalPrivacyControl === true) return false;
@@ -41,13 +50,14 @@ export function PrivacyFriendlyAnalytics() {
       });
     };
 
-    if ("requestIdleCallback" in window) {
-      const idleId = window.requestIdleCallback(send, { timeout: 2500 });
-      return () => window.cancelIdleCallback(idleId);
+    const idleWindow = window as IdleWindow;
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      const idleId = idleWindow.requestIdleCallback(send, { timeout: 2500 });
+      return () => idleWindow.cancelIdleCallback?.(idleId);
     }
 
-    const timeoutId = window.setTimeout(send, 1500);
-    return () => window.clearTimeout(timeoutId);
+    const timeoutId = globalThis.setTimeout(send, 1500);
+    return () => globalThis.clearTimeout(timeoutId);
   }, []);
 
   return null;
