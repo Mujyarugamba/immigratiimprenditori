@@ -46,8 +46,14 @@ commit;
 
 begin;
 
+-- Hosted pre-SPLIT history used account_role_assignments_role_code_check;
+-- the standalone SPLIT-3 baseline names the equivalent constraint
+-- account_role_code_check. Drop either form before installing the canonical
+-- contributor-inclusive constraint used by the cold-start model.
 alter table public.account_role_assignments
-  drop constraint account_role_assignments_role_code_check;
+  drop constraint if exists account_role_assignments_role_code_check;
+alter table public.account_role_assignments
+  drop constraint if exists account_role_code_check;
 alter table public.account_role_assignments
   add constraint account_role_assignments_role_code_check
   check (role_code in ('redattore','amministratore_applicativo','contributore'));
