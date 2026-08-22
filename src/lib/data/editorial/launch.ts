@@ -12,6 +12,9 @@ const STORY_VOICE_TYPES = [
   "testimony",
 ] as const;
 
+const ITALY_TERRITORY_CODES = new Set(["IT", "ITA"]);
+const AGGREGATE_TERRITORY_CODES = new Set(["OECD37", "OECD"]);
+
 export type NumberZeroDashboard = {
   available: boolean;
   snapshot: NumberZeroSnapshot;
@@ -22,6 +25,34 @@ export type NumberZeroDashboard = {
   internationalTerritories: string[];
   errors: string[];
 };
+
+function isComparableForeignTerritory(code: string | null): code is string {
+  if (!code) return false;
+  if (ITALY_TERRITORY_CODES.has(code)) return false;
+  if (code.startsWith("IT-")) return false;
+  if (AGGREGATE_TERRITORY_CODES.has(code)) return false;
+  return true;
+}
+
+function strongestInternationalComparison(
+  values: Array<{ indicator_id: string; territory_code: string | null }>,
+) {
+  const territoriesByIndicator = new Map<string, Set<string>>();
+
+  for (const value of values) {
+    if (!isComparableForeignTerritory(value.territory_code)) continue;
+    const territories = territoriesByIndicator.get(value.indicator_id) ?? new Set<string>();
+    territories.add(value.territory_code);
+    territoriesByIndicator.set(value.indicator_id, territories);
+  }
+
+  let strongest: string[] = [];
+  for (const territories of territoriesByIndicator.values()) {
+    const sorted = Array.from(territories).sort();
+    if (sorted.length > strongest.length) strongest = sorted;
+  }
+  return strongest;
+}
 
 export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
   const supabase = await createClient();
@@ -91,20 +122,11 @@ export async function getNumberZeroDashboard(): Promise<NumberZeroDashboard> {
     }
   }
 
-  const internationalTerritories = Array.from(
-    new Set(
-      values
-        .map((value) => value.territory_code)
-        .filter(
-          (code): code is string =>
-            code !== null && code !== "" && code !== "IT" && !code.startsWith("IT-"),
-        ),
-    ),
-  ).sort();
+  const internationalTerritories = strongestInternationalComparison(values);
 
   const snapshot: NumberZeroSnapshot = {
     lombardyDataValues: values.filter((value) => value.territory_code === "IT-25").length,
-    italyDataValues: values.filter((value) => value.territory_code === "IT").length,
+    italyDataValues: values.filter((value) => ITALY_TERRITORY_CODES.has(value.territory_code ?? "")).length,
     internationalComparisonTerritories: internationalTerritories.length,
     selectedReports: reportsResult.count ?? 0,
     publishedStoriesVoices: storiesResult.count ?? 0,
