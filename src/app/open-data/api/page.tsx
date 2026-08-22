@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "API pubblica v1 | Open data",
   description:
-    "Documentazione dell'API pubblica v1 di Immigrati Imprenditori per indicatori dell'Osservatorio, Paesi e rotte dell'Atlante.",
+    "Documentazione dell'API pubblica v1 di Immigrati Imprenditori per indicatori, Atlante, contesto di ricerca verificabile e relazioni del Knowledge Graph.",
   alternates: { canonical: "/open-data/api" },
 };
 
@@ -27,6 +27,20 @@ const endpoints = [
     description: "Restituisce soltanto le rotte origine-destinazione che dispongono di evidenze pubblicate.",
     filters: "—",
   },
+  {
+    path: "/api/v1/context?q=termine",
+    title: "Contesto di ricerca verificabile",
+    description:
+      "Restituisce risultati pubblici ordinati per pertinenza con riferimenti citabili. Non genera risposte AI.",
+    filters: "q, limit",
+  },
+  {
+    path: "/api/v1/graph",
+    title: "Knowledge Graph derivato",
+    description:
+      "Espone nodi e relazioni ricavati dai dati pubblicati tra Paesi, indicatori, settori e rotte.",
+    filters: "—",
+  },
 ] as const;
 
 export default function ApiDocsPage() {
@@ -46,7 +60,7 @@ export default function ApiDocsPage() {
           API pubblica v1
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          L&apos;API espone in sola lettura dati già pubblicati dal Centro Studi. La versione <code>v1</code>
+          L&apos;API espone in sola lettura dati e relazioni già pubblicati dal Centro Studi. La versione <code>v1</code>
           stabilizza i percorsi pubblici senza sostituire le pagine metodologiche e le fonti originarie.
         </p>
       </header>
@@ -78,8 +92,9 @@ export default function ApiDocsPage() {
           GET /api/v1/indicators?indicator=imprese-straniere-registrate&amp;territory=IT-25&amp;year=2025
         </code>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-700">
-          Le risposte includono <code>api_version</code>, data di generazione, numero di record e i filtri applicati.
-          Il campo <code>quality_code</code> conserva la qualificazione editoriale del valore.
+          Le risposte includono versione, data di generazione, numero di record e filtri applicati quando pertinenti.
+          Il campo <code>quality_code</code> conserva la qualificazione editoriale del valore. Gli endpoint di contesto
+          e grafo espongono soltanto relazioni o risultati riconducibili a materiale pubblico.
         </p>
       </section>
 
@@ -93,6 +108,7 @@ export default function ApiDocsPage() {
         <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
           <Link href="/dati-e-fonti" className="underline underline-offset-4">Metodologia →</Link>
           <Link href="/fonti" className="underline underline-offset-4">Fonti →</Link>
+          <Link href="/relazioni" className="underline underline-offset-4">Relazioni →</Link>
           <a href="/api/v1" className="underline underline-offset-4">Discovery JSON →</a>
         </div>
       </section>
