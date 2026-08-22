@@ -125,7 +125,7 @@ begin
   if position('auth.role()' in trigger_definition) > 0 then
     raise exception 'deprecated auth.role() found in rate-limit trigger';
   end if;
-  if position("auth.jwt()->>'role'" in trigger_definition) = 0 then
+  if position('auth.jwt()->>''role''' in trigger_definition) = 0 then
     raise exception 'signed JWT role claim check missing from rate-limit trigger';
   end if;
 end;
