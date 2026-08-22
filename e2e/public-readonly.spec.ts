@@ -71,3 +71,13 @@ test("core public pages do not overflow mobile or tablet viewports", async ({ pa
     }
   }
 });
+
+test("institutional and language navigation remains reachable on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  await expect(page.getByRole("link", { name: "Cerca" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Chi siamo" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Accedi" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Lingua" })).toBeVisible();
+});
