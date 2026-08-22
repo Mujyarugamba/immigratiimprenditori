@@ -25,14 +25,30 @@ export default async function RedazioneLayout({
   if (!session.isActiveAccount) {
     redirect("/accedi?error=account&next=/app/redazione");
   }
-  if (!session.isEditor && !session.isApplicationAdmin) {
+
+  const supabase = await createClient();
+  const [editorAssigned, adminAssigned] = await Promise.all([
+    supabase.rpc("access_is_editor_assigned"),
+    supabase.rpc("access_is_application_admin_assigned"),
+  ]);
+
+  if (
+    editorAssigned.error ||
+    adminAssigned.error ||
+    !Boolean(editorAssigned.data || adminAssigned.data)
+  ) {
     redirect("/accedi?error=role&next=/app/redazione");
   }
 
-  const supabase = await createClient();
   const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assurance.error || assurance.data.currentLevel !== "aal2") {
     redirect("/app/mfa?next=/app/redazione");
+  }
+
+  // At AAL2 the operational role helpers are authoritative. They are also used
+  // by RLS/RPC and therefore keep the server-rendered UI aligned with the DB gate.
+  if (!session.isEditor && !session.isApplicationAdmin) {
+    redirect("/accedi?error=role&next=/app/redazione");
   }
 
   return (
