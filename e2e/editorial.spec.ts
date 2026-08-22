@@ -54,6 +54,19 @@ async function waitForEditorialMfaRedirect(page: Page, timeout: number) {
   );
 }
 
+async function waitForMfaEnrollmentUi(page: Page, timeout: number) {
+  const secretCode = page.locator("code");
+  const alert = page.getByRole("alert").first();
+
+  await Promise.race([
+    secretCode.waitFor({ state: "visible", timeout }),
+    alert.waitFor({ state: "visible", timeout }).then(async () => {
+      const message = (await alert.textContent())?.trim() || "errore MFA sconosciuto";
+      throw new Error(`MFA enrollment UI error: ${message}`);
+    }),
+  ]);
+}
+
 test.describe("Authenticated editorial UI", () => {
   const users: string[] = [];
   const contents: string[] = [];
@@ -146,21 +159,11 @@ test.describe("Authenticated editorial UI", () => {
     await page.goto("/app/redazione");
     await waitForEditorialMfaRedirect(page, 30_000);
 
-    const enrollResponsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/auth/v1/factors") &&
-        response.request().method() === "POST",
-      { timeout: 20_000 },
-    );
+    // MFA enrollment now runs in a Next.js Server Action. The browser therefore
+    // observes the resulting UI state, not Supabase's server-side /auth/v1/factors request.
     await page.getByRole("button", { name: "Aggiungi autenticatore" }).click();
-    const enrollResponse = await enrollResponsePromise;
-    const enrollBody = await enrollResponse.text();
-    expect(
-      enrollResponse.ok(),
-      `MFA enroll failed (${enrollResponse.status()}): ${enrollBody.slice(0, 800)}`,
-    ).toBeTruthy();
+    await waitForMfaEnrollmentUi(page, 30_000);
 
-    await expect(page.locator("code")).toBeVisible({ timeout: 15_000 });
     const secret = (await page.locator("code").textContent())?.trim() ?? "";
     expect(secret.length).toBeGreaterThan(10);
 
@@ -174,7 +177,9 @@ test.describe("Authenticated editorial UI", () => {
     const title = `P6 E2E Content ${stamp}`;
     await page.locator('select[name="type_code"]').selectOption({ index: 1 });
     await page.getByRole("textbox", { name: "Titolo", exact: true }).fill(title);
-    await page.locator("#body").fill("Corpo editoriale E2E P6 con pubblicazione verificata dal browser dopo MFA AAL2.");
+    await page.locator("#body").fill(
+      "Corpo editoriale E2E P6 con pubblicazione verificata dal browser dopo MFA AAL2.",
+    );
     await page.getByRole("button", { name: "Crea contenuto" }).click();
     await page.waitForURL(/\/app\/redazione\/contenuti\/[0-9a-f-]{36}/i, {
       timeout: 45_000,
