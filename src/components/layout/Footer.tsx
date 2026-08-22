@@ -1,6 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { localeFromPathname, localizedHref } from "@/lib/i18n/navigation";
+import { NAV_MESSAGES } from "@/lib/i18n/messages";
 
 export function Footer() {
+  const pathname = usePathname() || "/";
+  const locale = localeFromPathname(pathname);
+  const m = NAV_MESSAGES[locale];
+
   return (
     <footer className="site-footer">
       <div className="site-container footer-grid">
@@ -14,46 +23,43 @@ export function Footer() {
               className="footer-logo"
             />
           </div>
-          <p>
-            Centro Studi AIPEL dedicato all&apos;imprenditoria migrante, alle sue
-            traiettorie economiche e alle persone che la costruiscono.
-          </p>
+          <p>{m.institutional}</p>
         </div>
 
         <div>
-          <h2>Esplora</h2>
-          <Link href="/osservatorio">Osservatorio</Link>
+          <h2>{m.footerResearch}</h2>
+          <Link href={localizedHref(locale, "/osservatorio")}>{m.observatory}</Link>
           <Link href="/esplora/dati">Data Explorer</Link>
-          <Link href="/esplora/territori">Territori</Link>
-          <Link href="/esplora/settori">Settori</Link>
-          <Link href="/open-data">Open data</Link>
+          <Link href="/esplora/territori">{m.territories ?? "Territori"}</Link>
+          <Link href="/esplora/settori">{m.sectors ?? "Settori"}</Link>
+          <Link href="/open-data">{m.openData}</Link>
         </div>
 
         <div>
-          <h2>Il Centro</h2>
-          <Link href="/contenuti">Analisi e ricerche</Link>
-          <Link href="/eventi">Eventi</Link>
-          <Link href="/contribuisci">Partecipa</Link>
-          <Link href="/chi-siamo">Chi siamo</Link>
-          <Link href="/sostieni">Sostieni il Centro Studi</Link>
-          <a href="mailto:info@immigratiimprenditori.it">Contatti</a>
+          <h2>{m.footerCenter}</h2>
+          <Link href={localizedHref(locale, "/contenuti")}>{m.analysis}</Link>
+          <Link href={localizedHref(locale, "/eventi")}>{m.events}</Link>
+          <Link href={localizedHref(locale, "/contribuisci")}>{m.participate}</Link>
+          <Link href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
+          <Link href="/sostieni">{m.support}</Link>
+          <a href="mailto:info@immigratiimprenditori.it">{m.contacts}</a>
         </div>
 
         <div>
-          <h2>Metodo e trasparenza</h2>
-          <Link href="/dati-e-fonti">Fonti e metodologia</Link>
-          <Link href="/glossario">Glossario</Link>
-          <Link href="/politica-editoriale">Politica editoriale</Link>
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/cookie">Cookie</Link>
-          <Link href="/termini">Termini</Link>
-          <a href="/feed.xml">RSS</a>
+          <h2>{m.footerMethod}</h2>
+          <Link href="/dati-e-fonti">{m.sourcesMethod}</Link>
+          <Link href="/glossario">{m.glossary}</Link>
+          <Link href="/politica-editoriale">{m.editorialPolicy}</Link>
+          <Link href="/privacy">{m.privacy}</Link>
+          <Link href="/cookie">{m.cookie}</Link>
+          <Link href="/termini">{m.terms}</Link>
+          <a href="/feed.xml">{m.rss}</a>
         </div>
       </div>
 
       <div className="site-container footer-bottom">
         <span>© 2026 Immigrati Imprenditori · Centro Studi AIPEL</span>
-        <span>Ricerca · dati · persone</span>
+        <span>{m.tagline}</span>
       </div>
     </footer>
   );
