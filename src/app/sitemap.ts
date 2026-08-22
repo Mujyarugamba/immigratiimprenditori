@@ -10,6 +10,13 @@ const publicRoutes = [
   "/contenuti",
   "/eventi",
   "/cultura",
+  "/esplora",
+  "/esplora/dati",
+  "/esplora/territori",
+  "/esplora/settori",
+  "/esplora/autori",
+  "/open-data",
+  "/glossario",
   "/dati-e-fonti",
   "/contribuisci",
   "/chi-siamo",
@@ -23,8 +30,20 @@ const publicRoutes = [
 function staticEntries(): MetadataRoute.Sitemap {
   return publicRoutes.map((path) => ({
     url: `${SITE_URL}${path}`,
-    changeFrequency: path === "" ? "daily" : "weekly",
-    priority: path === "" ? 1 : path === "/osservatorio" || path === "/contenuti" ? 0.9 : 0.7,
+    changeFrequency:
+      path === ""
+        ? "daily"
+        : path === "/esplora/dati" || path === "/open-data"
+          ? "daily"
+          : "weekly",
+    priority:
+      path === ""
+        ? 1
+        : path === "/osservatorio" || path === "/contenuti" || path === "/esplora"
+          ? 0.9
+          : path === "/esplora/dati" || path === "/open-data"
+            ? 0.85
+            : 0.7,
   }));
 }
 
