@@ -32,6 +32,16 @@ export type TerritoryDetail = TerritorySummary & {
   children: PublicTerritory[];
 };
 
+type TerritoryContentLink = {
+  territory_id: string;
+  content_id: string;
+};
+
+type TerritoryEventLink = {
+  territory_id: string;
+  event_id: string;
+};
+
 function valuesForTerritory(values: ExplorerValue[], territory: PublicTerritory) {
   const code = territory.code?.toUpperCase();
   return values.filter((value) => {
@@ -108,6 +118,79 @@ async function publicLinkedItems(territoryId: string) {
   };
 }
 
+async function batchPublicLinkCounts(territoryIds: string[]) {
+  const contentCounts = new Map<string, number>();
+  const eventCounts = new Map<string, number>();
+  if (territoryIds.length === 0) return { contentCounts, eventCounts };
+
+  const supabase = await createClient();
+  const [contentGeoResult, eventGeoResult] = await Promise.all([
+    supabase
+      .from("content_geographies")
+      .select("territory_id, content_id")
+      .in("territory_id", territoryIds),
+    supabase
+      .from("event_geographies")
+      .select("territory_id, event_id")
+      .in("territory_id", territoryIds),
+  ]);
+
+  if (contentGeoResult.error) throw new Error(contentGeoResult.error.message);
+  if (eventGeoResult.error) throw new Error(eventGeoResult.error.message);
+
+  const contentLinks = (contentGeoResult.data ?? []) as TerritoryContentLink[];
+  const eventLinks = (eventGeoResult.data ?? []) as TerritoryEventLink[];
+  const contentIds = Array.from(new Set(contentLinks.map((link) => link.content_id)));
+  const eventIds = Array.from(new Set(eventLinks.map((link) => link.event_id)));
+
+  const [contentResult, eventResult] = await Promise.all([
+    contentIds.length
+      ? supabase
+          .from("contents")
+          .select("id")
+          .in("id", contentIds)
+          .eq("editorial_status", "ready")
+          .eq("publication_status", "published")
+          .eq("visibility_status", "public")
+      : Promise.resolve({ data: [], error: null }),
+    eventIds.length
+      ? supabase
+          .from("events")
+          .select("id")
+          .in("id", eventIds)
+          .eq("editorial_status", "ready")
+          .eq("publication_status", "published")
+          .eq("visibility_status", "public")
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (contentResult.error) throw new Error(contentResult.error.message);
+  if (eventResult.error) throw new Error(eventResult.error.message);
+
+  const publicContentIds = new Set((contentResult.data ?? []).map((row) => row.id));
+  const publicEventIds = new Set((eventResult.data ?? []).map((row) => row.id));
+  const contentSets = new Map<string, Set<string>>();
+  const eventSets = new Map<string, Set<string>>();
+
+  for (const link of contentLinks) {
+    if (!publicContentIds.has(link.content_id)) continue;
+    const set = contentSets.get(link.territory_id) ?? new Set<string>();
+    set.add(link.content_id);
+    contentSets.set(link.territory_id, set);
+  }
+  for (const link of eventLinks) {
+    if (!publicEventIds.has(link.event_id)) continue;
+    const set = eventSets.get(link.territory_id) ?? new Set<string>();
+    set.add(link.event_id);
+    eventSets.set(link.territory_id, set);
+  }
+
+  for (const [territoryId, ids] of contentSets) contentCounts.set(territoryId, ids.size);
+  for (const [territoryId, ids] of eventSets) eventCounts.set(territoryId, ids.size);
+
+  return { contentCounts, eventCounts };
+}
+
 export async function listPublishedTerritorySummaries(): Promise<TerritorySummary[]> {
   const supabase = await createClient();
   const [territoryResult, snapshot] = await Promise.all([
@@ -122,15 +205,17 @@ export async function listPublishedTerritorySummaries(): Promise<TerritorySummar
 
   if (territoryResult.error) throw new Error(territoryResult.error.message);
   const territories = (territoryResult.data ?? []) as PublicTerritory[];
+  const { contentCounts, eventCounts } = await batchPublicLinkCounts(
+    territories.map((territory) => territory.id),
+  );
 
-  const summaries = await Promise.all(
-    territories.map(async (territory) => {
+  return territories
+    .map((territory) => {
       const values = valuesForTerritory(snapshot.values, territory);
-      const links = await publicLinkedItems(territory.id);
       const dataValueCount = values.length;
       const indicatorCount = new Set(values.map((value) => value.indicator_id)).size;
-      const contentCount = links.contents.length;
-      const eventCount = links.events.length;
+      const contentCount = contentCounts.get(territory.id) ?? 0;
+      const eventCount = eventCounts.get(territory.id) ?? 0;
       return {
         territory,
         dataValueCount,
@@ -139,10 +224,8 @@ export async function listPublishedTerritorySummaries(): Promise<TerritorySummar
         eventCount,
         hasEvidence: dataValueCount + contentCount + eventCount > 0,
       };
-    }),
-  );
-
-  return summaries.filter((item) => item.hasEvidence);
+    })
+    .filter((item) => item.hasEvidence);
 }
 
 export async function getTerritoryDetail(slug: string): Promise<TerritoryDetail | null> {
