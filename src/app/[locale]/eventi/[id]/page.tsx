@@ -21,7 +21,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const event = await getPublicEventById(id);
   if (!event) return { title: "Not found", robots: { index: false, follow: false } };
-  return { title: event.title, description: event.summary ?? undefined, alternates: { canonical: `/${locale}/eventi/${event.id}` } };
+  return {
+    title: event.title,
+    description: event.summary ?? undefined,
+    alternates: { canonical: `/eventi/${event.id}` },
+    robots: { index: false, follow: true },
+  };
 }
 
 export default async function LocalizedEventPage({ params }: Props) {
