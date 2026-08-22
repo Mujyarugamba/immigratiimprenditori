@@ -19,6 +19,18 @@ const localizedHomes = [
   ["ar", "/ar", "rtl"],
   ["zh", "/zh", "ltr"],
 ] as const;
+const goLiveLocalizedCorePaths = [
+  "/chi-siamo",
+  "/esplora",
+  "/osservatorio",
+  "/dati-e-fonti",
+  "/fonti",
+  "/glossario",
+  "/open-data",
+  "/eventi",
+  "/storie",
+  "/contribuisci",
+] as const;
 
 test("homepage renders the institutional editorial surface", async ({ page }) => {
   await page.goto("/");
@@ -149,6 +161,31 @@ test("all seven platform languages expose the correct document direction", async
     "href",
     "#contenuto-principale",
   );
+});
+
+test("go-live core interface renders across all seven platform languages", async ({ page }) => {
+  for (const [locale, , direction] of localizedHomes) {
+    for (const corePath of goLiveLocalizedCorePaths) {
+      const path = locale === "it" ? corePath : `/${locale}${corePath}`;
+      const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+      expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
+      await expect(page.locator("html")).toHaveAttribute("lang", locale);
+      await expect(page.locator("html")).toHaveAttribute("dir", direction);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+      await expect(page.getByText(/Impossibile caricare/i)).toHaveCount(0);
+
+      if (locale !== "it") {
+        await expect(page.locator(`[data-platform-locale="${locale}"]`)).toHaveAttribute(
+          "dir",
+          direction,
+        );
+      }
+
+      if (locale !== "it" && corePath === "/fonti") {
+        await expect(page.locator(`a[href="/${locale}/dati-e-fonti"]`)).toHaveCount(1);
+      }
+    }
+  }
 });
 
 test("localized homes publish canonical and hreflang metadata", async ({ page }) => {
