@@ -11,7 +11,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/app/", "/accedi"],
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: [
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/sitemap-contributors.xml`,
+    ],
     host: SITE_URL,
   };
 }
