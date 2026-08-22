@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
+import { assignInboxToMeAction, updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
 import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
 
 export const metadata: Metadata = {
@@ -104,10 +104,18 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
             </button>
           </form>
 
+          <form action={assignInboxToMeAction} className="mt-3">
+            <input type="hidden" name="id" value={item.id} />
+            <button type="submit" className="w-full border border-black px-4 py-2 text-sm font-semibold">
+              Assegna a me
+            </button>
+          </form>
+
           <dl className="text-ink-muted mt-6 space-y-3 text-xs">
             <div><dt>Priorità</dt><dd className="text-ink mt-1">{item.priority}</dd></div>
             <div><dt>Fascia geografica</dt><dd className="text-ink mt-1">{item.relevance_band ?? "—"}</dd></div>
             <div><dt>Fonte</dt><dd className="text-ink mt-1">{item.source_label ?? "—"}</dd></div>
+            <div><dt>Assegnazione</dt><dd className="text-ink mt-1">{item.assigned_account_id ? "Assegnato" : "Non assegnato"}</dd></div>
           </dl>
         </aside>
       </div>
