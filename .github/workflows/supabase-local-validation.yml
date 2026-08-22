@@ -2,9 +2,10 @@ name: Supabase local migration validation
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
-      - feature/research-radar-ai-knowledge-20260822
+      - feature/institutional-identity
+      - main
     paths:
       - "supabase/baseline/**"
       - "supabase/standalone-evolutions/**"
