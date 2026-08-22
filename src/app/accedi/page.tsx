@@ -21,6 +21,7 @@ type PageProps = {
 const errorMessages: Record<string, string> = {
   missing: "Inserisci email e password.",
   credentials: "Credenziali non valide.",
+  rate: "Troppi tentativi di accesso. Riprova più tardi.",
   account: "L’account non è abilitato.",
   role: "Questo account non dispone del ruolo richiesto per questa area.",
 };
