@@ -10,7 +10,7 @@ test("homepage renders the institutional editorial surface", async ({ page }) =>
   await page.keyboard.press("Tab");
   const skipLink = page.getByRole("link", { name: "Vai al contenuto" });
   await expect(skipLink).toBeFocused();
-  await expect(skipLink).toHaveAttribute("href", "#contenuto");
+  await expect(skipLink).toHaveAttribute("href", "#contenuto-principale");
 
   const hero = page.locator(".home-hero");
   if (await hero.count()) {
@@ -45,9 +45,9 @@ test("support page remains fail-closed while online payments are disabled", asyn
 test("localized shells expose LTR and RTL directions", async ({ page }) => {
   await page.goto("/en");
   await expect(page.locator('[data-platform-locale="en"]')).toHaveAttribute("dir", "ltr");
-  await expect(page.getByRole("link", { name: "Skip to content" })).toHaveAttribute("href", "#contenuto");
+  await expect(page.getByRole("link", { name: "Skip to content" })).toHaveAttribute("href", "#contenuto-principale");
 
   await page.goto("/ar");
   await expect(page.locator('[data-platform-locale="ar"]')).toHaveAttribute("dir", "rtl");
-  await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى" })).toHaveAttribute("href", "#contenuto");
+  await expect(page.getByRole("link", { name: "الانتقال إلى المحتوى" })).toHaveAttribute("href", "#contenuto-principale");
 });
