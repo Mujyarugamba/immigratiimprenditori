@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { EditorialNav } from "@/components/app/EditorialNav";
 import { signOutEditorialAction } from "@/lib/auth/actions";
 import { getApplicationSession } from "@/lib/session/get-application-session";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   robots: {
@@ -22,10 +23,16 @@ export default async function RedazioneLayout({
     redirect("/accedi?next=/app/redazione");
   }
   if (!session.isActiveAccount) {
-    redirect("/accedi?error=account");
+    redirect("/accedi?error=account&next=/app/redazione");
   }
   if (!session.isEditor && !session.isApplicationAdmin) {
-    redirect("/accedi?error=role");
+    redirect("/accedi?error=role&next=/app/redazione");
+  }
+
+  const supabase = await createClient();
+  const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance.error || assurance.data.currentLevel !== "aal2") {
+    redirect("/app/mfa?next=/app/redazione");
   }
 
   return (
