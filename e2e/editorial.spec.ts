@@ -171,10 +171,22 @@ test.describe("Authenticated editorial UI", () => {
 
     await page.locator("#mfa-enroll-code").fill(totpCode(secret));
     await page.getByRole("button", { name: "Verifica e attiva" }).click();
+
+    // Do not accept a transient URL during the full navigation. The actual
+    // server-rendered privileged dashboard proves that the AAL2 cookie reached
+    // a fresh request and survived the redazione layout gate.
     await expect(page).toHaveURL(/\/app\/redazione$/, { timeout: 45_000 });
+    await expect(page.getByRole("heading", { name: "Scrivania redazionale" })).toBeVisible({
+      timeout: 30_000,
+    });
 
     await page.goto("/app/redazione/contenuti/nuovo");
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/redazione\/contenuti\/nuovo$/, {
+      timeout: 30_000,
+    });
+    await expect(
+      page.getByRole("heading", { name: "Nuovo contenuto editoriale" }),
+    ).toBeVisible({ timeout: 30_000 });
 
     const title = `P6 E2E Content ${stamp}`;
     await page.locator('select[name="type_code"]').selectOption({ index: 1 });
