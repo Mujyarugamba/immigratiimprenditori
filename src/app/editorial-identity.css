@@ -16,6 +16,23 @@
   --cream: #f5f4f0;
   --line: #d7d7d2;
   --muted: #5f5f5a;
+
+  /* Tailwind theme variables used across the non-home public and private UI. */
+  --color-brand: #111111;
+  --color-brand-dark: #0a0a0a;
+  --color-brand-soft: #f3f3f1;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-muted: #f5f4f0;
+  --color-ink: #111111;
+  --color-ink-muted: #5f5f5a;
+  --color-ink-subtle: #7a7a74;
+  --color-accent: #9a6b24;
+  --color-accent-dark: #765018;
+  --color-accent-soft: #f4ede1;
+  --color-line: #d7d7d2;
+  --color-line-strong: #9b9b94;
+  --shadow-soft: 0 0 #0000;
 }
 
 body {
