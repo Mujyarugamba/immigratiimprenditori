@@ -6,12 +6,16 @@ on:
     branches:
       - feature/research-radar-ai-knowledge-20260822
     paths:
+      - "supabase/baseline/**"
+      - "supabase/standalone-evolutions/**"
       - "supabase/migrations/**"
       - ".github/workflows/supabase-local-validation.yml"
   pull_request:
     branches:
       - feature/institutional-identity
     paths:
+      - "supabase/baseline/**"
+      - "supabase/standalone-evolutions/**"
       - "supabase/migrations/**"
       - ".github/workflows/supabase-local-validation.yml"
 
@@ -34,7 +38,46 @@ jobs:
       - name: Initialize ephemeral local config
         run: supabase init
 
-      - name: Replay every migration on a fresh local database
+      - name: Assemble standalone Centro Studi migration chain
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # supabase/migrations contains historical pre-SPLIT-3 ownership files as
+          # well as recent Centro Studi evolutions. The canonical cold-start base
+          # is supabase/baseline/00..03 (see CS-MIGRATION-MANIFEST.md), so never
+          # concatenate the historical monolith chain.
+          mv supabase/migrations /tmp/repository-migrations
+          mkdir -p supabase/migrations
+
+          cp supabase/baseline/00000000000000_baseline_immigratiimprenditori.sql supabase/migrations/
+          cp supabase/baseline/00000000000001_runtime_link_compatibility.sql supabase/migrations/
+          cp supabase/baseline/00000000000002_seed_immigrati_public_data.sql supabase/migrations/
+          cp supabase/baseline/00000000000003_auth_identity_gate.sql supabase/migrations/
+
+          # Standalone editorial foundation. These repository versions are copied
+          # under their hosted chronological timestamps so the audit migration
+          # below is applied only after editorial_inbox_items exists.
+          cp /tmp/repository-migrations/20260819100000_grant_observatory_ingestion_writer.sql \
+            supabase/migrations/20260819100000_grant_observatory_ingestion_writer.sql
+          cp /tmp/repository-migrations/20260820170000_editorial_foundation_v1.sql \
+            supabase/migrations/20260819102530_editorial_foundation_v1.sql
+          cp /tmp/repository-migrations/20260820171000_editorial_submission_country_labels.sql \
+            supabase/migrations/20260819103031_editorial_submission_country_labels.sql
+          cp supabase/standalone-evolutions/20260819141022_editorial_inbox_activity.sql \
+            supabase/migrations/20260819141022_editorial_inbox_activity.sql
+          cp /tmp/repository-migrations/20260820173000_harden_editorial_public_submission.sql \
+            supabase/migrations/20260820173000_harden_editorial_public_submission.sql
+
+          # Current standalone branch evolutions. Older monolith/Ponte migration
+          # files remain intentionally excluded from this cold start.
+          cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
+
+          echo "Standalone cold-start chain:"
+          find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort
+
+      - name: Replay standalone chain on a fresh local database
         run: supabase db start
 
       - name: Lint PostgreSQL functions and schema
