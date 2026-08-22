@@ -8,6 +8,8 @@ const publicRoutes = [
   "",
   "/osservatorio",
   "/contenuti",
+  "/ricerca",
+  "/storie",
   "/eventi",
   "/cultura",
   "/esplora",
@@ -16,6 +18,7 @@ const publicRoutes = [
   "/esplora/settori",
   "/esplora/autori",
   "/open-data",
+  "/fonti",
   "/glossario",
   "/dati-e-fonti",
   "/contribuisci",
@@ -41,7 +44,7 @@ function staticEntries(): MetadataRoute.Sitemap {
         ? 1
         : path === "/osservatorio" || path === "/contenuti" || path === "/esplora"
           ? 0.9
-          : path === "/esplora/dati" || path === "/open-data"
+          : path === "/esplora/dati" || path === "/open-data" || path === "/ricerca" || path === "/storie"
             ? 0.85
             : 0.7,
   }));
