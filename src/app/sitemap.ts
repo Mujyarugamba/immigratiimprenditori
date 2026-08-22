@@ -45,6 +45,7 @@ const fullyLocalizedCoreRoutes = [
   "/esplora/autori",
   "/open-data",
   "/fonti",
+  "/dati-e-fonti",
   "/glossario",
   "/contribuisci",
   "/chi-siamo",
