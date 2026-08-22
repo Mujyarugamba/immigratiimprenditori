@@ -11,6 +11,7 @@ const links = [
   { href: "/app/redazione/contenuti", label: "Contenuti" },
   { href: "/app/redazione/eventi", label: "Eventi" },
   { href: "/app/redazione/osservatorio", label: "Osservatorio" },
+  { href: "/app/redazione/voci-candidate", label: "Voci candidate" },
   { href: "/app/redazione/lancio", label: "Numero zero" },
 ] as const;
 
