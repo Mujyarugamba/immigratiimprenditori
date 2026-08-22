@@ -26,6 +26,7 @@ export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]
       .eq("editorial_status", "ready")
       .eq("publication_status", "published")
       .eq("visibility_status", "public")
+      .is("archived_at", null)
       .or(`title.ilike.${pattern},abstract.ilike.${pattern}`)
       .order("published_at", { ascending: false, nullsFirst: false })
       .limit(30),
@@ -43,6 +44,7 @@ export async function searchPublicSite(rawQuery: string): Promise<SearchResult[]
       .eq("editorial_status", "ready")
       .eq("publication_status", "published")
       .eq("visibility_status", "public")
+      .is("archived_at", null)
       .or(`title.ilike.${pattern},summary.ilike.${pattern}`)
       .order("published_at", { ascending: false, nullsFirst: false })
       .limit(20),
