@@ -46,6 +46,17 @@ function totpCode(secret: string, now = Date.now()): string {
   return String(binary % 1_000_000).padStart(6, "0");
 }
 
+async function waitForEditorialMfaRedirect(
+  page: Parameters<typeof test>[0] extends never ? never : any,
+  timeout: number,
+) {
+  await page.waitForURL(
+    (url: URL) =>
+      url.pathname === "/app/mfa" && url.searchParams.get("next") === "/app/redazione",
+    { timeout },
+  );
+}
+
 test.describe("Authenticated editorial UI", () => {
   const users: string[] = [];
   const contents: string[] = [];
@@ -130,17 +141,13 @@ test.describe("Authenticated editorial UI", () => {
     await page.getByLabel("Password").fill(PASS);
     await page.getByRole("button", { name: "Accedi" }).click();
 
-    await expect(page).toHaveURL(/\/app\/mfa\?next=%2Fapp%2Fredazione/, {
-      timeout: 45_000,
-    });
+    await waitForEditorialMfaRedirect(page, 45_000);
     await expect(page.getByRole("heading", { name: "Verifica in due passaggi" })).toBeVisible();
 
     // Server-side guard: a direct redazione request at AAL1 must return to MFA,
     // not expose the privileged area and not misclassify the assigned role.
     await page.goto("/app/redazione");
-    await expect(page).toHaveURL(/\/app\/mfa\?next=%2Fapp%2Fredazione/, {
-      timeout: 30_000,
-    });
+    await waitForEditorialMfaRedirect(page, 30_000);
 
     await page.getByRole("button", { name: "Aggiungi autenticatore" }).click();
     const secret = (await page.locator("code").textContent())?.trim() ?? "";
