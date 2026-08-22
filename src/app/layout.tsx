@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   creator: "Immigrati Imprenditori",
   publisher: "AIPEL",
   category: "Ricerca e analisi sull'imprenditoria migrante",
+  alternates: {
+    types: {
+      "application/rss+xml": `${SITE_URL}/feed.xml`,
+    },
+  },
   openGraph: {
     type: "website",
     locale: "it_IT",
@@ -53,12 +58,48 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Immigrati Imprenditori",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo-immigrati-imprenditori.png`,
+      parentOrganization: {
+        "@type": "Organization",
+        name: "AIPEL",
+      },
+      email: "info@immigratiimprenditori.it",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "Immigrati Imprenditori",
+      description: SITE_DESCRIPTION,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      inLanguage: "it",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/cerca?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="it">
       <body className="bg-surface text-ink min-h-screen antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <Header />
         {children}
         <Footer />
