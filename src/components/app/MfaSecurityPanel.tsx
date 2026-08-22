@@ -1,12 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useCallback, useEffect, useState } from "react";
+import {
+  cancelTotpEnrollmentAction,
+  getMfaSecurityStateAction,
+  removeTotpFactorAction,
+  startTotpEnrollmentAction,
+  verifyExistingTotpAction,
+  verifyTotpEnrollmentAction,
+} from "@/lib/auth/mfa-actions";
 
 type TotpFactor = {
   id: string;
   friendlyName: string | null;
   status: string;
+};
+
+type MfaState = {
+  currentLevel: string | null;
+  nextLevel: string | null;
+  factors: TotpFactor[];
 };
 
 type PendingEnrollment = {
@@ -20,10 +33,6 @@ type MfaSecurityPanelProps = {
   nextPath?: string;
 };
 
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Operazione MFA non riuscita.";
-}
-
 function validTotp(value: string) {
   return /^\d{6}$/.test(value.trim());
 }
@@ -32,7 +41,6 @@ export function MfaSecurityPanel({
   required = false,
   nextPath = "/app/redazione",
 }: MfaSecurityPanelProps = {}) {
-  const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [currentLevel, setCurrentLevel] = useState<string | null>(null);
@@ -44,46 +52,37 @@ export function MfaSecurityPanel({
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const applyState = useCallback((state: MfaState) => {
+    setCurrentLevel(state.currentLevel);
+    setNextLevel(state.nextLevel);
+    setFactors(state.factors);
+  }, []);
+
   const refresh = useCallback(async () => {
-    const [aalResult, factorsResult] = await Promise.all([
-      supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-      supabase.auth.mfa.listFactors(),
-    ]);
-
-    if (aalResult.error) throw aalResult.error;
-    if (factorsResult.error) throw factorsResult.error;
-
-    setCurrentLevel(aalResult.data.currentLevel ?? null);
-    setNextLevel(aalResult.data.nextLevel ?? null);
-    setFactors(
-      factorsResult.data.totp.map((factor) => ({
-        id: factor.id,
-        friendlyName: factor.friendly_name ?? null,
-        status: factor.status,
-      })),
-    );
-  }, [supabase]);
+    const result = await getMfaSecurityStateAction();
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
+    applyState(result.state);
+  }, [applyState]);
 
   useEffect(() => {
     void (async () => {
       try {
         await refresh();
       } catch (cause) {
-        setError(errorMessage(cause));
+        setError(cause instanceof Error ? cause.message : "Impossibile verificare lo stato MFA.");
       } finally {
         setLoading(false);
       }
     })();
   }, [refresh]);
 
-  async function completeVerification(message: string) {
-    // Ensure the SSR cookie carries the new AAL2 session before navigating to
-    // the server-protected redazione layout.
-    const refreshed = await supabase.auth.refreshSession();
-    if (refreshed.error) throw refreshed.error;
-    await refresh();
-
+  function finishSuccessfulVerification(state: MfaState, message: string) {
+    applyState(state);
     if (required) {
+      // The Server Action response has already written the AAL2 cookie. A full
+      // navigation deliberately re-enters the server-side redazione gate.
       window.location.assign(nextPath);
       return;
     }
@@ -95,18 +94,15 @@ export function MfaSecurityPanel({
     setError(null);
     setNotice(null);
     try {
-      const { data, error: enrollError } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-      });
-      if (enrollError) throw enrollError;
-      setPending({
-        factorId: data.id,
-        qrCode: data.totp.qr_code,
-        secret: data.totp.secret,
-      });
+      const result = await startTotpEnrollmentAction();
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setPending(result.enrollment);
       setEnrollCode("");
-    } catch (cause) {
-      setError(errorMessage(cause));
+    } catch {
+      setError("Impossibile avviare la registrazione TOTP.");
     } finally {
       setBusy(false);
     }
@@ -118,15 +114,16 @@ export function MfaSecurityPanel({
     setError(null);
     setNotice(null);
     try {
-      const { error: unenrollError } = await supabase.auth.mfa.unenroll({
-        factorId: pending.factorId,
-      });
-      if (unenrollError) throw unenrollError;
+      const result = await cancelTotpEnrollmentAction(pending.factorId);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
       setPending(null);
       setEnrollCode("");
-      await refresh();
-    } catch (cause) {
-      setError(errorMessage(cause));
+      applyState(result.state);
+    } catch {
+      setError("Impossibile annullare la registrazione TOTP.");
     } finally {
       setBusy(false);
     }
@@ -142,22 +139,20 @@ export function MfaSecurityPanel({
     setError(null);
     setNotice(null);
     try {
-      const challenge = await supabase.auth.mfa.challenge({ factorId: pending.factorId });
-      if (challenge.error) throw challenge.error;
-      const verify = await supabase.auth.mfa.verify({
-        factorId: pending.factorId,
-        challengeId: challenge.data.id,
-        code: enrollCode.trim(),
-      });
-      if (verify.error) throw verify.error;
+      const result = await verifyTotpEnrollmentAction(pending.factorId, enrollCode.trim());
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
 
       setPending(null);
       setEnrollCode("");
-      await completeVerification(
+      finishSuccessfulVerification(
+        result.state,
         "Autenticatore TOTP verificato. La sessione corrente è stata elevata ad AAL2.",
       );
-    } catch (cause) {
-      setError(errorMessage(cause));
+    } catch {
+      setError("Codice TOTP non valido o scaduto.");
     } finally {
       setBusy(false);
     }
@@ -178,19 +173,19 @@ export function MfaSecurityPanel({
     setError(null);
     setNotice(null);
     try {
-      const challenge = await supabase.auth.mfa.challenge({ factorId: factor.id });
-      if (challenge.error) throw challenge.error;
-      const verify = await supabase.auth.mfa.verify({
-        factorId: factor.id,
-        challengeId: challenge.data.id,
-        code: challengeCode.trim(),
-      });
-      if (verify.error) throw verify.error;
+      const result = await verifyExistingTotpAction(factor.id, challengeCode.trim());
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
 
       setChallengeCode("");
-      await completeVerification("Secondo fattore verificato. La sessione corrente è AAL2.");
-    } catch (cause) {
-      setError(errorMessage(cause));
+      finishSuccessfulVerification(
+        result.state,
+        "Secondo fattore verificato. La sessione corrente è AAL2.",
+      );
+    } catch {
+      setError("Codice TOTP non valido o scaduto.");
     } finally {
       setBusy(false);
     }
@@ -206,12 +201,15 @@ export function MfaSecurityPanel({
     setError(null);
     setNotice(null);
     try {
-      const { error: unenrollError } = await supabase.auth.mfa.unenroll({ factorId });
-      if (unenrollError) throw unenrollError;
+      const result = await removeTotpFactorAction(factorId);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      applyState(result.state);
       setNotice("Autenticatore rimosso.");
-      await refresh();
-    } catch (cause) {
-      setError(errorMessage(cause));
+    } catch {
+      setError("Impossibile rimuovere l’autenticatore TOTP.");
     } finally {
       setBusy(false);
     }
