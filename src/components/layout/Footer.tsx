@@ -63,7 +63,7 @@ export function Footer() {
           <Link href="/privacy">{m.privacy}</Link>
           <Link href="/cookie">{m.cookie}</Link>
           <Link href="/termini">{m.terms}</Link>
-          <a href="/feed.xml">{m.rss}</a>
+          {locale === "it" ? <Link href="/rss">{m.rss}</Link> : <a href="/feed.xml">{m.rss}</a>}
         </div>
       </div>
 
