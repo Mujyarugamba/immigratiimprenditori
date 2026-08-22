@@ -7,8 +7,8 @@
 # while the canonical anonymous contribution form is much tighter.
 # Specific rules come before any future general redirect rules.
 [[redirects]]
-  from = "/api/v1/*"
-  to = "/api/v1/:splat"
+  from = "/api/*"
+  to = "/api/:splat"
 
   [redirects.rate_limit]
     window_limit = 60

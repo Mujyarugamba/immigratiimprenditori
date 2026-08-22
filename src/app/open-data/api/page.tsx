@@ -13,7 +13,7 @@ const endpoints = [
     path: "/api/v1/indicators",
     title: "Indicatori e valori",
     description: "Restituisce i valori finali degli indicatori pubblicati dall'Osservatorio.",
-    filters: "indicator, territory, year, sector, category",
+    filters: "indicator, territory, year, sector, category, limit, offset",
   },
   {
     path: "/api/v1/atlas/countries",
@@ -89,13 +89,32 @@ export default function ApiDocsPage() {
       <section className="mt-10 border-t border-black pt-8">
         <h2 className="text-2xl font-semibold text-black">Esempio</h2>
         <code className="mt-4 block overflow-x-auto bg-neutral-50 p-4 text-sm">
-          GET /api/v1/indicators?indicator=imprese-straniere-registrate&amp;territory=IT-25&amp;year=2025
+          GET /api/v1/indicators?indicator=imprese-straniere-registrate&amp;territory=IT-25&amp;year=2025&amp;limit=500&amp;offset=0
         </code>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-700">
           Le risposte includono versione, data di generazione, numero di record e filtri applicati quando pertinenti.
           Il campo <code>quality_code</code> conserva la qualificazione editoriale del valore. Gli endpoint di contesto
           e grafo espongono soltanto relazioni o risultati riconducibili a materiale pubblico.
         </p>
+      </section>
+
+      <section className="mt-10 border-t border-black pt-8">
+        <h2 className="text-2xl font-semibold text-black">Limiti tecnici</h2>
+        <div className="mt-4 max-w-3xl space-y-3 text-sm leading-7 text-neutral-700">
+          <p>
+            Gli endpoint sotto <code>/api/</code> sono protetti a livello Netlify da un limite di 60 richieste per
+            60 secondi per combinazione IP e dominio. Le richieste oltre soglia ricevono risposta HTTP <code>429</code>.
+          </p>
+          <p>
+            <code>/api/v1/indicators</code> restituisce al massimo 1.000 record per risposta; il valore predefinito è
+            500. Usa <code>limit</code> e <code>offset</code> per scorrere i risultati. La risposta espone anche
+            <code>total_count</code> e <code>pagination.has_more</code>.
+          </p>
+          <p>
+            Gli endpoint pubblici impostano caching CDN dove appropriato per ridurre richieste ripetute al database.
+            I limiti sono una protezione operativa e possono essere rivisti se il volume d&apos;uso reale lo richiede.
+          </p>
+        </div>
       </section>
 
       <section className="mt-10 border-t border-black pt-8">
