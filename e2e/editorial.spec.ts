@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { loginViaUi } from "./helpers/auth";
 import {
   cleanupContents,
@@ -46,12 +46,9 @@ function totpCode(secret: string, now = Date.now()): string {
   return String(binary % 1_000_000).padStart(6, "0");
 }
 
-async function waitForEditorialMfaRedirect(
-  page: Parameters<typeof test>[0] extends never ? never : any,
-  timeout: number,
-) {
+async function waitForEditorialMfaRedirect(page: Page, timeout: number) {
   await page.waitForURL(
-    (url: URL) =>
+    (url) =>
       url.pathname === "/app/mfa" && url.searchParams.get("next") === "/app/redazione",
     { timeout },
   );
