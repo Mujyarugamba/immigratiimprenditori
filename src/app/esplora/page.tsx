@@ -5,15 +5,20 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 export const metadata: Metadata = {
   title: "Esplora il Centro Studi",
   description:
-    "Esplora dati, territori, settori, autori, analisi, storie, eventi e fonti di Immigrati Imprenditori.",
+    "Esplora dati, mappe, territori, settori, autori, analisi, storie, eventi e fonti di Immigrati Imprenditori.",
   alternates: { canonical: "/esplora" },
 };
 
 const modules = [
   {
     title: "Data Explorer",
-    text: "Interroga i valori pubblicati dall'Osservatorio per indicatore, territorio e periodo.",
+    text: "Interroga i valori pubblicati dall'Osservatorio per indicatore, territorio, periodo, settore e categoria.",
     href: "/esplora/dati",
+  },
+  {
+    title: "Mappa quantitativa",
+    text: "Visualizza geograficamente un singolo indicatore con simboli proporzionali e senza mescolare definizioni diverse.",
+    href: "/esplora/mappa",
   },
   {
     title: "Territori",
@@ -65,7 +70,7 @@ export default async function EsploraPage() {
           Esplora
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Un unico punto di accesso a dati, analisi, territori, settori, persone, eventi e fonti.
+          Un unico punto di accesso a dati, mappe, analisi, territori, settori, persone, eventi e fonti.
           Ogni dato dell&apos;Osservatorio rimanda alla propria scheda metodologica e alla fonte.
         </p>
       </header>
@@ -91,7 +96,7 @@ export default async function EsploraPage() {
 
       <section className="mt-12">
         <h2 className="text-2xl font-semibold tracking-tight text-black">Strumenti e archivi</h2>
-        <div className="mt-6 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => (
             <article key={module.href} className="flex min-h-56 flex-col bg-white p-6">
               <h3 className="text-xl font-semibold text-black">{module.title}</h3>
