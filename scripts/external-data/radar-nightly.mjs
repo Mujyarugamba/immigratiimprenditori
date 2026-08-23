@@ -1,9 +1,10 @@
+import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const MAX_INSERTS_PER_RUN = 30;
 const RECENT_FINGERPRINT_WINDOW = 1000;
-const USER_AGENT = "ImmigratiImprenditori-Radar/1.1 (+https://immigratiimprenditori.it)";
+const USER_AGENT = "ImmigratiImprenditori-Radar/1.2 (+https://immigratiimprenditori.it)";
 const TIMEOUT_MS = 20000;
 
 const KEYWORDS = [
@@ -30,11 +31,41 @@ const STRONG_SIGNALS = [
   "migrant entrepreneur",
   "immigrant entrepreneur",
   "diaspora entrepreneur",
+  "refugee entrepreneur",
   "imprenditoria immigrata",
   "imprenditoria straniera",
   "imprese straniere",
-  "foreign-owned business",
-  "migrant-owned business",
+  "foreign owned business",
+  "migrant owned business",
+  "immigrant owned business",
+  "migrant business owner",
+  "ethnic minority entrepreneur",
+];
+
+const MIGRATION_SIGNALS = [
+  "immigrat",
+  "immigre",
+  "migrant",
+  "migration",
+  "stranier",
+  "foreign born",
+  "diaspora",
+  "refugee",
+];
+
+const ENTREPRENEURSHIP_SIGNALS = [
+  "entrepreneur",
+  "entrepreneurship",
+  "imprenditor",
+  "self employ",
+  "business owner",
+  "business ownership",
+  "business creation",
+  "new business",
+  "start up",
+  "startup",
+  "enterprise creation",
+  "microenterprise",
 ];
 
 const DOCUMENT_SIGNALS = [
@@ -107,6 +138,28 @@ const SOURCES = [
     relevanceBand: "rest_of_world",
     defaultKind: "report",
   },
+  {
+    code: "emn-studies",
+    sourceLabel: "European Migration Network (European Commission)",
+    indexUrl:
+      "https://home-affairs.ec.europa.eu/networks/european-migration-network-emn/emn-publications/emn-studies_en",
+    allowedHosts: ["home-affairs.ec.europa.eu"],
+    allowedPathPrefixes: [
+      "/networks/european-migration-network-emn/",
+      "/whats-new/publications/",
+    ],
+    relevanceBand: "europe_migrant_entrepreneurship",
+    defaultKind: "report",
+  },
+  {
+    code: "ec-migrant-entrepreneurs",
+    sourceLabel: "European Commission — Migrant entrepreneurs",
+    indexUrl:
+      "https://single-market-economy.ec.europa.eu/smes/learn-and-plan-entrepreneurship/migrant-entrepreneurs_en",
+    allowedHosts: ["single-market-economy.ec.europa.eu", "ec.europa.eu"],
+    relevanceBand: "europe_migrant_entrepreneurship",
+    defaultKind: "report",
+  },
 ];
 
 function required(name) {
@@ -142,11 +195,28 @@ function normalizedText(value) {
     .trim();
 }
 
+function digest(value) {
+  return createHash("sha256").update(value).digest("hex").slice(0, 24);
+}
+
 function titleFingerprint(sourceLabel, title) {
-  return createHash("sha256")
-    .update(`${normalizedText(sourceLabel)}|${normalizedText(title)}`)
-    .digest("hex")
-    .slice(0, 24);
+  return digest(`${normalizedText(sourceLabel)}|${normalizedText(title)}`);
+}
+
+function canonicalTitleFingerprint(title) {
+  const normalized = normalizedText(title);
+  return normalized.length >= 20 ? digest(normalized) : null;
+}
+
+function conceptSignals(title, url) {
+  const haystack = normalizedText(`${title} ${url}`);
+  return {
+    strong: STRONG_SIGNALS.some((signal) => haystack.includes(normalizedText(signal))),
+    migration: MIGRATION_SIGNALS.some((signal) => haystack.includes(normalizedText(signal))),
+    entrepreneurship: ENTREPRENEURSHIP_SIGNALS.some((signal) =>
+      haystack.includes(normalizedText(signal)),
+    ),
+  };
 }
 
 function relevanceScore(title, url) {
@@ -163,7 +233,9 @@ function relevanceScore(title, url) {
   score += Math.min(documentMatches.length, 3) * 4;
 
   if (/entrepreneur|imprenditor|self[- ]?employ|business owner/.test(haystack)) score += 12;
-  if (/migrant|migration|immigrant|immigraz|stranier|diaspora|foreign/.test(haystack)) score += 12;
+  if (/migrant|migration|immigrant|immigraz|stranier|diaspora|foreign|refugee/.test(haystack)) {
+    score += 12;
+  }
 
   return Math.min(score, 100);
 }
@@ -175,7 +247,9 @@ function priorityForScore(score) {
 }
 
 function relevant(title, url) {
-  return relevanceScore(title, url) >= 20;
+  const signals = conceptSignals(title, url);
+  const inScope = signals.strong || (signals.migration && signals.entrepreneurship);
+  return inScope && relevanceScore(title, url) >= 20;
 }
 
 function classify(title, url, fallback) {
@@ -201,15 +275,21 @@ function classify(title, url, fallback) {
   return fallback;
 }
 
-function normalizeUrl(href, baseUrl, allowedHosts) {
+function normalizeUrl(href, baseUrl, allowedHosts, allowedPathPrefixes = []) {
   try {
     const url = new URL(href, baseUrl);
     if (url.protocol !== "https:") return null;
     url.hash = "";
     for (const key of [...url.searchParams.keys()]) {
-      if (/^(utm_|fbclid|gclid)/i.test(key)) url.searchParams.delete(key);
+      if (/^(utm_|fbclid$|gclid$|mc_cid$|mc_eid$)/i.test(key)) url.searchParams.delete(key);
     }
     if (!allowedHosts.includes(url.hostname.toLowerCase())) return null;
+    if (
+      allowedPathPrefixes.length > 0 &&
+      !allowedPathPrefixes.some((prefix) => url.pathname.startsWith(prefix))
+    ) {
+      return null;
+    }
     return url.toString();
   } catch {
     return null;
@@ -225,11 +305,17 @@ function extractCandidates(html, source) {
   while ((match = anchorRe.exec(html)) !== null) {
     const title = textOnly(match[2] ?? "");
     if (title.length < 8 || title.length > 280) continue;
-    const url = normalizeUrl(match[1] ?? "", source.indexUrl, source.allowedHosts);
+    const url = normalizeUrl(
+      match[1] ?? "",
+      source.indexUrl,
+      source.allowedHosts,
+      source.allowedPathPrefixes,
+    );
     if (!url || seen.has(url) || !relevant(title, url)) continue;
 
     const score = relevanceScore(title, url);
     const fingerprint = titleFingerprint(source.sourceLabel, title);
+    const canonicalFingerprint = canonicalTitleFingerprint(title);
     seen.add(url);
     candidates.push({
       title,
@@ -246,7 +332,8 @@ function extractCandidates(html, source) {
         radar_mode: "metadata_link_only",
         radar_relevance_score: score,
         radar_title_fingerprint: fingerprint,
-        radar_version: "1.1",
+        radar_canonical_title_fingerprint: canonicalFingerprint,
+        radar_version: "1.2",
         auto_publish: false,
       },
     });
@@ -348,18 +435,25 @@ async function main() {
   if (recentError) throw recentError;
 
   const existingFingerprints = new Set();
+  const existingCanonicalFingerprints = new Set();
   for (const row of recentRadar ?? []) {
     const stored = row.raw_metadata?.radar_title_fingerprint;
     if (typeof stored === "string" && stored) {
       existingFingerprints.add(stored);
-      continue;
     }
     if (row.title) {
       existingFingerprints.add(titleFingerprint(row.source_label ?? "", row.title));
+      const canonical =
+        row.raw_metadata?.radar_canonical_title_fingerprint ??
+        canonicalTitleFingerprint(row.title);
+      if (typeof canonical === "string" && canonical) {
+        existingCanonicalFingerprints.add(canonical);
+      }
     }
   }
 
   const candidateFingerprints = new Set();
+  const candidateCanonicalFingerprints = new Set();
   const fresh = unique
     .sort(
       (a, b) =>
@@ -372,7 +466,18 @@ async function main() {
       if (existingFingerprints.has(fingerprint) || candidateFingerprints.has(fingerprint)) {
         return false;
       }
+
+      const canonicalFingerprint = item.raw_metadata.radar_canonical_title_fingerprint;
+      if (
+        canonicalFingerprint &&
+        (existingCanonicalFingerprints.has(canonicalFingerprint) ||
+          candidateCanonicalFingerprints.has(canonicalFingerprint))
+      ) {
+        return false;
+      }
+
       candidateFingerprints.add(fingerprint);
+      if (canonicalFingerprint) candidateCanonicalFingerprints.add(canonicalFingerprint);
       return true;
     })
     .slice(0, MAX_INSERTS_PER_RUN)
@@ -393,12 +498,13 @@ async function main() {
       {
         mode: "review_only",
         autoPublish: false,
-        radarVersion: "1.1",
+        radarVersion: "1.2",
         sources: sourceResults,
         discovered: discovered.length,
         uniqueUrls: unique.length,
         alreadyKnownUrls: existingUrls.size,
         recentFingerprints: existingFingerprints.size,
+        recentCanonicalFingerprints: existingCanonicalFingerprints.size,
         inserted,
         insertedByPriority: {
           high: fresh.filter((item) => item.priority === "high").length,
@@ -413,7 +519,62 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+function selfTest() {
+  assert.equal(
+    relevant("Entrepreneurship Action Plan 2026", "https://example.org/entrepreneurship"),
+    false,
+    "generic entrepreneurship must not enter the migrant-entrepreneurship radar",
+  );
+  assert.equal(
+    relevant("International Migration Statistics 2026", "https://example.org/migration"),
+    false,
+    "generic migration must not enter without an entrepreneurship signal",
+  );
+  assert.equal(
+    relevant("Migrant entrepreneurship report 2026", "https://example.org/report"),
+    true,
+    "migrant entrepreneurship must pass the conceptual gate",
+  );
+  assert.equal(
+    relevant(
+      "Self-employed worker in Italy",
+      "https://home-affairs.ec.europa.eu/policies/migration-and-asylum/eu-immigration-portal/self-employed-worker-italy_en",
+    ),
+    true,
+    "migration-path context plus self-employment must pass",
+  );
+  assert.equal(
+    normalizeUrl(
+      "https://example.org/report?utm_source=test&id=7#section",
+      "https://example.org/",
+      ["example.org"],
+    ),
+    "https://example.org/report?id=7",
+    "tracking parameters and fragments must be stripped while preserving semantic query parameters",
+  );
+  assert.equal(
+    normalizeUrl(
+      "https://example.org/outside/item",
+      "https://example.org/",
+      ["example.org"],
+      ["/allowed/"],
+    ),
+    null,
+    "source path allowlists must block unrelated navigation links",
+  );
+  assert.equal(
+    canonicalTitleFingerprint("Migrant entrepreneurship report 2026"),
+    canonicalTitleFingerprint("Migrant entrepreneurship report 2026"),
+    "canonical fingerprints must be stable",
+  );
+  console.log("RADAR_SELF_TEST = PASS");
+}
+
+if (process.env.RADAR_SELF_TEST === "1") {
+  selfTest();
+} else {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  });
+}
