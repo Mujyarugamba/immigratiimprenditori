@@ -17,6 +17,12 @@ function responseFor(request: NextRequest) {
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies
+    .getAll()
+    .some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));
+}
+
 /**
  * Refresh and validate the Supabase Auth session for SSR requests.
  * Authorization remains in the protected application layouts/actions.
@@ -25,8 +31,15 @@ function responseFor(request: NextRequest) {
  */
 export async function updateSession(request: NextRequest) {
   let response = responseFor(request);
-  const { url, publishableKey } = getPublicSupabaseEnv();
 
+  // Anonymous public traffic has no Supabase session to validate or refresh.
+  // Skipping Auth here avoids putting every public document behind a remote
+  // auth round-trip while protected layouts/actions still enforce authorization.
+  if (!hasSupabaseAuthCookie(request)) {
+    return response;
+  }
+
+  const { url, publishableKey } = getPublicSupabaseEnv();
   const supabase = createServerClient(url, publishableKey, {
     cookies: {
       getAll() {
