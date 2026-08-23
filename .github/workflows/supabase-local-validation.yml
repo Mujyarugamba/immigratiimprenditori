@@ -23,6 +23,7 @@ on:
       - "scripts/ci/rate-limit-smoke.sql"
       - "scripts/ci/go-live-db-smoke.sql"
       - "scripts/ci/backup-archive-smoke.sh"
+      - "scripts/ci/post-restore-auth-hooks.sql"
       - "scripts/ci/auth-integration-smoke.mjs"
       - "scripts/ci/http-smoke.mjs"
       - "next.config.ts"
