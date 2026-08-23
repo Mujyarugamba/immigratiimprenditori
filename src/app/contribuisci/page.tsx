@@ -96,7 +96,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
           {hasError ? (
             <div className="border border-black p-4 text-sm text-black" role="alert">
               {params.errore === "campi"
-                ? "Controlla i campi obbligatori, i limiti dei valori e il consenso al ricontatto."
+                ? "Controlla i campi obbligatori, i limiti dei valori e la presa d'atto dell'informativa privacy."
                 : "L'invio non è riuscito. Riprova tra poco."}
             </div>
           ) : null}
@@ -190,18 +190,20 @@ export default async function ContribuisciPage({ searchParams }: Props) {
             </section>
 
             <section className="border-t border-black pt-8">
-              <h2 className="text-xl font-semibold text-black">4. Consensi</h2>
+              <h2 className="text-xl font-semibold text-black">4. Privacy e autorizzazioni</h2>
               <div className="mt-5 space-y-4 text-sm leading-6 text-neutral-700">
                 <label className="flex items-start gap-3">
                   <input name="consent_contact" type="checkbox" required className="mt-1 size-4" />
                   <span>
-                    Autorizzo la redazione a utilizzare i miei recapiti per contattarmi in relazione a questa proposta. <strong className="text-black">Obbligatorio.</strong>
+                    Prendo atto che nome, email e gli eventuali altri recapiti indicati saranno trattati dalla redazione per ricevere, valutare e, se necessario, approfondire questa proposta. Ho letto la {" "}
+                    <Link href="/privacy" className="font-semibold text-black underline underline-offset-4">Privacy Policy</Link>.
+                    {" "}<strong className="text-black">Obbligatorio per inviare la proposta.</strong>
                   </span>
                 </label>
                 <label className="flex items-start gap-3">
                   <input name="consent_publication" type="checkbox" className="mt-1 size-4" />
                   <span>
-                    Autorizzo la possibile pubblicazione del materiale inviato, fermo restando il lavoro di verifica, selezione e cura della redazione. Per immagini, audio o video possono essere richieste ulteriori autorizzazioni.
+                    Autorizzo la possibile pubblicazione del materiale inviato, fermo restando il lavoro di verifica, selezione e cura della redazione. Per immagini, audio o video possono essere richieste ulteriori autorizzazioni. <strong className="text-black">Facoltativo.</strong>
                   </span>
                 </label>
               </div>

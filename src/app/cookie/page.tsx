@@ -11,15 +11,16 @@ export default function CookiePage() {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Documenti legali · aggiornamento 21 agosto 2026
+          Documenti legali · aggiornamento 23 agosto 2026
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
           Cookie Policy
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          ImmigratiImprenditori.it utilizza soltanto strumenti tecnici necessari
-          al funzionamento e alla sicurezza del servizio. Non sono attivi cookie
-          di profilazione, advertising o analytics comportamentali.
+          ImmigratiImprenditori.it utilizza strumenti tecnici necessari al funzionamento e alla
+          sicurezza del servizio e, quando abilitata, una misurazione statistica aggregata di prima
+          parte priva di cookie o identificatori individuali. Non sono attivi cookie di profilazione,
+          advertising o analytics comportamentali.
         </p>
       </header>
 
@@ -52,7 +53,28 @@ export default function CookiePage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">3. Nessun cookie di profilazione</h2>
+          <h2 className="text-2xl font-semibold text-black">3. Misurazione aggregata di prima parte</h2>
+          <p className="mt-4">
+            Quando la funzione di misurazione è abilitata, il browser invia a un endpoint dello stesso
+            sito soltanto il percorso della pagina, senza query string, e la lingua della piattaforma.
+            La richiesta è effettuata senza credenziali applicative e non usa cookie analytics,
+            identificatori pubblicitari o identificatori individuali creati dall&apos;applicazione.
+          </p>
+          <p className="mt-3">
+            Il database applicativo incrementa direttamente un conteggio giornaliero aggregato per
+            percorso e lingua: non conserva nell&apos;archivio analytics indirizzo IP, user-agent, account,
+            identificatori cookie o una sequenza di eventi riferibile a un visitatore. La misurazione
+            non viene inviata quando il browser segnala Global Privacy Control o Do Not Track.
+          </p>
+          <p className="mt-3">
+            I normali dati tecnici di connessione che i fornitori infrastrutturali possono trattare per
+            trasmettere richieste, prevenire abusi e garantire sicurezza restano distinti da questa
+            misurazione applicativa aggregata e sono descritti nella Privacy Policy.
+          </p>
+        </section>
+
+        <section className="border-t border-black pt-8">
+          <h2 className="text-2xl font-semibold text-black">4. Nessun cookie di profilazione</h2>
           <p className="mt-4">
             Alla data di aggiornamento non risultano integrati nel sito Google Analytics, pixel
             pubblicitari, sistemi di remarketing, Hotjar o altri strumenti di tracciamento
@@ -62,21 +84,24 @@ export default function CookiePage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">4. Perché non compare un banner “Accetta tutto”</h2>
+          <h2 className="text-2xl font-semibold text-black">5. Perché non compare un banner “Accetta tutto”</h2>
           <p className="mt-4">
             Le linee guida del Garante distinguono gli strumenti tecnici, necessari al servizio,
-            dagli strumenti non tecnici che richiedono consenso preventivo. Poiché il sito utilizza
-            soltanto strumenti tecnici, non viene mostrato un banner di consenso privo di una scelta
-            reale da compiere.
+            dagli strumenti non tecnici che richiedono consenso preventivo. Gli strumenti tecnici
+            non richiedono consenso, ma devono essere descritti nell&apos;informativa. La misurazione
+            applicativa descritta sopra non scrive cookie o identificatori di tracciamento e produce
+            soltanto statistiche aggregate di prima parte.
           </p>
           <p className="mt-3">
-            Gli strumenti non tecnici vengono attivati soltanto quando sono presenti le informazioni
-            e i meccanismi di consenso richiesti dalla normativa applicabile.
+            Poiché non vengono attivati strumenti non tecnici che richiedano una scelta preventiva,
+            non viene mostrato un banner “Accetta tutto” privo di una scelta reale da compiere.
+            Eventuali strumenti non tecnici saranno attivati soltanto dopo aver predisposto le
+            informazioni e i meccanismi di consenso richiesti dalla normativa applicabile.
           </p>
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">5. Link e servizi esterni</h2>
+          <h2 className="text-2xl font-semibold text-black">6. Link e servizi esterni</h2>
           <p className="mt-4">
             Un normale link verso un sito esterno non comporta, di per sé, il caricamento sul
             nostro sito dei cookie del servizio esterno. Quando l&apos;utente segue il link, si
@@ -89,7 +114,7 @@ export default function CookiePage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">6. Gestione dal browser</h2>
+          <h2 className="text-2xl font-semibold text-black">7. Gestione dal browser</h2>
           <p className="mt-4">
             È possibile eliminare o bloccare i cookie dalle impostazioni del browser. Il blocco
             dei cookie tecnici può però impedire l&apos;accesso alle aree riservate o compromettere
@@ -98,9 +123,9 @@ export default function CookiePage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">7. Titolare e contatti</h2>
+          <h2 className="text-2xl font-semibold text-black">8. Titolare e contatti</h2>
           <p className="mt-4">
-            Il titolare è AIPEL. Per informazioni sui cookie:
+            Il titolare è AIPEL. Per informazioni sui cookie e sugli strumenti tecnici:
             {" "}<a className="underline underline-offset-4" href="mailto:cookies@aipel.it">cookies@aipel.it</a>.
           </p>
           <p className="mt-3">
