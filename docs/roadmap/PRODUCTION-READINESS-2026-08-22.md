@@ -21,27 +21,27 @@ Nel ciclo corrente:
 
 ## Ultimo codice verificato
 
-Commit applicativo verificato: `d76d892f81c930a0ebe89834ab3f97007d57204b`.
+Commit applicativo verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`.
 
-- `Editorial v1 CI` run `32619432154`: **COMPLETED / SUCCESS**.
-- `Supabase local migration validation` run `32619432133`: tutti i gate DB/infra/app passano; il job conclude failure esclusivamente perché il browser mantiene intenzionalmente rosso il requisito editoriale **Storie reali**.
-- Browser nel laboratorio Supabase: **18 PASS / 1 FAIL**; unico failure = nessuna storia/intervista/testimonianza reale pubblicata.
+- `Editorial v1 CI` run `32620148591`: **COMPLETED / SUCCESS**.
+- `Supabase local migration validation` run `32620148584`: tutti i gate DB/infra/app passano; il job conclude failure esclusivamente perché il browser mantiene intenzionalmente rosso il requisito editoriale **Storie reali**.
+- Browser nel laboratorio Supabase: **19 PASS / 1 FAIL**; unico failure = nessuna storia/intervista/testimonianza reale pubblicata.
 - La matrice core multilingua **70/70** passa anche contro il vero stack Supabase locale.
-
-Le revisioni documentali successive non cambiano il codice verificato.
+- Il nuovo gate tastiera verifica focus visibile del salto al contenuto e trasferimento del focus a `#contenuto-principale`: **PASS**.
 
 ## Gate tecnici verificati
 
 | Gate | Stato | Evidenza / nota |
 | --- | --- | --- |
-| TypeScript | PASS | `Editorial v1 CI` run `32619432154` |
+| TypeScript | PASS | `Editorial v1 CI` run `32620148591` |
 | Unit / contract tests | PASS | inclusi gate profilo autore e contrasto WCAG |
 | Next.js build | PASS | build standard + build contro Supabase locale; 180 route |
 | HTTP smoke | PASS | route critiche + header di sicurezza |
-| Public browser smoke | PASS | homepage/shell, lingue, responsive e navigazione core |
+| Public browser smoke | PASS | homepage/shell, lingue, responsive, tastiera e navigazione core |
 | Matrice 7 lingue × 10 superfici | PASS | 70/70 risposte complete, `lang`, `dir`, H1 e link localizzati |
 | Internal-link integrity | PASS | verificato sul vero stack Supabase locale |
 | Responsive automatico | PASS | 320 / 390 / 768 px senza overflow sulle superfici core |
+| Keyboard skip/focus | PASS | primo Tab → skip link visibile con outline; Invio → focus sul contenuto principale |
 | Slow-network core | PASS | homepage con latenza artificiale entro budget DOM/request |
 | Local DB cold-start | PASS | catena standalone ricostruita da database vuoto |
 | PostgreSQL lint | PASS | nessun errore schema/funzioni |
@@ -55,6 +55,7 @@ Le revisioni documentali successive non cambiano il codice verificato.
 | Dependency install/audit | PASS | 0 vulnerabilità al gate configurato |
 | Supabase Auth deprecation guard | PASS | nessun `auth.role()` eseguibile nella catena verificata |
 | Contrast/focus automatico | PASS | testo piccolo >=4.5:1; focus >=3:1 su shell chiare/scure |
+| Author editorial lifecycle | PASS LOCAL/CI | MFA → contenuto pubblicato → autore privato → attribuzione → evidence gate → profilo pubblico → cleanup |
 
 ## Ambiente database non-production gratuito
 
@@ -79,6 +80,7 @@ Controlli verificati:
 - backup archive integrity;
 - Auth integration reale con utenti effimeri;
 - build applicativa contro il DB locale;
+- browser autenticato con MFA e ciclo autore evidence-gated;
 - teardown completo.
 
 Gate:
@@ -103,7 +105,8 @@ Il browser/laboratorio verifica prima del gate Storie che:
 - Open Data offre JSON/CSV/XLSX, con XLSX validato realmente;
 - analytics first-party aggrega senza cookie;
 - RTL arabo e navigazione mobile sono utilizzabili senza overflow sulle superfici core;
-- le 70 combinazioni core delle sette lingue restituiscono risposte complete e strutturalmente valide.
+- le 70 combinazioni core delle sette lingue restituiscono risposte complete e strutturalmente valide;
+- la navigazione da tastiera dispone di salto al contenuto verificato e focus visibile.
 
 ## Gate editoriali e di autorevolezza
 
@@ -117,8 +120,8 @@ Il browser/laboratorio verifica prima del gate Storie che:
 | SEO internazionale | PASS — FOUNDATION | canonical/hreflang verificati sulle home localizzate; sitemap/noindex preview predisposti |
 | Sette lingue | READY — CORE 70/70 PASS | IT/EN/FR/ES/DE/AR/ZH × 10 superfici core verificate sul vero stack locale |
 | RTL arabo | PASS — CORE | `/ar`, `/ar/chi-siamo`, `/ar/esplora` senza overflow mobile |
-| Profili autore | BACK-OFFICE + GATE PASS / REAL DATA PENDING | gestione redazionale protetta da MFA AAL2; pubblicazione consentita solo con evidenza e contenuto pubblico collegato; cold-start = 0 profili pubblici reali |
-| Accessibilità | AUTOMATED CORE + CONTRAST PASS / HUMAN WCAG QA PENDING | struttura/reflow/contrasto/focus passano; non equivale a certificazione WCAG completa |
+| Profili autore | **READY — FULL E2E** | back-office MFA AAL2, attribuzione ed evidence gate verificati; cold-start = 0 profili reali per scelta di integrità editoriale |
+| Accessibilità | AUTOMATED CORE + CONTRAST + KEYBOARD PASS / HUMAN WCAG QA PENDING | struttura/reflow/contrasto/focus/skip link passano; non equivale a certificazione WCAG completa |
 | Correzioni/versioni | PREPARED / PROD NOT ACTIVATED | schema predisposto; pagina pubblica solo con record reali |
 | Controlli automatici | PASS | CI applicativo, DB/security, link integrity, multilingua e release source gates automatici |
 | Numero zero | **5/6 EVIDENZE / STORIES BLOCKER** | requisito Storie è l'unico failure del browser locale completo |
@@ -148,9 +151,9 @@ Gate:
 - `OUTREACH_SENT = 0`
 - `NUMBER_ZERO_STORIES = BLOCKED_BY_REAL_CONTENT`
 
-## Profili autore reali
+## Profili autore
 
-Il back-office ora espone:
+Il back-office espone:
 
 - `/app/redazione/autori` per elenco e creazione privata;
 - `/app/redazione/autori/[id]` per verifica, modifica e attribuzioni;
@@ -159,17 +162,19 @@ Il back-office ora espone:
 - blocco della pubblicazione se mancano bio/evidenza minima;
 - blocco della pubblicazione se non esiste almeno un contenuto `ready + published + public` collegato.
 
-Il security smoke continua a restituire `anon_public_authors = 0`: il ramo **non introduce profili fittizi**. #36 resta quindi da rifinire con identità reali, non con dati di test persistenti.
+Il browser autenticato ha verificato l'intero ciclo con dati effimeri e cleanup finale. Il security smoke continua a restituire `anon_public_authors = 0`: il ramo **non introduce profili fittizi**. La funzione #36 è quindi READY; i futuri autori reali verranno popolati soltanto quando esistono identità e attribuzioni effettive.
 
 ## Accessibilità automatizzata
 
-Oltre ai gate strutturali già presenti, il branch ora protegge anche i token critici di contrasto:
+Oltre ai gate strutturali già presenti, il branch protegge anche i token critici di contrasto e il percorso di tastiera iniziale:
 
 - testo piccolo/stati secondari: rapporto minimo **4.5:1** su bianco;
 - focus visibile: rapporto minimo **3:1** sia su superficie chiara sia sulla shell navy;
+- primo Tab: skip link visibile e dotato di outline;
+- attivazione skip link: focus trasferito al contenuto principale;
 - reduced motion e reflow restano coperti.
 
-Questo riduce il rischio tecnico del #92 ma non sostituisce tastiera completa, screen reader, zoom, percezione contenuti e altri controlli umani WCAG 2.2 AA.
+Questo riduce il rischio tecnico del #92 ma non sostituisce tastiera completa su tutti i flussi, screen reader, zoom, percezione contenuti e altri controlli umani WCAG 2.2 AA.
 
 ## Sostegno economico
 
@@ -214,25 +219,20 @@ La validazione locale **non equivale** ad attivazione sul database live.
 
 Riferimento: `docs/roadmap/ROADMAP-110-PRIORITIES.md`.
 
-- **READY: 30/33**
-- **DA RIFINIRE: 2/33**
+- **READY: 31/33**
+- **DA RIFINIRE: 1/33 (#92 WCAG QA umano)**
 - **BLOCCANTE — CONTENUTO REALE: 1/33 (#10 Storie d'impresa)**
 
-I due punti ancora da rifinire sono:
-
-1. #36 — popolamento e verifica di profili autore reali;
-2. #92 — QA umano completo WCAG 2.2 AA.
-
-#30 multilingua e #99 controlli automatici sono passati a READY sulla base dei gate verificati sopra.
+#30 multilingua, #36 Profili autore e #99 controlli automatici sono READY sulla base dei gate verificati sopra.
 
 ## Blocchi reali prima della produzione
 
 1. **Numero zero — Storie:** acquisire, approvare e pubblicare almeno una storia/intervista/testimonianza reale.
-2. **Autori:** inserire profili reali quando richiesti dai contenuti del numero zero.
-3. **Accessibilità:** completare QA umano WCAG 2.2 AA; il gate automatico è una baseline forte, non una certificazione.
+2. **Accessibilità:** completare QA umano WCAG 2.2 AA; il gate automatico è una baseline forte, non una certificazione.
+3. **Contenuti/autori reali:** inserire identità autore soltanto quando richieste da contenuti realmente attribuiti; questo non è più un difetto funzionale #36.
 4. **Legal:** revisione finale Privacy / Cookie / Termini e dati amministrativi esposti.
 5. **Security pre-release:** CSP finale e verifica configurazione production.
-6. **Required checks:** `main` è protetto via ruleset, ma i required status checks vanno verificati separatamente prima di dichiararli attivi.
+6. **Required checks:** `main` è protetto, ma i required status checks risultano ancora non configurati/attivi e richiedono una decisione di governance prima del rilascio.
 7. **Migration produzione:** definire ordine/rollback e applicare solo con autorizzazione esplicita.
 8. **Production secrets/activation:** MFA Auth, backup schedulato, analytics e altre funzioni validate localmente devono essere configurate esplicitamente sul live.
 9. **Netlify final QA:** preview del commit candidato, controllo umano desktop/tablet/mobile, performance e smoke finale.
@@ -244,6 +244,7 @@ Social e pagamenti possono rimanere disabilitati senza bloccare il sito se non v
 
 - `APPLICATION_CI = PASS`
 - `PUBLIC_BROWSER_RESPONSIVE = PASS`
+- `PUBLIC_KEYBOARD_SKIP_FOCUS = PASS`
 - `MULTILINGUAL_CORE_70_70 = PASS`
 - `INTERNAL_LINK_INTEGRITY = PASS`
 - `DB_LOCAL_NONPROD = PASS`
@@ -255,13 +256,15 @@ Social e pagamenti possono rimanere disabilitati senza bloccare il sito se non v
 - `BACKUP_ARCHIVE_LOCAL = PASS`
 - `MFA_AAL2_LOCAL = PASS`
 - `AUTHOR_BACKOFFICE = PASS_LOCAL_CI`
-- `AUTHOR_REAL_PUBLIC_PROFILES = 0`
+- `AUTHOR_FULL_LIFECYCLE_E2E = PASS`
+- `AUTHOR_REAL_PUBLIC_PROFILES = 0_INTENTIONAL`
 - `WCAG_AUTOMATED_CONTRAST = PASS`
+- `WCAG_HUMAN_QA = PENDING`
 - `MAIN_UNTOUCHED = PASS`
 - `PRODUCTION_DB_UNTOUCHED = PASS`
 - `PAID_SUPABASE_BRANCH = NOT_NEEDED_NOW`
-- `GO_LIVE_A_READY = 30/33`
+- `GO_LIVE_A_READY = 31/33`
 - `NUMBER_ZERO_STORIES = BLOCKER`
 - `PRODUCTION_RELEASE = BLOCKED_BY_EXPLICIT_FINAL_GATES`
 
-Il ramo non è bloccato da errori di compilazione, database, multilingua, link integrity, responsive o infrastruttura di test. Il **solo failure automatico residuo** del laboratorio è deliberatamente editoriale: manca una storia reale. Restano inoltre due rifiniture A (#36 dati autore reali, #92 QA umano) e i gate amministrativi/production sopra elencati.
+Il ramo non è bloccato da errori di compilazione, database, multilingua, link integrity, responsive, tastiera core o infrastruttura di test. Il **solo failure automatico residuo** del laboratorio è deliberatamente editoriale: manca una storia reale. Rimangono inoltre il QA umano WCAG e i gate amministrativi/production sopra elencati.

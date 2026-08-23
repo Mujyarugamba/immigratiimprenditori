@@ -30,8 +30,8 @@ Base di integrazione: `feature/institutional-identity`
 | 9 | Social istituzionali | CONFIG PASS / PROFILI ESTERNI PENDING | LinkedIn, X, YouTube restano disabilitati finché URL reali non verificati |
 | 10 | Catalogo lingue DB | PASS | Mantenere catalogo editoriale |
 | 11 | 7 lingue prioritarie | PASS | IT EN FR ES DE AR ZH |
-| 12 | Multilingua — infrastruttura | BASE PASS — BROWSER VERIFIED | Routing, switch, `lang`/`dir` e RTL core verificati; rifinire fallback/casi periferici |
-| 13 | Multilingua — interfaccia | IN CORSO / CORE PASS | Home shell verificata nelle 7 lingue; completare copertura delle pagine pubbliche previste |
+| 12 | Multilingua — infrastruttura | PASS — CORE VERIFIED | Routing, switch, `lang`/`dir`, RTL e matrice core verificati |
+| 13 | Multilingua — interfaccia | GO-LIVE CORE PASS — 70/70 | 7 lingue × 10 superfici core verificate sul vero stack locale; ampliare contenuti reali nel tempo |
 | 14 | Multilingua — traduzioni contenuti | PREPARATO / LOCAL DB PASS | Attivare modello gruppi/versioni solo dopo decisione production |
 | 15 | SEO internazionale | PASS — FOUNDATION / BROWSER VERIFIED | Hreflang/canonical verificati; mantenere sitemap/noindex preview e QA finale |
 | 16 | Osservatorio — struttura | GO-LIVE CORE PASS — E2E | Superficie reale + almeno un indicatore navigabile verificati; ampliare indicatori nel tempo |
@@ -48,7 +48,7 @@ Base di integrazione: `feature/institutional-identity`
 | 27 | GIS / mappe quantitative | BASE PASS | QA cartografico e nuovi indicatori compatibili |
 | 28 | Analisi e ricerche | BASE PASS | Filtri, autori, raccolte |
 | 29 | Storie e voci | **BLOCCANTE — CONTENUTO REALE MANCANTE** / SHORTLIST READY | Pubblicare almeno una storia/intervista/testimonianza reale; nessun contenuto fittizio o riclassificazione artificiale |
-| 30 | Autori | FUNCTION E2E PASS / REAL PROFILES PENDING | Pagina/listing/ORCID/JSON-LD verificati; popolare identità autore reali prima del go-live se richieste dai contenuti |
+| 30 | Autori | **GO-LIVE FUNCTION READY — FULL E2E** | MFA AAL2, profilo privato, attribuzione, evidence gate, pubblicazione e cleanup verificati; popolare solo identità reali quando esistono |
 | 31 | Fonti | PASS | Registro evidence-gated; mantenere fonte → dati → copertura → periodicità → metodo/limiti |
 | 32 | Glossario scientifico | BASE PASS | Ampliare e tradurre |
 | 33 | Rapporti Centro Studi | ARCHITETTURA PREPARATA | Attivare collana solo con un rapporto reale del Centro Studi |
@@ -98,9 +98,9 @@ Base di integrazione: `feature/institutional-identity`
 | 77 | Donazioni / pagamenti | INTENTIONALLY DISABLED | Provider, conto, dati amministrativi e formulazione fiscale prima dell'attivazione |
 | 78 | Sponsorizzazioni / commissioned research | DA FARE | Governance e trasparenza |
 | 79 | Analytics privacy-friendly | LOCAL/CI PASS — COOKIELESS | Aggregazione first-party senza cookie verificata E2E; attivazione production separata |
-| 80 | Accessibilità WCAG 2.2 AA | AUTOMATED CORE PASS / HUMAN QA PENDING | Landmark, H1, alt, label, nomi accessibili, lang/dir e skip-link verificati; audit umano completo ancora necessario |
+| 80 | Accessibilità WCAG 2.2 AA | AUTOMATED CORE + CONTRAST + KEYBOARD PASS / HUMAN QA PENDING | Struttura, reflow, contrasto/focus e skip-link verificati; audit umano completo ancora necessario |
 | 81 | Responsive reale | BROWSER PASS — 320/390/768 | Reflow e navigazione mobile verificati automaticamente; resta QA umano su dispositivi reali |
-| 82 | Performance | SLOW-NETWORK CORE PASS / LIGHTHOUSE PENDING | Homepage passa test high-latency; completare Lighthouse/caching/bundle |
+| 82 | Performance | SLOW-NETWORK CORE PASS / LIGHTHOUSE PENDING | Homepage passa test high-latency; completare Lighthouse/caching/bundle nel pre-release |
 | 83 | Security headers/CSP | HEADERS PASS / FINAL CSP QA PENDING | Header di sicurezza coperti dallo smoke; chiudere CSP definitiva nel pre-release |
 | 84 | Rate limiting persistente | API + FORM + LOGIN LOCAL/CI PASS | API Netlify e limiti DB/form verificati; login persistente verificato lato DB e browser, activation production separata |
 | 85 | Leaked Password Protection | FREE UNAVAILABLE / PRIVILEGED MFA MITIGATION PASS LOCAL/CI | Funzione Supabase non disponibile sul piano Free; redattori/admin protetti da TOTP obbligatorio, activation production separata |
@@ -108,8 +108,8 @@ Base di integrazione: `feature/institutional-identity`
 | 87 | MFA amministratori | LOCAL/CI PASS — TOTP + AAL2 ENFORCED | Enrollment/challenge/verify reali, redattore AAL1 negato e AAL2 persistito su nuove richieste; activation production separata |
 | 88 | Audit log | LOCAL/CI PASS | Activity log e policy insert validate nel cold-start; activation production separata |
 | 89 | Backup / recovery | WORKFLOW + ARCHIVE INTEGRITY LOCAL/CI PASS | PostgreSQL 17 dump/restore + cifratura/retention predisposti; configurare secret e run production solo nel pre-release autorizzato |
-| 90 | Test E2E | LOCAL/CI PASS — UNICO GATE ROSSO: STORIE | Auth, MFA, rate limit, superfici pubbliche, a11y, lingue, RTL, responsive, XLSX, analytics e rete lenta passano; resta solo contenuto reale Storie |
-| 91 | Branch protection | PASS — MAIN PROTECTED BY RULESET | `main` risulta protected; non dichiarare required status checks finché non verificati separatamente |
+| 90 | Test E2E | LOCAL/CI PASS — 19 PASS / UNICO GATE ROSSO: STORIE | Auth, MFA, autori, rate limit, superfici pubbliche, a11y, lingue, RTL, responsive, XLSX, analytics e rete lenta passano; resta solo contenuto reale Storie |
+| 91 | Branch protection | MAIN PROTECTED / REQUIRED CHECKS OFF | `main` è protected, ma required status checks risultano `enforcement_level: off` e senza context/check; decisione di governance pre-release |
 | 92 | Registro correzioni | PREPARATO / LOCAL DB PASS | Schema validato localmente; pagina pubblica solo con avvisi reali |
 | 93 | Quality gate finale | BLOCKER | Chiudere Storie reali, QA umano WCAG/device, performance/Lighthouse, legal e gate production |
 | 94 | Merge PR → main | BLOCCATO | Solo dopo gate; PR #9 resta draft |
@@ -124,20 +124,30 @@ Base di integrazione: `feature/institutional-identity`
 - Browser E2E login throttling: primi tentativi invalidi gestiti come credenziali errate e soglia successiva bloccata dal rate limiter persistente: PASS.
 - TOTP locale è abilitato esplicitamente nel laboratorio CI; nessun default implicito viene assunto.
 - Cleanup utenti/account/proposte/contenuti effimeri: PASS; nessuna identità di test conservata.
-- `main` risulta protetto tramite ruleset GitHub. I required status checks non vengono dichiarati attivi finché non verificati separatamente.
+- `main` risulta protetto. I required status checks non sono attualmente imposti e non vengono modificati in questo ciclo.
 - Nessuna migration è stata applicata al database production; nessun merge e nessun deploy production sono stati eseguiti.
 
 ## Verifica go-live A — 2026-08-23
 
-Codice verificato: `5617d9a00ddab75e5d6b71ffba1e944ac7276904`.
+Codice verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`.
 
-- `Editorial v1 CI` run `32602163909`: **SUCCESS completo**, inclusi typecheck, 80 test, source gate, dependency audit, Auth guard, build, HTTP smoke e browser pubblico.
-- `Supabase local migration validation` run `32602163939`: cold-start, DB lint, RLS/security, rate limiting, audit+analytics, backup, Auth e build **PASS**.
-- Browser laboratorio: **16 PASS / 1 FAIL**. L'unico failure è il gate Storie perché non esiste ancora una storia/intervista/testimonianza reale pubblicata.
+- `Editorial v1 CI` run `32620148591`: **SUCCESS completo**, inclusi typecheck, unit/contract test, source gate, dependency audit, Auth guard, build, HTTP smoke e browser pubblico.
+- `Supabase local migration validation` run `32620148584`: cold-start, DB lint, RLS/security, rate limiting, audit+analytics, backup, Auth e build **PASS**.
+- Browser laboratorio: **19 PASS / 1 FAIL**. L'unico failure è il gate Storie perché non esiste ancora una storia/intervista/testimonianza reale pubblicata.
+- Ciclo autore completo: redattore AAL2 → contenuto pubblicato → autore privato → attribuzione → evidence gate → profilo pubblico → pagina autore → cleanup: **PASS**.
+- Accessibilità automatica: skip link visibile al primo Tab, outline non nullo e trasferimento focus al contenuto principale con Invio: **PASS**.
 - Osservatorio, Atlante e Rotte vengono verificati prima dell'assert sulle Storie e passano: indicatore navigabile, Paese evidence-backed e rotta evidence-backed presenti.
 - Cold-start: 34 territori attivi e 11 rotte attive; evidenze Futurae collegate alle rotte.
 - Open Data XLSX valido; analytics cookie-less; homepage high-latency; RTL arabo; accessibilità strutturale; reflow 320/390/768 e navigazione mobile: PASS.
 - Nessuna di queste verifiche attiva automaticamente produzione: database live, secrets, backup schedulato, MFA production e analytics production restano separati fino ad autorizzazione.
+
+## Roadmap A sintetica
+
+- **READY: 31/33**
+- **DA RIFINIRE: 1/33 — #92 WCAG 2.2 AA, QA umano finale**
+- **BLOCCANTE CONTENUTO REALE: 1/33 — #10 Storie d'impresa**
+
+#36 Profili autore è ora READY funzionalmente: l'assenza di autori reali nel cold-start è intenzionale e non va colmata con identità fittizie.
 
 ## Sequenza vincolante
 
