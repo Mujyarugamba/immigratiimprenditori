@@ -1,0 +1,394 @@
+name: Authorized Production to staging restore
+
+on:
+  push:
+    branches:
+      - ops/production-restore-drill-20260823
+    paths:
+      - .github/workflows/execute-production-to-staging-authorized.yml
+
+permissions:
+  contents: read
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PROD_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+      EXPECTED_PROD_REF: hvfvfatlaspcpszgizhg
+    steps:
+      - name: Check out operational tooling
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Validate source target identities and staging sentinel read-only
+        id: counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PROD_DB_URL"
+          test -n "$STAGING_DB_URL"
+          test -n "$BACKUP_PASSPHRASE"
+
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlsplit, unquote
+          prod = urlsplit(os.environ['PROD_DB_URL'])
+          stage = urlsplit(os.environ['STAGING_DB_URL'])
+          prod_user = unquote(prod.username or '')
+          stage_user = unquote(stage.username or '')
+          expected = 'postgres.' + os.environ['EXPECTED_PROD_REF']
+          if prod_user != expected:
+              raise SystemExit('RESTORE_IDENTITY = FAIL production project ref mismatch')
+          if not stage_user.startswith('postgres.') or stage_user == prod_user:
+              raise SystemExit('RESTORE_IDENTITY = FAIL staging ref invalid or equals production')
+          for label, u in [('production', prod), ('staging', stage)]:
+              if not (u.hostname or '').endswith('.pooler.supabase.com'):
+                  raise SystemExit(f'RESTORE_IDENTITY = FAIL {label} not Supabase session pooler')
+              if u.port != 5432:
+                  raise SystemExit(f'RESTORE_IDENTITY = FAIL {label} expected port 5432')
+          print('RESTORE_CONNECTION_IDENTITIES = PASS')
+          PY
+
+          qstage() { psql "$STAGING_DB_URL" -Atqc "$1"; }
+          qprod() { psql "$PROD_DB_URL" -Atqc "$1"; }
+
+          stage_contents="$(qstage 'select count(*) from public.contents;')"
+          stage_indicators="$(qstage 'select count(*) from public.observatory_indicators;')"
+          stage_accounts="$(qstage 'select count(*) from public.accounts;')"
+          stage_profiles="$(qstage 'select count(*) from public.profiles;')"
+          stage_auth_users="$(qstage 'select count(*) from auth.users;')"
+          stage_auth_identities="$(qstage 'select count(*) from auth.identities;')"
+          stage_sessions="$(qstage 'select count(*) from auth.sessions;')"
+          stage_refresh="$(qstage 'select count(*) from auth.refresh_tokens;')"
+          stage_mfa="$(qstage 'select count(*) from auth.mfa_factors;')"
+
+          [[ "$stage_contents" == "18" ]]
+          [[ "$stage_indicators" == "1" ]]
+          [[ "$stage_accounts" == "0" ]]
+          [[ "$stage_profiles" == "0" ]]
+          [[ "$stage_auth_users" == "0" ]]
+          [[ "$stage_auth_identities" == "0" ]]
+          [[ "$stage_sessions" == "0" ]]
+          [[ "$stage_refresh" == "0" ]]
+          [[ "$stage_mfa" == "0" ]]
+          echo "STAGING_SENTINEL_IDENTITY = PASS"
+
+          public_extensions="$(qstage "select count(*) from pg_extension e join pg_namespace n on n.oid=e.extnamespace where n.nspname='public' and e.extname <> 'plpgsql';")"
+          [[ "$public_extensions" == "0" ]]
+          echo "STAGING_PUBLIC_EXTENSION_PREFLIGHT = PASS"
+
+          prod_users_sig="$(qprod "select md5(coalesce(string_agg(column_name||':'||udt_name||':'||is_nullable,',' order by ordinal_position),'')) from information_schema.columns where table_schema='auth' and table_name='users';")"
+          stage_users_sig="$(qstage "select md5(coalesce(string_agg(column_name||':'||udt_name||':'||is_nullable,',' order by ordinal_position),'')) from information_schema.columns where table_schema='auth' and table_name='users';")"
+          prod_id_sig="$(qprod "select md5(coalesce(string_agg(column_name||':'||udt_name||':'||is_nullable,',' order by ordinal_position),'')) from information_schema.columns where table_schema='auth' and table_name='identities';")"
+          stage_id_sig="$(qstage "select md5(coalesce(string_agg(column_name||':'||udt_name||':'||is_nullable,',' order by ordinal_position),'')) from information_schema.columns where table_schema='auth' and table_name='identities';")"
+          [[ "$prod_users_sig" == "$stage_users_sig" ]]
+          [[ "$prod_id_sig" == "$stage_id_sig" ]]
+          echo "AUTH_SCHEMA_COMPATIBILITY = PASS"
+
+          languages="$(qprod 'select count(*) from public.languages;')"
+          contents="$(qprod 'select count(*) from public.contents;')"
+          indicators="$(qprod 'select count(*) from public.observatory_indicators;')"
+          accounts="$(qprod 'select count(*) from public.accounts;')"
+          profiles="$(qprod 'select count(*) from public.profiles;')"
+          auth_users="$(qprod 'select count(*) from auth.users;')"
+          auth_identities="$(qprod 'select count(*) from auth.identities;')"
+          migration_count="$(qprod 'select count(*) from supabase_migrations.schema_migrations;')"
+          migration_max="$(qprod "select coalesce(max(version::text),'0') from supabase_migrations.schema_migrations;")"
+          account_orphans="$(qprod "select count(*) from public.accounts a left join auth.users u on u.id=a.auth_user_id where a.auth_user_id is not null and u.id is null;")"
+          profile_orphans="$(qprod "select count(*) from public.profiles p left join auth.users u on u.id=p.id where u.id is null;")"
+          [[ "$account_orphans" == "0" ]]
+          [[ "$profile_orphans" == "0" ]]
+          for v in "$languages" "$contents" "$indicators" "$accounts" "$profiles" "$auth_users" "$auth_identities" "$migration_count" "$migration_max"; do
+            [[ "$v" =~ ^[0-9]+$ ]]
+          done
+          {
+            echo "languages=$languages"
+            echo "contents=$contents"
+            echo "indicators=$indicators"
+            echo "accounts=$accounts"
+            echo "profiles=$profiles"
+            echo "auth_users=$auth_users"
+            echo "auth_identities=$auth_identities"
+            echo "migration_count=$migration_count"
+            echo "migration_max=$migration_max"
+          } >> "$GITHUB_OUTPUT"
+          echo "PRODUCTION_READ_ONLY_PREFLIGHT = PASS"
+
+      - name: Preserve current staging before overwrite
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p staging-preservation
+          supabase db dump --db-url "$STAGING_DB_URL" -f staging-preservation/roles.sql --role-only
+          supabase db dump --db-url "$STAGING_DB_URL" -f staging-preservation/schema.sql
+          supabase db dump --db-url "$STAGING_DB_URL" -f staging-preservation/data.sql --use-copy --data-only \
+            -x "storage.buckets_vectors" \
+            -x "storage.vector_indexes"
+          supabase db dump --db-url "$STAGING_DB_URL" -f staging-preservation/history_schema.sql --schema supabase_migrations
+          supabase db dump --db-url "$STAGING_DB_URL" -f staging-preservation/history_data.sql --use-copy --data-only --schema supabase_migrations
+          docker run --rm \
+            -e DB_URL="$STAGING_DB_URL" \
+            -v "$PWD/staging-preservation:/out" \
+            postgres:17-alpine \
+            sh -lc 'pg_dump "$DB_URL" --data-only --no-owner --no-privileges --use-copy --table=auth.users --table=auth.identities --file=/out/auth_data.sql'
+          for f in roles.sql schema.sql data.sql history_schema.sql history_data.sql auth_data.sql; do
+            test -s "staging-preservation/$f"
+          done
+          tar -C staging-preservation -cf staging-preservation/staging-before-authorized-restore.tar \
+            roles.sql schema.sql data.sql history_schema.sql history_data.sql auth_data.sql
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -pass env:BACKUP_PASSPHRASE \
+            -in staging-preservation/staging-before-authorized-restore.tar \
+            -out staging-preservation/staging-before-authorized-restore.tar.enc
+          sha256sum staging-preservation/staging-before-authorized-restore.tar.enc \
+            > staging-preservation/staging-before-authorized-restore.tar.enc.sha256
+          rm -f staging-preservation/roles.sql staging-preservation/schema.sql staging-preservation/data.sql \
+            staging-preservation/history_schema.sql staging-preservation/history_data.sql \
+            staging-preservation/auth_data.sql staging-preservation/staging-before-authorized-restore.tar
+          test -s staging-preservation/staging-before-authorized-restore.tar.enc
+          echo "STAGING_PRESERVATION_BACKUP = PASS"
+
+      - name: Upload encrypted staging preservation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-before-authorized-restore-${{ github.run_id }}
+          path: |
+            staging-preservation/staging-before-authorized-restore.tar.enc
+            staging-preservation/staging-before-authorized-restore.tar.enc.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build fresh production restore set read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p restore-set
+          supabase db dump --db-url "$PROD_DB_URL" -f restore-set/roles.sql --role-only
+          supabase db dump --db-url "$PROD_DB_URL" -f restore-set/schema.sql
+          supabase db dump --db-url "$PROD_DB_URL" -f restore-set/data.sql --use-copy --data-only \
+            -x "storage.buckets_vectors" \
+            -x "storage.vector_indexes"
+          supabase db dump --db-url "$PROD_DB_URL" -f restore-set/history_schema.sql --schema supabase_migrations
+          supabase db dump --db-url "$PROD_DB_URL" -f restore-set/history_data.sql --use-copy --data-only --schema supabase_migrations
+          docker run --rm \
+            -e DB_URL="$PROD_DB_URL" \
+            -v "$PWD/restore-set:/out" \
+            postgres:17-alpine \
+            sh -lc 'pg_dump "$DB_URL" --data-only --no-owner --no-privileges --use-copy --table=auth.users --table=auth.identities --file=/out/auth_data.sql'
+          for f in roles.sql schema.sql data.sql history_schema.sql history_data.sql auth_data.sql; do
+            test -s "restore-set/$f"
+          done
+          grep -Eq 'CREATE TABLE .*contents' restore-set/schema.sql
+          grep -Eq 'COPY .*languages' restore-set/data.sql
+          grep -Eq 'COPY auth\.users|COPY "auth"\."users"' restore-set/auth_data.sql
+          echo "PRODUCTION_RESTORE_SET = PASS"
+
+      - name: Normalize known managed role statements
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - restore-set/roles.sql <<'PY'
+          from pathlib import Path
+          import re, sys
+          path = Path(sys.argv[1])
+          text = path.read_text(encoding='utf-8')
+          parts = re.split(r'(?<=;)', text)
+          kept = []
+          alter_role = re.compile(r'(?is)^\s*ALTER\s+ROLE\b.*\blog_min_messages\b')
+          grant_parameter = re.compile(r'(?is)^\s*GRANT\s+SET\s+ON\s+PARAMETER\s+"?log_min_messages"?\s+TO\b')
+          bad_cli_grant = re.compile(r'(?is)^\s*GRANT\s+"?postgres"?\s+TO\s+"?cli_login_postgres"?\b')
+          for part in parts:
+              statement = part.strip()
+              if statement and (alter_role.match(statement) or grant_parameter.match(statement) or bad_cli_grant.match(statement)):
+                  continue
+              kept.append(part)
+          filtered = ''.join(kept)
+          if re.search(r'(?i)\blog_min_messages\b', filtered):
+              raise SystemExit('unrecognized log_min_messages statement survived normalization')
+          path.write_text(filtered, encoding='utf-8')
+          print('RESTORE_ROLE_NORMALIZATION = PASS')
+          PY
+
+      - name: Build atomic restore guards and postflight
+        shell: bash
+        env:
+          PROD_LANGUAGES: ${{ steps.counts.outputs.languages }}
+          PROD_CONTENTS: ${{ steps.counts.outputs.contents }}
+          PROD_INDICATORS: ${{ steps.counts.outputs.indicators }}
+          PROD_ACCOUNTS: ${{ steps.counts.outputs.accounts }}
+          PROD_PROFILES: ${{ steps.counts.outputs.profiles }}
+          PROD_AUTH_USERS: ${{ steps.counts.outputs.auth_users }}
+          PROD_AUTH_IDENTITIES: ${{ steps.counts.outputs.auth_identities }}
+          PROD_MIGRATION_COUNT: ${{ steps.counts.outputs.migration_count }}
+          PROD_MIGRATION_MAX: ${{ steps.counts.outputs.migration_max }}
+        run: |
+          set -euo pipefail
+          cat > restore-set/pre_restore.sql <<'SQL'
+          DO $guard$
+          BEGIN
+            IF (SELECT count(*) FROM public.contents) <> 18 THEN
+              RAISE EXCEPTION 'STAGING_CHANGED_SINCE_PREFLIGHT contents';
+            END IF;
+            IF (SELECT count(*) FROM public.observatory_indicators) <> 1 THEN
+              RAISE EXCEPTION 'STAGING_CHANGED_SINCE_PREFLIGHT indicators';
+            END IF;
+            IF (SELECT count(*) FROM auth.users) <> 0 OR (SELECT count(*) FROM auth.identities) <> 0 THEN
+              RAISE EXCEPTION 'STAGING_AUTH_CHANGED_SINCE_PREFLIGHT';
+            END IF;
+          END;
+          $guard$;
+
+          DROP SCHEMA public CASCADE;
+          CREATE SCHEMA public AUTHORIZATION postgres;
+          DROP SCHEMA IF EXISTS supabase_migrations CASCADE;
+          SQL
+
+          cat > restore-set/post_restore.sql <<SQL
+          SET session_replication_role = origin;
+
+          DO \$hook\$
+          BEGIN
+            IF to_regclass('auth.users') IS NULL THEN
+              RAISE EXCEPTION 'RESTORE_AUTH_USERS_MISSING';
+            END IF;
+            IF to_regprocedure('public.handle_new_user()') IS NULL THEN
+              RAISE EXCEPTION 'RESTORE_HANDLE_NEW_USER_MISSING';
+            END IF;
+          END;
+          \$hook\$;
+
+          DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+          CREATE TRIGGER on_auth_user_created
+            AFTER INSERT ON auth.users
+            FOR EACH ROW
+            EXECUTE FUNCTION public.handle_new_user();
+
+          DO \$verify\$
+          DECLARE
+            v_rls integer;
+            v_hook integer;
+            v_account_orphans integer;
+            v_profile_orphans integer;
+          BEGIN
+            IF (SELECT count(*) FROM public.languages) <> $PROD_LANGUAGES THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH languages';
+            END IF;
+            IF (SELECT count(*) FROM public.contents) <> $PROD_CONTENTS THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH contents';
+            END IF;
+            IF (SELECT count(*) FROM public.observatory_indicators) <> $PROD_INDICATORS THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH indicators';
+            END IF;
+            IF (SELECT count(*) FROM public.accounts) <> $PROD_ACCOUNTS THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH accounts';
+            END IF;
+            IF (SELECT count(*) FROM public.profiles) <> $PROD_PROFILES THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH profiles';
+            END IF;
+            IF (SELECT count(*) FROM auth.users) <> $PROD_AUTH_USERS THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH auth_users';
+            END IF;
+            IF (SELECT count(*) FROM auth.identities) <> $PROD_AUTH_IDENTITIES THEN
+              RAISE EXCEPTION 'RESTORE_COUNT_MISMATCH auth_identities';
+            END IF;
+            IF (SELECT count(*) FROM supabase_migrations.schema_migrations) <> $PROD_MIGRATION_COUNT THEN
+              RAISE EXCEPTION 'RESTORE_MIGRATION_COUNT_MISMATCH';
+            END IF;
+            IF (SELECT coalesce(max(version::text),'0') FROM supabase_migrations.schema_migrations) <> '$PROD_MIGRATION_MAX' THEN
+              RAISE EXCEPTION 'RESTORE_MIGRATION_MAX_MISMATCH';
+            END IF;
+
+            SELECT count(*) INTO v_rls
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname='public'
+              AND c.relname IN ('accounts','account_role_assignments','editorial_inbox_items','editorial_submissions')
+              AND c.relrowsecurity;
+            IF v_rls <> 4 THEN
+              RAISE EXCEPTION 'RESTORE_RLS_MISMATCH expected 4 found %', v_rls;
+            END IF;
+
+            SELECT count(*) INTO v_hook
+            FROM pg_trigger t
+            JOIN pg_class c ON c.oid=t.tgrelid
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            JOIN pg_proc p ON p.oid=t.tgfoid
+            JOIN pg_namespace pn ON pn.oid=p.pronamespace
+            WHERE NOT t.tgisinternal
+              AND n.nspname='auth'
+              AND c.relname='users'
+              AND t.tgname='on_auth_user_created'
+              AND pn.nspname='public'
+              AND p.proname='handle_new_user';
+            IF v_hook <> 1 THEN
+              RAISE EXCEPTION 'RESTORE_AUTH_HOOK_MISMATCH expected 1 found %', v_hook;
+            END IF;
+
+            SELECT count(*) INTO v_account_orphans
+            FROM public.accounts a
+            LEFT JOIN auth.users u ON u.id=a.auth_user_id
+            WHERE a.auth_user_id IS NOT NULL AND u.id IS NULL;
+            SELECT count(*) INTO v_profile_orphans
+            FROM public.profiles p
+            LEFT JOIN auth.users u ON u.id=p.id
+            WHERE u.id IS NULL;
+            IF v_account_orphans <> 0 OR v_profile_orphans <> 0 THEN
+              RAISE EXCEPTION 'RESTORE_AUTH_ORPHANS accounts %, profiles %', v_account_orphans, v_profile_orphans;
+            END IF;
+          END;
+          \$verify\$;
+          SQL
+          echo "ATOMIC_RESTORE_GUARDS_BUILT = PASS"
+
+      - name: Execute explicitly authorized atomic overwrite of staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$STAGING_DB_URL" \
+            --single-transaction \
+            --variable ON_ERROR_STOP=1 \
+            --file restore-set/pre_restore.sql \
+            --file restore-set/roles.sql \
+            --file restore-set/schema.sql \
+            --command 'SET session_replication_role = replica' \
+            --file restore-set/auth_data.sql \
+            --file restore-set/data.sql \
+            --file restore-set/history_schema.sql \
+            --file restore-set/history_data.sql \
+            --file restore-set/post_restore.sql
+          echo "PRODUCTION_TO_STAGING_ATOMIC_RESTORE = PASS"
+
+      - name: External postflight after commit
+        shell: bash
+        env:
+          PROD_CONTENTS: ${{ steps.counts.outputs.contents }}
+          PROD_ACCOUNTS: ${{ steps.counts.outputs.accounts }}
+          PROD_AUTH_USERS: ${{ steps.counts.outputs.auth_users }}
+          PROD_AUTH_IDENTITIES: ${{ steps.counts.outputs.auth_identities }}
+          PROD_MIGRATION_MAX: ${{ steps.counts.outputs.migration_max }}
+        run: |
+          set -euo pipefail
+          q() { psql "$STAGING_DB_URL" -Atqc "$1"; }
+          [[ "$(q 'select count(*) from public.contents;')" == "$PROD_CONTENTS" ]]
+          [[ "$(q 'select count(*) from public.accounts;')" == "$PROD_ACCOUNTS" ]]
+          [[ "$(q 'select count(*) from auth.users;')" == "$PROD_AUTH_USERS" ]]
+          [[ "$(q 'select count(*) from auth.identities;')" == "$PROD_AUTH_IDENTITIES" ]]
+          [[ "$(q "select coalesce(max(version::text),'0') from supabase_migrations.schema_migrations;")" == "$PROD_MIGRATION_MAX" ]]
+          [[ "$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname in ('accounts','account_role_assignments','editorial_inbox_items','editorial_submissions') and c.relrowsecurity;")" == "4" ]]
+          [[ "$(q "select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace join pg_proc p on p.oid=t.tgfoid join pg_namespace pn on pn.oid=p.pronamespace where not t.tgisinternal and n.nspname='auth' and c.relname='users' and t.tgname='on_auth_user_created' and pn.nspname='public' and p.proname='handle_new_user';")" == "1" ]]
+          echo "PRODUCTION_TO_STAGING_EXTERNAL_POSTFLIGHT = PASS"
+
+      - name: Remove plaintext restore material
+        if: always()
+        shell: bash
+        run: |
+          rm -rf restore-set
+          echo "RESTORE_PLAINTEXT_CLEANUP = PASS"
