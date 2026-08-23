@@ -49,6 +49,16 @@ grep -Eq 'COPY .*languages' "$DATA_FILE" || {
   exit 1
 }
 
+# A fresh Supabase-managed target already owns platform logging configuration.
+# The role-only dump can contain ALTER ROLE ... SET log_min_messages copied from
+# the source. Supautils correctly prevents a normal project connection from
+# overwriting that platform-managed GUC. Remove only that setting; keep the rest
+# of roles.sql intact so role memberships/grants remain part of this restore test.
+if grep -Eq '^ALTER ROLE .* SET log_min_messages ' "$ROLES_FILE"; then
+  sed -Ei '/^ALTER ROLE .* SET log_min_messages /d' "$ROLES_FILE"
+  echo "Restore drill: ignored platform-managed role log_min_messages setting"
+fi
+
 # Prove actual recoverability against a clean Supabase-managed database, not a
 # bare PostgreSQL database. Stop the source stack, start a fresh managed stack
 # with no application migrations, restore the three official logical components,
