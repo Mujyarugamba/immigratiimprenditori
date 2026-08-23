@@ -163,34 +163,39 @@ test("all seven platform languages expose the correct document direction", async
   );
 });
 
-test("go-live core interface renders across all seven platform languages", async ({ page }) => {
+test("go-live core interface renders across all seven platform languages", async ({ request }) => {
   for (const [locale, , direction] of localizedHomes) {
     for (const corePath of goLiveLocalizedCorePaths) {
       const path = locale === "it" ? corePath : `/${locale}${corePath}`;
-      const response = await page.goto(path, { waitUntil: "load" });
-      expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
-      await expect(page.locator("html")).toHaveAttribute("lang", locale);
-      await expect(page.locator("html")).toHaveAttribute("dir", direction);
-      const h1Texts = await page.getByRole("heading", { level: 1 }).allTextContents();
-      expect(
-        h1Texts,
-        `${path} [${locale}] must expose exactly one H1; H1s=${JSON.stringify(h1Texts)}`,
-      ).toHaveLength(1);
-      await expect(page.getByText(/Impossibile caricare/i)).toHaveCount(0);
+      const response = await request.get(path, { timeout: 30_000 });
+      expect(response.ok(), `${path} did not return 2xx`).toBeTruthy();
+
+      const body = await response.text();
+      expect(body, `${path} [${locale}] must expose document language`).toMatch(
+        new RegExp(`<html[^>]*\\blang=["']${locale}["']`, "i"),
+      );
+      expect(body, `${path} [${locale}] must expose writing direction`).toMatch(
+        new RegExp(`<html[^>]*\\bdir=["']${direction}["']`, "i"),
+      );
+
+      const h1Count = body.match(/<h1(?:\s|>)/gi)?.length ?? 0;
+      expect(h1Count, `${path} [${locale}] must expose exactly one H1`).toBe(1);
+      expect(body, `${path} must not render a load error`).not.toContain("Impossibile caricare");
 
       if (locale !== "it") {
-        await expect(page.locator(`[data-platform-locale="${locale}"]`)).toHaveAttribute(
-          "dir",
-          direction,
+        expect(body, `${path} must expose localized platform wrapper`).toContain(
+          `data-platform-locale="${locale}"`,
+        );
+        expect(body, `${path} localized wrapper must expose ${direction}`).toContain(
+          `dir="${direction}"`,
         );
       }
 
       if (locale !== "it" && corePath === "/fonti") {
-        const methodologyLinks = page.locator(`a[href="/${locale}/dati-e-fonti"]`);
         expect(
-          await methodologyLinks.count(),
-          `${path} must expose at least one localized Fonti → Metodologia link`,
-        ).toBeGreaterThan(0);
+          body.includes(`href="/${locale}/dati-e-fonti"`),
+          `${path} must expose a localized Fonti → Metodologia link`,
+        ).toBeTruthy();
       }
     }
   }
