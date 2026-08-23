@@ -28,6 +28,29 @@ async function expectFocusedInViewport(target: Locator, viewportWidth: number) {
   expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth + 1);
 }
 
+async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(dimensions.scrollWidth, `${label} has horizontal document overflow`).toBeLessThanOrEqual(
+    dimensions.clientWidth + 1,
+  );
+}
+
+async function applyWcagTextSpacing(page: Page) {
+  await page.addStyleTag({
+    content: `
+      body, body * {
+        line-height: 1.5 !important;
+        letter-spacing: 0.12em !important;
+        word-spacing: 0.16em !important;
+      }
+      p { margin-bottom: 2em !important; }
+    `,
+  });
+}
+
 test("homepage renders the institutional editorial shell", async ({ page }) => {
   const response = await page.goto("/", { waitUntil: "domcontentloaded" });
   expect(response?.ok()).toBeTruthy();
@@ -85,15 +108,53 @@ test("core static surfaces reflow on narrow viewports", async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     for (const path of corePublicPages) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
-      const dimensions = await page.evaluate(() => ({
-        clientWidth: document.documentElement.clientWidth,
-        scrollWidth: document.documentElement.scrollWidth,
-      }));
-      expect(dimensions.scrollWidth, `${path} overflows at ${width}px`).toBeLessThanOrEqual(
-        dimensions.clientWidth + 1,
-      );
+      await expectNoHorizontalDocumentOverflow(page, `${path} at ${width}px`);
     }
   }
+});
+
+test("core public surfaces tolerate WCAG text spacing at narrow width", async ({ page }) => {
+  const width = 320;
+  await page.setViewportSize({ width, height: 844 });
+
+  for (const path of corePublicPages) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await applyWcagTextSpacing(page);
+    await expectNoHorizontalDocumentOverflow(page, `${path} with WCAG text spacing`);
+
+    const clippedControls = await page.locator("button, select").evaluateAll((elements) =>
+      elements
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        })
+        .filter(
+          (element) =>
+            element.scrollWidth > element.clientWidth + 1 ||
+            element.scrollHeight > element.clientHeight + 1,
+        )
+        .map((element) => element.textContent?.trim() || element.getAttribute("aria-label") || element.tagName),
+    );
+    expect(clippedControls, `${path} clips button/select content under text spacing`).toEqual([]);
+  }
+});
+
+test("primary mobile controls meet the WCAG 2.2 minimum target size", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const language = page.getByRole("combobox", { name: "Lingua" });
+  const languageBox = await language.boundingBox();
+  expect(languageBox).not.toBeNull();
+  expect(languageBox!.width).toBeGreaterThanOrEqual(24);
+  expect(languageBox!.height).toBeGreaterThanOrEqual(24);
+
+  await page.goto("/contribuisci", { waitUntil: "domcontentloaded" });
+  const submit = page.getByRole("button", { name: /Invia alla redazione/i });
+  const submitBox = await submit.boundingBox();
+  expect(submitBox).not.toBeNull();
+  expect(submitBox!.width).toBeGreaterThanOrEqual(24);
+  expect(submitBox!.height).toBeGreaterThanOrEqual(24);
 });
 
 test("narrow header navigation remains keyboard reachable and scrolls focus into view", async ({ page }) => {
