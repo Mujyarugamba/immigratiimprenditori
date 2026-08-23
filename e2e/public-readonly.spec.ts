@@ -55,6 +55,36 @@ test("homepage renders the institutional editorial surface", async ({ page }) =>
   }
 });
 
+test("skip link transfers keyboard focus to the main content target", async ({ page }) => {
+  await page.goto("/");
+
+  await page.keyboard.press("Tab");
+  const skipLink = page.getByRole("link", { name: "Vai al contenuto", exact: true });
+  await expect(skipLink).toBeFocused();
+
+  const focusStyle = await skipLink.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return {
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth || "0"),
+      top: rect.top,
+      bottom: rect.bottom,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  expect(focusStyle.outlineStyle, "skip link must expose a visible keyboard outline").not.toBe("none");
+  expect(focusStyle.outlineWidth, "skip link outline must have non-zero width").toBeGreaterThan(0);
+  expect(focusStyle.bottom, "focused skip link must enter the viewport").toBeGreaterThan(0);
+  expect(focusStyle.top, "focused skip link must remain inside the viewport").toBeLessThan(
+    focusStyle.viewportHeight,
+  );
+
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#contenuto-principale$/);
+  await expect(page.locator("#contenuto-principale")).toBeFocused();
+});
+
 test("core public surfaces pass the automated accessibility structure gate", async ({ page }) => {
   for (const path of accessibilityPages) {
     const response = await page.goto(path, { waitUntil: "domcontentloaded" });
