@@ -101,9 +101,12 @@ includes("scripts/ci/go-live-db-smoke.sql", [
 ]);
 
 includes(".github/workflows/production-backup.yml", [
-  "postgres:17-alpine",
-  "pg_dump",
-  "pg_restore",
+  "supabase/setup-cli@v3",
+  "version: 2.115.0",
+  "supabase db dump",
+  "roles.sql",
+  "schema.sql",
+  "data.sql",
   "gpg",
   "retention-days: 14",
   "SUPABASE_DB_URL",
