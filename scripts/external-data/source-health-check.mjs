@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { lookup } from "node:dns/promises";
 import { mkdir, writeFile } from "node:fs/promises";
+import http from "node:http";
+import https from "node:https";
 import { isIP } from "node:net";
 import { createClient } from "@supabase/supabase-js";
 
@@ -77,11 +79,12 @@ function parsePublicHttpUrl(raw) {
   }
 }
 
-async function assertPublicDestination(url) {
+async function resolvePublicDestination(url) {
   const host = normalizedHostname(url);
-  if (isIP(host)) {
+  const literalFamily = isIP(host);
+  if (literalFamily) {
     if (isPrivateAddress(host)) throw new Error("private destination blocked");
-    return;
+    return { address: host, family: literalFamily };
   }
 
   const addresses = await lookup(host, { all: true, verbatim: true });
@@ -89,35 +92,76 @@ async function assertPublicDestination(url) {
   if (addresses.some(({ address }) => isPrivateAddress(address))) {
     throw new Error("source hostname resolves to a private/reserved address");
   }
+
+  // Pin one address from the set that was actually validated. The HTTP client
+  // receives this address through a custom lookup callback, preventing a second
+  // DNS resolution between validation and connection (DNS-rebinding/TOCTOU).
+  return addresses[0];
 }
 
-async function fetchOne(url, method) {
-  await assertPublicDestination(url);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    return await fetch(url, {
-      method,
-      redirect: "manual",
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "ImmigratiImprenditori-SourceHealth/1.1",
-        ...(method === "GET" ? { Range: "bytes=0-2047" } : {}),
+function pinnedLookup(resolved) {
+  return (_hostname, options, callback) => {
+    if (options?.all) {
+      callback(null, [{ address: resolved.address, family: resolved.family }]);
+      return;
+    }
+    callback(null, resolved.address, resolved.family);
+  };
+}
+
+async function requestOne(url, method) {
+  const resolved = await resolvePublicDestination(url);
+  const transport = url.protocol === "https:" ? https : http;
+
+  return new Promise((resolve, reject) => {
+    const request = transport.request(
+      url,
+      {
+        method,
+        agent: false,
+        lookup: pinnedLookup(resolved),
+        headers: {
+          "User-Agent": "ImmigratiImprenditori-SourceHealth/1.2",
+          ...(method === "GET" ? { Range: "bytes=0-2047" } : {}),
+        },
       },
+      (response) => {
+        const remoteAddress = response.socket.remoteAddress;
+        if (!remoteAddress || isPrivateAddress(remoteAddress)) {
+          response.destroy();
+          reject(new Error("private/reserved connected address blocked"));
+          return;
+        }
+
+        const location = Array.isArray(response.headers.location)
+          ? response.headers.location[0]
+          : response.headers.location;
+        const status = response.statusCode ?? 0;
+
+        // We only need headers/status. Do not download a large body when a
+        // server ignores Range on the GET fallback.
+        response.on("error", () => {});
+        response.destroy();
+        resolve({ status, location, url: url.toString() });
+      },
+    );
+
+    request.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      request.destroy(new Error("source request timed out"));
     });
-  } finally {
-    clearTimeout(timeout);
-  }
+    request.once("error", reject);
+    request.end();
+  });
 }
 
 async function requestWithSafeRedirects(initialUrl, method) {
   let current = initialUrl;
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
-    const response = await fetchOne(current, method);
+    const response = await requestOne(current, method);
     if (![301, 302, 303, 307, 308].includes(response.status)) return response;
 
     if (redirectCount === MAX_REDIRECTS) throw new Error("too many redirects");
-    const location = response.headers.get("location");
+    const location = response.location;
     if (!location) throw new Error(`redirect ${response.status} without Location`);
     const next = parsePublicHttpUrl(new URL(location, current).toString());
     if (!next) throw new Error("unsafe redirect destination blocked");
@@ -241,6 +285,18 @@ function selfTest() {
   assert.equal(isPrivateAddress("fc00::1"), true);
   assert.equal(isPrivateAddress("2001:db8::1"), true);
   assert.equal(isPrivateAddress("2001:4860:4860::8888"), false);
+
+  const pinned = pinnedLookup({ address: "8.8.8.8", family: 4 });
+  pinned("example.com", {}, (error, address, family) => {
+    assert.equal(error, null);
+    assert.equal(address, "8.8.8.8");
+    assert.equal(family, 4);
+  });
+  pinned("example.com", { all: true }, (error, addresses) => {
+    assert.equal(error, null);
+    assert.deepEqual(addresses, [{ address: "8.8.8.8", family: 4 }]);
+  });
+
   console.log("SOURCE_HEALTH_SELF_TEST = PASS");
 }
 
