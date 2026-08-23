@@ -56,6 +56,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   transpilePackages: ["@immigrati/product-config", "@immigrati/ui-foundation"],
   async headers() {
     return [

@@ -49,6 +49,35 @@ function expectHeader(response, header, expected) {
   if (actual !== expected) fail(`${header}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
 }
 
+function expectHeaderAbsent(response, header) {
+  const actual = response.headers.get(header);
+  if (actual !== null) fail(`${header}: expected header to be absent, received ${JSON.stringify(actual)}`);
+}
+
+function expectCsp(response) {
+  const csp = response.headers.get("content-security-policy") ?? "";
+  const requiredDirectives = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "upgrade-insecure-requests",
+  ];
+
+  for (const directive of requiredDirectives) {
+    if (!csp.includes(directive)) {
+      fail(`content-security-policy: missing directive ${JSON.stringify(directive)} in ${JSON.stringify(csp)}`);
+    }
+  }
+  if (csp.includes("'unsafe-eval'")) {
+    fail("content-security-policy: unsafe-eval must not be enabled");
+  }
+}
+
 async function main() {
   const server = spawn(
     process.execPath,
@@ -84,9 +113,11 @@ async function main() {
     if (!home.body.includes("<h1")) fail("/: missing primary h1");
     expectHeader(home.response, "x-content-type-options", "nosniff");
     expectHeader(home.response, "x-frame-options", "DENY");
-    expectHeader(home.response, "strict-transport-security", /max-age=63072000/i);
-    expectHeader(home.response, "content-security-policy", /default-src 'self'/i);
+    expectHeader(home.response, "strict-transport-security", /max-age=63072000;\s*includeSubDomains/i);
     expectHeader(home.response, "referrer-policy", "strict-origin-when-cross-origin");
+    expectHeader(home.response, "permissions-policy", "camera=(), microphone=(), geolocation=()");
+    expectHeaderAbsent(home.response, "x-powered-by");
+    expectCsp(home.response);
 
     await expectText("/en", ['<html lang="en" dir="ltr"', 'data-platform-locale="en"']);
     await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
@@ -144,6 +175,8 @@ async function main() {
       checks: [
         "home",
         "security response headers",
+        "strict CSP directives and unsafe-eval exclusion",
+        "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
         "support fail-closed state",
