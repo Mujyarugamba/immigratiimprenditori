@@ -1,30 +1,31 @@
 # Production release runbook — Centro Studi
 
-Data di riferimento: 2026-08-23
-Stato: **PREPARATO — NON AUTORIZZA IL RILASCIO**
-Branch sorgente: `feature/research-radar-ai-knowledge-20260822`
+Data di riferimento: 2026-08-23  
+Stato: **PREPARATO — NON AUTORIZZA IL RILASCIO**  
+Branch sorgente: `feature/research-radar-ai-knowledge-20260822`  
 Production branch corrente: `main` — da non modificare prima dei gate finali.
 
-Questo runbook traduce `supabase/CS-PRODUCTION-RELEASE.json` in una sequenza operativa controllata. Non contiene credenziali e non autorizza alcuna scrittura su production.
+Questo runbook traduce `supabase/CS-PRODUCTION-RELEASE.json` in una sequenza operativa controllata. Non contiene credenziali e non autorizza alcuna scrittura su Production.
 
 ## Regole inderogabili
 
 1. **Mai** eseguire `supabase db push` sull'intera directory storica `supabase/migrations` per questo rilascio.
 2. Le quattro baseline cold-start sono esclusivamente per ricostruzione locale e non vanno applicate al progetto hosted esistente.
 3. Le due migration repository già riconciliate con versioni hosted precedenti non vanno riapplicate.
-4. Prima di qualsiasi write production occorre una nuova lettura dello storico migration hosted.
-5. Occorrono backup production cifrato/checksum e restore drill completato su ambiente non-production.
-6. Occorre autorizzazione esplicita prima dell'applicazione delle migration e una seconda autorizzazione separata prima del deploy production.
+4. Prima di qualsiasi write Production occorre una nuova lettura dello storico migration hosted.
+5. Occorrono backup Production cifrato/checksum e restore drill **Production-source → non-Production** completato.
+6. Occorre autorizzazione esplicita prima dell'applicazione delle migration e una seconda autorizzazione separata prima del deploy Production.
 7. Le **24 candidate** vanno applicate **una alla volta, in ordine cronologico**, verificando l'esito prima di passare alla successiva.
 8. Al primo errore inatteso: **STOP**. Non ripetere alla cieca una migration parzialmente eseguita.
 9. Nessun contenuto viene auto-pubblicato durante il rilascio; Radar/AI restano review-only.
-10. Il form pubblico non è considerato production-hardened finché il rate-limit persistente non è applicato e verificato live.
+10. Il form pubblico non è considerato Production-hardened finché il rate-limit persistente non è applicato e verificato live.
 11. Le Storie reali non sono un gate pre-go-live: outreach/interviste iniziano solo dopo sito online + live smoke PASS.
 12. La governance editoriale è **ibrida**: same-editor per contenuti ordinari, seconda approvazione distinta per contenuti sensibili/istituzionali, indicatori Osservatorio e correzioni sostanziali/retraction.
+13. Un PASS locale/CI non viene mai trasformato in PASS Production senza il corrispondente controllo live.
 
 ## Stato hosted osservato
 
-Ultima migration production osservata in sola lettura:
+Ultima migration Production osservata in sola lettura:
 
 `20260820160000_prepare_events_external_ingestion_rls`
 
@@ -72,17 +73,17 @@ Il guard `scripts/ci/production-migration-plan-smoke.mjs` verifica automaticamen
 
 Prima di iniziare qualsiasi procedura live devono essere esplicitamente noti:
 
-- esito QA umano WCAG/device (#92);
-- esito revisione legale finale;
+- esito QA umano WCAG/device (#92), secondo `docs/operations/go-live-a-closure-kit-2026-08-23.md`;
+- esito revisione legale professionale finale, con handoff in `docs/operations/legal-professional-review-handoff-2026-08-23.md`;
 - governance review: **DECISA — modello ibrido**, validata nel laboratorio e da riverificare live dopo eventuale apply;
 - decisione required checks `main`;
 - identità del commit candidato e deployment Vercel candidato;
-- restore drill non-production completo e verificato;
+- restore drill **Production-source → non-Production** completo e verificato;
 - enrollment/verifica MFA reale dell'account privilegiato Production.
 
 Le Storie reali non sono una precondizione: la superficie `/storie` deve essere sana anche a zero contenuti reali e l'acquisizione editoriale parte soltanto dopo il live smoke.
 
-## Fase 1 — fresh read-only audit production
+## Fase 1 — fresh read-only audit Production
 
 Eseguire senza write:
 
@@ -91,24 +92,78 @@ Eseguire senza write:
 - Security Advisor;
 - conteggi/visibilità minimi di contenuti, eventi, account, fonti;
 - configurazione Auth rilevante;
+- inventario account privilegiati e fattori MFA;
 - stato DNS/hosting candidato.
 
 **Hold point A:** se l'ultima migration hosted non è ancora `20260820160000`, fermarsi e riconciliare il piano.
 
 ## Fase 2 — backup e restore drill
 
-Prima delle migration:
+### 2A. Drill tecnico CI — CHIUSO
 
-1. creare backup logical Supabase CLI coerente con la piattaforma;
-2. cifrare l'archivio prima di conservarlo fuori dal runner;
-3. calcolare e registrare checksum;
-4. verificare ruoli/schema/dati esportati;
-5. ripristinare il backup in ambiente **non-production** isolato;
-6. eseguire controlli minimi di schema, dati e RLS sul restore.
+Il laboratorio ha già completato un vero ciclo di recovery contro un **secondo stack Supabase-managed fresco**:
 
-Il restore drill resta **PENDING** sul setting Supabase-managed `log_min_messages`; il gate non va aggirato con una dichiarazione manuale di PASS.
+1. dump logico `roles.sql`, `schema.sql`, `data.sql` tramite Supabase CLI;
+2. verifica preflight dei componenti;
+3. normalizzazione chirurgica del solo privilegio platform-managed `log_min_messages` nel role dump;
+4. stop dello stack sorgente;
+5. avvio di uno stack Supabase fresco senza migration applicative preinstallate;
+6. restore ruoli/schema/dati;
+7. reattach idempotente del solo hook applicativo `on_auth_user_created` su `auth.users` tramite `scripts/ci/post-restore-auth-hooks.sql`;
+8. verifica tabelle critiche e RLS;
+9. Auth integration smoke con due utenti effimeri reali;
+10. verifica provisioning `public.profiles`, login password, JWT/RPC, contributor/editor separation e auto-elevazione negata;
+11. build applicativa contro il database ripristinato;
+12. HTTP/security smoke;
+13. browser E2E autenticato;
+14. cleanup stack/utenti effimeri.
 
-**Hold point B:** nessuna migration production senza backup verificato e restore drill riuscito.
+Esito:
+
+`CI_EPHEMERAL_RESTORE_DRILL = PASS`
+
+Il precedente errore su:
+
+`GRANT SET ON PARAMETER "log_min_messages" ...`
+
+è chiuso. È chiuso anche il successivo problema del trigger applicativo su `auth.users` non incluso dal logical dump: il post-restore script ricrea soltanto quell'hook e ne verifica la presenza.
+
+### 2B. Drill da sorgente Production reale — ANCORA PENDING
+
+Prima delle migration Production occorre ancora:
+
+1. ottenere un dump logico dalla **Production reale** usando una macchina/ambiente amministrativo controllato e credenziali non registrate nel repository;
+2. cifrare/conservare il backup secondo `docs/security/BACKUP-RECOVERY.md`;
+3. verificare checksum e componenti;
+4. ripristinare il dump su un target **non-Production** Supabase-managed pulito;
+5. applicare il post-restore hook applicativo previsto;
+6. ripetere almeno schema/data/RLS/Auth/postflight;
+7. registrare origine dump, data, target non-Production, risultato e cleanup.
+
+Il workflow `Production encrypted backup` è preparato sul candidato ma, per sicurezza, è inerte fuori da `main`. Non va aggirato anticipando accessi Production da feature branch.
+
+**Hold point B:** nessuna migration Production senza `PRODUCTION_SOURCE_RESTORE_DRILL = PASS`.
+
+## Fase 2C — enrollment MFA privilegiato Production
+
+Il codice applicativo supporta enrollment e verifica TOTP tramite l'area MFA. L'operazione reale resta una write Auth Production e richiede intervento dell'utente privilegiato.
+
+Sequenza operativa dopo che la migration MFA è presente nel target live autorizzato:
+
+1. accedere con l'account privilegiato corretto;
+2. aprire `/app/mfa` / superficie sicurezza prevista dall'applicazione;
+3. selezionare **Aggiungi autenticatore**;
+4. scansionare il QR con un'app TOTP controllata oppure usare il secret mostrato;
+5. inserire il codice TOTP a 6 cifre e completare **Verifica e attiva**;
+6. verificare che il fattore risulti `verified` e che la sessione sia `aal2`;
+7. effettuare logout/login o nuova sessione e verificare che l'accesso privilegiato a AAL1 venga bloccato;
+8. completare il challenge del fattore esistente e verificare il passaggio ad AAL2;
+9. confermare l'accesso alle funzioni privilegiate solo dopo AAL2;
+10. rileggere in sola lettura `auth.mfa_factors` e l'inventario dei ruoli per registrare il risultato.
+
+Non rimuovere l'ultimo fattore verificato durante il collaudo. Non copiare QR/secret TOTP nei log, ticket o repository.
+
+`PRODUCTION_PRIVILEGED_MFA = PENDING` finché l'enrollment reale non è completato e verificato.
 
 ## Fase 3 — autorizzazione migration
 
@@ -209,7 +264,7 @@ Non esiste un generico “rollback automatico” affidabile per una catena di mi
 
 ## Fase 6 — build/deploy Production Vercel separato
 
-Migration production riuscite **non autorizzano automaticamente il deploy**.
+Migration Production riuscite **non autorizzano automaticamente il deploy**.
 
 Prima del deploy:
 
@@ -217,9 +272,9 @@ Prima del deploy:
 - deployment Vercel candidato identificato e configurato;
 - visual/device QA completato;
 - CSP/header verificati;
-- secrets production verificati senza esposizione;
+- secrets Production verificati senza esposizione;
 - `NEXT_PUBLIC_SITE_URL` HTTPS verificata;
-- configurazione Auth production verificata;
+- configurazione Auth Production verificata;
 - gate editoriali/legal chiusi.
 
 Richiedere autorizzazione esplicita separata per merge/deploy.
@@ -229,7 +284,7 @@ Richiedere autorizzazione esplicita separata per merge/deploy.
 Subito dopo l'eventuale deploy autorizzato verificare:
 
 - homepage 2xx e H1 unico;
-- canonical/noindex/robots coerenti con production;
+- canonical/noindex/robots coerenti con Production;
 - sette lingue core e RTL;
 - Osservatorio/Atlante/Rotte;
 - `/contribuisci` con rate limiting attivo;
@@ -244,18 +299,31 @@ Subito dopo l'eventuale deploy autorizzato verificare:
 
 ## Stato attuale
 
-- migration candidate validate nella catena cold-start: **24/24** fino ai smoke DB pre-restore;
-- cold-start: **PASS**;
+- candidate migration: **24/24 validate**;
+- destructive schema operations rilevate dal guard: **0**;
+- standalone cold-start: **PASS**;
 - PostgreSQL lint: **PASS**;
 - publication/RLS smoke: **PASS**;
 - governance ibrida due-redattori: **PASS**;
 - persistent rate-limit smoke: **PASS**;
 - go-live DB smoke: **PASS**;
-- destructive schema operations rilevate dal guard: **0**;
-- production DB writes in questo ciclo: **0**;
-- production deploy in questo ciclo: **0**;
+- logical backup locale Supabase: **PASS**;
+- clean Supabase-managed restore: **PASS**;
+- post-restore Auth hook: **PASS**;
+- Auth integration reale su utenti effimeri: **PASS**;
+- build contro DB ripristinato: **PASS**;
+- HTTP/security smoke contro DB ripristinato: **PASS**;
+- browser E2E autenticato contro DB ripristinato: **PASS**;
+- Editorial CI sul candidato funzionale: **PASS**;
+- Production-source restore drill: **PENDING**;
+- QA umano/device #92: **PENDING**;
+- revisione legale professionale: **PENDING**;
+- MFA privilegiato Production: **PENDING**;
+- first source-health run default branch: **PENDING POST-MERGE**;
+- required checks `main`: **PENDING / NON MODIFICATI**;
+- Production DB writes in questo ciclo: **0**;
+- Production deploy in questo ciclo: **0**;
 - `main` modificato: **NO**;
 - governance editoriale: **IBRIDA — DECISA / VALIDATA NEL LABORATORIO, NON ATTIVA IN PRODUCTION**;
-- rate-limit production: **PENDING APPLY AUTORIZZATO**;
-- backup production + restore drill: **PENDING**;
+- rate-limit Production: **PENDING APPLY AUTORIZZATO**;
 - merge/deploy: **NON AUTORIZZATI**.
