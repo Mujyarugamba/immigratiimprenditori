@@ -1,0 +1,74 @@
+name: Production restore auth preflight
+
+on:
+  push:
+    branches:
+      - ops/production-restore-drill-20260823
+    paths:
+      - .github/workflows/production-restore-auth-preflight.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROD_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+      EXPECTED_PROD_REF: hvfvfatlaspcpszgizhg
+    steps:
+      - name: Validate identities and inspect auth-linked state read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PROD_DB_URL"
+          test -n "$STAGING_DB_URL"
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlsplit, unquote
+          prod = urlsplit(os.environ['PROD_DB_URL'])
+          stage = urlsplit(os.environ['STAGING_DB_URL'])
+          pu = unquote(prod.username or '')
+          su = unquote(stage.username or '')
+          expected = 'postgres.' + os.environ['EXPECTED_PROD_REF']
+          if pu != expected:
+              raise SystemExit('RESTORE_IDENTITY = FAIL production ref')
+          if not su.startswith('postgres.') or su == pu:
+              raise SystemExit('RESTORE_IDENTITY = FAIL staging ref')
+          for label, u in [('production', prod), ('staging', stage)]:
+              if not (u.hostname or '').endswith('.pooler.supabase.com') or u.port != 5432:
+                  raise SystemExit(f'RESTORE_IDENTITY = FAIL {label} pooler')
+          print('RESTORE_CONNECTION_IDENTITIES = PASS')
+          PY
+
+          echo "PROD_AUTH_USERS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from auth.users;')"
+          echo "PROD_ACCOUNTS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from public.accounts;')"
+          echo "PROD_ROLE_ASSIGNMENTS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from public.account_role_assignments;')"
+          echo "STAGE_AUTH_USERS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from auth.users;')"
+          echo "STAGE_ACCOUNTS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from public.accounts;')"
+          echo "STAGE_ROLE_ASSIGNMENTS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from public.account_role_assignments;')"
+
+          echo 'AUTH_LINKED_FKS_BEGIN'
+          psql "$PROD_DB_URL" -Atqc "
+            select n.nspname||'.'||c.relname||'|'||con.conname||'|'||pg_get_constraintdef(con.oid)
+            from pg_constraint con
+            join pg_class c on c.oid=con.conrelid
+            join pg_namespace n on n.oid=c.relnamespace
+            join pg_class rc on rc.oid=con.confrelid
+            join pg_namespace rn on rn.oid=rc.relnamespace
+            where con.contype='f' and rn.nspname='auth' and rc.relname='users'
+            order by 1,2;
+          "
+          echo 'AUTH_LINKED_FKS_END'
+
+          prod_orphans="$(psql "$PROD_DB_URL" -Atqc "
+            select count(*)
+            from public.accounts a
+            left join auth.users u on u.id=a.id
+            where u.id is null;
+          ")"
+          echo "PROD_ACCOUNT_ORPHANS=$prod_orphans"
+          [[ "$prod_orphans" == "0" ]]
+          echo "RESTORE_AUTH_PREFLIGHT = PASS"
