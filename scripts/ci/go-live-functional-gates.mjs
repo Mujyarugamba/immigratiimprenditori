@@ -122,15 +122,25 @@ file(".github/workflows/source-health-weekly.yml");
 
 // Hosted previews must stay mutation-free automatically on both supported
 // deployment paths. Production remains writable and is gated separately.
+includes("src/lib/deployment/environment.ts", [
+  "resolveDeploymentEnvironment",
+  'env.VERCEL_ENV === "preview"',
+  'env.VERCEL_ENV === "production"',
+  'env.CONTEXT !== "production"',
+  "NEXT_PUBLIC_PREVIEW_READ_ONLY",
+]);
+file("src/lib/deployment/environment.test.ts");
 includes("next.config.ts", [
-  'process.env.VERCEL_ENV === "preview"',
-  "isHostedPreviewLikeContext",
+  "resolveDeploymentEnvironment",
+  "deployment.isHostedProduction",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "deployment.isHostedPreview",
   'key: "X-Robots-Tag"',
   'value: "noindex, nofollow, noarchive"',
 ]);
 includes("src/proxy.ts", [
-  'process.env.VERCEL_ENV === "preview"',
-  'process.env.CONTEXT !== "production"',
+  "resolveDeploymentEnvironment",
+  "deployment.isReadOnlyPreview",
   '"X-Preview-Read-Only": "true"',
 ]);
 
