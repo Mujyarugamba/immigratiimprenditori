@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createClient } from "@supabase/supabase-js";
 import {
   getPublicSupabaseEnv,
@@ -6,7 +8,7 @@ import {
 
 /**
  * Privileged Supabase client for narrow server-only operations.
- * Never import this module from a Client Component.
+ * The server-only marker makes accidental Client Component imports fail at build time.
  */
 export function createServiceRoleClient() {
   const { url } = getPublicSupabaseEnv();
