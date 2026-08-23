@@ -24,13 +24,13 @@ Questa roadmap recepisce l'elenco funzionale di 110 punti approvato dall'utente 
 
 ### Stato della fascia A
 
-- **READY:** 28/33
-- **DA RIFINIRE:** 4/33
+- **READY:** 30/33
+- **DA RIFINIRE:** 2/33
 - **BLOCCANTE — CONTENUTO REALE:** 1/33
 
-Quindi **5 punti della fascia A non sono ancora completamente go-live ready**: quattro hanno già una base funzionante ma richiedono chiusura o QA aggiuntivo; uno solo, **#10 Storie d'impresa**, richiede ancora un contenuto editoriale reale pubblicato.
+Quindi **3 punti della fascia A non sono ancora completamente go-live ready**: due hanno già una base funzionante ma richiedono chiusura o QA umano/reale aggiuntivo; uno solo, **#10 Storie d'impresa**, richiede ancora un contenuto editoriale reale pubblicato.
 
-Il conteggio è volutamente prudente: un gate browser automatico non viene equiparato a una certificazione WCAG completa e una funzione tecnicamente operativa non viene considerata popolata se mancano identità/contenuti reali.
+Il conteggio è volutamente prudente: un gate automatico non viene equiparato a una certificazione WCAG completa e una funzione tecnicamente operativa non viene considerata popolata se mancano identità/contenuti reali.
 
 ## A — Necessari al go-live
 
@@ -50,43 +50,45 @@ Il conteggio è volutamente prudente: un gate browser automatico non viene equip
 | 21 | Metodologia | **READY** |
 | 22 | Glossario | **READY** |
 | 26 | Ricerca interna avanzata | **READY** |
-| 30 | Le sette lingue principali | **DA RIFINIRE** |
+| 30 | Le sette lingue principali | **READY — MATRICE CORE 70/70 PASS** |
 | 33 | SEO internazionale | **READY — FOUNDATION** |
 | 34 | Partecipa | **READY** |
-| 36 | Profili autore | **DA RIFINIRE — FUNZIONE PASS, PROFILI REALI DA POPOLARE** |
+| 36 | Profili autore | **DA RIFINIRE — BACK-OFFICE + GATE PASS, PROFILI REALI DA POPOLARE** |
 | 40 | Calendario internazionale | **READY** |
 | 41 | Evento completo | **READY** |
 | 48 | Il pubblico non deve registrarsi | **READY** |
 | 49 | Account contributor | **READY** |
 | 51 | Download dati | **READY — JSON / CSV / XLSX** |
 | 59 | Provenienza dei dati | **READY** |
-| 92 | WCAG 2.2 AA | **DA RIFINIRE — GATE AUTOMATICO PASS, QA COMPLETO PENDING** |
+| 92 | WCAG 2.2 AA | **DA RIFINIRE — GATE AUTOMATICI + CONTRASTO PASS, QA UMANO PENDING** |
 | 93 | RTL | **READY — CORE ARABO PASS** |
 | 94 | Connessioni lente | **READY — TEST HIGH-LATENCY PASS** |
 | 95 | MFA per amministratori | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
 | 96 | Audit log | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
 | 97 | Backup | **READY — WORKFLOW + ARCHIVE INTEGRITY PASS, ATTIVAZIONE PROD SEPARATA** |
 | 98 | Rate limiting | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
-| 99 | Controlli automatici | **DA RIFINIRE** |
+| 99 | Controlli automatici | **READY — CI + LINK INTEGRITY + RELEASE GATES AUTOMATICI PASS** |
 | 100 | Analytics privacy-friendly | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
 
 ### Unico blocco A di contenuto ancora aperto
 
-- **#10 — Storie d'impresa:** il cold-start contiene 12 `insight`, 4 `guide` e 1 `institutional_page`, ma nessun `business_story`, `interview`, `testimony` o `personal_story`. Il gate resta rosso intenzionalmente finché non esiste almeno una storia/intervista/testimonianza reale, approvata e pubblicabile.
+- **#10 — Storie d'impresa:** il cold-start contiene 12 `insight`, 4 `guide` e 1 `institutional_page`, ma nessun `business_story`, `interview`, `testimony` o `personal_story`. Il gate resta rosso intenzionalmente finché non esiste almeno una storia/intervista/testimonianza reale, approvata e pubblicabile. Non va chiuso con placeholder, contenuti fittizi o riclassificazioni tecniche.
 
-### Quattro punti A da rifinire
+### Due punti A da rifinire
 
-- **#30 — Le sette lingue principali:** routing/home shell, `lang`/`dir` e switch sono verificati per IT/EN/FR/ES/DE/AR/ZH; resta da completare la copertura editoriale dell'interfaccia pubblica dove prevista.
-- **#36 — Profili autore:** pagina, listing, ORCID, JSON-LD ed evidence gate passano E2E; il cold-start non contiene ancora profili autore pubblici reali.
-- **#92 — WCAG 2.2 AA:** struttura automatizzata, landmark, H1, alt, label, nomi accessibili, skip-link e reflow passano sulle superfici core; resta il QA completo, inclusi controlli umani non coperti dal gate automatico.
-- **#99 — Controlli automatici:** typecheck, unit/contract test, build, dependency vulnerability audit, Auth deprecation guard, DB lint/smoke e workflow fonti sono presenti; resta la chiusura del pacchetto finale di controlli esterni/link e release gate.
+- **#36 — Profili autore:** pagina/listing pubblico, ORCID, JSON-LD ed evidence gate passano; è ora presente anche il back-office redazionale protetto da MFA AAL2 per creare profili privati, collegarli a contenuti verificati e renderli pubblici solo in presenza di dati sostanziali e almeno una pubblicazione pubblica collegata. Il cold-start continua correttamente a contenere **0 profili autore pubblici reali**: servono identità reali da verificare e popolare.
+- **#92 — WCAG 2.2 AA:** struttura automatizzata, landmark, H1, alt, label, nomi accessibili, skip-link, reflow e RTL passano sulle superfici core. Sono stati inoltre corretti i token di contrasto per testo piccolo/stati di errore e focus visibile, con gate automatici >=4.5:1 per testo piccolo e >=3:1 per focus su superfici chiare/scure. Resta il QA umano completo richiesto per non equiparare i test automatici a una certificazione WCAG.
 
 ### Verifica automatica del 23 agosto 2026
 
-Head verificato: `5617d9a00ddab75e5d6b71ffba1e944ac7276904`.
+Head tecnico verificato: `d76d892f81c930a0ebe89834ab3f97007d57204b`.
 
-- `Editorial v1 CI` run `32602163909`: **COMPLETED / SUCCESS**, incluso browser pubblico e reflow 320/390/768 px.
-- `Supabase local migration validation` run `32602163939`: database, lint, RLS/security, rate limiting, audit/analytics, backup, Auth, build e **16 test browser PASS**; unico failure: gate #10 Storie per assenza di una storia reale.
+- `Editorial v1 CI` run `32619432154`: **COMPLETED / SUCCESS**. Typecheck, unit test, functional gates, vulnerability audit, Auth deprecation guard, Next build, HTTP smoke e browser pubblico sono tutti PASS.
+- `Supabase local migration validation` run `32619432133`: cold-start, migration replay, DB lint, RLS/security, persistent rate limiting, audit/analytics, backup archive, Auth reale, dependency install e build applicazione sono PASS. Browser E2E: **18 PASS / 1 FAIL**; l'unico failure è intenzionalmente il gate #10 Storie per assenza di una storia reale.
+- **Sette lingue:** matrice core IT/EN/FR/ES/DE/AR/ZH × 10 superfici = **70/70 PASS** anche sul vero stack Supabase locale; il gate usa risposte HTTP complete per evitare falsi negativi dovuti alla cancellazione di stream durante navigazioni browser consecutive. I test browser separati continuano a verificare lingua, direzione, RTL e usabilità mobile.
+- **Controlli automatici:** internal-link integrity sul vero stack locale è PASS; non restano failure tecnici mascherati dal gate Storie.
+- **Profili autore:** build espone `/app/redazione/autori` e `/app/redazione/autori/[id]`; il back-office applica MFA AAL2 e gate di evidenza prima della pubblicazione. Il security smoke conferma `anon_public_authors = 0`, quindi non sono stati introdotti autori fittizi.
+- **Accessibilità:** i test automatici di struttura/reflow restano PASS; i token di contrasto/focus sono ora protetti da test dedicati.
 - Osservatorio: almeno un indicatore navigabile verificato E2E.
 - Atlante: almeno un Paese evidence-backed navigabile verificato E2E.
 - Rotte: almeno una rotta evidence-backed navigabile verificata E2E; cold-start espone 11 rotte attive.
