@@ -9,7 +9,7 @@ const deployment = resolveDeploymentEnvironment(process.env);
 // it at build time. Hosted-provider detection remains runtime-capable, while CI
 // can remove the runtime flag and still prove that a preview build stays closed.
 const previewReadOnly =
-  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || deployment.isHostedPreview;
+  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || deployment.isReadOnlyPreview;
 
 export async function proxy(request: NextRequest) {
   if (previewReadOnly && !SAFE_METHODS.has(request.method.toUpperCase())) {
