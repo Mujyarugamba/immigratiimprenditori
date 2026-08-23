@@ -230,6 +230,18 @@ export function cleanupBusinesses(businessIds: string[]) {
   );
 }
 
+export function cleanupAuthorProfiles(authorProfileIds: string[]) {
+  assertUuids(authorProfileIds);
+  if (!authorProfileIds.length) return;
+  const a = authorProfileIds.map((id) => `'${id}'`).join(",");
+  psql(
+    [
+      `DELETE FROM public.content_authors WHERE author_profile_id IN (${a});`,
+      `DELETE FROM public.author_profiles WHERE id IN (${a});`,
+    ].join(" "),
+  );
+}
+
 export function cleanupContents(contentIds: string[]) {
   assertUuids(contentIds);
   if (!contentIds.length) return;
