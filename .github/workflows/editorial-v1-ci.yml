@@ -72,7 +72,7 @@ jobs:
           fi
           echo "SUPABASE_AUTH_DEPRECATION_GUARD = PASS"
 
-      - name: Start deterministic unavailable Supabase stub
+      - name: Start deterministic empty Supabase stub
         shell: bash
         run: |
           set -euo pipefail
@@ -91,9 +91,9 @@ jobs:
 
       - name: Next build
         env:
-          # Public-shell CI has no database. The local stub returns HTTP 503
-          # immediately, exercising the app's real fallback path without DNS,
-          # retry or black-hole network latency from a fabricated backend.
+          # Public-shell CI has no live database. The local PostgREST stub
+          # returns healthy empty collections immediately, isolating frontend
+          # rendering/performance from external network or backend failure latency.
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
