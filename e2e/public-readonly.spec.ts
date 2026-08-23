@@ -85,6 +85,62 @@ test("skip link transfers keyboard focus to the main content target", async ({ p
   await expect(page.locator("#contenuto-principale")).toBeFocused();
 });
 
+test("mobile homepage stays within good LCP and CLS thresholds on local delivery", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    type LayoutShiftEntry = PerformanceEntry & {
+      value: number;
+      hadRecentInput: boolean;
+    };
+    type WebVitalWindow = Window & {
+      __goLiveWebVitals?: { cls: number; lcp: number };
+    };
+
+    const target = window as WebVitalWindow;
+    target.__goLiveWebVitals = { cls: 0, lcp: 0 };
+
+    try {
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as LayoutShiftEntry[]) {
+          if (!entry.hadRecentInput && target.__goLiveWebVitals) {
+            target.__goLiveWebVitals.cls += entry.value;
+          }
+        }
+      }).observe({ type: "layout-shift", buffered: true });
+    } catch {
+      /* Chromium in CI supports this; assertions below fail if no metric is observed. */
+    }
+
+    try {
+      new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const last = entries.at(-1);
+        if (last && target.__goLiveWebVitals) {
+          target.__goLiveWebVitals.lcp = last.startTime;
+        }
+      }).observe({ type: "largest-contentful-paint", buffered: true });
+    } catch {
+      /* Chromium in CI supports this; assertions below fail if no metric is observed. */
+    }
+  });
+
+  const response = await page.goto("/", { waitUntil: "networkidle", timeout: 30_000 });
+  expect(response?.ok()).toBeTruthy();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.waitForTimeout(250);
+
+  const metrics = await page.evaluate(() => {
+    const target = window as Window & {
+      __goLiveWebVitals?: { cls: number; lcp: number };
+    };
+    return target.__goLiveWebVitals ?? { cls: Number.POSITIVE_INFINITY, lcp: 0 };
+  });
+
+  expect(metrics.lcp, "homepage LCP metric was not observed").toBeGreaterThan(0);
+  expect(metrics.lcp, `homepage LCP ${metrics.lcp.toFixed(1)}ms exceeded 2.5s good threshold`).toBeLessThanOrEqual(2_500);
+  expect(metrics.cls, `homepage CLS ${metrics.cls.toFixed(4)} exceeded 0.10 good threshold`).toBeLessThanOrEqual(0.1);
+});
+
 test("core public surfaces pass the automated accessibility structure gate", async ({ page }) => {
   for (const path of accessibilityPages) {
     const response = await page.goto(path, { waitUntil: "domcontentloaded" });
