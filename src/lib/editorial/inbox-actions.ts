@@ -22,25 +22,8 @@ async function requireEditorialSession() {
   return session;
 }
 
-async function writeInboxActivity(
-  inboxItemId: string,
-  actorAccountId: string | null,
-  changes: Record<string, unknown>,
-) {
-  const supabase = await createClient();
-  const { error } = await supabase.from("editorial_inbox_activity").insert({
-    inbox_item_id: inboxItemId,
-    actor_account_id: actorAccountId,
-    changes,
-  });
-  // The write policy is prepared in a migration but may not yet be applied to
-  // the production DB used by branch previews. Editorial state changes must not
-  // fail merely because the optional audit append is not available yet.
-  return !error;
-}
-
 export async function updateInboxStatusAction(formData: FormData) {
-  const session = await requireEditorialSession();
+  await requireEditorialSession();
 
   const id = String(formData.get("id") ?? "").trim();
   const status = String(formData.get("status") ?? "").trim();
@@ -66,14 +49,8 @@ export async function updateInboxStatusAction(formData: FormData) {
 
   if (error) throw new Error("Impossibile aggiornare lo stato dell'arrivo.");
 
-  if (current.status !== status) {
-    await writeInboxActivity(id, session.accountId, {
-      kind: "status_change",
-      from: current.status,
-      to: status,
-    });
-  }
-
+  // editorial_inbox_activity_log is the canonical database audit trigger. It
+  // records status/priority/assignment changes atomically with this update.
   revalidatePath("/app/redazione/inbox");
   revalidatePath(`/app/redazione/inbox/${id}`);
 }
@@ -103,12 +80,8 @@ export async function assignInboxToMeAction(formData: FormData) {
     .eq("id", id);
   if (error) throw new Error("Impossibile assegnare l'arrivo.");
 
-  await writeInboxActivity(id, session.accountId, {
-    kind: "assignment",
-    from_account_id: current.assigned_account_id,
-    to_account_id: session.accountId,
-  });
-
+  // Assignment and any accompanying status transition are captured once by the
+  // canonical database trigger, avoiding duplicate/non-atomic audit rows.
   revalidatePath("/app/redazione/inbox");
   revalidatePath(`/app/redazione/inbox/${id}`);
 }
