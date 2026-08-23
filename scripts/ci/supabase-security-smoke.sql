@@ -109,6 +109,29 @@ begin
 
   if not exists (
     select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'content_versions'
+      and c.relrowsecurity
+  ) then
+    raise exception 'SECURITY_SMOKE_CONTENT_VERSIONS_RLS_DISABLED';
+  end if;
+
+  if has_table_privilege('anon', 'public.content_versions', 'SELECT') then
+    raise exception 'SECURITY_SMOKE_ANON_CAN_SELECT_CONTENT_VERSIONS';
+  end if;
+
+  if not has_table_privilege('authenticated', 'public.content_versions', 'SELECT') then
+    raise exception 'SECURITY_SMOKE_EDITORIAL_VERSION_AUTH_GRANT_MISSING';
+  end if;
+
+  if not has_table_privilege('anon', 'public.content_corrections', 'SELECT') then
+    raise exception 'SECURITY_SMOKE_PUBLIC_CORRECTIONS_GRANT_MISSING';
+  end if;
+
+  if not exists (
+    select 1
     from pg_trigger
     where tgname = 'contents_human_publication_gate'
       and not tgisinternal
@@ -134,6 +157,7 @@ set local role anon;
 select count(*) as anon_active_territories from public.geo_territories;
 select count(*) as anon_active_routes from public.migration_routes;
 select count(*) as anon_public_authors from public.author_profiles;
+select count(*) as anon_public_corrections from public.content_corrections;
 reset role;
 rollback;
 
