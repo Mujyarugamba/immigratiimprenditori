@@ -23,6 +23,42 @@ function attribute(tag: string, name: string) {
   return match?.[1] ?? null;
 }
 
+function assertCanonical(href: string | null, path: string) {
+  expect(href, `${path} canonical href must not be empty`).toBeTruthy();
+  const actual = new URL(href!);
+  const expected = new URL(path, `${PRODUCTION_ORIGIN}/`);
+  expect(actual.origin, `${path} canonical origin`).toBe(expected.origin);
+  expect(actual.pathname, `${path} canonical pathname`).toBe(expected.pathname);
+  expect(actual.search, `${path} canonical must not contain query parameters`).toBe("");
+  expect(actual.hash, `${path} canonical must not contain a fragment`).toBe("");
+}
+
+function assertGlobalStructuredData(html: string, path: string) {
+  const scripts = [
+    ...html.matchAll(
+      /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+    ),
+  ];
+  expect(scripts.length, `${path} must expose structured data`).toBeGreaterThanOrEqual(1);
+
+  const documents = scripts.map((match, index) => {
+    try {
+      return JSON.parse(match[1]);
+    } catch (error) {
+      throw new Error(`${path} JSON-LD #${index + 1} is invalid: ${String(error)}`);
+    }
+  });
+  const nodes = documents.flatMap((document) =>
+    Array.isArray(document?.["@graph"]) ? document["@graph"] : [document],
+  );
+  const types = nodes.flatMap((node) => {
+    const value = node?.["@type"];
+    return Array.isArray(value) ? value : value ? [value] : [];
+  });
+  expect(types, `${path} global JSON-LD must include Organization`).toContain("Organization");
+  expect(types, `${path} global JSON-LD must include WebSite`).toContain("WebSite");
+}
+
 function assertSeoDocument(html: string, path: string) {
   const titles = html.match(/<title>[\s\S]*?<\/title>/gi) ?? [];
   expect(titles, `${path} must expose exactly one title`).toHaveLength(1);
@@ -38,15 +74,10 @@ function assertSeoDocument(html: string, path: string) {
     (tag) => attribute(tag, "rel")?.toLowerCase() === "canonical",
   );
   expect(canonicals, `${path} must expose exactly one canonical`).toHaveLength(1);
-  expect(attribute(canonicals[0], "href"), `${path} canonical must target production`).toBe(
-    `${PRODUCTION_ORIGIN}${path}`,
-  );
+  assertCanonical(attribute(canonicals[0], "href"), path);
 
   expect(html.match(/<h1(?:\s|>)/gi)?.length ?? 0, `${path} must expose one H1`).toBe(1);
-  expect(
-    html.match(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>/gi)?.length ?? 0,
-    `${path} must retain global structured data`,
-  ).toBeGreaterThanOrEqual(2);
+  assertGlobalStructuredData(html, path);
   expect(html, `${path} must not render a load error`).not.toContain("Impossibile caricare");
 }
 
