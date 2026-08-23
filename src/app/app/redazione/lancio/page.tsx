@@ -37,9 +37,11 @@ export default async function EditorialLaunchPage() {
               Numero zero · gate di lancio
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-700">
-              Il lancio non viene dichiarato LIVE finché il sito non dispone di un nucleo dati
-              Lombardia/Italia, un confronto internazionale, rapporti selezionati, eventi e almeno
-              due storie o interviste pubblicate. La qualità editoriale finale resta una decisione umana.
+              Il gate pre-go-live verifica il nucleo dati Lombardia/Italia, il confronto
+              internazionale, i rapporti selezionati, gli eventi e la solidità tecnica delle
+              superfici pubbliche. Le Storie sono già pronte come funzione, ma il loro popolamento
+              reale inizia solo dopo la messa online e lo smoke live: prima non vengono inviati
+              inviti o richieste di intervista.
             </p>
           </div>
           <div className="border border-black px-4 py-3 text-right">
@@ -118,11 +120,12 @@ export default async function EditorialLaunchPage() {
             </ul>
           ) : (
             <p className="mt-4 text-sm leading-6 text-neutral-700">
-              Nessuna storia/intervista è ancora pubblicata. Questo è il principale blocco editoriale del numero zero.
+              Nessuna storia/intervista è ancora pubblicata. È uno stato previsto prima del go-live:
+              il popolamento reale inizierà solo dopo la messa online e lo smoke live.
             </p>
           )}
           <p className="mt-4 text-xs text-neutral-600">
-            Inbox: {snapshot.interviewCandidatesInResearch} proposte di intervista in ricerca.
+            Inbox: {snapshot.interviewCandidatesInResearch} proposte interne in ricerca; nessun contatto esterno pre-go-live.
           </p>
           <Link href="/app/redazione/inbox" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">
             Apri Inbox →
@@ -149,8 +152,11 @@ export default async function EditorialLaunchPage() {
               Candidati intervista
             </h2>
           </div>
-          <p className="text-xs text-neutral-600">{dashboard.interviewCandidates.length} proposte visibili alla redazione</p>
+          <p className="text-xs text-neutral-600">{dashboard.interviewCandidates.length} proposte interne visibili alla redazione</p>
         </div>
+        <p className="mt-3 max-w-3xl text-xs leading-5 text-neutral-600">
+          La shortlist è materiale preparatorio interno. Nessun candidato viene contattato prima che il sito sia online e abbia superato lo smoke live.
+        </p>
         <div className="mt-4 grid gap-px border border-black bg-black md:grid-cols-2">
           {dashboard.interviewCandidates.map((candidate) => {
             const route = [candidate.originCountryCode, candidate.destinationCountryCode]
@@ -187,7 +193,7 @@ export default async function EditorialLaunchPage() {
       <section aria-labelledby="pipeline-interviste" className="border-t border-black pt-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Produzione editoriale</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Produzione editoriale post-go-live</p>
             <h2 id="pipeline-interviste" className="mt-1 text-xl font-semibold text-black">
               Pipeline delle interviste
             </h2>
@@ -207,16 +213,17 @@ export default async function EditorialLaunchPage() {
           ))}
         </div>
         <p className="mt-4 max-w-3xl text-xs leading-5 text-neutral-600">
-          Le proposte presenti nella Inbox non entrano automaticamente in questa pipeline: il workflow nasce solo quando la redazione apre una vera bozza/intervista. Nessuno stato della pipeline equivale da solo a pubblicazione.
+          Le proposte presenti nella Inbox non entrano automaticamente in questa pipeline. I contatti esterni iniziano solo dopo il go-live; il workflow nasce quando la redazione avvia realmente l'intervista. Nessuno stato della pipeline equivale da solo a pubblicazione.
         </p>
       </section>
 
       <section className="border-t border-black pt-6">
         <h2 className="text-xl font-semibold text-black">Controllo umano obbligatorio</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
-          Anche quando tutti i numeri diventano verdi, il gate automatico non equivale a pubblicazione.
-          Prima del lancio la redazione deve approvare qualità delle storie, equilibrio della home,
-          correttezza delle fonti, resa visuale desktop/mobile e commit esatto candidato al rilascio.
+          Anche quando tutti i requisiti automatici pre-go-live diventano verdi, il gate non equivale a pubblicazione.
+          Prima del lancio la redazione deve approvare coerenza della home, correttezza delle fonti,
+          resa visuale desktop/mobile, accessibilità umana e commit esatto candidato al rilascio.
+          Le storie reali vengono acquisite successivamente, con consenso, fact-check e review editoriale.
         </p>
       </section>
     </main>
