@@ -147,7 +147,7 @@ function jwtClaims(userId) {
 function asEditor(userId, sql) {
   return `
     begin;
-    select set_config('request.jwt.claims', '${jwtClaims(userId)}', true);
+    set local "request.jwt.claims" = '${jwtClaims(userId)}';
     set local role authenticated;
     ${sql}
     reset role;
