@@ -1,46 +1,101 @@
+import assert from "node:assert/strict";
+import { lookup } from "node:dns/promises";
 import { mkdir, writeFile } from "node:fs/promises";
+import { isIP } from "node:net";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+const MAX_REDIRECTS = 5;
+const REQUEST_TIMEOUT_MS = 15000;
+
+function required(name) {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`Missing environment variable: ${name}`);
+  return value;
 }
 
-const supabase = createClient(supabaseUrl, serviceRoleKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+function isPrivateIPv4(address) {
+  const octets = address.split(".").map(Number);
+  if (octets.length !== 4 || octets.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) {
+    return true;
+  }
+  const [a, b] = octets;
+  return (
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 0) ||
+    (a === 192 && b === 168) ||
+    (a === 198 && (b === 18 || b === 19)) ||
+    a >= 224
+  );
+}
 
-function isPrivateHost(hostname) {
-  const host = hostname.toLowerCase();
-  if (host === "localhost" || host === "::1" || host.endsWith(".local")) return true;
-  if (/^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true;
-  const match = host.match(/^172\.(\d+)\./);
-  if (match && Number(match[1]) >= 16 && Number(match[1]) <= 31) return true;
+function isPrivateAddress(address) {
+  const normalized = address.toLowerCase().split("%")[0];
+  const family = isIP(normalized);
+  if (family === 4) return isPrivateIPv4(normalized);
+  if (family !== 6) return true;
+
+  if (
+    normalized === "::" ||
+    normalized === "::1" ||
+    normalized.startsWith("fc") ||
+    normalized.startsWith("fd") ||
+    /^fe[89ab]/.test(normalized)
+  ) {
+    return true;
+  }
+
+  const mapped = normalized.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return isPrivateIPv4(mapped[1]);
+
   return false;
 }
 
-function safeUrl(raw) {
+function parsePublicHttpUrl(raw) {
   try {
     const url = new URL(raw);
-    if (!['http:', 'https:'].includes(url.protocol)) return null;
-    if (isPrivateHost(url.hostname)) return null;
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    if (url.username || url.password) return null;
+    const host = url.hostname.toLowerCase();
+    if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) {
+      return null;
+    }
+    if (isIP(host) && isPrivateAddress(host)) return null;
     return url;
   } catch {
     return null;
   }
 }
 
-async function requestWithTimeout(url, method) {
+async function assertPublicDestination(url) {
+  const host = url.hostname;
+  if (isIP(host)) {
+    if (isPrivateAddress(host)) throw new Error("private destination blocked");
+    return;
+  }
+
+  const addresses = await lookup(host, { all: true, verbatim: true });
+  if (addresses.length === 0) throw new Error("source hostname has no DNS address");
+  if (addresses.some(({ address }) => isPrivateAddress(address))) {
+    throw new Error("source hostname resolves to a private/reserved address");
+  }
+}
+
+async function fetchOne(url, method) {
+  await assertPublicDestination(url);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     return await fetch(url, {
       method,
-      redirect: "follow",
+      redirect: "manual",
       signal: controller.signal,
       headers: {
-        "User-Agent": "ImmigratiImprenditori-SourceHealth/1.0",
+        "User-Agent": "ImmigratiImprenditori-SourceHealth/1.1",
         ...(method === "GET" ? { Range: "bytes=0-2047" } : {}),
       },
     });
@@ -49,16 +104,39 @@ async function requestWithTimeout(url, method) {
   }
 }
 
+async function requestWithSafeRedirects(initialUrl, method) {
+  let current = initialUrl;
+  for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
+    const response = await fetchOne(current, method);
+    if (![301, 302, 303, 307, 308].includes(response.status)) return response;
+
+    if (redirectCount === MAX_REDIRECTS) throw new Error("too many redirects");
+    const location = response.headers.get("location");
+    if (!location) throw new Error(`redirect ${response.status} without Location`);
+    const next = parsePublicHttpUrl(new URL(location, current).toString());
+    if (!next) throw new Error("unsafe redirect destination blocked");
+    current = next;
+    if (response.status === 303 && method !== "HEAD") method = "GET";
+  }
+  throw new Error("redirect loop");
+}
+
 async function checkSource(source) {
-  const url = safeUrl(source.url);
+  const url = parsePublicHttpUrl(source.url);
   if (!url) {
-    return { ...source, status: "invalid_url", http_status: null, final_url: null, checked_at: new Date().toISOString() };
+    return {
+      ...source,
+      status: "invalid_url",
+      http_status: null,
+      final_url: null,
+      checked_at: new Date().toISOString(),
+    };
   }
 
   try {
-    let response = await requestWithTimeout(url, "HEAD");
+    let response = await requestWithSafeRedirects(url, "HEAD");
     if ([403, 405, 406].includes(response.status)) {
-      response = await requestWithTimeout(url, "GET");
+      response = await requestWithSafeRedirects(url, "GET");
     }
     const ok = response.status >= 200 && response.status < 400;
     return {
@@ -80,54 +158,86 @@ async function checkSource(source) {
   }
 }
 
-const { data: sources, error } = await supabase
-  .from("observatory_statistical_sources")
-  .select("id, name, producer_name, url, external_identifier, lifecycle_status")
-  .neq("lifecycle_status", "withdrawn")
-  .not("url", "is", null)
-  .order("producer_name");
+async function main() {
+  const supabase = createClient(
+    required("NEXT_PUBLIC_SUPABASE_URL"),
+    required("SUPABASE_SERVICE_ROLE_KEY"),
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
 
-if (error) throw new Error(error.message);
+  const { data: sources, error } = await supabase
+    .from("observatory_statistical_sources")
+    .select("id, name, producer_name, url, external_identifier, lifecycle_status")
+    .neq("lifecycle_status", "withdrawn")
+    .not("url", "is", null)
+    .order("producer_name");
 
-const results = [];
-const queue = [...(sources ?? [])];
-const workers = Array.from({ length: Math.min(4, queue.length || 1) }, async () => {
-  while (queue.length > 0) {
-    const source = queue.shift();
-    if (!source) return;
-    results.push(await checkSource(source));
-  }
-});
-await Promise.all(workers);
-results.sort((a, b) => a.producer_name.localeCompare(b.producer_name));
+  if (error) throw new Error(error.message);
 
-const summary = {
-  checked_at: new Date().toISOString(),
-  total: results.length,
-  ok: results.filter((item) => item.status === "ok").length,
-  issues: results.filter((item) => item.status !== "ok").length,
-  results,
-};
+  const results = [];
+  const queue = [...(sources ?? [])];
+  const workers = Array.from({ length: Math.min(4, queue.length || 1) }, async () => {
+    while (queue.length > 0) {
+      const source = queue.shift();
+      if (!source) return;
+      results.push(await checkSource(source));
+    }
+  });
+  await Promise.all(workers);
+  results.sort((a, b) => a.producer_name.localeCompare(b.producer_name));
 
-await mkdir("artifacts", { recursive: true });
-await writeFile("artifacts/source-health.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
+  const summary = {
+    checked_at: new Date().toISOString(),
+    total: results.length,
+    ok: results.filter((item) => item.status === "ok").length,
+    issues: results.filter((item) => item.status !== "ok").length,
+    results,
+  };
 
-console.log(JSON.stringify({ total: summary.total, ok: summary.ok, issues: summary.issues }));
-for (const item of results.filter((row) => row.status !== "ok")) {
-  console.warn(`[source-health] ${item.status} ${item.http_status ?? "-"} ${item.name} ${item.url}`);
-}
+  await mkdir("artifacts", { recursive: true });
+  await writeFile("artifacts/source-health.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
 
-if (process.env.GITHUB_STEP_SUMMARY) {
-  const lines = [
-    "## Observatory source health",
-    "",
-    `Checked: **${summary.total}** · OK: **${summary.ok}** · Issues: **${summary.issues}**`,
-    "",
-  ];
+  console.log(JSON.stringify({ total: summary.total, ok: summary.ok, issues: summary.issues }));
   for (const item of results.filter((row) => row.status !== "ok")) {
-    lines.push(`- ${item.name}: ${item.status}${item.http_status ? ` (${item.http_status})` : ""}`);
+    console.warn(`[source-health] ${item.status} ${item.http_status ?? "-"} ${item.name} ${item.url}`);
   }
-  await writeFile(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n", { flag: "a" });
+
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    const lines = [
+      "## Observatory source health",
+      "",
+      `Checked: **${summary.total}** · OK: **${summary.ok}** · Issues: **${summary.issues}**`,
+      "",
+    ];
+    for (const item of results.filter((row) => row.status !== "ok")) {
+      lines.push(`- ${item.name}: ${item.status}${item.http_status ? ` (${item.http_status})` : ""}`);
+    }
+    await writeFile(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n", { flag: "a" });
+  }
+
+  if (summary.issues > 0) process.exitCode = 2;
 }
 
-if (summary.issues > 0) process.exitCode = 2;
+function selfTest() {
+  assert.equal(parsePublicHttpUrl("https://example.com/report")?.hostname, "example.com");
+  assert.equal(parsePublicHttpUrl("http://127.0.0.1/admin"), null);
+  assert.equal(parsePublicHttpUrl("http://10.0.0.1/data"), null);
+  assert.equal(parsePublicHttpUrl("http://169.254.169.254/latest/meta-data"), null);
+  assert.equal(parsePublicHttpUrl("http://[::1]/admin"), null);
+  assert.equal(parsePublicHttpUrl("file:///etc/passwd"), null);
+  assert.equal(parsePublicHttpUrl("https://user:pass@example.com/private"), null);
+  assert.equal(isPrivateAddress("192.168.1.1"), true);
+  assert.equal(isPrivateAddress("8.8.8.8"), false);
+  assert.equal(isPrivateAddress("fc00::1"), true);
+  assert.equal(isPrivateAddress("2001:4860:4860::8888"), false);
+  console.log("SOURCE_HEALTH_SELF_TEST = PASS");
+}
+
+if (process.env.SOURCE_HEALTH_SELF_TEST === "1") {
+  selfTest();
+} else {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.stack : error);
+    process.exitCode = 1;
+  });
+}
