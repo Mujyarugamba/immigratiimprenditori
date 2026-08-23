@@ -92,7 +92,7 @@ Il ciclo completo è stato verificato nel laboratorio Supabase locale con dati e
 8. rendering della pagina pubblica autore con collegamento al contenuto;
 9. cleanup di autore, contenuto e utente effimeri.
 
-Il cold-start continua correttamente a restituire **0 profili autore pubblici reali**. Nessun nome o'identità viene inventato per far passare il gate.
+Il cold-start continua correttamente a restituire **0 profili autore pubblici reali**. Nessun nome o identità viene inventato per far passare il gate.
 
 ### Verifica automatica del 23 agosto 2026
 
