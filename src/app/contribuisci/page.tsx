@@ -94,14 +94,19 @@ export default async function ContribuisciPage({ searchParams }: Props) {
       ) : (
         <>
           {hasError ? (
-            <div className="border border-black p-4 text-sm text-black" role="alert">
+            <div id="submission-form-error" className="border border-black p-4 text-sm text-black" role="alert">
               {params.errore === "campi"
                 ? "Controlla i campi obbligatori, i limiti dei valori e la presa d'atto dell'informativa privacy."
                 : "L'invio non è riuscito. Riprova tra poco."}
             </div>
           ) : null}
 
-          <form id="modulo-partecipazione" action={submitEditorialContributionAction} className="mt-10 space-y-10">
+          <form
+            id="modulo-partecipazione"
+            action={submitEditorialContributionAction}
+            aria-describedby={hasError ? "submission-form-error" : undefined}
+            className="mt-10 space-y-10"
+          >
             <div hidden aria-hidden="true">
               <label>
                 Sito web
