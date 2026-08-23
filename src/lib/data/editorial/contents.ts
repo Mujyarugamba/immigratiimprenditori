@@ -35,6 +35,20 @@ export type EditorialContent = EditorialContentListItem & {
   created_at: string;
 };
 
+export type EditorialContentVersionListItem = {
+  id: string;
+  version_number: number;
+  version_label: string;
+  change_summary: string;
+  created_by: string | null;
+  created_at: string;
+};
+
+export type EditorialContentVersion = EditorialContentVersionListItem & {
+  content_id: string;
+  snapshot: Record<string, unknown>;
+};
+
 const LIST_SELECT =
   "id, title, slug, type_code, editorial_status, publication_status, visibility_status, updated_at";
 
@@ -99,6 +113,43 @@ export async function getEditorialContentById(
     return null;
   }
   return data as EditorialContent;
+}
+
+export async function listEditorialContentVersions(
+  contentId: string,
+): Promise<EditorialContentVersionListItem[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("content_versions")
+    .select("id, version_number, version_label, change_summary, created_by, created_at")
+    .eq("content_id", contentId)
+    .order("version_number", { ascending: false })
+    .limit(100);
+
+  // The migration is intentionally not active in production yet. Branch previews
+  // backed by the current hosted schema therefore degrade to an empty timeline.
+  if (error) return [];
+  return (data ?? []) as EditorialContentVersionListItem[];
+}
+
+export async function getEditorialContentVersion(
+  contentId: string,
+  versionNumber: number,
+): Promise<EditorialContentVersion | null> {
+  if (!Number.isInteger(versionNumber) || versionNumber < 1) return null;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("content_versions")
+    .select(
+      "id, content_id, version_number, version_label, change_summary, snapshot, created_by, created_at",
+    )
+    .eq("content_id", contentId)
+    .eq("version_number", versionNumber)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data as EditorialContentVersion;
 }
 
 export type CreateEditorialContentInput = {
