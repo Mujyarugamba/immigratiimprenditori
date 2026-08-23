@@ -2,7 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
-const previewReadOnly = process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true";
+const previewReadOnly =
+  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" ||
+  (process.env.NETLIFY === "true" && process.env.CONTEXT !== "production") ||
+  (process.env.VERCEL === "1" && process.env.VERCEL_ENV === "preview");
 
 export async function proxy(request: NextRequest) {
   if (previewReadOnly && !SAFE_METHODS.has(request.method.toUpperCase())) {
