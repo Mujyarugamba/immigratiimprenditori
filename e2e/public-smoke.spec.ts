@@ -58,9 +58,9 @@ test("contribution and support surfaces remain safe without live data", async ({
 
 test("contribution server errors are announced and associated with the form", async ({ page }) => {
   await page.goto("/contribuisci?errore=campi", { waitUntil: "domcontentloaded" });
-  const alert = page.getByRole("alert");
+  const alert = page.locator("#submission-form-error");
   await expect(alert).toBeVisible();
-  await expect(alert).toHaveAttribute("id", "submission-form-error");
+  await expect(alert).toHaveAttribute("role", "alert");
   await expect(alert).toContainText(/Controlla i campi obbligatori/i);
   await expect(page.locator("#modulo-partecipazione")).toHaveAttribute(
     "aria-describedby",
