@@ -17,7 +17,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,3 +76,10 @@ jobs:
 
       - name: Public browser E2E
         run: npx playwright test --config=playwright.public.config.ts
+
+      - name: Lighthouse mobile performance gate
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
+        run: npx --yes @lhci/cli@0.15.1 autorun
