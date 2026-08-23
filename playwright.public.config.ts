@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = "http://127.0.0.1:3000";
+const unavailableSupabaseURL = "http://127.0.0.1:9";
 
 export default defineConfig({
   testDir: "e2e",
@@ -25,7 +26,10 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 60_000,
     env: {
-      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      // Public-shell CI intentionally runs without a database. Use a local
+      // closed endpoint so fallback behavior is deterministic and does not
+      // depend on DNS/network latency to an invented external Supabase host.
+      NEXT_PUBLIC_SUPABASE_URL: unavailableSupabaseURL,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "ci-placeholder-key",
       NEXT_PUBLIC_SITE_URL: "https://preview.example.invalid",
     },
