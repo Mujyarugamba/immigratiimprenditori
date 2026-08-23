@@ -45,7 +45,8 @@
     "20260822210500_go_live_audit_analytics.sql",
     "20260822211500_fix_public_rls_mfa_compatibility.sql",
     "20260822212000_backfill_futurae_route_evidence.sql",
-    "20260822213000_hybrid_editorial_review_governance.sql"
+    "20260822213000_hybrid_editorial_review_governance.sql",
+    "20260822213100_fix_hybrid_null_category_classifier.sql"
   ],
   "releasePolicy": {
     "historicalMigrationsDirectoryIsNotBootstrap": true,
