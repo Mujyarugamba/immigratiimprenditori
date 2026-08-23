@@ -282,3 +282,233 @@ comment on function public.access_self_delete_preflight() is
   'Self-service deletion preflight for permanent authenticated users only; anonymous Auth users are rejected.';
 comment on function public.access_self_close_account() is
   'Closes the current permanent user account while protecting the final application administrator; anonymous Auth users are rejected.';
+
+-- Service-role-only lifecycle RPCs are also present in the hosted database with
+-- deprecated auth.role() checks. SECURITY DEFINER changes current_user, so the
+-- signed JWT role claim is the correct request identity signal here.
+create or replace function public.access_provision_account(p_auth_user_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_account_id uuid;
+begin
+  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if p_auth_user_id is null then
+    raise exception 'auth user id required' using errcode = '22004';
+  end if;
+  if not exists (select 1 from auth.users u where u.id = p_auth_user_id) then
+    raise exception 'auth user not available' using errcode = 'P0002';
+  end if;
+
+  select a.id into v_account_id
+  from public.accounts a
+  where a.auth_user_id = p_auth_user_id
+  for update;
+
+  if v_account_id is not null then
+    raise exception 'account already exists' using errcode = '23505';
+  end if;
+
+  insert into public.accounts(
+    auth_user_id, person_id, person_association_status, person_linked_at, account_status
+  ) values (
+    p_auth_user_id, null, null, null, 'registered'
+  ) returning id into v_account_id;
+
+  return v_account_id;
+end;
+$$;
+
+create or replace function public.access_link_person(p_account_id uuid, p_person_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_account public.accounts%rowtype;
+begin
+  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if p_account_id is null or p_person_id is null then
+    raise exception 'account id and person id required' using errcode = '22004';
+  end if;
+  if not exists (
+    select 1 from public.profiles p where p.id = p_person_id and p.deleted_at is null
+  ) then
+    raise exception 'person not available' using errcode = 'P0002';
+  end if;
+
+  select * into v_account
+  from public.accounts a
+  where a.id = p_account_id
+  for update;
+
+  if not found then
+    raise exception 'account not available' using errcode = 'P0002';
+  end if;
+  if v_account.account_status = 'closed' then
+    raise exception 'account state incompatible' using errcode = '55000';
+  end if;
+  if v_account.person_id is not null and v_account.person_id is distinct from p_person_id then
+    raise exception 'person association already set' using errcode = '55000';
+  end if;
+
+  update public.accounts a
+  set
+    person_id = p_person_id,
+    person_association_status = 'verified',
+    person_linked_at = coalesce(a.person_linked_at, now()),
+    account_status = case when a.account_status in ('registered','limited') then 'active' else a.account_status end,
+    activated_at = case when a.account_status in ('registered','limited') then coalesce(a.activated_at, now()) else a.activated_at end
+  where a.id = p_account_id;
+
+  return p_account_id;
+end;
+$$;
+
+create or replace function public.assign_application_role(p_account_id uuid, p_role_code text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_assignment_id uuid;
+begin
+  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if p_account_id is null or p_role_code is null then
+    raise exception 'account id and role code required' using errcode = '22004';
+  end if;
+  if p_role_code not in ('redattore','amministratore_applicativo','contributore') then
+    raise exception 'role not allowed' using errcode = '22023';
+  end if;
+  if not exists (
+    select 1 from public.accounts a
+    where a.id = p_account_id and a.account_status <> 'closed'
+  ) then
+    raise exception 'account not available' using errcode = 'P0002';
+  end if;
+
+  insert into public.account_role_assignments(
+    account_id, role_code, assignment_status, assigned_at, revoked_at
+  ) values (
+    p_account_id, p_role_code, 'active', now(), null
+  )
+  on conflict(account_id, role_code) do update
+    set assignment_status = 'active', revoked_at = null, assigned_at = now()
+  returning id into v_assignment_id;
+
+  return v_assignment_id;
+end;
+$$;
+
+create or replace function public.provision_contributor_account(p_auth_user_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_account_id uuid;
+begin
+  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if p_auth_user_id is null then
+    raise exception 'auth user id required' using errcode = '22004';
+  end if;
+  if not exists (select 1 from auth.users u where u.id = p_auth_user_id) then
+    raise exception 'auth user not available' using errcode = 'P0002';
+  end if;
+  if not exists (
+    select 1 from public.profiles p where p.id = p_auth_user_id and p.deleted_at is null
+  ) then
+    raise exception 'profile not available' using errcode = 'P0002';
+  end if;
+
+  select a.id into v_account_id
+  from public.accounts a
+  where a.auth_user_id = p_auth_user_id
+  for update;
+
+  if v_account_id is null then
+    select public.access_provision_account(p_auth_user_id) into v_account_id;
+  end if;
+
+  perform public.access_link_person(v_account_id, p_auth_user_id);
+  perform public.assign_application_role(v_account_id, 'contributore');
+
+  return v_account_id;
+end;
+$$;
+
+create or replace function public.revoke_contributor_role(p_account_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_assignment_id uuid;
+begin
+  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
+    raise exception 'not authorized' using errcode = '42501';
+  end if;
+  if p_account_id is null then
+    raise exception 'account id required' using errcode = '22004';
+  end if;
+
+  update public.account_role_assignments r
+  set
+    assignment_status = 'revoked',
+    revoked_at = now(),
+    updated_at = now()
+  where r.account_id = p_account_id
+    and r.role_code = 'contributore'
+    and r.assignment_status = 'active'
+  returning r.id into v_assignment_id;
+
+  if v_assignment_id is null then
+    raise exception 'active contributor role not available' using errcode = 'P0002';
+  end if;
+
+  return v_assignment_id;
+end;
+$$;
+
+revoke all on function public.access_provision_account(uuid)
+  from public, anon, authenticated, service_role;
+revoke all on function public.access_link_person(uuid,uuid)
+  from public, anon, authenticated, service_role;
+revoke all on function public.assign_application_role(uuid,text)
+  from public, anon, authenticated, service_role;
+revoke all on function public.provision_contributor_account(uuid)
+  from public, anon, authenticated, service_role;
+revoke all on function public.revoke_contributor_role(uuid)
+  from public, anon, authenticated, service_role;
+
+grant execute on function public.access_provision_account(uuid) to service_role;
+grant execute on function public.access_link_person(uuid,uuid) to service_role;
+grant execute on function public.assign_application_role(uuid,text) to service_role;
+grant execute on function public.provision_contributor_account(uuid) to service_role;
+grant execute on function public.revoke_contributor_role(uuid) to service_role;
+
+comment on function public.access_provision_account(uuid) is
+  'Service-role-only account provisioning RPC; authorization uses the signed JWT role claim.';
+comment on function public.access_link_person(uuid,uuid) is
+  'Service-role-only account/person linking RPC; authorization uses the signed JWT role claim.';
+comment on function public.assign_application_role(uuid,text) is
+  'Service-role-only application-role assignment RPC; authorization uses the signed JWT role claim.';
+comment on function public.provision_contributor_account(uuid) is
+  'Service-role-only contributor provisioning RPC; authorization uses the signed JWT role claim.';
+comment on function public.revoke_contributor_role(uuid) is
+  'Service-role-only contributor revocation RPC; authorization uses the signed JWT role claim.';
