@@ -1,0 +1,49 @@
+name: Production dump scope diagnostic
+
+on:
+  push:
+    branches:
+      - ops/production-restore-drill-20260823
+    paths:
+      - .github/workflows/production-dump-scope-diagnostic.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROD_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Dump Production data read-only and report COPY targets only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PROD_DB_URL"
+          test -n "$STAGING_DB_URL"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          supabase db dump --db-url "$PROD_DB_URL" -f "$tmp/data.sql" --use-copy --data-only \
+            -x "storage.buckets_vectors" \
+            -x "storage.vector_indexes"
+          echo 'COPY_TARGETS_BEGIN'
+          sed -n -E 's/^COPY ([^ ]+) .*/\1/p' "$tmp/data.sql" | sort -u
+          echo 'COPY_TARGETS_END'
+          for needle in 'auth.users' 'auth.identities' 'storage.buckets' 'storage.objects'; do
+            if grep -Eq "^COPY (\\\"?${needle%%.*}\\\"?\\.)?\\\"?${needle##*.}\\\"? " "$tmp/data.sql"; then
+              echo "DUMP_CONTAINS_${needle//./_}=YES"
+            else
+              echo "DUMP_CONTAINS_${needle//./_}=NO"
+            fi
+          done
+          echo "PROD_STORAGE_BUCKETS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from storage.buckets;')"
+          echo "PROD_STORAGE_OBJECTS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from storage.objects;')"
+          echo "STAGE_STORAGE_BUCKETS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from storage.buckets;')"
+          echo "STAGE_STORAGE_OBJECTS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from storage.objects;')"
+          echo "DUMP_SCOPE_DIAGNOSTIC = PASS"
