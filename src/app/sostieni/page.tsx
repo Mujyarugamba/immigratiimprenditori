@@ -116,7 +116,7 @@ export default function SostieniPage() {
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
           Per partnership e rapporti istituzionali:{" "}
           <a
-            className="underline underline-offset-4"
+            className="break-all underline underline-offset-4"
             href={`mailto:${SUPPORT_CONFIGURATION.partnershipEmail}`}
           >
             {SUPPORT_CONFIGURATION.partnershipEmail}
