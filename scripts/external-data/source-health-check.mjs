@@ -165,16 +165,19 @@ async function checkSource(source) {
 }
 
 async function main() {
+  // The source registry exposes active rows through anon SELECT + RLS. This
+  // external read-only checker therefore uses the public publishable key and
+  // must never receive a privileged service-role credential.
   const supabase = createClient(
     required("NEXT_PUBLIC_SUPABASE_URL"),
-    required("SUPABASE_SERVICE_ROLE_KEY"),
+    required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 
   const { data: sources, error } = await supabase
     .from("observatory_statistical_sources")
     .select("id, name, producer_name, url, external_identifier, lifecycle_status")
-    .neq("lifecycle_status", "withdrawn")
+    .eq("lifecycle_status", "active")
     .not("url", "is", null)
     .order("producer_name");
 
