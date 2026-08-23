@@ -4,339 +4,304 @@ Stato: **GATE APERTO — NON PASS**
 
 Data audit: 2026-08-23
 Branch: `feature/research-radar-ai-knowledge-20260822`
-Ultimo head applicativo/security verificato: `4ffa299caf05938e4628ec536d5f0f9f129cb9c5`
+Candidato applicativo di riferimento prima di questo aggiornamento documentale: `a4e75c6eaf40f3079bd79ccc241226e37646f20f`
 
-Questo documento registra lo stato verificato del gate di sicurezza e rilascio. Un elemento è PASS soltanto quando è stato verificato sul codice, nel laboratorio locale/CI o in lettura sul servizio collegato. Le verifiche locali/CI non autorizzano né implicano applicazione al database o deploy di produzione.
+Questo documento registra il **perimetro corrente di rilascio**. Non sostituisce i check GitHub del commit candidato e non trasforma verifiche locali o di preview in autorizzazioni Production.
 
-## 1. Database e RLS
+Regola editoriale vincolante:
 
-### SEC-RLS-01 — RLS sulle tabelle public
-**PASS**
+> **Prima il sito va online e supera il live smoke; solo dopo iniziano inviti, interviste e altri contatti esterni.**
 
-Verifica live Supabase in sola lettura: le tabelle ordinarie dello schema `public` mantengono RLS e policy coerenti con il modello applicativo.
+Di conseguenza una storia reale **non è un blocker del primo go-live**. Il cold-start può avere zero storie reali purché `/storie`, workflow, evidence gate e pubblicazione controllata siano tecnicamente pronti.
 
-### SEC-RLS-02 — Inbox e account non leggibili da anon
-**PASS**
+---
 
-Gli smoke locali/CI verificano che Inbox editoriale, account e superfici private non siano leggibili dal ruolo anonimo.
+## 1. Stato sintetico Go-Live A
 
-### SEC-RLS-03 — Pubblicazione controllata
-**PASS LOCAL/CI**
+Roadmap canonica: `docs/roadmap/ROADMAP-110-PRIORITIES.md`.
 
-Le superfici pubbliche espongono soltanto contenuti/eventi `ready + published + public` e non archiviati. Il publication gate DB vieta bypass di pubblicazione e richiede ruoli editoriali appropriati.
+- **READY: 32/33**
+- **DA RIFINIRE: 1/33** — #92 WCAG 2.2 AA human/device QA
+- **blocker di contenuto reale prima del primo go-live: 0**
 
-### SEC-RLS-04 — Performance policy advisor
-**NON BLOCCANTE / TUNING POST-GO-LIVE**
+`PRODUCTION_READINESS = NOT PASS` finché i gate esterni e di rilascio indicati in fondo non sono chiusi.
 
-Il Performance Advisor production segnala più policy permissive `SELECT` sovrapposte per il ruolo `authenticated` su diverse tabelle pubbliche/editoriali. Il pattern deriva in larga parte dalla coesistenza di lettura pubblica e lettura editor/self-service.
+---
 
-È un warning di costo RLS, non un'esposizione aggiuntiva. Non viene eseguita una riscrittura ampia delle policy alla vigilia del rilascio senza evidenza di un problema di query plan. La correttezza RLS ha priorità sulla micro-ottimizzazione.
-
-Gli `unused_index` segnalati dal Performance Advisor sono classificati **INFO**. Il database production ha ancora un volume/uso limitato: nessun indice viene rimosso automaticamente sulla sola base del contatore di utilizzo attuale.
-
-## 2. Funzioni SECURITY DEFINER
-
-### SEC-FUNC-01 — Self-service account
-**PASS / WARNING INTENZIONALE**
-
-Security Advisor production segnala `access_self_close_account()` e `access_self_delete_preflight()` perché sono `SECURITY DEFINER`. Audit live in sola lettura conferma:
-
-- grant client soltanto a `authenticated`;
-- `search_path=''`;
-- identità derivata da `auth.uid()`;
-- operazioni limitate all'account corrente;
-- protezione dell'ultimo amministratore applicativo.
-
-Il warning è quindi intenzionale e non va eliminato automaticamente.
-
-### SEC-FUNC-02 — Contributo editoriale pubblico
-**HARDENING PREPARATO / LOCAL CI PASS — PRODUCTION APPLY OBBLIGATORIO PRIMA DEL FORM LIVE**
-
-`submit_editorial_contribution()` deve restare eseguibile da `anon` perché `/contribuisci` non richiede account. Security Advisor segnala correttamente la funzione come `SECURITY DEFINER` esposta a ruoli client.
-
-La versione production corrente è ancora precedente al rate limiting persistente del branch. La migration già preparata e validata:
-
-`20260822183000_persistent_public_submission_rate_limits.sql`
-
-introduce:
-
-- tabella contatori privata con RLS e nessun accesso client;
-- chiavi memorizzate esclusivamente come SHA-256;
-- primitive atomiche non eseguibili da `anon`/`authenticated`;
-- trigger `BEFORE INSERT` su `editorial_submissions`;
-- limite globale di 200 invii/ora;
-- limite di 5 invii/ora per e-mail;
-- bypass soltanto per service/editor/admin.
-
-Smoke locale: `PERSISTENT_RATE_LIMIT_SECURITY = PASS`.
-
-**Regola di release:** il form pubblico non va considerato production-hardened finché questa migration non è applicata nel set autorizzato e riverificata live.
-
-## 3. Form pubblico / anti-abuso
-
-### SEC-FORM-01 — Validazione server-side
-**PASS SUL BRANCH**
-
-Tipo proposta, campi obbligatori, acknowledgement privacy, limiti di lunghezza e URL HTTP/HTTPS sono validati lato server/DB nel candidato.
-
-### SEC-FORM-02 — Honeypot
-**PASS SUL BRANCH**
-
-Filtro anti-bot elementare senza tracker o cookie esterni.
-
-### SEC-FORM-03 — Rate limiting persistente
-**PASS LOCAL/CI — PRODUCTION ACTIVATION PENDING**
-
-Form e login hanno rate-limit persistenti verificati nel laboratorio. La production non è stata modificata.
-
-## 4. Autenticazione e privilegi
-
-### SEC-AUTH-01 — Leaked Password Protection
-**WARNING PRODUCTION / PIANO FREE — MFA PRIVILEGIATI COME MITIGAZIONE**
-
-Security Advisor production conferma `Leaked Password Protection` disabilitato. Nel perimetro corrente del piano Free non viene rappresentato come attivo.
-
-Per `redattore` e `amministratore_applicativo`, la mitigazione verificata nel laboratorio è TOTP + AAL2 obbligatorio. L'attivazione/configurazione Auth production resta un passo separato.
-
-### SEC-AUTH-02 — Separazione ruoli
-**PASS LOCAL/CI**
-
-Verificati login reale, provisioning account, JWT/RPC, separazione contributor/editor, auto-elevazione negata, accesso contributor alla propria proposta e negazione della redazione.
-
-### SEC-AUTH-03 — MFA TOTP / AAL2
-**PASS LOCAL/CI — PRODUCTION ACTIVATION PENDING**
-
-Il browser autenticato verifica password → AAL1 → MFA obbligatoria → enrollment/challenge/verify TOTP → AAL2 persistito → operazioni editoriali privilegiate.
-
-### SEC-AUTH-04 — Session user trust boundary
-**PASS + CI GUARD**
-
-Il codice applicativo usa `auth.getUser()` per autenticare l'identità server-side prima delle decisioni di autorizzazione. `getApplicationSession()` risolve poi account/ruoli tramite RPC; il layout redazione aggiunge ruolo editor/admin e AAL2.
-
-La CI contiene ora `Supabase unsafe session-user guard`: una chiamata diretta `.auth.getSession(` dentro `src/**` fa fallire il workflow.
-
-Il warning emesso dalla libreria Supabase durante `getAuthenticatorAssuranceLevel()` non viene usato come fonte di identità o autorizzazione applicativa.
-
-### SEC-AUTH-05 — Service-role boundary
-**PASS SUL BRANCH / BUILD VERIFIED**
-
-`src/lib/supabase/service.ts` importa `server-only`: un import diretto o indiretto del client service-role in un Client Component diventa errore di build. Build standard e build contro Supabase locale: PASS.
-
-## 5. HTTP security / CSP
-
-### SEC-HTTP-01 — Header baseline
-**PASS SUL BRANCH / CI**
-
-Verificati:
-
-- HSTS;
-- `X-Content-Type-Options: nosniff`;
-- `X-Frame-Options: DENY`;
-- `Referrer-Policy: strict-origin-when-cross-origin`;
-- `Permissions-Policy` con camera/microfono/geolocalizzazione disabilitati;
-- `X-Powered-By` assente.
-
-### SEC-HTTP-02 — Content Security Policy
-**PASS SUL CANDIDATO / FINAL LIVE SMOKE PENDING**
-
-La CSP è applicata e lo smoke CI la verifica. Il candidato corrente include:
-
-- `default-src 'self'`;
-- `base-uri 'self'`;
-- `object-src 'none'`;
-- `frame-ancestors 'none'`;
-- `frame-src 'none'`;
-- `form-action 'self'`;
-- `connect-src` ristretto all'esatta origine Supabase configurata per l'ambiente e alla corrispondente origine WebSocket;
-- nessun wildcard `*.supabase.co`;
-- nessun `'unsafe-eval'`;
-- `upgrade-insecure-requests`.
-
-`'unsafe-inline'` resta per script/style perché la rimozione corretta richiederebbe una deliberata architettura nonce/hash compatibile con Next.js. Non viene sostituita con una modifica improvvisata che rischi di rompere SSR/hydration.
-
-Lo smoke fallisce se ricompaiono wildcard Supabase o `unsafe-eval`.
-
-## 6. SEO / aree private
-
-### SEO-INDEX-01 — Aree riservate fuori dall'indice
-**PASS**
-
-`/app/` e `/accedi` restano esclusi/`noindex`; i deploy-preview Netlify hanno `X-Robots-Tag: noindex, nofollow, noarchive`.
-
-### SEO-BASE-02 — Canonical / hreflang / metadata
-**PASS — FOUNDATION + BROWSER VERIFIED**
-
-Metadata, canonical, hreflang, JSON-LD, sitemap e noindex preview sono coperti dai test automatici sulle superfici core.
-
-### SEO-FINAL-03 — QA candidato/live
-**PENDING**
-
-Resta il controllo finale sul candidato effettivamente autorizzato e poi sul live.
-
-## 7. CI, performance e hosting
-
-### SEC-CI-01 — Editorial v1 CI
-**PASS**
-
-Head applicativo/security `4ffa299caf05938e4628ec536d5f0f9f129cb9c5`:
-
-- run `32630712208`: **COMPLETED / SUCCESS**;
-- TypeScript, test, functional gates, Radar, source-health self-test, privacy guard, dependency audit, Auth deprecation guard, unsafe-session guard, build, HTTP/CSP smoke, public browser E2E e Lighthouse: PASS.
-
-### SEC-CI-02 — Supabase local migration validation
-**PASS TECNICO / 22 PASS + 1 BLOCCO EDITORIALE INTENZIONALE**
-
-Run `32630712281`:
-
-- migration plan: PASS;
-- cold-start: PASS;
-- PostgreSQL lint: PASS;
-- RLS/publication smoke: PASS;
-- persistent form/login rate-limit: PASS;
-- audit/analytics: PASS;
-- backup archive: PASS;
-- Auth integration: PASS;
-- build contro Supabase locale: PASS;
-- browser: **22 PASS / 1 FAIL**.
-
-L'unico failure è il gate Storie: cold-start pubblica `guide:4`, `insight:12`, `institutional_page:1` e volutamente zero storie/interviste/testimonianze reali.
-
-### SEC-CI-03 — Protezione `main`
-**PROTECTED / REQUIRED CHECKS OFF**
-
-`main` è protetto, ma i required status checks risultano ancora `enforcement_level: off` e senza context/check obbligatori. È una decisione di governance pre-release, non viene cambiata automaticamente.
-
-### PERF-01 — Lighthouse mobile
-**PASS CI — 3/3**
-
-Evidenza verificata sul candidato applicativo precedente e preservata dai successivi hardening:
-
-- LCP 1.223 s / 2.440 s / 2.368 s;
-- CLS 0 / 0 / 0;
-- performance 1.00 / 0.98 / 0.98.
-
-Le soglie hard non sono state abbassate. Anche il workflow `32630712208` con CSP/service-role hardening ha superato Lighthouse.
-
-### HOST-NETLIFY-01 — Deploy preview corrente
-**PASS INFRASTRUTTURA / VISUAL DEVICE QA PENDING**
-
-Deploy-preview Netlify del commit `4ffa299caf05938e4628ec536d5f0f9f129cb9c5`:
-
-- deploy id `6a8abb4679db3c0008a38095`;
-- state `ready`;
-- context `deploy-preview`;
-- `published_at = null`;
-- plugin Next success;
-- server function + edge function deployate;
-- nessun production deploy.
-
-Il runtime collegato non ha potuto aprire direttamente lo screenshot/URL non indicizzato: non viene quindi dichiarato completato il QA visuale umano/device.
-
-## 8. Backup / recovery
-
-### SEC-BACKUP-01 — Archive integrity
-**PASS LOCAL/CI**
-
-Dump/restore integrity PostgreSQL 17: PASS nel laboratorio.
-
-### SEC-BACKUP-02 — Production backup + restore drill
-**PENDING PRE-RELEASE**
-
-Prima delle migration live servono backup production cifrato/checksum e restore drill su ambiente non-production. Nessuna operazione live è stata avviata.
-
-## 9. Privacy e documenti legali
-
-### LEGAL-01 — Privacy
-**CONTENUTO TECNICAMENTE ALLINEATO / REVISIONE PROFESSIONALE PENDING**
-
-La raccolta proposta distingue trattamento necessario per ricezione/valutazione dal consenso facoltativo alla pubblicazione. Analytics first-party resta aggregato/cookie-less.
-
-### LEGAL-02 — Cookie
-**RUNTIME GUARD PASS / REVISIONE FINALE PENDING**
-
-Il privacy runtime guard fallisce CI se vengono introdotti tracker/embed noti o iframe senza revisione deliberata.
-
-### LEGAL-03 — Termini
-**CONTENUTO TECNICAMENTE ALLINEATO / REVISIONE PROFESSIONALE PENDING**
-
-Resta la revisione legale finale sul servizio effettivamente attivato.
-
-## 10. Integrità editoriale
+## 2. Pubblicazione e integrità editoriale
 
 ### EDIT-01 — No auto-publish
-**PASS**
+**PASS SUL CANDIDATO**
 
-Contributi pubblici, Radar e AI non dispongono di un percorso di auto-pubblicazione. La pubblicazione resta umana e role-gated.
+Contributi pubblici, Radar e strumenti AI non dispongono di un percorso di auto-pubblicazione. La decisione di pubblicazione resta umana e role-gated.
 
-### EDIT-02 — Versioning / audit
-**PASS LOCAL/E2E — PRODUCTION MIGRATION PENDING**
+### EDIT-02 — Storie d'impresa
+**FUNZIONE PRE-GO-LIVE READY / CONTENUTO REALE POST-GO-LIVE**
 
-Audit Inbox canonico DB-trigger, ledger privato `content_versions`, v1/v2/v3 e snapshot storico sono verificati nel laboratorio. La relativa migration non è stata applicata al live.
+Prima del go-live devono essere pronti:
+
+- `/storie` anche in stato vuoto;
+- tipi editoriali Storie/intervista/testimonianza;
+- Inbox e workflow redazionale;
+- evidence/fact-check gate;
+- pubblicazione umana controllata.
+
+Prima del go-live è vietato:
+
+- inviare inviti o richieste di intervista;
+- contattare imprenditori, partner o ricercatori per popolare Storie;
+- simulare testimonianze;
+- usare placeholder fittizi per rendere verde un gate.
+
+Dopo sito online + live smoke PASS può iniziare l'acquisizione delle prime storie reali.
 
 ### EDIT-03 — Review governance
 **DECISIONE PENDING**
 
-Resta da stabilire se la review può coincidere con l'editor che porta il contenuto a `ready` oppure richiede un secondo soggetto/4-eyes. Non viene inventata una policy tecnica senza decisione esplicita.
+La Politica editoriale pubblica richiede responsabilità e verifica umane ma **non promette oggi un doppio revisore**.
 
-### EDIT-04 — Storia reale
-**BLOCKER CONTENUTO**
+Resta quindi da decidere internamente:
 
-Il numero zero richiede almeno una storia/intervista/testimonianza reale. Non è ammesso chiudere il gate con placeholder o riclassificazioni artificiali.
+- `same-editor`: chi verifica può anche portare il contenuto a ready/published;
+- `4-eyes`: pubblicazione subordinata a una seconda persona diversa dal redattore/autore della modifica.
 
-## 11. Responsive e accessibilità
+La decisione non viene inventata tecnicamente senza approvazione esplicita.
 
-### UI-RESP-01 — Browser automatico
-**PASS**
+### EDIT-04 — Versioning / audit
+**IMPLEMENTATO E VALIDATO NEL LABORATORIO / ATTIVAZIONE PRODUCTION PENDING**
 
-Reflow e navigazione mobile coperti su 320/390/768 px; matrice core multilingua 70/70 PASS.
+Il candidato conserva versioning editoriale, correzioni e audit. L'attivazione live resta parte del set di release autorizzato e non viene anticipata.
 
-### UI-RESP-02 — Device/visual QA umano
-**PENDING**
+---
 
-Resta controllo su desktop/laptop/tablet/smartphone reali e sul deploy-preview candidato finale.
+## 3. Preview e confine Production
 
-### UI-A11Y-01 — Baseline automatica
-**PASS**
+### HOST-01 — Preview read-only
+**PASS SUL CANDIDATO**
 
-Landmark, H1, alt/label, nomi accessibili, contrasto token, focus e skip-link sono coperti dai test pertinenti.
+Vercel Preview e Netlify Deploy Preview sono trattati come read-only/noindex.
 
-### UI-A11Y-02 — WCAG 2.2 AA umano
-**PENDING**
+Il proxy blocca le mutazioni in Preview e il client service-role è fail-closed in ambiente Preview anche qualora un secret privilegiato venisse configurato per errore.
 
-Screen reader, zoom, tastiera completa e valutazione percettiva richiedono ancora QA umano; i gate automatici non vengono presentati come certificazione WCAG.
+### HOST-02 — Vercel Production
+**PENDING RILASCIO AUTORIZZATO**
 
-## 12. Production Advisor snapshot — 2026-08-23
+Vercel è il percorso Production selezionato. Il runbook è:
 
-Audit eseguito in sola lettura, senza modificare production.
+`docs/operations/vercel-production-runbook-2026-08-23.md`
 
-**Security Advisor:**
+Il primo candidato Production deve essere un vero build Production, non la promozione di un artifact Preview.
 
-- warning `SECURITY DEFINER` sui due RPC self-service account: valutati intenzionali e circoscritti;
-- warning `SECURITY DEFINER` sulla submission pubblica: intenzionale come accesso anonimo, ma rate-limit production ancora da attivare tramite migration già validata;
-- Leaked Password Protection disabilitato: noto/accettato nel perimetro Free, con MFA privilegiati come mitigazione applicativa da attivare live.
+Quando possibile usare un flusso equivalente a:
 
-**Performance Advisor:**
+`vercel --prod --skip-domain`
 
-- `unused_index`: INFO; nessuna rimozione automatica;
-- `multiple_permissive_policies`: WARN di performance; nessuna riscrittura RLS pre-release senza query-plan evidence.
+così il deployment Production può essere collaudato prima del cutover del dominio.
 
-## 13. Gate residui prima di `PRODUCTION_READINESS = PASS`
+### HOST-03 — Deployment Protection
+**DISPONIBILE / ATTIVAZIONE DA VERIFICARE SUL PROGETTO**
 
-1. acquisire/approvare/pubblicare almeno una storia/intervista/testimonianza reale;
-2. completare QA umano WCAG 2.2 AA + dispositivi reali;
-3. completare revisione professionale Privacy / Cookie / Termini;
-4. decidere governance editoriale same-editor vs 4-eyes;
-5. osservare il primo run source-health schedulato reale;
-6. attivare/verificare configurazione Auth production, incluso TOTP/AAL2 privilegiati;
-7. eseguire backup production cifrato + restore drill non-production;
-8. rileggere lo storico migration hosted subito prima del rilascio;
-9. applicare il set migration autorizzato in ordine controllato, **incluso il persistent rate-limit prima di rendere live il form pubblico**;
-10. ripetere Security/HTTP/RLS/rate-limit smoke sulla configurazione production;
-11. decidere required status checks su `main`;
-12. completare QA visuale/device sul deploy-preview finale;
-13. autorizzare esplicitamente merge e deploy production;
-14. eseguire smoke live finale dopo il deploy autorizzato.
+Vercel Authentication / Standard Deployment Protection può proteggere deployment e URL generati senza richiedere l'add-on Advanced. Non viene dichiarato attivo finché la configurazione effettiva del progetto non è verificata.
 
-Fino alla chiusura di questi punti:
+### HOST-04 — Dominio
+**CUTOVER PREPARATO / DNS NON MODIFICATO**
+
+Per il go-live:
+
+- mantenere i nameserver e la zona DNS presso il provider corrente salvo decisione separata;
+- non modificare MX, SPF, DKIM, DMARC e record mail;
+- cambiare soltanto i record web necessari dopo verifica Vercel `domains inspect`/dashboard;
+- apex canonico: `https://immigratiimprenditori.it`;
+- `www` come alias/redirect verso apex;
+- TLS, canonical, hreflang, sitemap e robots da riverificare dopo il cutover.
+
+---
+
+## 4. HTTP security e dipendenze
+
+### SEC-HTTP-01 — Header baseline
+**PASS CI SUL CANDIDATO PRECEDENTE / FINAL LIVE SMOKE PENDING**
+
+Il candidato verifica almeno:
+
+- HSTS;
+- `X-Content-Type-Options: nosniff`;
+- `X-Frame-Options: DENY`;
+- `Referrer-Policy`;
+- `Permissions-Policy`;
+- assenza di `X-Powered-By`;
+- CSP con origini esplicite e senza `unsafe-eval`.
+
+Il vero deployment Production dovrà ripetere lo smoke.
+
+### SEC-DEPS-01 — Dipendenze Production
+**PASS NELLA CI APPLICATIVA**
+
+`npm audit --omit=dev --audit-level=high` è un gate del workflow Editorial. Il risultato valido è sempre quello del commit candidato corrente, non un run ID congelato in questo documento.
+
+---
+
+## 5. Autenticazione, ruoli e database
+
+**Stato backend non riletto né modificato nel ciclo frontend/documentale corrente.** Le evidenze sottostanti restano quelle già validate prima di questo aggiornamento.
+
+### SEC-AUTH-01 — Separazione ruoli
+**PASS LABORATORIO / LIVE RECHECK PENDING**
+
+Contributor, editor e amministratore sono separati; auto-elevazione negata nel laboratorio.
+
+### SEC-AUTH-02 — MFA privilegiati
+**PASS LABORATORIO / PRODUCTION ACTIVATION PENDING**
+
+TOTP/AAL2 per le operazioni privilegiate è validato nel laboratorio. Resta la verifica con account privilegiato Production prima dell'uso della redazione live.
+
+### SEC-RLS-01 — RLS e publication gate
+**PASS LABORATORIO / PRODUCTION APPLY + RECHECK PENDING**
+
+RLS, publication gate, rate-limit persistenti e audit sono parte del candidato validato. Nessuna nuova applicazione Production è implicata da questo documento.
+
+### SEC-MIGRATION-01 — Apply Production
+**NON AUTORIZZATO**
+
+Prima dell'apply servono ancora:
+
+1. restore drill non-production riuscito;
+2. fresh migration-history read;
+3. controllo assenza drift;
+4. autorizzazione esplicita;
+5. apply ordinato del solo set candidato;
+6. smoke Security/RLS/rate-limit dopo apply.
+
+---
+
+## 6. Backup / recovery
+
+### BACKUP-01 — Backup cifrato Production
+**PENDING PRE-RELEASE**
+
+Il workflow e le verifiche di archivio sono preparati, ma il gate di release richiede backup Production reale + restore drill non-production riuscito.
+
+Il restore drill è un gate di **recovery**, non un motivo per riscrivere la logica applicativa o la roadmap editoriale.
+
+---
+
+## 7. Privacy e documenti legali
+
+### LEGAL-01 — Privacy
+**TECNICAMENTE ALLINEATA / REVISIONE PROFESSIONALE PENDING**
+
+La raccolta proposta distingue il trattamento necessario per ricezione/valutazione dalla possibile autorizzazione alla pubblicazione.
+
+### LEGAL-02 — Cookie
+**RUNTIME COERENTE / REVISIONE PROFESSIONALE PENDING**
+
+Il runtime non introduce tracker o embed comportamentali senza revisione deliberata. L'analytics applicativo resta first-party, aggregato e governato da flag espliciti.
+
+### LEGAL-03 — Termini
+**TECNICAMENTE ALLINEATI / REVISIONE PROFESSIONALE PENDING**
+
+La matrice contatti pubblica approvata resta preservata:
+
+- privacy/AIPEL: `info@aipel.it`;
+- PEC: `direzione@pec.aipel.it`;
+- Termini: `termini@aipel.it`;
+- Cookie: `cookies@aipel.it`;
+- redazione: `redazione@immigratiimprenditori.it`;
+- contatto Centro Studi: `info@immigratiimprenditori.it`.
+
+La revisione professionale deve validare almeno base giuridica/formulazione analytics, fornitori e trasferimenti, clausola foro, maggiore età, contributi/licenze e autorizzazioni media.
+
+---
+
+## 8. Accessibilità e responsive
+
+### UI-A11Y-01 — Automazione
+**COPERTURA ESTESA / RISULTATO DEL CURRENT HEAD DA LEGGERE IN CI**
+
+La suite automatica copre fra l'altro:
+
+- skip-link e focus sul main;
+- H1 e immagini alt;
+- 7 lingue e Arabic RTL;
+- reflow 320/390/768 px;
+- navigazione e selettore lingua solo tastiera a 320 px;
+- errori server del form Contribuisci associati semanticamente al form;
+- errori login associati semanticamente al form;
+- target size minimo dei principali controlli mobile;
+- text spacing WCAG a 320 px sulle superfici core.
+
+Il test text-spacing ha individuato un overflow reale dell'indirizzo editoriale lungo su `/contribuisci`; il candidato è stato corretto consentendo il wrapping dell'indirizzo. Lo stesso hardening è applicato preventivamente ai contatti lunghi su Chi siamo e Politica editoriale.
+
+### UI-A11Y-02 — Human/device QA #92
+**PENDING — UNICO PUNTO A NON READY**
+
+Restano obbligatori i controlli umani/documentati su:
+
+- desktop 1440×900;
+- laptop 1366×768;
+- tablet 768×1024;
+- mobile 390×844;
+- narrow mobile 320×568;
+- tastiera completa;
+- NVDA + Chrome/Firefox;
+- VoiceOver/Safari quando disponibile;
+- zoom 200% e reflow core a 400%;
+- Arabic RTL;
+- form/errori/auth/MFA.
+
+L'automazione non viene presentata come certificazione WCAG.
+
+---
+
+## 9. GitHub release governance
+
+### GH-01 — Catena di merge
+**VERIFICATA / NESSUN MERGE AUTORIZZATO**
+
+Catena corrente:
+
+1. PR #9 → `feature/institutional-identity`;
+2. PR #8 (`feature/institutional-identity`) → `main`.
+
+Entrambe restano draft. PR #9 non va retargettata direttamente a `main` senza una decisione deliberata.
+
+I vecchi PR draft #5, #6 e #7 hanno storie divergenti e non vengono chiusi automaticamente.
+
+### GH-02 — Required checks `main`
+**DECISIONE PENDING**
+
+La protezione legacy dei required status checks risulta senza context obbligatori. Prima del merge finale va scelta e applicata una governance minima.
+
+Proposta tecnica, da attivare solo quando tutti i relativi gate sono realmente verdi:
+
+1. `Editorial v1 CI / verify`;
+2. `Supabase local migration validation / validate-local-database`;
+3. `Vercel – immigratiimprenditori`.
+
+Netlify e il progetto Vercel Preview duplicato non sono proposti come required release checks.
+
+---
+
+## 10. Gate residui prima di `PRODUCTION_READINESS = PASS`
+
+1. restore drill reale non-production;
+2. QA umano WCAG 2.2 AA + dispositivi (#92);
+3. revisione professionale Privacy / Cookie / Termini;
+4. decisione same-editor vs 4-eyes;
+5. configurazione/verifica privilegi e MFA Production;
+6. fresh migration-history read immediatamente prima dell'apply;
+7. apply Production esplicitamente autorizzato e ordinato;
+8. Security/RLS/HTTP/rate-limit smoke dopo apply;
+9. attivazione required checks scelti per `main`;
+10. merge soltanto con autorizzazione esplicita;
+11. vero deployment Vercel Production protetto e smoke;
+12. cutover dominio controllato;
+13. live smoke sul dominio reale.
+
+**Non compare tra i blocker pre-go-live l'acquisizione di una storia reale.**
+
+Dopo il live smoke PASS iniziano i contatti esterni e il primo ciclo editoriale Storie.
+
+Fino alla chiusura dei punti sopra:
 
 `PRODUCTION_READINESS = NOT PASS`
