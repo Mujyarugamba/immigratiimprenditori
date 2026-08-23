@@ -47,6 +47,11 @@ jobs:
           node scripts/external-data/radar-nightly.mjs
           node scripts/external-data/radar-emn.mjs
 
+      - name: Source-health safety self-test
+        env:
+          SOURCE_HEALTH_SELF_TEST: "1"
+        run: node scripts/external-data/source-health-check.mjs
+
       - name: Privacy runtime tracker/embed guard
         run: node scripts/ci/privacy-runtime-guard.mjs
 
