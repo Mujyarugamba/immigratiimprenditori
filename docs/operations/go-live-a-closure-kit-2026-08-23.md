@@ -4,16 +4,18 @@ Data di riferimento: 2026-08-23
 Stato: **OPERATIVO — NON CHIUDE I GATE DA SOLO**
 Branch: `feature/research-radar-ai-knowledge-20260822`
 
-Questo documento serve esclusivamente a chiudere i due punti ancora aperti della fascia A della roadmap funzionale 110:
+Questo documento separa nettamente due momenti:
 
-- **#92 — WCAG 2.2 AA:** QA umano finale;
-- **#10 — Storie d'impresa:** almeno una storia/intervista/testimonianza reale, approvata e pubblicabile.
+- **prima del go-live:** chiusura tecnica e QA umano del candidato;
+- **dopo il go-live:** avvio dei contatti esterni e acquisizione delle prime storie reali.
 
-Non autorizza merge, migration o deploy production e non modifica la regola editoriale: nessun contenuto fittizio, nessun auto-publish, nessuna scorciatoia tecnica per rendere verde il gate Storie.
+Regola editoriale vincolante: **nessun invito, richiesta di intervista o contatto esterno prima che il sito sia online**. Nessun contenuto fittizio, nessun auto-publish e nessuna scorciatoia tecnica sono ammessi.
+
+Non autorizza merge, migration o deploy production.
 
 ---
 
-## A. Chiusura #92 — QA umano WCAG/device
+## A. Chiusura pre-go-live #92 — QA umano WCAG/device
 
 ### Precondizioni
 
@@ -138,22 +140,38 @@ Il gate può essere marcato chiuso solo con un record compilato:
 
 ---
 
-## B. Chiusura #10 — prima Storia reale
+## B. #10 — Storie d'impresa: funzione pre-go-live, contenuto reale post-go-live
 
-### Contenuto ammesso al gate
+La superficie pubblica `/storie`, i tipi editoriali, il workflow redazionale, l'evidence gate e la pubblicazione controllata devono essere tecnicamente pronti **prima** del go-live. Il cold-start può però contenere **zero storie reali**.
 
-Il gate accetta almeno un contenuto pubblico realmente appartenente a uno dei tipi editoriali:
+Questa assenza non blocca la messa online perché la regola approvata è:
+
+> **prima il sito va online; solo dopo iniziano inviti, interviste e contatti esterni.**
+
+Perciò il test pre-go-live verifica che la superficie Storie sia raggiungibile, corretta e senza errori anche a contenuto vuoto. Non deve più pretendere una storia reale prima della pubblicazione del sito.
+
+### Divieti pre-go-live
+
+Prima che il sito sia online:
+
+- non inviare richieste di intervista;
+- non invitare imprenditori, ricercatori o partner;
+- non attribuire dichiarazioni a soggetti non intervistati;
+- non creare placeholder o storie simulate per rendere verde un test;
+- non pubblicare contenuti esterni senza consenso ed evidenza.
+
+Eventuali shortlist, bozze di email o tracce di intervista possono essere preparate internamente, ma devono restare **NON INVIATE**.
+
+### Primo obiettivo editoriale dopo il go-live
+
+Dopo messa online e smoke live riuscito, il primo ciclo editoriale Storie può partire. Il contenuto ammesso appartiene a uno dei tipi:
 
 - `business_story`;
 - `interview`;
 - `testimony`;
 - `personal_story`.
 
-Il contenuto deve essere reale, verificabile, attribuito e navigabile nella superficie pubblica Storie. Un `guide`, `insight` o `institutional_page` rinominato non chiude il gate.
-
-### Requisiti minimi di evidenza
-
-Prima di passare a `ready` registrare almeno:
+Prima della pubblicazione registrare almeno:
 
 - nome reale della persona o soggetto intervistato;
 - ruolo e impresa/progetto, quando pertinenti;
@@ -167,21 +185,20 @@ Prima di passare a `ready` registrare almeno:
 - consenso separato per immagini/video/audio quando presenti;
 - eventuali limitazioni o richieste di anonimizzazione concordate.
 
-### Workflow obbligatorio
+### Workflow post-go-live obbligatorio
 
-1. **Contatto reale** — nessuna intervista simulata.
-2. **Consenso** — chiarire finalità editoriale e uso delle dichiarazioni.
-3. **Intervista/testimonianza** — conservare note o trascrizione di lavoro in area privata.
-4. **Bozza redazionale** — distinguere chiaramente dichiarazioni, fatti verificati e contesto redazionale.
-5. **Fact-check** — verificare nomi, date, impresa, luoghi, numeri e fonti esterne.
-6. **Review umana** — stato Inbox/ready secondo governance editoriale vigente.
-7. **Conferma finale del soggetto** quando concordata o necessaria per accuratezza/consenso.
-8. **Pubblicazione controllata** — mai automatica.
-9. **Smoke pubblico** — `/storie` mostra il contenuto e la pagina dettaglio è navigabile.
+1. sito online e smoke live PASS;
+2. contatto reale;
+3. consenso e chiarimento finalità editoriale;
+4. intervista/testimonianza;
+5. bozza redazionale;
+6. fact-check;
+7. review umana;
+8. conferma finale del soggetto quando concordata o necessaria;
+9. pubblicazione controllata, mai automatica;
+10. smoke pubblico su `/storie` e pagina dettaglio.
 
 ### Traccia intervista essenziale
-
-Domande base, da adattare alla persona:
 
 1. Qual è la sua attività e come è iniziata?
 2. Qual è stato il passaggio decisivo che l'ha portata a fare impresa nel luogo in cui opera oggi?
@@ -196,11 +213,9 @@ Domande base, da adattare alla persona:
 11. C'è un punto che ritiene importante chiarire perché spesso viene raccontato male dall'esterno?
 12. Quali dati o informazioni della storia desidera verificare prima della pubblicazione?
 
-Evitare domande che presuppongano una risposta, stereotipi o una narrativa obbligatoria di successo. Il soggetto deve poter correggere fatti e contesto senza alterare l'indipendenza editoriale.
+Evitare domande che presuppongano una risposta, stereotipi o una narrativa obbligatoria di successo.
 
-### Shortlist già presente nel lavoro editoriale
-
-La documentazione/PR precedente ha già indicato come candidati da contattare, senza considerare alcuna intervista acquisita:
+### Shortlist interna, non da contattare prima del go-live
 
 - Agie Hujian Zhou / Ravioleria Sarpi;
 - Paolo Privitera;
@@ -208,26 +223,29 @@ La documentazione/PR precedente ha già indicato come candidati da contattare, s
 - Adeola Adedewe / Kredete;
 - Semyon Dukach come riserva.
 
-Questi nomi sono **shortlist**, non contenuti acquisiti. Nessuna dichiarazione va attribuita loro senza intervista o fonte primaria utilizzabile secondo la politica editoriale.
-
-### Criterio tecnico di chiusura #10
-
-Dopo pubblicazione autorizzata, il laboratorio/go-live smoke deve rilevare almeno un record pubblico appartenente ai tipi Storie e la pagina deve essere raggiungibile dalla superficie `/storie`.
-
-Il test E2E deve diventare verde **perché esiste il contenuto reale**, non perché il test viene indebolito o escluso.
+Questi nomi restano solo shortlist interna. Nessuna dichiarazione va attribuita senza intervista o fonte primaria utilizzabile secondo la politica editoriale.
 
 ---
 
-## C. Sequenza di chiusura della fascia A
+## C. Sequenza corretta di avanzamento
 
-1. completare e registrare QA umano #92 sul candidato Netlify;
-2. acquisire una storia/intervista/testimonianza reale;
-3. fact-check + review + consenso;
-4. pubblicare nel candidato/ambiente autorizzato secondo workflow;
-5. rieseguire E2E: atteso **23/23 PASS**;
-6. aggiornare `ROADMAP-110-PRIORITIES.md` da 31/33 a 33/33 solo dopo evidenza reale;
-7. proseguire quindi con i gate esterni di rilascio: legal, governance review, source-health su default branch, backup/restore, migration production autorizzate, QA preview finale, merge/deploy autorizzati.
+### Prima del go-live
 
-Finché #92 e #10 non sono entrambi chiusi, la regola resta:
+1. completare QA umano #92 sul candidato Netlify;
+2. chiudere i gate tecnici/amministrativi esterni: legal, governance review, backup/restore, migration production autorizzate, required checks e QA preview finale;
+3. merge e deploy soltanto con autorizzazione esplicita;
+4. smoke test live.
 
-`GO_LIVE_A = NOT PASS`
+### Dopo il go-live
+
+5. iniziare i primi contatti esterni;
+6. acquisire una storia/intervista/testimonianza reale;
+7. fact-check + review + consenso;
+8. pubblicare il primo contenuto Storie;
+9. eseguire il gate editoriale post-go-live e verificare la navigazione pubblica.
+
+Finché #92 e i gate esterni pre-release non sono chiusi:
+
+`PRE_GO_LIVE_READINESS = NOT PASS`
+
+L'assenza di una storia reale **non è più un blocker del primo go-live**; è il primo obiettivo editoriale dopo la messa online.
