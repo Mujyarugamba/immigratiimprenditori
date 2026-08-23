@@ -24,13 +24,15 @@ Questa roadmap recepisce l'elenco funzionale di 110 punti approvato dall'utente 
 
 ### Stato della fascia A
 
-- **READY:** 31/33
+- **READY:** 32/33
 - **DA RIFINIRE:** 1/33
-- **BLOCCANTE — CONTENUTO REALE:** 1/33
+- **BLOCCANTI DI CONTENUTO REALE:** 0/33
 
-Quindi **2 punti della fascia A non sono ancora completamente go-live ready**: **#92 WCAG 2.2 AA** richiede ancora QA umano finale e **#10 Storie d'impresa** richiede almeno un contenuto editoriale reale pubblicato.
+Resta un solo punto della fascia A non completamente go-live ready: **#92 WCAG 2.2 AA**, che richiede ancora QA umano finale.
 
-Il conteggio resta volutamente prudente: i gate automatici non vengono equiparati a una certificazione WCAG completa. Il punto **#36 Profili autore** è READY sul piano funzionale perché l'intero ciclo redazionale è stato verificato E2E con dati effimeri; il fatto che il cold-start contenga correttamente zero autori reali è un tema di popolamento editoriale, non una mancanza della funzione.
+Il punto **#10 Storie d'impresa** è READY sul piano funzionale: superficie pubblica, tipi editoriali, workflow, evidence gate e pubblicazione controllata sono presenti. La presenza di almeno una storia reale non è più un prerequisito del primo go-live, perché la regola approvata è esplicita: **nessun invito, richiesta di intervista o contatto esterno prima che il sito sia online**. Il popolamento reale delle Storie inizia quindi dopo il go-live e non va simulato con placeholder o contenuti fittizi.
+
+Il conteggio resta prudente: i gate automatici non vengono equiparati a una certificazione WCAG completa. Il punto **#36 Profili autore** è READY sul piano funzionale perché l'intero ciclo redazionale è stato verificato E2E con dati effimeri; il fatto che il cold-start contenga correttamente zero autori reali è un tema di popolamento editoriale, non una mancanza della funzione.
 
 ## A — Necessari al go-live
 
@@ -44,7 +46,7 @@ Il conteggio resta volutamente prudente: i gate automatici non vengono equiparat
 | 7 | Rotte imprenditoriali | **READY** |
 | 8 | Territori | **READY** |
 | 9 | Settori economici | **READY** |
-| 10 | Storie d'impresa | **BLOCCANTE — CONTENUTO REALE** |
+| 10 | Storie d'impresa | **READY — SUPERFICIE/WORKFLOW; CONTENUTO REALE POST-GO-LIVE** |
 | 18 | Biblioteca / Archivio | **READY** |
 | 20 | Fonti | **READY** |
 | 21 | Metodologia | **READY** |
@@ -70,9 +72,13 @@ Il conteggio resta volutamente prudente: i gate automatici non vengono equiparat
 | 99 | Controlli automatici | **READY — CI + LINK + LIGHTHOUSE + RELEASE GATES PASS** |
 | 100 | Analytics privacy-friendly | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
 
-### Unico blocco A di contenuto ancora aperto
+### #10 — Storie d'impresa: regola di popolamento post-go-live
 
-- **#10 — Storie d'impresa:** il cold-start contiene 12 `insight`, 4 `guide` e 1 `institutional_page`, ma nessun `business_story`, `interview`, `testimony` o `personal_story`. Il gate resta rosso intenzionalmente finché non esiste almeno una storia/intervista/testimonianza reale, approvata e pubblicabile. Non va chiuso con placeholder, contenuti fittizi o riclassificazioni tecniche.
+Il cold-start può legittimamente contenere 12 `insight`, 4 `guide`, 1 `institutional_page` e nessun `business_story`, `interview`, `testimony` o `personal_story`.
+
+Questo non blocca il primo go-live. Prima della messa online non si inviano richieste di intervista, inviti o altri contatti esterni. Eventuali shortlist e bozze restano solo materiale preparatorio interno e **NON INVIATO**.
+
+Dopo il go-live e lo smoke live, il primo obiettivo editoriale è acquisire almeno una storia/intervista/testimonianza reale, con consenso, fact-check, review umana e pubblicazione controllata. Nessun placeholder, contenuto fittizio o riclassificazione tecnica può sostituire il contenuto reale.
 
 ### Unico punto A da rifinire
 
@@ -96,17 +102,16 @@ Il cold-start continua correttamente a restituire **0 profili autore pubblici re
 
 ### Verifica automatica del 23 agosto 2026
 
-Head applicativo verificato: `d3fe1e49277d43ad0bcbe5f5217bcde010761890`. I commit documentali successivi riallineano soltanto la documentazione.
+Il run Supabase `32634928151`, eseguito prima dell'allineamento definitivo della regola “online prima degli inviti”, aveva **22 PASS / 1 FAIL** unicamente perché il test pre-go-live pretendeva una storia reale. Quel requisito era incompatibile con la regola editoriale approvata e non rappresentava una regressione tecnica. Il test è stato riallineato: pre-go-live deve verificare la superficie Storie anche vuota; la presenza di contenuto reale viene verificata nel ciclo editoriale post-go-live.
 
-- `Editorial v1 CI` run `32629772363`: **COMPLETED / SUCCESS**. Typecheck, 92 unit/contract test, functional gates, Radar/EMN self-test, source-health security self-test, vulnerability audit, Auth deprecation guard, Next build, HTTP smoke, public browser E2E e Lighthouse sono PASS.
-- `Supabase local migration validation` run `32629772352`: cold-start, migration replay, DB lint, RLS/security, persistent rate limiting, audit/analytics, backup archive, Auth reale, MFA, dependency install e build applicazione sono PASS. Browser E2E: **22 PASS / 1 FAIL**; l'unico failure è intenzionalmente il gate #10 Storie per assenza di una storia reale.
+- `Editorial v1 CI` run `32634928160`: **COMPLETED / SUCCESS** sul candidato precedente all'allineamento della regola Storie. Typecheck, test, functional gates, Radar/EMN, source-health, privacy, audit dipendenze, Auth guard, build, HTTP smoke, public browser E2E e Lighthouse sono PASS.
+- `Supabase local migration validation` run `32634928151`: cold-start, migration replay, DB lint, RLS/security, persistent rate limiting, audit/analytics, backup archive, Auth reale, MFA, dependency install e build applicazione sono PASS; il solo failure era il precedente requisito contenuto Storie ora rimosso dal gate pre-go-live.
 - **Performance:** Lighthouse mobile 3/3 sotto la soglia hard LCP 2,5 s: **1.223 / 2.440 / 2.368 s**; CLS **0 / 0 / 0**; performance **1.00 / 0.98 / 0.98**. Le soglie non sono state allentate.
 - **Browser pubblico:** 5/5 PASS in **15,3 s**; le sette home localizzate completano il test in circa **1,5 s**.
 - **Sette lingue:** matrice core IT/EN/FR/ES/DE/AR/ZH × 10 superfici = **70/70 PASS** anche sul vero stack Supabase locale.
 - **Workflow/versioni:** audit DB canonico, version ledger privato trigger-only, v1/v2/v3 e snapshot storico E2E: PASS. La decisione same-editor vs 4-eyes resta governance esplicita.
 - **Radar:** scope/dedupe/canonical/path e no-auto-publish self-test PASS; resta review-only.
 - **Source health:** SSRF/redirect/DNS/private-IP self-test PASS; il primo run esterno schedulato reale resta distinto e non è dichiarato completato.
-- **Controlli automatici:** internal-link integrity sul vero stack locale è PASS; non restano failure tecnici mascherati dal gate Storie.
 - **Profili autore:** ciclo redazionale evidence-gated completo PASS; `anon_public_authors = 0` dopo cleanup.
 - **Accessibilità:** struttura/reflow, contrasto/focus e salto tastiera al contenuto principale PASS nei controlli automatici pertinenti.
 - Osservatorio: almeno un indicatore navigabile verificato E2E.
@@ -120,6 +125,8 @@ Head applicativo verificato: `d3fe1e49277d43ad0bcbe5f5217bcde010761890`. I commi
 Questi PASS descrivono lo stato del branch/laboratorio locale; **non equivalgono ad attivazione in produzione**.
 
 ## B — Subito dopo il go-live
+
+La prima attività editoriale esterna dopo il go-live è il popolamento reale di **#10 Storie d'impresa**, con contatti avviati solo quando il sito è già online.
 
 - **#4 — Data Explorer**
 - **#11 — Interviste**
@@ -208,7 +215,7 @@ La roadmap funzionale non sostituisce i gate tecnici e amministrativi. Anche con
 
 - revisione finale Privacy / Cookie / Termini e coerenza con i servizi realmente attivi;
 - decisione esplicita sulla governance di review editoriale;
-- primo controllo source-health esterno/schedulato utile;
+- primo controllo source-health esterno/schedulato utile quando tecnicamente eseguibile sul default branch;
 - CSP/security configuration production finale;
 - backup production e restore drill non-production;
 - autorizzazione e applicazione controllata delle migration di produzione;
@@ -218,9 +225,12 @@ La roadmap funzionale non sostituisce i gate tecnici e amministrativi. Anche con
 - merge controllato della PR di integrazione;
 - deploy di produzione Netlify, DNS/HTTPS e smoke test live soltanto dopo autorizzazione.
 
+**Solo dopo il go-live e lo smoke live** possono partire inviti, interviste, richieste di testimonianze e altri contatti esterni legati al Centro Studi.
+
 ## Regola di avanzamento
 
 1. Non lavorare sui punti C finché esistono blocchi A aperti, salvo dipendenze tecniche inevitabili.
 2. I punti B già presenti nel codice possono essere mantenuti e corretti, ma non devono rallentare la chiusura della fascia A.
-3. Un punto A passa a READY solo quando il suo nucleo è realmente utilizzabile e ha superato il QA pertinente.
-4. `main` e produzione restano separati finché tutti i gate di rilascio non sono chiusi.
+3. Un punto A passa a READY quando il suo nucleo funzionale è realmente utilizzabile e ha superato il QA pertinente; il popolamento editoriale reale può essere post-go-live quando richiede contatti esterni.
+4. Nessun invito o contatto esterno prima della messa online.
+5. `main` e produzione restano separati finché tutti i gate di rilascio non sono chiusi.
