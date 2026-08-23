@@ -129,7 +129,7 @@ Base di integrazione: `feature/institutional-identity`
 
 ## Verifica go-live A — 2026-08-23
 
-Codice verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`.
+Codice applicativo verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`. Le revisioni documentali successive non modificano i risultati tecnici qui registrati.
 
 - `Editorial v1 CI` run `32620148591`: **SUCCESS completo**, inclusi typecheck, unit/contract test, source gate, dependency audit, Auth guard, build, HTTP smoke e browser pubblico.
 - `Supabase local migration validation` run `32620148584`: cold-start, DB lint, RLS/security, rate limiting, audit+analytics, backup, Auth e build **PASS**.
