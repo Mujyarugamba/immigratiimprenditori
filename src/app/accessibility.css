@@ -1,5 +1,21 @@
 /* Accessibility layer kept separate from visual identity so WCAG hardening is explicit. */
 
+:root {
+  /*
+   * Runtime overrides for small text/error states that sit on white or muted
+   * surfaces. The original visual palette remains available for decorative
+   * gold accents on dark backgrounds.
+   */
+  --color-ink-subtle: #657481;
+  --color-accent-dark: #9b6800;
+  --gold-deep: #9b6800;
+}
+
+:focus-visible {
+  /* >= 3:1 against both white surfaces and the navy institutional shell. */
+  outline-color: var(--gold-deep);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
