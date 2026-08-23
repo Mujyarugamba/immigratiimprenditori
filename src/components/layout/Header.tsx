@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
@@ -25,10 +26,10 @@ export function Header() {
         <div className="site-container institutional-bar-inner">
           <p>{m.institutional}</p>
           <nav aria-label="Institutional links">
-            <Link href={localizedHref(locale, "/cerca")}>{m.search}</Link>
-            <Link href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
-            <Link href="/politica-editoriale">{m.editorialPolicy}</Link>
-            <Link href="/accedi">{m.login}</Link>
+            <Link prefetch={false} href={localizedHref(locale, "/cerca")}>{m.search}</Link>
+            <Link prefetch={false} href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
+            <Link prefetch={false} href="/politica-editoriale">{m.editorialPolicy}</Link>
+            <Link prefetch={false} href="/accedi">{m.login}</Link>
             <LanguageSwitcher />
           </nav>
         </div>
@@ -37,28 +38,32 @@ export function Header() {
       <div className="primary-header">
         <div className="site-container primary-header-inner">
           <Link
+            prefetch={false}
             href={localizedHref(locale, "/")}
             className="brand-link"
             aria-label="Immigrati Imprenditori - Home"
           >
-            <img
+            <Image
               src="/logo-immigrati-imprenditori.png"
               alt="Immigrati Imprenditori"
-              width="360"
-              height="120"
+              width={360}
+              height={120}
+              sizes="235px"
+              priority
               className="brand-logo"
             />
           </Link>
 
           <nav aria-label="Primary navigation" className="primary-nav">
             {mainNav.map((item) => (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={item.href} prefetch={false}>
                 {item.label}
               </Link>
             ))}
           </nav>
 
           <Link
+            prefetch={false}
             href={localizedHref(locale, "/sostieni")}
             className="header-support"
           >
