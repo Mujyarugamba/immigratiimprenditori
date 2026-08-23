@@ -102,7 +102,9 @@ PY
 # Prove actual recoverability against a clean Supabase-managed database, not a
 # bare PostgreSQL database. Stop the source stack, start a fresh managed stack
 # with no application migrations, restore the three official logical components,
-# then leave the restored stack running for the remaining Auth/HTTP/E2E gates.
+# then reattach only the application-owned Auth hook that targets managed
+# auth.users. Leave the restored stack running for the remaining Auth/HTTP/E2E
+# gates.
 MIGRATIONS_STASH="$(mktemp -d /tmp/centro-studi-migrations-XXXXXX)"
 rmdir "$MIGRATIONS_STASH"
 mv supabase/migrations "$MIGRATIONS_STASH"
@@ -119,6 +121,10 @@ PGPASSWORD=postgres psql "postgresql://postgres@127.0.0.1:54322/postgres" \
   --command 'SET session_replication_role = replica' \
   --file "$DATA_FILE"
 
+PGPASSWORD=postgres psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+  --variable ON_ERROR_STOP=1 \
+  --file scripts/ci/post-restore-auth-hooks.sql
+
 rm -rf supabase/migrations
 mv "$MIGRATIONS_STASH" supabase/migrations
 MIGRATIONS_STASH=""
@@ -133,6 +139,8 @@ private_rls="$(PGPASSWORD=postgres psql "postgresql://postgres@127.0.0.1:54322/p
   "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname in ('accounts','account_role_assignments','editorial_inbox_items','editorial_submissions') and c.relrowsecurity;")"
 auth_users_exists="$(PGPASSWORD=postgres psql "postgresql://postgres@127.0.0.1:54322/postgres" -Atqc \
   "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='auth' and c.relname='users' and c.relkind='r';")"
+auth_hook_exists="$(PGPASSWORD=postgres psql "postgresql://postgres@127.0.0.1:54322/postgres" -Atqc \
+  "select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace join pg_proc p on p.oid=t.tgfoid join pg_namespace pn on pn.oid=p.pronamespace where not t.tgisinternal and n.nspname='auth' and c.relname='users' and t.tgname='on_auth_user_created' and pn.nspname='public' and p.proname='handle_new_user';")"
 
 [[ "$languages_count" =~ ^[0-9]+$ ]] && (( languages_count > 0 )) || {
   echo "Restore drill: public.languages is empty or unavailable" >&2
@@ -154,6 +162,11 @@ auth_users_exists="$(PGPASSWORD=postgres psql "postgresql://postgres@127.0.0.1:5
   echo "Restore drill: managed auth.users table missing from fresh Supabase target" >&2
   exit 1
 }
+[[ "$auth_hook_exists" == "1" ]] || {
+  echo "Restore drill: application Auth provisioning hook missing after post-restore repair" >&2
+  exit 1
+}
 
 echo "BACKUP_SUPABASE_FILTERED_DUMP = PASS"
+echo "BACKUP_POST_RESTORE_AUTH_HOOK = PASS"
 echo "BACKUP_EPHEMERAL_RESTORE = PASS"
