@@ -70,6 +70,7 @@ const requiredSecurityCandidates = [
   "20260822210500_go_live_audit_analytics.sql",
   "20260822211500_fix_public_rls_mfa_compatibility.sql",
   "20260822213000_hybrid_editorial_review_governance.sql",
+  "20260822213100_fix_hybrid_null_category_classifier.sql",
 ];
 for (const filename of requiredSecurityCandidates) {
   if (!uniqueCandidates.has(filename)) {
@@ -93,6 +94,9 @@ const auditIndex = candidates.indexOf("20260822210500_go_live_audit_analytics.sq
 const hybridReviewIndex = candidates.indexOf(
   "20260822213000_hybrid_editorial_review_governance.sql",
 );
+const hybridNullFixIndex = candidates.indexOf(
+  "20260822213100_fix_hybrid_null_category_classifier.sql",
+);
 
 if (
   !(
@@ -100,11 +104,12 @@ if (
     publicRateLimitIndex < loginRateLimitIndex &&
     loginRateLimitIndex < mfaIndex &&
     mfaIndex < auditIndex &&
-    auditIndex < hybridReviewIndex
+    auditIndex < hybridReviewIndex &&
+    hybridReviewIndex < hybridNullFixIndex
   )
 ) {
   fail(
-    "release-critical security migrations must remain ordered: publication gate -> public rate limit -> login rate limit -> MFA -> audit -> hybrid review governance",
+    "release-critical security migrations must remain ordered: publication gate -> public rate limit -> login rate limit -> MFA -> audit -> hybrid review governance -> null-category classifier fix",
   );
 }
 
