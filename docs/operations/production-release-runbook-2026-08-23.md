@@ -128,21 +128,32 @@ Il precedente errore su:
 
 è chiuso. È chiuso anche il successivo problema del trigger applicativo su `auth.users` non incluso dal logical dump: il post-restore script ricrea soltanto quell'hook e ne verifica la presenza.
 
-### 2B. Drill da sorgente Production reale — ANCORA PENDING
+### 2B. Drill da sorgente Production reale — CHIUSO
 
-Prima delle migration Production occorre ancora:
+Il drill con sorgente **Production reale** è stato completato il 2026-08-23 sul progetto non-Production `immigratiimprenditori-staging` dopo backup cifrato dello staging preesistente.
 
-1. ottenere un dump logico dalla **Production reale** usando una macchina/ambiente amministrativo controllato e credenziali non registrate nel repository;
-2. cifrare/conservare il backup secondo `docs/security/BACKUP-RECOVERY.md`;
-3. verificare checksum e componenti;
-4. ripristinare il dump su un target **non-Production** Supabase-managed pulito;
-5. applicare il post-restore hook applicativo previsto;
-6. ripetere almeno schema/data/RLS/Auth/postflight;
-7. registrare origine dump, data, target non-Production, risultato e cleanup.
+Evidenza canonica:
 
-Il workflow `Production encrypted backup` è preparato sul candidato ma, per sicurezza, è inerte fuori da `main`. Non va aggirato anticipando accessi Production da feature branch.
+`docs/operations/production-source-restore-drill-2026-08-23.md`
 
-**Hold point B:** nessuna migration Production senza `PRODUCTION_SOURCE_RESTORE_DRILL = PASS`.
+Risultati principali:
+
+1. backup logico cifrato della Production reale: **PASS** — run `32669477733`;
+2. backup cifrato dello staging pre-overwrite: **PASS** — run `32669477735`;
+3. restore atomico Production → staging: **PASS** — run `32669477734`;
+4. postflight indipendente read-only: **PASS** — run `32669477774`, rerun job `97268700919`;
+5. parità verificata per schema pubblico, dati chiave, migration ledger, RLS, grants, funzioni e Auth applicativo;
+6. nessun orphan `accounts`/`profiles` rispetto ad Auth;
+7. Security Advisor staging senza regressioni rispetto alla Production;
+8. workflow distruttivo rimosso dal branch operativo e PR #11 chiusa senza merge.
+
+Parità quantitativa finale: contents `31/31`, indicatori `4/4`, lingue `30/30`, accounts `1/1`, profiles `1/1`, `auth.users` `1/1`, `auth.identities` `1/1`, migration ledger `209/209`, max version `20260820160000` su entrambi.
+
+`PRODUCTION_SOURCE_RESTORE_DRILL = PASS`
+
+Il backup usato come evidenza ha retention GitHub finita; immediatamente prima di un futuro apply Production autorizzato restano obbligatori un **fresh hosted-state read** e un **fresh Production backup**.
+
+**Hold point B: CHIUSO.** Il superamento di questo hold point non autorizza le migration Production.
 
 ## Fase 2C — enrollment MFA privilegiato Production
 
@@ -315,7 +326,7 @@ Subito dopo l'eventuale deploy autorizzato verificare:
 - HTTP/security smoke contro DB ripristinato: **PASS**;
 - browser E2E autenticato contro DB ripristinato: **PASS**;
 - Editorial CI sul candidato funzionale: **PASS**;
-- Production-source restore drill: **PENDING**;
+- Production-source restore drill: **PASS**;
 - QA umano/device #92: **PENDING**;
 - revisione legale professionale: **PENDING**;
 - MFA privilegiato Production: **PENDING**;
