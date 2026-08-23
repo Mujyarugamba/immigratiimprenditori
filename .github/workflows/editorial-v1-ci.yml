@@ -40,10 +40,12 @@ jobs:
       - name: Go-live functional source gates
         run: node scripts/ci/go-live-functional-gates.mjs
 
-      - name: Radar quality self-test
+      - name: Radar quality self-tests
         env:
           RADAR_SELF_TEST: "1"
-        run: node scripts/external-data/radar-nightly.mjs
+        run: |
+          node scripts/external-data/radar-nightly.mjs
+          node scripts/external-data/radar-emn.mjs
 
       - name: Privacy runtime tracker/embed guard
         run: node scripts/ci/privacy-runtime-guard.mjs
