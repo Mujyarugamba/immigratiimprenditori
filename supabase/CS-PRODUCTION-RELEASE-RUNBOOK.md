@@ -23,7 +23,7 @@ La lettura delle migration hosted del 23/08/2026 mostra come ultima migration:
 
 `20260820160000_prepare_events_external_ingestion_rls`
 
-Le 23 migration elencate in `candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` non risultavano ancora applicate al momento della verifica.
+Le **24 migration** elencate in `candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` non risultavano ancora applicate al momento della verifica.
 
 Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano.
 
@@ -53,7 +53,7 @@ Il gate `scripts/ci/production-migration-plan-smoke.mjs` verifica che:
 - tutti i file dichiarati esistano;
 - l'ordine sia cronologico e senza duplicati;
 - ogni file repository successivo al cutoff hosted sia classificato come alias già applicato oppure come candidato;
-- i gate security/governance critici, inclusa la governance ibrida 4-eyes, restino esplicitamente presenti nel piano;
+- i gate security/governance critici, inclusa la governance ibrida 4-eyes e la relativa forward-fix del classificatore `NULL`, restino esplicitamente presenti nel piano;
 - nessun candidato contenga `DROP TABLE`, `DROP SCHEMA`, `TRUNCATE` o `DROP COLUMN` non consentiti dal gate.
 
 Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente.
@@ -81,6 +81,7 @@ Controllare almeno:
 - rate limit pubblico e login;
 - audit log e analytics in stato previsto, senza attivare feature production non autorizzate;
 - governance ibrida: contenuto ordinario same-editor consentito, contenuti sensibili/istituzionali bloccati senza seconda approvazione distinta, self-approval negata e approval stale negata dopo modifica;
+- contenuti ordinari senza categoria (`primary_category_code = NULL`) non devono essere classificati sensibili per il solo `NULL`;
 - indicatori Osservatorio bloccati senza seconda approvazione;
 - correzioni `substantive`/`retraction` pubbliche bloccate senza seconda approvazione;
 - lettura di Osservatorio, Atlante, rotte, contenuti, autori e open data;
@@ -100,7 +101,7 @@ Controllare almeno:
 
 ### B. Migration applicata ma difetto semantico correggibile
 
-Preferire una **forward-fix migration** esplicita. Non inventare automaticamente una down-migration se non è stata progettata e provata.
+Preferire una **forward-fix migration** esplicita. Il candidato corrente applica esattamente questo principio con `20260822213100_fix_hybrid_null_category_classifier.sql`, introdotta dopo che il test due-redattori ha rilevato la semantica SQL `NULL` del classificatore. Non inventare automaticamente una down-migration se non è stata progettata e provata.
 
 ### C. Corruzione/perdita dati o incompatibilità non recuperabile con forward-fix sicura
 
@@ -124,7 +125,7 @@ Registrare per il rilascio:
 - timestamp e checksum del backup pre-release;
 - esito restore drill;
 - esito smoke DB/security/app;
-- esito governance ibrida 4-eyes;
+- esito governance ibrida 4-eyes, inclusa la regressione `NULL`;
 - eventuali forward-fix;
 - autorizzazione esplicita a merge/deploy production.
 
