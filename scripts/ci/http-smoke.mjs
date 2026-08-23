@@ -4,6 +4,7 @@ import process from "node:process";
 const PORT = 3100;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
 const TIMEOUT_MS = 30_000;
+const PREVIEW_READ_ONLY = process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true";
 
 function fail(message) {
   throw new Error(message);
@@ -55,6 +56,8 @@ function expectHeaderAbsent(response, header) {
 }
 
 function expectedSupabaseConnectDirective() {
+  if (PREVIEW_READ_ONLY) return "connect-src 'self'";
+
   const raw = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co";
   const httpUrl = new URL(raw);
   const websocketUrl = new URL(httpUrl.origin);
@@ -85,9 +88,27 @@ function expectCsp(response) {
   if (csp.includes("https://*.supabase.co") || csp.includes("wss://*.supabase.co")) {
     fail("content-security-policy: wildcard Supabase connect origins must not be enabled");
   }
+  if (PREVIEW_READ_ONLY && /connect-src[^;]*supabase/i.test(csp)) {
+    fail("content-security-policy: read-only preview browser must not connect directly to Supabase");
+  }
   if (csp.includes("'unsafe-eval'")) {
     fail("content-security-policy: unsafe-eval must not be enabled");
   }
+}
+
+async function expectPreviewMutationBlocked(path) {
+  const response = await fetch(`${ORIGIN}${path}`, {
+    method: "POST",
+    redirect: "manual",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (response.status !== 405) {
+    fail(`${path}: read-only preview expected HTTP 405 for POST, received ${response.status}`);
+  }
+  expectHeader(response, "x-preview-read-only", "true");
+  expectHeader(response, "allow", "GET, HEAD, OPTIONS");
+  expectHeader(response, "cache-control", "no-store");
 }
 
 async function main() {
@@ -130,6 +151,12 @@ async function main() {
     expectHeader(home.response, "permissions-policy", "camera=(), microphone=(), geolocation=()");
     expectHeaderAbsent(home.response, "x-powered-by");
     expectCsp(home.response);
+
+    if (PREVIEW_READ_ONLY) {
+      await expectPreviewMutationBlocked("/contribuisci");
+      await expectPreviewMutationBlocked("/accedi");
+      await expectPreviewMutationBlocked("/api/analytics/page-view");
+    }
 
     await expectText("/en", ['<html lang="en" dir="ltr"', 'data-platform-locale="en"']);
     await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
@@ -184,10 +211,16 @@ async function main() {
 
     console.log(JSON.stringify({
       ok: true,
+      previewReadOnly: PREVIEW_READ_ONLY,
       checks: [
         "home",
         "security response headers",
-        "strict CSP directives, exact Supabase connect origin and unsafe-eval exclusion",
+        PREVIEW_READ_ONLY
+          ? "strict CSP with browser Supabase connections disabled"
+          : "strict CSP directives, exact Supabase connect origin and unsafe-eval exclusion",
+        ...(PREVIEW_READ_ONLY
+          ? ["preview mutation firewall for contribution, login and analytics POST"]
+          : []),
         "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
