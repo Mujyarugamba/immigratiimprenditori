@@ -111,6 +111,18 @@ async function expectPreviewMutationBlocked(path) {
   expectHeader(response, "cache-control", "no-store");
 }
 
+async function expectNormalMutationPathNotFirewalled() {
+  const response = await fetch(`${ORIGIN}/api/analytics/page-view`, {
+    method: "POST",
+    redirect: "manual",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (response.status === 405 || response.headers.has("x-preview-read-only")) {
+    fail("normal build: analytics POST was incorrectly intercepted by preview read-only firewall");
+  }
+}
+
 async function main() {
   const runtimeEnv = {
     ...process.env,
@@ -164,6 +176,8 @@ async function main() {
       await expectPreviewMutationBlocked("/contribuisci");
       await expectPreviewMutationBlocked("/accedi");
       await expectPreviewMutationBlocked("/api/analytics/page-view");
+    } else {
+      await expectNormalMutationPathNotFirewalled();
     }
 
     await expectText("/en", ['<html lang="en" dir="ltr"', 'data-platform-locale="en"']);
@@ -226,9 +240,9 @@ async function main() {
         PREVIEW_READ_ONLY
           ? "strict CSP with browser Supabase connections disabled"
           : "strict CSP directives, exact Supabase connect origin and unsafe-eval exclusion",
-        ...(PREVIEW_READ_ONLY
-          ? ["preview mutation firewall for contribution, login and analytics POST"]
-          : []),
+        PREVIEW_READ_ONLY
+          ? "preview mutation firewall for contribution, login and analytics POST"
+          : "normal mutation path is not intercepted by preview firewall",
         "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
