@@ -126,7 +126,7 @@ export default function PoliticaEditorialePage() {
           <h2 className="text-2xl font-semibold text-black">10. Richieste di correzione</h2>
           <p className="mt-4">
             Segnalazioni motivate di errori possono essere inviate a
-            {" "}<a href="mailto:redazione@immigratiimprenditori.it" className="underline underline-offset-4">redazione@immigratiimprenditori.it</a>,
+            {" "}<a href="mailto:redazione@immigratiimprenditori.it" className="break-all underline underline-offset-4">redazione@immigratiimprenditori.it</a>,
             indicando la pagina interessata e gli elementi che consentono di verificare la richiesta.
           </p>
         </section>
