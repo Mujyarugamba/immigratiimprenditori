@@ -120,6 +120,20 @@ file("e2e/seo-real-stack.spec.ts");
 file(".github/dependabot.yml");
 file(".github/workflows/source-health-weekly.yml");
 
+// Hosted previews must stay mutation-free automatically on both supported
+// deployment paths. Production remains writable and is gated separately.
+includes("next.config.ts", [
+  'process.env.VERCEL_ENV === "preview"',
+  "isHostedPreviewLikeContext",
+  'key: "X-Robots-Tag"',
+  'value: "noindex, nofollow, noarchive"',
+]);
+includes("src/proxy.ts", [
+  'process.env.VERCEL_ENV === "preview"',
+  'process.env.CONTEXT !== "production"',
+  '"X-Preview-Read-Only": "true"',
+]);
+
 // The placeholder public browser run must stay data-independent while also
 // enforcing static SEO metadata. Data-backed SEO stays in the real Supabase laboratory.
 includes("playwright.public.config.ts", [
