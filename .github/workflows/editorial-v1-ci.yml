@@ -72,6 +72,20 @@ jobs:
           fi
           echo "SUPABASE_AUTH_DEPRECATION_GUARD = PASS"
 
+      - name: Supabase unsafe session-user guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(grep -R --line-number --include='*.ts' --include='*.tsx' \
+            --fixed-strings '.auth.getSession(' src || true)"
+          if [[ -n "$matches" ]]; then
+            echo "Direct auth.getSession() usage found in application source."
+            echo "Do not trust cookie-backed session user data for authorization; use getUser()/getClaims() and explicit role checks."
+            echo "$matches"
+            exit 1
+          fi
+          echo "SUPABASE_UNSAFE_SESSION_USER_GUARD = PASS"
+
       - name: Start deterministic empty Supabase stub
         shell: bash
         run: |
