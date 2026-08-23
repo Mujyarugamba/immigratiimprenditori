@@ -26,6 +26,21 @@ svg {
   max-width: 100%;
 }
 
+#modulo-partecipazione,
+#modulo-partecipazione label,
+#modulo-partecipazione input,
+#modulo-partecipazione select,
+#modulo-partecipazione textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#modulo-partecipazione input:not([type="checkbox"]),
+#modulo-partecipazione select,
+#modulo-partecipazione textarea {
+  width: 100%;
+}
+
 .home-chart-head {
   flex-wrap: wrap;
 }
