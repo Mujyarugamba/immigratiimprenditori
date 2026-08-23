@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import { loginViaUi } from "./helpers/auth";
 import {
+  cleanupAuthorProfiles,
   cleanupContents,
   cleanupInboxItems,
   cleanupUsers,
@@ -72,11 +73,13 @@ async function waitForMfaEnrollmentUi(page: Page, timeout: number) {
 test.describe("Authenticated editorial UI", () => {
   const users: string[] = [];
   const contents: string[] = [];
+  const authorProfiles: string[] = [];
   const inboxItems: string[] = [];
 
   test.afterEach(() => {
     try {
       cleanupInboxItems(inboxItems.splice(0));
+      cleanupAuthorProfiles(authorProfiles.splice(0));
       cleanupContents(contents.splice(0));
       cleanupUsers(users.splice(0));
     } catch {
@@ -202,7 +205,8 @@ test.describe("Authenticated editorial UI", () => {
     const url = page.url();
     const match = url.match(/contenuti\/([0-9a-f-]{36})/i);
     expect(match?.[1]).toBeTruthy();
-    contents.push(match![1]);
+    const contentId = match![1];
+    contents.push(contentId);
 
     const slug = await page.locator('input[name="slug"]').inputValue();
     expect(slug).toBeTruthy();
@@ -222,6 +226,50 @@ test.describe("Authenticated editorial UI", () => {
     await expect(page.getByRole("heading", { name: title })).toBeVisible({
       timeout: 30_000,
     });
+
+    // Author workflow is deliberately exercised with a local ephemeral identity.
+    // The profile starts private, is linked to the published content, becomes
+    // public only after the evidence gate passes, and is removed in afterEach.
+    const authorName = `P6 E2E Author ${stamp}`;
+    const authorSlug = `p6-e2e-author-${stamp}`;
+    await page.goto("/app/redazione/autori");
+    await expect(page.getByRole("heading", { name: "Profili autore" })).toBeVisible({
+      timeout: 30_000,
+    });
+    await page.getByLabel("Nome pubblico").fill(authorName);
+    await page.getByLabel("Slug").fill(authorSlug);
+    await page.getByLabel("Biografia / descrizione").fill(
+      "Profilo autore E2E locale ed effimero usato esclusivamente per verificare il gate editoriale.",
+    );
+    await page.getByLabel("Affiliazione").fill("Centro Studi E2E locale");
+    await page.getByRole("button", { name: "Crea profilo privato" }).click();
+    await page.waitForURL(/\/app\/redazione\/autori\/[0-9a-f-]{36}/i, {
+      timeout: 30_000,
+    });
+
+    const authorMatch = page.url().match(/autori\/([0-9a-f-]{36})/i);
+    expect(authorMatch?.[1]).toBeTruthy();
+    const authorProfileId = authorMatch![1];
+    authorProfiles.push(authorProfileId);
+
+    await page.locator('select[name="content_id"]').selectOption(contentId);
+    await page.locator('select[name="role_kind"]').selectOption("author");
+    await page.getByRole("button", { name: "Collega contenuto" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Contenuto collegato al profilo autore." }),
+    ).toBeVisible({ timeout: 30_000 });
+
+    await page.locator('input[name="is_public"]').check();
+    await page.getByRole("button", { name: "Salva profilo" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Profilo autore aggiornato." }),
+    ).toBeVisible({ timeout: 30_000 });
+
+    await page.goto(`/autori/${authorSlug}`);
+    await expect(page.getByRole("heading", { name: authorName })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.getByRole("link", { name: title })).toBeVisible();
   });
 
   test("repeated invalid password attempts are blocked before Auth", async ({ page }) => {
