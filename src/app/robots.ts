@@ -1,13 +1,12 @@
 import type { MetadataRoute } from "next";
+import { resolveDeploymentEnvironment } from "@/lib/deployment/environment";
 
 const SITE_URL = "https://immigratiimprenditori.it";
 
-function isNetlifyPreviewLikeContext() {
-  return process.env.NETLIFY === "true" && process.env.CONTEXT !== "production";
-}
-
 export default function robots(): MetadataRoute.Robots {
-  if (isNetlifyPreviewLikeContext()) {
+  const deployment = resolveDeploymentEnvironment(process.env);
+
+  if (deployment.isHostedPreview) {
     return {
       rules: [
         {
