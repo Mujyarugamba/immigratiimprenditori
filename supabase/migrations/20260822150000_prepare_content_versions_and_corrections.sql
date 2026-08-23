@@ -1,5 +1,6 @@
 -- Versioning and public correction-register architecture.
 -- Prepared on the development branch. Apply only after production-schema review.
+-- Historical version snapshots are editorial records and are never exposed to anon.
 -- The public correction register must be exposed only when this migration is live
 -- and at least one public notice exists; no empty public placeholder page.
 
@@ -46,20 +47,10 @@ on public.content_versions for all to authenticated
 using (access_is_editor() or access_is_application_admin())
 with check (access_is_editor() or access_is_application_admin());
 
+-- Version snapshots may contain draft text, internal corrections or superseded
+-- material. They remain private to authenticated editors even when the current
+-- content is public. Public transparency is provided by content_corrections only.
 drop policy if exists content_versions_public_read on public.content_versions;
-create policy content_versions_public_read
-on public.content_versions for select to public
-using (
-  exists (
-    select 1
-    from public.contents c
-    where c.id = content_id
-      and c.editorial_status = 'ready'
-      and c.publication_status = 'published'
-      and c.visibility_status = 'public'
-      and c.archived_at is null
-  )
-);
 
 drop policy if exists content_corrections_editor_all on public.content_corrections;
 create policy content_corrections_editor_all
@@ -69,7 +60,7 @@ with check (access_is_editor() or access_is_application_admin());
 
 drop policy if exists content_corrections_public_read on public.content_corrections;
 create policy content_corrections_public_read
-on public.content_corrections for select to public
+on public.content_corrections for select to anon, authenticated
 using (
   public_notice
   and exists (
@@ -83,12 +74,12 @@ using (
   )
 );
 
-grant select on public.content_versions to anon, authenticated;
+revoke all on public.content_versions from anon;
+grant select, insert, update, delete on public.content_versions to authenticated;
 grant select on public.content_corrections to anon, authenticated;
-grant insert, update, delete on public.content_versions to authenticated;
 grant insert, update, delete on public.content_corrections to authenticated;
 
 comment on table public.content_versions is
-  'Immutable editorial snapshots used to document substantive published-content versions.';
+  'Private immutable editorial snapshots used to document substantive content versions; never exposed directly to anonymous readers.';
 comment on table public.content_corrections is
   'Correction and retraction notices; public rows are visible only for currently public content.';
