@@ -41,8 +41,9 @@ create index if not exists content_corrections_public_idx
 alter table public.content_versions enable row level security;
 alter table public.content_corrections enable row level security;
 
--- Append-only version ledger: editors may inspect and append snapshots, but an
--- already recorded version cannot be rewritten or deleted through Data API/RLS.
+-- The application can only read the version ledger. New snapshots are appended
+-- exclusively by the database trigger below, so an editor cannot fabricate,
+-- rewrite or delete historical versions through Data API/RLS.
 drop policy if exists content_versions_editor_all on public.content_versions;
 drop policy if exists content_versions_editor_read on public.content_versions;
 create policy content_versions_editor_read
@@ -50,15 +51,11 @@ on public.content_versions for select to authenticated
 using (access_is_editor() or access_is_application_admin());
 
 drop policy if exists content_versions_editor_insert on public.content_versions;
-create policy content_versions_editor_insert
-on public.content_versions for insert to authenticated
-with check (access_is_editor() or access_is_application_admin());
+drop policy if exists content_versions_public_read on public.content_versions;
 
 -- Version snapshots may contain draft text, internal corrections or superseded
 -- material. They remain private to authenticated editors even when the current
 -- content is public. Public transparency is provided by content_corrections only.
-drop policy if exists content_versions_public_read on public.content_versions;
-
 drop policy if exists content_corrections_editor_all on public.content_corrections;
 create policy content_corrections_editor_all
 on public.content_corrections for all to authenticated
@@ -82,8 +79,8 @@ using (
 );
 
 revoke all on public.content_versions from anon;
-revoke update, delete on public.content_versions from authenticated;
-grant select, insert on public.content_versions to authenticated;
+revoke insert, update, delete on public.content_versions from authenticated;
+grant select on public.content_versions to authenticated;
 grant select on public.content_corrections to anon, authenticated;
 grant insert, update, delete on public.content_corrections to authenticated;
 
@@ -219,7 +216,7 @@ on public.contents
 for each row execute function public.capture_content_version();
 
 comment on table public.content_versions is
-  'Private append-only editorial snapshots captured automatically on creation and meaningful content changes; never exposed directly to anonymous readers.';
+  'Private database-canonical append-only editorial snapshots captured automatically on creation and meaningful content changes; application users have read-only access.';
 comment on table public.content_corrections is
   'Correction and retraction notices; public rows are visible only for currently public content.';
 comment on function public.capture_content_version() is
