@@ -30,7 +30,7 @@ Questa roadmap recepisce l'elenco funzionale di 110 punti approvato dall'utente 
 
 Quindi **2 punti della fascia A non sono ancora completamente go-live ready**: **#92 WCAG 2.2 AA** richiede ancora QA umano finale e **#10 Storie d'impresa** richiede almeno un contenuto editoriale reale pubblicato.
 
-Il conteggio resta volutamente prudente: i gate automatici non vengono equiparati a una certificazione WCAG completa. Il punto **#36 Profili autore** è invece considerato READY sul piano funzionale perché l'intero ciclo redazionale è stato verificato E2E con dati effimeri; il fatto che il cold-start contenga correttamente zero autori reali è un tema di popolamento editoriale, non una mancanza della funzione.
+Il conteggio resta volutamente prudente: i gate automatici non vengono equiparati a una certificazione WCAG completa. Il punto **#36 Profili autore** è READY sul piano funzionale perché l'intero ciclo redazionale è stato verificato E2E con dati effimeri; il fatto che il cold-start contenga correttamente zero autori reali è un tema di popolamento editoriale, non una mancanza della funzione.
 
 ## A — Necessari al go-live
 
@@ -64,10 +64,10 @@ Il conteggio resta volutamente prudente: i gate automatici non vengono equiparat
 | 93 | RTL | **READY — CORE ARABO PASS** |
 | 94 | Connessioni lente | **READY — TEST HIGH-LATENCY PASS** |
 | 95 | MFA per amministratori | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
-| 96 | Audit log | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
+| 96 | Audit log | **READY — LOCAL/CI, DB-TRIGGER CANONICO** |
 | 97 | Backup | **READY — WORKFLOW + ARCHIVE INTEGRITY PASS, ATTIVAZIONE PROD SEPARATA** |
 | 98 | Rate limiting | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
-| 99 | Controlli automatici | **READY — CI + LINK INTEGRITY + RELEASE GATES AUTOMATICI PASS** |
+| 99 | Controlli automatici | **READY — CI + LINK + LIGHTHOUSE + RELEASE GATES PASS** |
 | 100 | Analytics privacy-friendly | **READY — LOCAL/CI, ATTIVAZIONE PROD SEPARATA** |
 
 ### Unico blocco A di contenuto ancora aperto
@@ -96,14 +96,19 @@ Il cold-start continua correttamente a restituire **0 profili autore pubblici re
 
 ### Verifica automatica del 23 agosto 2026
 
-Head applicativo verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`. Le revisioni documentali successive non modificano i risultati tecnici registrati qui.
+Head applicativo verificato: `d3fe1e49277d43ad0bcbe5f5217bcde010761890`. I commit documentali successivi riallineano soltanto la documentazione.
 
-- `Editorial v1 CI` run `32620148591`: **COMPLETED / SUCCESS**. Typecheck, unit test, functional gates, vulnerability audit, Auth deprecation guard, Next build, HTTP smoke e browser pubblico sono tutti PASS.
-- `Supabase local migration validation` run `32620148584`: cold-start, migration replay, DB lint, RLS/security, persistent rate limiting, audit/analytics, backup archive, Auth reale, dependency install e build applicazione sono PASS. Browser E2E: **19 PASS / 1 FAIL**; l'unico failure è intenzionalmente il gate #10 Storie per assenza di una storia reale.
-- **Sette lingue:** matrice core IT/EN/FR/ES/DE/AR/ZH × 10 superfici = **70/70 PASS** anche sul vero stack Supabase locale; il gate usa risposte HTTP complete per evitare falsi negativi dovuti alla cancellazione di stream durante navigazioni browser consecutive. I test browser separati continuano a verificare lingua, direzione, RTL e usabilità mobile.
+- `Editorial v1 CI` run `32629772363`: **COMPLETED / SUCCESS**. Typecheck, 92 unit/contract test, functional gates, Radar/EMN self-test, source-health security self-test, vulnerability audit, Auth deprecation guard, Next build, HTTP smoke, public browser E2E e Lighthouse sono PASS.
+- `Supabase local migration validation` run `32629772352`: cold-start, migration replay, DB lint, RLS/security, persistent rate limiting, audit/analytics, backup archive, Auth reale, MFA, dependency install e build applicazione sono PASS. Browser E2E: **22 PASS / 1 FAIL**; l'unico failure è intenzionalmente il gate #10 Storie per assenza di una storia reale.
+- **Performance:** Lighthouse mobile 3/3 sotto la soglia hard LCP 2,5 s: **1.223 / 2.440 / 2.368 s**; CLS **0 / 0 / 0**; performance **1.00 / 0.98 / 0.98**. Le soglie non sono state allentate.
+- **Browser pubblico:** 5/5 PASS in **15,3 s**; le sette home localizzate completano il test in circa **1,5 s**.
+- **Sette lingue:** matrice core IT/EN/FR/ES/DE/AR/ZH × 10 superfici = **70/70 PASS** anche sul vero stack Supabase locale.
+- **Workflow/versioni:** audit DB canonico, version ledger privato trigger-only, v1/v2/v3 e snapshot storico E2E: PASS. La decisione same-editor vs 4-eyes resta governance esplicita.
+- **Radar:** scope/dedupe/canonical/path e no-auto-publish self-test PASS; resta review-only.
+- **Source health:** SSRF/redirect/DNS/private-IP self-test PASS; il primo run esterno schedulato reale resta distinto e non è dichiarato completato.
 - **Controlli automatici:** internal-link integrity sul vero stack locale è PASS; non restano failure tecnici mascherati dal gate Storie.
-- **Profili autore:** il ciclo redazionale evidence-gated completo è PASS nel browser autenticato; il security smoke conferma `anon_public_authors = 0` dopo il cleanup.
-- **Accessibilità:** struttura/reflow, contrasto/focus e salto tastiera al contenuto principale sono PASS sulle verifiche automatiche pertinenti.
+- **Profili autore:** ciclo redazionale evidence-gated completo PASS; `anon_public_authors = 0` dopo cleanup.
+- **Accessibilità:** struttura/reflow, contrasto/focus e salto tastiera al contenuto principale PASS nei controlli automatici pertinenti.
 - Osservatorio: almeno un indicatore navigabile verificato E2E.
 - Atlante: almeno un Paese evidence-backed navigabile verificato E2E.
 - Rotte: almeno una rotta evidence-backed navigabile verificata E2E; cold-start espone 11 rotte attive.
@@ -202,12 +207,16 @@ Questi PASS descrivono lo stato del branch/laboratorio locale; **non equivalgono
 La roadmap funzionale non sostituisce i gate tecnici e amministrativi. Anche con la fascia A chiusa, il go-live resta subordinato a:
 
 - revisione finale Privacy / Cookie / Termini e coerenza con i servizi realmente attivi;
-- CSP/security headers finali e security QA;
+- decisione esplicita sulla governance di review editoriale;
+- primo controllo source-health esterno/schedulato utile;
+- CSP/security configuration production finale;
+- backup production e restore drill non-production;
 - autorizzazione e applicazione controllata delle migration di produzione;
 - verifica definitiva della branch protection e dei required checks effettivamente configurati;
-- quality gate finale su dati, responsive, accessibilità e performance;
+- QA umano finale su responsive/accessibilità/device; il gate performance CI è già PASS;
+- preview Netlify del candidato corrente + smoke finale;
 - merge controllato della PR di integrazione;
-- deploy di produzione Netlify, DNS/HTTPS e smoke test live.
+- deploy di produzione Netlify, DNS/HTTPS e smoke test live soltanto dopo autorizzazione.
 
 ## Regola di avanzamento
 
