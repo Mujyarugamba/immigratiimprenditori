@@ -7,6 +7,8 @@ declare
   v_content_id uuid;
   v_language_id bigint;
   v_type_code text;
+  v_version_count integer;
+  v_latest_body text;
 begin
   select id
     into v_language_id
@@ -55,6 +57,39 @@ begin
   )
   returning id into v_content_id;
 
+  select count(*)::integer
+    into v_version_count
+  from public.content_versions
+  where content_id = v_content_id;
+
+  if v_version_count <> 1 then
+    raise exception 'SECURITY_SMOKE_INITIAL_VERSION_COUNT_%', v_version_count;
+  end if;
+
+  update public.contents
+  set body = 'Temporary local-only fixture, revision two.'
+  where id = v_content_id;
+
+  select count(*)::integer
+    into v_version_count
+  from public.content_versions
+  where content_id = v_content_id;
+
+  select snapshot ->> 'body'
+    into v_latest_body
+  from public.content_versions
+  where content_id = v_content_id
+  order by version_number desc
+  limit 1;
+
+  if v_version_count <> 2 then
+    raise exception 'SECURITY_SMOKE_UPDATED_VERSION_COUNT_%', v_version_count;
+  end if;
+
+  if v_latest_body is distinct from 'Temporary local-only fixture, revision two.' then
+    raise exception 'SECURITY_SMOKE_VERSION_SNAPSHOT_MISMATCH_%', v_latest_body;
+  end if;
+
   -- No auth.uid()/active editor exists in this local postgres session. The hard
   -- gate must reject any attempt to cross onto a public editorial axis.
   begin
@@ -78,6 +113,15 @@ begin
       and (publication_status = 'published' or visibility_status = 'public')
   ) then
     raise exception 'SECURITY_SMOKE_PUBLICATION_STATE_ESCAPED';
+  end if;
+
+  select count(*)::integer
+    into v_version_count
+  from public.content_versions
+  where content_id = v_content_id;
+
+  if v_version_count <> 2 then
+    raise exception 'SECURITY_SMOKE_REJECTED_PUBLICATION_CREATED_VERSION_%', v_version_count;
   end if;
 
   delete from public.contents where id = v_content_id;
@@ -190,6 +234,15 @@ begin
       and not tgisinternal
   ) then
     raise exception 'SECURITY_SMOKE_PUBLICATION_TRIGGER_MISSING';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_trigger
+    where tgname = 'contents_capture_version'
+      and not tgisinternal
+  ) then
+    raise exception 'SECURITY_SMOKE_CONTENT_VERSION_TRIGGER_MISSING';
   end if;
 
   -- MFA authorization helpers stay private to authenticated sessions. Public
