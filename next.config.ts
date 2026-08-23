@@ -3,17 +3,36 @@ import type { NextConfig } from "next";
 const isNetlifyPreviewLikeContext =
   process.env.NETLIFY === "true" && process.env.CONTEXT !== "production";
 
+function configuredSupabaseConnectSources() {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  if (!raw) return [];
+
+  try {
+    const httpUrl = new URL(raw);
+    if (httpUrl.protocol !== "https:" && httpUrl.protocol !== "http:") return [];
+
+    const websocketUrl = new URL(httpUrl.origin);
+    websocketUrl.protocol = httpUrl.protocol === "https:" ? "wss:" : "ws:";
+    return [httpUrl.origin, websocketUrl.origin];
+  } catch {
+    return [];
+  }
+}
+
+const connectSources = ["'self'", ...configuredSupabaseConnectSources()].join(" ");
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
+  "frame-src 'none'",
   "form-action 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  `connect-src ${connectSources}`,
   "media-src 'self' https:",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
