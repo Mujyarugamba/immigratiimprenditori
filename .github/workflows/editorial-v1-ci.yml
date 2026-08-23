@@ -74,14 +74,17 @@ jobs:
 
       - name: Next build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          # This workflow validates the public fallback shell without a DB.
+          # A closed loopback endpoint fails immediately and keeps the result
+          # independent from DNS/Internet latency to a fabricated remote host.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npm run build
 
       - name: HTTP smoke
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npm run test:smoke
@@ -91,7 +94,7 @@ jobs:
 
       - name: Lighthouse mobile performance gate
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npx --yes @lhci/cli@0.15.1 autorun
