@@ -192,11 +192,11 @@ test.describe("Authenticated editorial UI", () => {
     ).toBeVisible({ timeout: 30_000 });
 
     const title = `P6 E2E Content ${stamp}`;
+    const originalBody =
+      "Corpo editoriale E2E P6 con pubblicazione verificata dal browser dopo MFA AAL2.";
     await page.locator('select[name="type_code"]').selectOption({ index: 1 });
     await page.getByRole("textbox", { name: "Titolo", exact: true }).fill(title);
-    await page.locator("#body").fill(
-      "Corpo editoriale E2E P6 con pubblicazione verificata dal browser dopo MFA AAL2.",
-    );
+    await page.locator("#body").fill(originalBody);
     await page.getByRole("button", { name: "Crea contenuto" }).click();
     await page.waitForURL(/\/app\/redazione\/contenuti\/[0-9a-f-]{36}/i, {
       timeout: 45_000,
@@ -226,6 +226,25 @@ test.describe("Authenticated editorial UI", () => {
     await expect(page.getByRole("heading", { name: title })).toBeVisible({
       timeout: 30_000,
     });
+
+    // The version ledger is database-canonical. Creation, editorial readiness
+    // and publication must yield three immutable snapshots visible to redazione.
+    await page.goto(`/app/redazione/contenuti/${contentId}`);
+    await expect(page.getByRole("heading", { name: "Cronologia versioni" })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.getByText("3 versioni", { exact: true })).toBeVisible();
+    await expect(page.getByText("v3", { exact: true })).toBeVisible();
+    await expect(page.getByText("v2", { exact: true })).toBeVisible();
+    await expect(page.getByText("v1", { exact: true })).toBeVisible();
+
+    await page.getByRole("link", { name: "Apri snapshot" }).last().click();
+    await expect(page).toHaveURL(
+      new RegExp(`/app/redazione/contenuti/${contentId}/versioni/1$`),
+      { timeout: 30_000 },
+    );
+    await expect(page.getByRole("heading", { name: `v1 — ${title}` })).toBeVisible();
+    await expect(page.getByText(originalBody, { exact: true })).toBeVisible();
 
     // Author workflow is deliberately exercised with a local ephemeral identity.
     // The profile starts private, is linked to the published content, becomes
