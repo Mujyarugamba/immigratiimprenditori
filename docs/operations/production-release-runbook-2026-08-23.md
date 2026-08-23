@@ -15,7 +15,7 @@ Questo runbook traduce `supabase/CS-PRODUCTION-RELEASE.json` in una sequenza ope
 4. Prima di qualsiasi write production occorre una nuova lettura dello storico migration hosted.
 5. Occorrono backup production cifrato/checksum e restore drill completato su ambiente non-production.
 6. Occorre autorizzazione esplicita prima dell'applicazione delle migration e una seconda autorizzazione separata prima del deploy production.
-7. Le **23 candidate** vanno applicate **una alla volta, in ordine cronologico**, verificando l'esito prima di passare alla successiva.
+7. Le **24 candidate** vanno applicate **una alla volta, in ordine cronologico**, verificando l'esito prima di passare alla successiva.
 8. Al primo errore inatteso: **STOP**. Non ripetere alla cieca una migration parzialmente eseguita.
 9. Nessun contenuto viene auto-pubblicato durante il rilascio; Radar/AI restano review-only.
 10. Il form pubblico non è considerato production-hardened finché il rate-limit persistente non è applicato e verificato live.
@@ -62,6 +62,9 @@ Questa fotografia va riletta immediatamente prima del rilascio. Se lo storico ho
 21. `20260822211500_fix_public_rls_mfa_compatibility.sql`
 22. `20260822212000_backfill_futurae_route_evidence.sql`
 23. `20260822213000_hybrid_editorial_review_governance.sql`
+24. `20260822213100_fix_hybrid_null_category_classifier.sql`
+
+La #24 è una **forward-fix esplicita** scoperta dal test due-redattori: il classificatore originario poteva restituire `NULL` per contenuti ordinari senza `primary_category_code`. La correzione tratta tale assenza come non sensibile, salvo tipo sensibile o escalation manuale.
 
 Il guard `scripts/ci/production-migration-plan-smoke.mjs` verifica automaticamente che l'elenco resti completo, ordinato, senza duplicati e senza drift rispetto ai file post-cutoff del repository.
 
@@ -71,7 +74,7 @@ Prima di iniziare qualsiasi procedura live devono essere esplicitamente noti:
 
 - esito QA umano WCAG/device (#92);
 - esito revisione legale finale;
-- governance review: **DECISA — modello ibrido**, da verificare tecnicamente sul candidato e poi live;
+- governance review: **DECISA — modello ibrido**, validata nel laboratorio e da riverificare live dopo eventuale apply;
 - decisione required checks `main`;
 - identità del commit candidato e deployment Vercel candidato;
 - restore drill non-production completo e verificato;
@@ -103,13 +106,13 @@ Prima delle migration:
 5. ripristinare il backup in ambiente **non-production** isolato;
 6. eseguire controlli minimi di schema, dati e RLS sul restore.
 
-Al 23 agosto 2026 il restore drill locale ha individuato una resistenza sulla configurazione gestita del ruolo `log_min_messages`; il gate resta **PENDING** e non va aggirato con una dichiarazione manuale di PASS.
+Il restore drill resta **PENDING** sul setting Supabase-managed `log_min_messages`; il gate non va aggirato con una dichiarazione manuale di PASS.
 
 **Hold point B:** nessuna migration production senza backup verificato e restore drill riuscito.
 
 ## Fase 3 — autorizzazione migration
 
-Richiedere autorizzazione esplicita per l'applicazione delle **23 candidate**. L'autorizzazione deve riferirsi al commit candidato e allo storico hosted appena verificato.
+Richiedere autorizzazione esplicita per l'applicazione delle **24 candidate**. L'autorizzazione deve riferirsi al commit candidato e allo storico hosted appena verificato.
 
 **Hold point C:** senza autorizzazione non eseguire alcuna write.
 
@@ -163,11 +166,12 @@ Verificare:
 - letture pubbliche compatibili con MFA/RLS;
 - nessuna regressione nelle pagine anonime.
 
-### Checkpoint governance ibrida dopo #23
+### Checkpoint governance ibrida dopo #23–#24
 
-Dopo `20260822213000_hybrid_editorial_review_governance.sql` verificare:
+Dopo `20260822213000_hybrid_editorial_review_governance.sql` e la forward-fix `20260822213100_fix_hybrid_null_category_classifier.sql` verificare:
 
 - un contenuto ordinario resta pubblicabile dal medesimo redattore;
+- un contenuto ordinario senza categoria non viene classificato sensibile per il solo `NULL`;
 - un contenuto sensibile non è pubblicabile senza review;
 - il richiedente non può approvare la propria review;
 - un secondo account redazionale può approvare;
@@ -240,12 +244,18 @@ Subito dopo l'eventuale deploy autorizzato verificare:
 
 ## Stato attuale
 
-- migration candidate validate nella catena cold-start: **23/23** sul candidato governance; recheck del HEAD finale in CI;
+- migration candidate validate nella catena cold-start: **24/24** fino ai smoke DB pre-restore;
+- cold-start: **PASS**;
+- PostgreSQL lint: **PASS**;
+- publication/RLS smoke: **PASS**;
+- governance ibrida due-redattori: **PASS**;
+- persistent rate-limit smoke: **PASS**;
+- go-live DB smoke: **PASS**;
 - destructive schema operations rilevate dal guard: **0**;
 - production DB writes in questo ciclo: **0**;
 - production deploy in questo ciclo: **0**;
 - `main` modificato: **NO**;
-- governance editoriale: **IBRIDA — DECISA / CANDIDATA, NON ATTIVA IN PRODUCTION**;
+- governance editoriale: **IBRIDA — DECISA / VALIDATA NEL LABORATORIO, NON ATTIVA IN PRODUCTION**;
 - rate-limit production: **PENDING APPLY AUTORIZZATO**;
 - backup production + restore drill: **PENDING**;
 - merge/deploy: **NON AUTORIZZATI**.
