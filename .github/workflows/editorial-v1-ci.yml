@@ -52,6 +52,28 @@ jobs:
           SOURCE_HEALTH_SELF_TEST: "1"
         run: node scripts/external-data/source-health-check.mjs
 
+      - name: Source-health least-privilege guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          targets=(
+            scripts/external-data/source-health-check.mjs
+            .github/workflows/source-health-weekly.yml
+          )
+          matches="$(grep -n --fixed-strings 'SUPABASE_SERVICE_ROLE_KEY' "${targets[@]}" || true)"
+          if [[ -n "$matches" ]]; then
+            echo "Source-health must never receive the Supabase service-role credential:"
+            echo "$matches"
+            exit 1
+          fi
+          for target in "${targets[@]}"; do
+            if ! grep -q --fixed-strings 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY' "$target"; then
+              echo "Source-health public publishable-key contract missing from $target"
+              exit 1
+            fi
+          done
+          echo "SOURCE_HEALTH_LEAST_PRIVILEGE_GUARD = PASS"
+
       - name: Privacy runtime tracker/embed guard
         run: node scripts/ci/privacy-runtime-guard.mjs
 
