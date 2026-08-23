@@ -52,11 +52,35 @@ grep -Eq 'COPY .*languages' "$DATA_FILE" || {
 # A fresh Supabase-managed target already owns platform logging configuration.
 # The role-only dump can contain ALTER ROLE ... SET log_min_messages copied from
 # the source. Supautils correctly prevents a normal project connection from
-# overwriting that platform-managed GUC. Remove only that setting; keep the rest
-# of roles.sql intact so role memberships/grants remain part of this restore test.
-if grep -Eq '^ALTER ROLE .* SET log_min_messages ' "$ROLES_FILE"; then
-  sed -Ei '/^ALTER ROLE .* SET log_min_messages /d' "$ROLES_FILE"
-  echo "Restore drill: ignored platform-managed role log_min_messages setting"
+# overwriting that platform-managed GUC. Supabase/pg_dump output may quote the
+# parameter name or vary SET syntax, so match the statement semantically rather
+# than relying on one exact rendering. Remove only ALTER ROLE statements that
+# mention log_min_messages; keep every other role setting/membership/grant.
+ROLES_FILTERED="$BACKUP_DIR/roles.filtered.sql"
+awk '
+  BEGIN { IGNORECASE = 1 }
+  /^[[:space:]]*ALTER[[:space:]]+ROLE[[:space:]]+/ && /log_min_messages/ {
+    filtered = 1
+    next
+  }
+  { print }
+  END {
+    if (filtered) {
+      print "Restore drill: ignored platform-managed role log_min_messages setting" > "/dev/stderr"
+    }
+  }
+' "$ROLES_FILE" > "$ROLES_FILTERED"
+mv "$ROLES_FILTERED" "$ROLES_FILE"
+
+# Defensive check: never continue if an ALTER ROLE log_min_messages statement
+# survived the normalization above.
+if awk '
+  BEGIN { IGNORECASE = 1; found = 0 }
+  /^[[:space:]]*ALTER[[:space:]]+ROLE[[:space:]]+/ && /log_min_messages/ { found = 1 }
+  END { exit found ? 0 : 1 }
+' "$ROLES_FILE"; then
+  echo "Restore drill: platform-managed log_min_messages ALTER ROLE survived filtering" >&2
+  exit 1
 fi
 
 # Prove actual recoverability against a clean Supabase-managed database, not a
