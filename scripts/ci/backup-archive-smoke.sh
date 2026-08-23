@@ -49,6 +49,47 @@ grep -Eq 'COPY .*languages' "$DATA_FILE" || {
   exit 1
 }
 
+# Temporary, safe diagnostic for the managed role-setting restore blocker.
+# Print only the SQL statement(s) containing log_min_messages and redact the
+# role identifier. No schema/data dump, password, token or connection secret is
+# emitted. Keep this until the exact Supabase CLI rendering is captured once.
+python3 - "$ROLES_FILE" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+needle = re.compile(r"log_min_messages", re.IGNORECASE)
+seen = set()
+
+for match in needle.finditer(text):
+    start = text.rfind(";", 0, match.start()) + 1
+    end = text.find(";", match.end())
+    if end == -1:
+        end = len(text)
+    else:
+        end += 1
+    statement = text[start:end].strip()
+    if not statement or statement in seen:
+        continue
+    seen.add(statement)
+    statement = re.sub(
+        r'(?is)(\bALTER\s+ROLE\s+)(?:"(?:[^"]|"")*"|\S+)',
+        r'\1<ROLE>',
+        statement,
+        count=1,
+    )
+    first_line = text.count("\n", 0, start) + 1
+    last_line = first_line + statement.count("\n")
+    print(f"RESTORE_ROLE_DIAGNOSTIC lines={first_line}-{last_line}", file=sys.stderr)
+    for line in statement.splitlines():
+        print(f"RESTORE_ROLE_DIAGNOSTIC_SQL {line}", file=sys.stderr)
+
+if not seen:
+    print("RESTORE_ROLE_DIAGNOSTIC no log_min_messages occurrence found", file=sys.stderr)
+PY
+
 # A fresh Supabase-managed target already owns platform logging configuration.
 # The role-only dump can contain ALTER ROLE ... SET log_min_messages copied from
 # the source. Supautils correctly prevents a normal project connection from
