@@ -127,6 +127,12 @@ Creare un **nuovo deployment target Production**, non promuovere un Preview esis
 
 Motivo: Preview e Production hanno contratti diversi (read-only/noindex vs writable/crawlable) e alcune variabili vengono incorporate durante il build.
 
+Per il primo candidato Production, se si usa la CLI o un flusso equivalente che lo consente, preferire:
+
+`vercel --prod --skip-domain`
+
+In questo modo viene costruito un vero deployment Production ma non viene assegnato automaticamente al dominio pubblico. Il collaudo può quindi avvenire sul relativo URL Vercel protetto prima del cutover DNS. Se il deploy viene creato dal dashboard/Git integration, ottenere lo stesso risultato mantenendo il custom domain non assegnato al candidato fino al PASS.
+
 Prima del deploy devono essere verdi:
 
 - typecheck;
@@ -182,15 +188,39 @@ I test automatici riducono il rischio ma non sostituiscono questo gate.
 
 ## 10. Dominio e apertura pubblica
 
-Solo dopo i PASS precedenti:
+Solo dopo i PASS precedenti.
 
-1. associare/verificare `immigratiimprenditori.it` sul progetto Production;
-2. confermare `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it`;
-3. verificare DNS/TLS;
-4. rimuovere la Deployment Protection destinata al collaudo;
-5. verificare canonical, hreflang, sitemap e robots sul dominio reale;
-6. eseguire live smoke completo;
-7. controllare i log Production immediatamente dopo l'apertura.
+### 10.1 Sicurezza DNS prima del cutover
+
+1. **Non cambiare i nameserver del dominio come parte del go-live applicativo.** Mantenere la zona DNS presso il provider attuale (Aruba) salvo una decisione separata e pianificata.
+2. Prima di modificare i record web, esportare o fotografare la zona DNS corrente e annotare almeno A/AAAA/CNAME, MX, TXT, CAA e record di verifica.
+3. Non modificare né eliminare MX, SPF, DKIM, DMARC o altri record di posta. Il dominio è stato storicamente utilizzato anche per indirizzi email `@immigratiimprenditori.it`; il cutover web non deve interrompere la posta.
+4. Associare `immigratiimprenditori.it` e `www.immigratiimprenditori.it` al progetto Vercel Production e completare l'eventuale verifica di proprietà **prima** di cambiare i record di traffico.
+5. Eseguire `vercel domains inspect immigratiimprenditori.it` (o controllo equivalente nel dashboard) e usare i valori DNS richiesti da Vercel in quel momento. Non assumere valori diversi se il dashboard restituisce istruzioni specifiche.
+
+Le istruzioni Vercel correnti mostrano come configurazione tipica un record A apex verso `76.76.21.21` e un CNAME `www` verso `cname.vercel-dns-0.com`; questi valori sono soltanto riferimento operativo e vanno confermati con `domains inspect` prima dell'applicazione.
+
+### 10.2 Cutover web
+
+1. confermare `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it` nel vero build Production destinato al dominio;
+2. scegliere l'apex `https://immigratiimprenditori.it` come URL canonico;
+3. configurare `www.immigratiimprenditori.it` come alias/redirect verso l'apex, evitando due versioni indicizzabili dello stesso sito;
+4. modificare esclusivamente i record A/AAAA/CNAME web necessari presso Aruba;
+5. verificare che tutti i record email e di verifica non interessati siano rimasti invariati;
+6. attendere la risoluzione DNS e verificare certificato TLS Vercel valido sia su apex sia su `www`;
+7. rimuovere la Deployment Protection destinata al collaudo soltanto quando il dominio risolve sul deployment corretto;
+8. verificare canonical, hreflang, sitemap e robots sul dominio reale;
+9. eseguire live smoke completo;
+10. controllare i log Production immediatamente dopo l'apertura.
+
+### 10.3 Rollback del dominio
+
+Se il cutover DNS espone un deployment errato o instabile:
+
+- riattivare la protezione del deployment se possibile;
+- ripristinare **solo** i precedenti record web A/AAAA/CNAME annotati nel preflight;
+- non modificare i record di posta durante il rollback;
+- non procedere con ulteriori cambi finché il deployment non è nuovamente verificato.
 
 ## 11. Dopo il live smoke
 
