@@ -93,8 +93,25 @@ jobs:
         run: npx playwright test --config=playwright.public.config.ts
 
       - name: Lighthouse mobile performance gate
+        id: lighthouse
+        continue-on-error: true
         env:
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npx --yes @lhci/cli@0.15.1 autorun
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: artifacts/lighthouse
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Enforce Lighthouse result
+        if: steps.lighthouse.outcome == 'failure'
+        run: |
+          echo "Lighthouse assertions failed; reports were preserved as a workflow artifact."
+          exit 1
