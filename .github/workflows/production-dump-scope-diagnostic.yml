@@ -6,6 +6,11 @@ on:
       - ops/production-restore-drill-20260823
     paths:
       - .github/workflows/production-dump-scope-diagnostic.yml
+  pull_request:
+    branches:
+      - feature/research-radar-ai-knowledge-20260822
+    paths:
+      - .github/workflows/production-dump-scope-diagnostic.yml
 
 permissions:
   contents: read
@@ -36,7 +41,9 @@ jobs:
           sed -n -E 's/^COPY ([^ ]+) .*/\1/p' "$tmp/data.sql" | sort -u
           echo 'COPY_TARGETS_END'
           for needle in 'auth.users' 'auth.identities' 'storage.buckets' 'storage.objects'; do
-            if grep -Eq "^COPY (\\\"?${needle%%.*}\\\"?\\.)?\\\"?${needle##*.}\\\"? " "$tmp/data.sql"; then
+            schema="${needle%%.*}"
+            table="${needle##*.}"
+            if grep -Eq "^COPY (\\\"?${schema}\\\"?\\.)\\\"?${table}\\\"? " "$tmp/data.sql"; then
               echo "DUMP_CONTAINS_${needle//./_}=YES"
             else
               echo "DUMP_CONTAINS_${needle//./_}=NO"
