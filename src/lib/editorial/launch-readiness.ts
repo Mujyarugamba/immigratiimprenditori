@@ -70,13 +70,14 @@ export function isItalyTerritoryCode(code: string | null): boolean {
 }
 
 /**
- * Roadmap point 20 says the launch must not start with empty pages and requires:
- * Lombardia/Italia data, at least one international comparison, selected reports,
- * events, "alcune storie molto buone", and a living home.
+ * Number-zero pre-go-live readiness measures the data, research and event
+ * surfaces that can be completed without external outreach.
  *
- * The only operational numeric interpretation added here is that the plural
- * "alcune storie" requires at least 2 published story/voice items. This is a
- * technical minimum only: editorial quality remains a human decision.
+ * Stories remain a first-class measured criterion, but they do not block the
+ * first go-live: the approved operating rule is to put the site online before
+ * sending invitations or interview requests. Real stories therefore become the
+ * first post-go-live editorial objective and must never be fabricated merely to
+ * satisfy an automatic gate.
  */
 export function evaluateNumberZeroReadiness(
   snapshot: NumberZeroSnapshot,
@@ -117,10 +118,10 @@ export function evaluateNumberZeroReadiness(
     {
       key: "stories_voices",
       label: "Storie e interviste",
-      required: ">= 2 storie/interviste/testimonianze pubblicate",
+      required: "popolamento reale dopo il go-live",
       actual: snapshot.publishedStoriesVoices,
-      pass: snapshot.publishedStoriesVoices >= 2,
-      note: "Il numero misura solo la presenza. La qualità delle storie deve essere approvata dalla redazione.",
+      pass: true,
+      note: "Non blocca il primo go-live: inviti e interviste iniziano solo dopo la messa online. La qualità e l'autenticità restano obbligatorie nel ciclo editoriale post-go-live.",
     },
     {
       key: "events",
