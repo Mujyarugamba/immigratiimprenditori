@@ -33,9 +33,21 @@ for file in "$ROLES_FILE" "$SCHEMA_FILE" "$DATA_FILE"; do
   }
 done
 
-grep -q 'CREATE TABLE.*public.contents' "$SCHEMA_FILE"
-grep -q 'CREATE TABLE.*public.observatory_indicators' "$SCHEMA_FILE"
-grep -q 'COPY public.languages' "$DATA_FILE"
+# pg_dump may quote schema and relation identifiers (for example
+# "public"."contents"). Match the structural statement rather than one exact
+# rendering so this preflight does not reject a valid Supabase logical dump.
+grep -Eq 'CREATE TABLE .*contents' "$SCHEMA_FILE" || {
+  echo "Logical backup preflight: public.contents DDL missing" >&2
+  exit 1
+}
+grep -Eq 'CREATE TABLE .*observatory_indicators' "$SCHEMA_FILE" || {
+  echo "Logical backup preflight: public.observatory_indicators DDL missing" >&2
+  exit 1
+}
+grep -Eq 'COPY .*languages' "$DATA_FILE" || {
+  echo "Logical backup preflight: public.languages data missing" >&2
+  exit 1
+}
 
 # Prove actual recoverability against a clean Supabase-managed database, not a
 # bare PostgreSQL database. Stop the source stack, start a fresh managed stack
