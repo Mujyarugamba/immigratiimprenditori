@@ -15,11 +15,12 @@ Questo runbook traduce `supabase/CS-PRODUCTION-RELEASE.json` in una sequenza ope
 4. Prima di qualsiasi write production occorre una nuova lettura dello storico migration hosted.
 5. Occorrono backup production cifrato/checksum e restore drill completato su ambiente non-production.
 6. Occorre autorizzazione esplicita prima dell'applicazione delle migration e una seconda autorizzazione separata prima del deploy production.
-7. Le 22 candidate vanno applicate **una alla volta, in ordine cronologico**, verificando l'esito prima di passare alla successiva.
+7. Le **23 candidate** vanno applicate **una alla volta, in ordine cronologico**, verificando l'esito prima di passare alla successiva.
 8. Al primo errore inatteso: **STOP**. Non ripetere alla cieca una migration parzialmente eseguita.
 9. Nessun contenuto viene auto-pubblicato durante il rilascio; Radar/AI restano review-only.
 10. Il form pubblico non è considerato production-hardened finché il rate-limit persistente non è applicato e verificato live.
 11. Le Storie reali non sono un gate pre-go-live: outreach/interviste iniziano solo dopo sito online + live smoke PASS.
+12. La governance editoriale è **ibrida**: same-editor per contenuti ordinari, seconda approvazione distinta per contenuti sensibili/istituzionali, indicatori Osservatorio e correzioni sostanziali/retraction.
 
 ## Stato hosted osservato
 
@@ -60,6 +61,7 @@ Questa fotografia va riletta immediatamente prima del rilascio. Se lo storico ho
 20. `20260822210500_go_live_audit_analytics.sql`
 21. `20260822211500_fix_public_rls_mfa_compatibility.sql`
 22. `20260822212000_backfill_futurae_route_evidence.sql`
+23. `20260822213000_hybrid_editorial_review_governance.sql`
 
 Il guard `scripts/ci/production-migration-plan-smoke.mjs` verifica automaticamente che l'elenco resti completo, ordinato, senza duplicati e senza drift rispetto ai file post-cutoff del repository.
 
@@ -69,10 +71,11 @@ Prima di iniziare qualsiasi procedura live devono essere esplicitamente noti:
 
 - esito QA umano WCAG/device (#92);
 - esito revisione legale finale;
-- decisione sulla governance review same-editor vs 4-eyes;
+- governance review: **DECISA — modello ibrido**, da verificare tecnicamente sul candidato e poi live;
 - decisione required checks `main`;
 - identità del commit candidato e deployment Vercel candidato;
-- restore drill non-production completo e verificato.
+- restore drill non-production completo e verificato;
+- enrollment/verifica MFA reale dell'account privilegiato Production.
 
 Le Storie reali non sono una precondizione: la superficie `/storie` deve essere sana anche a zero contenuti reali e l'acquisizione editoriale parte soltanto dopo il live smoke.
 
@@ -106,7 +109,7 @@ Al 23 agosto 2026 il restore drill locale ha individuato una resistenza sulla co
 
 ## Fase 3 — autorizzazione migration
 
-Richiedere autorizzazione esplicita per l'applicazione delle 22 candidate. L'autorizzazione deve riferirsi al commit candidato e allo storico hosted appena verificato.
+Richiedere autorizzazione esplicita per l'applicazione delle **23 candidate**. L'autorizzazione deve riferirsi al commit candidato e allo storico hosted appena verificato.
 
 **Hold point C:** senza autorizzazione non eseguire alcuna write.
 
@@ -160,12 +163,28 @@ Verificare:
 - letture pubbliche compatibili con MFA/RLS;
 - nessuna regressione nelle pagine anonime.
 
+### Checkpoint governance ibrida dopo #23
+
+Dopo `20260822213000_hybrid_editorial_review_governance.sql` verificare:
+
+- un contenuto ordinario resta pubblicabile dal medesimo redattore;
+- un contenuto sensibile non è pubblicabile senza review;
+- il richiedente non può approvare la propria review;
+- un secondo account redazionale può approvare;
+- una modifica successiva rende stale l'approvazione precedente;
+- una nuova review sul nuovo fingerprint consente la pubblicazione;
+- gli indicatori Osservatorio richiedono seconda review;
+- correzioni pubbliche `substantive`/`retraction` richiedono seconda review;
+- registro review non cancellabile dagli utenti applicativi;
+- nessun bypass AI/Radar/service-role.
+
 ## Fase 5 — smoke DB/API immediato
 
 Dopo tutte le migration eseguire almeno:
 
 - DB lint pertinente;
 - RLS/publication smoke;
+- smoke 4-eyes con due account redattore distinti;
 - rate-limit smoke;
 - Auth/MFA smoke;
 - version ledger/audit smoke;
@@ -212,6 +231,7 @@ Subito dopo l'eventuale deploy autorizzato verificare:
 - `/contribuisci` con rate limiting attivo;
 - `/accedi` e area contributor;
 - redazione MFA/AAL2;
+- governance 4-eyes sulle superfici sensibili;
 - security headers/CSP exact-origin;
 - nessun `unsafe-eval`;
 - performance/LCP candidato live;
@@ -220,11 +240,12 @@ Subito dopo l'eventuale deploy autorizzato verificare:
 
 ## Stato attuale
 
-- migration candidate validate localmente: **22/22 nella catena cold-start**;
+- migration candidate validate nella catena cold-start: **23/23** sul candidato governance; recheck del HEAD finale in CI;
 - destructive schema operations rilevate dal guard: **0**;
 - production DB writes in questo ciclo: **0**;
 - production deploy in questo ciclo: **0**;
 - `main` modificato: **NO**;
+- governance editoriale: **IBRIDA — DECISA / CANDIDATA, NON ATTIVA IN PRODUCTION**;
 - rate-limit production: **PENDING APPLY AUTORIZZATO**;
 - backup production + restore drill: **PENDING**;
 - merge/deploy: **NON AUTORIZZATI**.
