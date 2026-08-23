@@ -4,6 +4,8 @@ import { validateHostedProductionEnv } from "./src/lib/deployment/production-env
 
 const deployment = resolveDeploymentEnvironment(process.env);
 
+// Hosted production validation includes the server-only SUPABASE_SERVICE_ROLE_KEY;
+// previews intentionally do not require or receive that privileged credential.
 if (deployment.isHostedProduction) {
   const validation = validateHostedProductionEnv(process.env);
   if (!validation.ok) throw new Error(validation.error);
