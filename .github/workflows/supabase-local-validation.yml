@@ -19,6 +19,7 @@ on:
       - "supabase/CS-PRODUCTION-RELEASE-RUNBOOK.md"
       - "scripts/ci/production-migration-plan-smoke.mjs"
       - "scripts/ci/supabase-security-smoke.sql"
+      - "scripts/ci/hybrid-review-smoke.mjs"
       - "scripts/ci/rate-limit-smoke.sql"
       - "scripts/ci/go-live-db-smoke.sql"
       - "scripts/ci/backup-archive-smoke.sh"
@@ -183,6 +184,9 @@ jobs:
           psql "postgresql://postgres@127.0.0.1:54322/postgres" \
             -v ON_ERROR_STOP=1 \
             -f scripts/ci/supabase-security-smoke.sql
+
+      - name: Hybrid two-editor review smoke
+        run: node scripts/ci/hybrid-review-smoke.mjs
 
       - name: Persistent rate limit security smoke
         env:
