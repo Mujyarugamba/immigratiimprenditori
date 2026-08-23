@@ -96,7 +96,7 @@ Il cold-start continua correttamente a restituire **0 profili autore pubblici re
 
 ### Verifica automatica del 23 agosto 2026
 
-Head tecnico verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`.
+Head applicativo verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`. Le revisioni documentali successive non modificano i risultati tecnici registrati qui.
 
 - `Editorial v1 CI` run `32620148591`: **COMPLETED / SUCCESS**. Typecheck, unit test, functional gates, vulnerability audit, Auth deprecation guard, Next build, HTTP smoke e browser pubblico sono tutti PASS.
 - `Supabase local migration validation` run `32620148584`: cold-start, migration replay, DB lint, RLS/security, persistent rate limiting, audit/analytics, backup archive, Auth reale, dependency install e build applicazione sono PASS. Browser E2E: **19 PASS / 1 FAIL**; l'unico failure è intenzionalmente il gate #10 Storie per assenza di una storia reale.
