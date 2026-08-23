@@ -20,7 +20,38 @@ const STATUS_OPTIONS = [
 
 const STATUS_LABEL = Object.fromEntries(STATUS_OPTIONS) as Record<string, string>;
 
+function transition(changes: Record<string, unknown>, key: string) {
+  const value = changes[key];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  return {
+    from: typeof record.from === "string" ? record.from : null,
+    to: typeof record.to === "string" ? record.to : null,
+  };
+}
+
 function activityLabel(changes: Record<string, unknown>) {
+  const parts: string[] = [];
+  const status = transition(changes, "status");
+  if (status) {
+    const from = status.from ? STATUS_LABEL[status.from] ?? status.from : "—";
+    const to = status.to ? STATUS_LABEL[status.to] ?? status.to : "—";
+    parts.push(`Stato: ${from} → ${to}`);
+  }
+
+  const priority = transition(changes, "priority");
+  if (priority) {
+    parts.push(`Priorità: ${priority.from ?? "—"} → ${priority.to ?? "—"}`);
+  }
+
+  if (transition(changes, "assigned_account_id")) {
+    parts.push("Assegnazione redazionale aggiornata");
+  }
+
+  if (parts.length > 0) return parts.join(" · ");
+
+  // Compatibility with the short-lived application-side audit shape used by
+  // early branch revisions. Canonical records now come from the DB trigger.
   if (changes.kind === "status_change") {
     const from = typeof changes.from === "string" ? STATUS_LABEL[changes.from] ?? changes.from : "—";
     const to = typeof changes.to === "string" ? STATUS_LABEL[changes.to] ?? changes.to : "—";
