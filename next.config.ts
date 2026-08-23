@@ -2,8 +2,12 @@ import type { NextConfig } from "next";
 
 const isNetlifyPreviewLikeContext =
   process.env.NETLIFY === "true" && process.env.CONTEXT !== "production";
+const isVercelPreviewLikeContext =
+  process.env.VERCEL === "1" && process.env.VERCEL_ENV === "preview";
+const isHostedPreviewLikeContext =
+  isNetlifyPreviewLikeContext || isVercelPreviewLikeContext;
 const isReadOnlyPreview =
-  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || isNetlifyPreviewLikeContext;
+  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || isHostedPreviewLikeContext;
 
 function configuredSupabaseConnectSources() {
   const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -21,7 +25,7 @@ function configuredSupabaseConnectSources() {
   }
 }
 
-// Preview browsers have no reason to talk directly to Supabase. Public data is
+// Hosted previews have no reason to talk directly to Supabase. Public data is
 // rendered server-side and every non-safe HTTP method is blocked by src/proxy.ts.
 // Keeping connect-src at self adds a second barrier against client-side writes.
 const connectSources = isReadOnlyPreview
@@ -71,7 +75,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
-  ...(isNetlifyPreviewLikeContext
+  ...(isHostedPreviewLikeContext
     ? [
         {
           key: "X-Robots-Tag",
