@@ -111,10 +111,10 @@ comment on function public.access_has_assigned_application_role(text) is
 comment on function public.access_has_active_application_role(text) is
   'Application-role authorization gate. Contributor remains AAL1; redattore and amministratore_applicativo require JWT aal=aal2.';
 
--- Production currently contains legacy self-service account RPCs that still
--- use deprecated auth.role() checks. Anonymous Supabase users also assume the
--- authenticated Postgres role, so these RPCs explicitly require a permanent
--- authenticated user via auth.uid() + the signed is_anonymous JWT claim.
+-- Hosted self-service deletion RPCs still use deprecated auth.role().
+-- A permanent authenticated user is identified by auth.uid() plus the signed
+-- is_anonymous claim, because anonymous Supabase users also assume the
+-- authenticated Postgres role.
 create or replace function public.access_self_delete_preflight()
 returns jsonb
 language plpgsql
@@ -129,18 +129,15 @@ declare
 begin
   if v_uid is null
      or coalesce((auth.jwt()->>'is_anonymous')::boolean, false) then
-    raise exception 'not authenticated'
-      using errcode = '42501';
+    raise exception 'not authenticated' using errcode = '42501';
   end if;
 
-  select *
-  into v_account
+  select * into v_account
   from public.accounts as a
   where a.auth_user_id = v_uid;
 
   if not found then
-    raise exception 'account not available'
-      using errcode = 'P0002';
+    raise exception 'account not available' using errcode = 'P0002';
   end if;
 
   if exists (
@@ -158,8 +155,7 @@ begin
         and r2.assignment_status = 'active'
         and a2.account_status = 'active'
         and r2.account_id is distinct from v_account.id
-    )
-    into v_is_last_admin;
+    ) into v_is_last_admin;
 
     if v_is_last_admin then
       v_blockers := array_append(v_blockers, 'last_application_admin');
@@ -190,21 +186,18 @@ declare
 begin
   if v_uid is null
      or coalesce((auth.jwt()->>'is_anonymous')::boolean, false) then
-    raise exception 'not authenticated'
-      using errcode = '42501';
+    raise exception 'not authenticated' using errcode = '42501';
   end if;
 
   perform pg_advisory_xact_lock(hashtext('access:self-delete:admin-guard'));
 
-  select *
-  into v_account
+  select * into v_account
   from public.accounts as a
   where a.auth_user_id = v_uid
   for update;
 
   if not found then
-    raise exception 'account not available'
-      using errcode = 'P0002';
+    raise exception 'account not available' using errcode = 'P0002';
   end if;
 
   if v_account.account_status = 'closed' then
@@ -233,8 +226,7 @@ begin
         and r2.assignment_status = 'active'
         and a2.account_status = 'active'
         and r2.account_id is distinct from v_account.id
-    )
-    into v_is_last_admin;
+    ) into v_is_last_admin;
 
     if v_is_last_admin then
       raise exception 'self_delete_blocked: last_application_admin'
@@ -244,19 +236,17 @@ begin
   end if;
 
   update public.account_role_assignments as r
-  set
-    assignment_status = 'revoked',
-    revoked_at = coalesce(r.revoked_at, now()),
-    updated_at = now()
+  set assignment_status = 'revoked',
+      revoked_at = coalesce(r.revoked_at, now()),
+      updated_at = now()
   where r.account_id = v_account.id
     and r.assignment_status = 'active';
 
   update public.accounts as a
-  set
-    account_status = 'closed',
-    closed_at = coalesce(a.closed_at, now()),
-    status_reason = 'self_service_account_deletion',
-    updated_at = now()
+  set account_status = 'closed',
+      closed_at = coalesce(a.closed_at, now()),
+      status_reason = 'self_service_account_deletion',
+      updated_at = now()
   where a.id = v_account.id;
 
   return jsonb_build_object(
@@ -274,7 +264,6 @@ revoke all on function public.access_self_delete_preflight()
   from public, anon, authenticated, service_role;
 revoke all on function public.access_self_close_account()
   from public, anon, authenticated, service_role;
-
 grant execute on function public.access_self_delete_preflight() to authenticated;
 grant execute on function public.access_self_close_account() to authenticated;
 
@@ -283,9 +272,10 @@ comment on function public.access_self_delete_preflight() is
 comment on function public.access_self_close_account() is
   'Closes the current permanent user account while protecting the final application administrator; anonymous Auth users are rejected.';
 
--- Service-role-only lifecycle RPCs are also present in the hosted database with
--- deprecated auth.role() checks. SECURITY DEFINER changes current_user, so the
--- signed JWT role claim is the correct request identity signal here.
+-- Hosted lifecycle RPCs also contain deprecated auth.role() checks. Preserve the
+-- current Centro Studi contracts while switching request identity to signed JWT
+-- claims. In particular, access_link_person intentionally allows a normal
+-- authenticated user to link only their own account/profile.
 create or replace function public.access_provision_account(p_auth_user_id uuid)
 returns uuid
 language plpgsql
@@ -321,6 +311,9 @@ begin
   ) returning id into v_account_id;
 
   return v_account_id;
+exception
+  when unique_violation then
+    raise exception 'account already exists' using errcode = '23505';
 end;
 $$;
 
@@ -331,16 +324,21 @@ security definer
 set search_path = ''
 as $$
 declare
+  v_is_svc boolean := (coalesce(auth.jwt()->>'role', '') = 'service_role');
+  v_is_adm boolean := public.access_is_application_admin();
+  v_uid uuid := auth.uid();
   v_account public.accounts%rowtype;
+  v_assoc text;
 begin
-  if coalesce(auth.jwt()->>'role', '') <> 'service_role' then
-    raise exception 'not authorized' using errcode = '42501';
-  end if;
   if p_account_id is null or p_person_id is null then
     raise exception 'account id and person id required' using errcode = '22004';
   end if;
+  if not v_is_svc and v_uid is null then
+    raise exception 'not authenticated' using errcode = '42501';
+  end if;
   if not exists (
-    select 1 from public.profiles p where p.id = p_person_id and p.deleted_at is null
+    select 1 from public.profiles p
+    where p.id = p_person_id and p.deleted_at is null
   ) then
     raise exception 'person not available' using errcode = 'P0002';
   end if;
@@ -356,20 +354,60 @@ begin
   if v_account.account_status = 'closed' then
     raise exception 'account state incompatible' using errcode = '55000';
   end if;
-  if v_account.person_id is not null and v_account.person_id is distinct from p_person_id then
+
+  if not v_is_svc and not v_is_adm then
+    if coalesce((auth.jwt()->>'is_anonymous')::boolean, false)
+       or v_account.auth_user_id is distinct from v_uid
+       or p_person_id is distinct from v_uid then
+      raise exception 'not authorized' using errcode = '42501';
+    end if;
+    if v_account.account_status in ('suspended','disabled') then
+      raise exception 'account not operational' using errcode = '55000';
+    end if;
+    v_assoc := 'declared';
+  else
+    v_assoc := 'verified';
+  end if;
+
+  if v_account.person_id is not null
+     and v_account.person_id is distinct from p_person_id then
     raise exception 'person association already set' using errcode = '55000';
+  end if;
+  if v_account.person_association_status = 'contested'
+     and not v_is_svc and not v_is_adm then
+    raise exception 'person association contested' using errcode = '55000';
+  end if;
+
+  if v_account.person_id is not distinct from p_person_id
+     and v_account.person_association_status in ('declared','verified')
+     and (
+       (not v_is_svc and not v_is_adm and v_account.person_association_status = 'declared')
+       or ((v_is_svc or v_is_adm) and v_account.person_association_status = 'verified')
+     ) then
+    return v_account.id;
   end if;
 
   update public.accounts a
-  set
-    person_id = p_person_id,
-    person_association_status = 'verified',
-    person_linked_at = coalesce(a.person_linked_at, now()),
-    account_status = case when a.account_status in ('registered','limited') then 'active' else a.account_status end,
-    activated_at = case when a.account_status in ('registered','limited') then coalesce(a.activated_at, now()) else a.activated_at end
+  set person_id = p_person_id,
+      person_association_status = case
+        when v_is_svc or v_is_adm then 'verified'
+        else coalesce(a.person_association_status, v_assoc)
+      end,
+      person_linked_at = coalesce(a.person_linked_at, now()),
+      account_status = case
+        when a.account_status in ('registered','limited') then 'active'
+        else a.account_status
+      end,
+      activated_at = case
+        when a.account_status in ('registered','limited') then coalesce(a.activated_at, now())
+        else a.activated_at
+      end
   where a.id = p_account_id;
 
   return p_account_id;
+exception
+  when unique_violation then
+    raise exception 'person already linked to another account' using errcode = '23505';
 end;
 $$;
 
@@ -430,7 +468,8 @@ begin
     raise exception 'auth user not available' using errcode = 'P0002';
   end if;
   if not exists (
-    select 1 from public.profiles p where p.id = p_auth_user_id and p.deleted_at is null
+    select 1 from public.profiles p
+    where p.id = p_auth_user_id and p.deleted_at is null
   ) then
     raise exception 'profile not available' using errcode = 'P0002';
   end if;
@@ -468,10 +507,9 @@ begin
   end if;
 
   update public.account_role_assignments r
-  set
-    assignment_status = 'revoked',
-    revoked_at = now(),
-    updated_at = now()
+  set assignment_status = 'revoked',
+      revoked_at = now(),
+      updated_at = now()
   where r.account_id = p_account_id
     and r.role_code = 'contributore'
     and r.assignment_status = 'active'
@@ -497,7 +535,7 @@ revoke all on function public.revoke_contributor_role(uuid)
   from public, anon, authenticated, service_role;
 
 grant execute on function public.access_provision_account(uuid) to service_role;
-grant execute on function public.access_link_person(uuid,uuid) to service_role;
+grant execute on function public.access_link_person(uuid,uuid) to authenticated, service_role;
 grant execute on function public.assign_application_role(uuid,text) to service_role;
 grant execute on function public.provision_contributor_account(uuid) to service_role;
 grant execute on function public.revoke_contributor_role(uuid) to service_role;
@@ -505,7 +543,7 @@ grant execute on function public.revoke_contributor_role(uuid) to service_role;
 comment on function public.access_provision_account(uuid) is
   'Service-role-only account provisioning RPC; authorization uses the signed JWT role claim.';
 comment on function public.access_link_person(uuid,uuid) is
-  'Service-role-only account/person linking RPC; authorization uses the signed JWT role claim.';
+  'Allows a permanent authenticated user to link only their own profile; service role and AAL2 application admins retain administrative linking.';
 comment on function public.assign_application_role(uuid,text) is
   'Service-role-only application-role assignment RPC; authorization uses the signed JWT role claim.';
 comment on function public.provision_contributor_account(uuid) is
