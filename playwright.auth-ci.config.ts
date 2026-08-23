@@ -9,6 +9,8 @@ export default defineConfig({
     "go-live-local.spec.ts",
     "internal-links.spec.ts",
     "public-readonly.spec.ts",
+    "seo-smoke.spec.ts",
+    "seo-real-stack.spec.ts",
   ],
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
