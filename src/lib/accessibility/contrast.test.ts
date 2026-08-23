@@ -45,7 +45,7 @@ test("focus indicator meets non-text contrast on light and dark shells", () => {
   assert.ok(contrastRatio(focus, navyDeep) >= 3, "focus indicator must be >= 3:1 on navy");
   assert.match(
     accessibility,
-    /:focus-visible\s*\{[^}]*outline-color:\s*var\(--gold-deep\)/s,
+    /:focus-visible\s*\{[\s\S]*?outline-color:\s*var\(--gold-deep\)/,
     "focus-visible must use the hardened token",
   );
 });
