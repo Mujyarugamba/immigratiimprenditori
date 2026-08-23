@@ -60,5 +60,30 @@ if (findings.length) {
   process.exit(1);
 }
 
+const analyticsRoutePath = path.join(
+  SOURCE_ROOT,
+  "app",
+  "api",
+  "analytics",
+  "page-view",
+  "route.ts",
+);
+const analyticsRoute = readFileSync(analyticsRoutePath, "utf8");
+const requiredAnalyticsFlags = [
+  "NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED",
+  "PRIVACY_ANALYTICS_WRITE_ENABLED",
+];
+for (const flag of requiredAnalyticsFlags) {
+  if (!analyticsRoute.includes(`process.env.${flag} !== \"true\"`)) {
+    console.error("PRIVACY_RUNTIME_GUARD = FAIL");
+    console.error(
+      `Analytics write endpoint must fail closed unless ${flag}=true.`,
+    );
+    process.exit(1);
+  }
+}
+
 console.log("PRIVACY_RUNTIME_GUARD = PASS");
-console.log("Checked runtime source for known trackers, external embeds and iframe markup.");
+console.log(
+  "Checked runtime source for known trackers/external embeds and enforced dual analytics activation gates.",
+);
