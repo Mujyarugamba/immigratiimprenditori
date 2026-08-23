@@ -87,6 +87,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Inline the computed preview mode so client-only code (analytics/forms) sees
+  // the same fail-closed state as the server proxy on Netlify and Vercel.
+  env: {
+    NEXT_PUBLIC_PREVIEW_READ_ONLY: isReadOnlyPreview ? "true" : "false",
+  },
   transpilePackages: ["@immigrati/product-config", "@immigrati/ui-foundation"],
   async headers() {
     return [
