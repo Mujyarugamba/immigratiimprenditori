@@ -56,22 +56,36 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          targets=(
-            scripts/external-data/source-health-check.mjs
-            .github/workflows/source-health-weekly.yml
-          )
-          matches="$(grep -n --fixed-strings 'SUPABASE_SERVICE_ROLE_KEY' "${targets[@]}" || true)"
-          if [[ -n "$matches" ]]; then
+          checker="scripts/external-data/source-health-check.mjs"
+          workflow=".github/workflows/source-health-weekly.yml"
+          targets=("$checker" "$workflow")
+
+          privileged="$(grep -n --fixed-strings 'SUPABASE_SERVICE_ROLE_KEY' "${targets[@]}" || true)"
+          if [[ -n "$privileged" ]]; then
             echo "Source-health must never receive the Supabase service-role credential:"
-            echo "$matches"
+            echo "$privileged"
             exit 1
           fi
+
           for target in "${targets[@]}"; do
             if ! grep -q --fixed-strings 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY' "$target"; then
               echo "Source-health public publishable-key contract missing from $target"
               exit 1
             fi
           done
+
+          mutations="$(grep -nE '\.(insert|upsert|update|delete|rpc)\(' "$checker" || true)"
+          if [[ -n "$mutations" ]]; then
+            echo "Source-health checker must remain database read-only; mutation/RPC call found:"
+            echo "$mutations"
+            exit 1
+          fi
+
+          if ! grep -q --fixed-strings '.eq("lifecycle_status", "active")' "$checker"; then
+            echo "Source-health checker must explicitly restrict registry reads to active sources"
+            exit 1
+          fi
+
           echo "SOURCE_HEALTH_LEAST_PRIVILEGE_GUARD = PASS"
 
       - name: Privacy runtime tracker/embed guard
