@@ -63,12 +63,17 @@ export default async function AccediPage({ searchParams }: PageProps) {
         <p className="text-ink-muted mt-2 text-sm">{description}</p>
 
         {errorMessage ? (
-          <p className="mt-4 rounded-md border px-3 py-2 text-sm" role="alert">
+          <p id="login-form-error" className="mt-4 rounded-md border px-3 py-2 text-sm" role="alert">
             {errorMessage}
           </p>
         ) : null}
 
-        <form action={signInEditorialAction} className="mt-6 space-y-4">
+        <form
+          id="login-form"
+          action={signInEditorialAction}
+          aria-describedby={errorMessage ? "login-form-error" : undefined}
+          className="mt-6 space-y-4"
+        >
           <input type="hidden" name="next" value={next} />
           <div>
             <label htmlFor="email" className="text-ink block text-sm font-medium">
