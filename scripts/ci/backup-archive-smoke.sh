@@ -49,10 +49,13 @@ grep -Eq 'COPY .*languages' "$DATA_FILE" || {
   exit 1
 }
 
-# Temporary, safe diagnostic for the managed role-setting restore blocker.
-# Print only the SQL statement(s) containing log_min_messages and redact the
-# role identifier. No schema/data dump, password, token or connection secret is
-# emitted. Keep this until the exact Supabase CLI rendering is captured once.
+# A fresh Supabase-managed target already owns platform logging configuration.
+# Depending on the Supabase/PostgreSQL version, the role-only dump can encode
+# that managed privilege either as ALTER ROLE ... log_min_messages or as
+# GRANT SET ON PARAMETER "log_min_messages" TO .... Supautils correctly blocks
+# replaying either form through normal project privileges. Remove only those
+# exact log_min_messages statements and preserve every other role setting,
+# membership and parameter grant.
 python3 - "$ROLES_FILE" <<'PY'
 from pathlib import Path
 import re
@@ -60,69 +63,41 @@ import sys
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
-needle = re.compile(r"log_min_messages", re.IGNORECASE)
-seen = set()
+parts = re.split(r"(?<=;)", text)
+kept = []
+removed = []
 
-for match in needle.finditer(text):
-    start = text.rfind(";", 0, match.start()) + 1
-    end = text.find(";", match.end())
-    if end == -1:
-        end = len(text)
-    else:
-        end += 1
-    statement = text[start:end].strip()
-    if not statement or statement in seen:
+alter_role = re.compile(
+    r"(?is)^\s*ALTER\s+ROLE\b.*\blog_min_messages\b"
+)
+grant_parameter = re.compile(
+    r'(?is)^\s*GRANT\s+SET\s+ON\s+PARAMETER\s+"?log_min_messages"?\s+TO\b'
+)
+
+for part in parts:
+    statement = part.strip()
+    if statement and alter_role.match(statement):
+        removed.append("ALTER ROLE log_min_messages")
         continue
-    seen.add(statement)
-    statement = re.sub(
-        r'(?is)(\bALTER\s+ROLE\s+)(?:"(?:[^"]|"")*"|\S+)',
-        r'\1<ROLE>',
-        statement,
-        count=1,
+    if statement and grant_parameter.match(statement):
+        removed.append("GRANT SET ON PARAMETER log_min_messages")
+        continue
+    kept.append(part)
+
+filtered = "".join(kept)
+if re.search(r"(?i)\blog_min_messages\b", filtered):
+    raise SystemExit(
+        "Restore drill: unrecognized log_min_messages statement survived normalization"
     )
-    first_line = text.count("\n", 0, start) + 1
-    last_line = first_line + statement.count("\n")
-    print(f"RESTORE_ROLE_DIAGNOSTIC lines={first_line}-{last_line}", file=sys.stderr)
-    for line in statement.splitlines():
-        print(f"RESTORE_ROLE_DIAGNOSTIC_SQL {line}", file=sys.stderr)
 
-if not seen:
-    print("RESTORE_ROLE_DIAGNOSTIC no log_min_messages occurrence found", file=sys.stderr)
+path.write_text(filtered, encoding="utf-8")
+if removed:
+    print(
+        "Restore drill: ignored platform-managed log_min_messages statement(s): "
+        + ", ".join(sorted(set(removed))),
+        file=sys.stderr,
+    )
 PY
-
-# A fresh Supabase-managed target already owns platform logging configuration.
-# The role-only dump can contain ALTER ROLE ... SET log_min_messages copied from
-# the source. Supautils correctly prevents a normal project connection from
-# overwriting that platform-managed GUC. Supabase/pg_dump output may quote the
-# parameter name or vary SET syntax, so match the statement semantically rather
-# than relying on one exact rendering. Remove only ALTER ROLE statements that
-# mention log_min_messages; keep every other role setting/membership/grant.
-ROLES_FILTERED="$BACKUP_DIR/roles.filtered.sql"
-awk '
-  BEGIN { IGNORECASE = 1 }
-  /^[[:space:]]*ALTER[[:space:]]+ROLE[[:space:]]+/ && /log_min_messages/ {
-    filtered = 1
-    next
-  }
-  { print }
-  END {
-    if (filtered) {
-      print "Restore drill: ignored platform-managed role log_min_messages setting" > "/dev/stderr"
-    }
-  }
-' "$ROLES_FILE" > "$ROLES_FILTERED"
-mv "$ROLES_FILTERED" "$ROLES_FILE"
-
-# Defensive check: never continue if an ALTER ROLE log_min_messages statement
-# survived the normalization above.
-if awk '
-  BEGIN { IGNORECASE = 1; found = 0 }
-  /^[[:space:]]*ALTER[[:space:]]+ROLE[[:space:]]+/ && /log_min_messages/ { found = 1 }
-  END { exit found ? 0 : 1 }
-' "$ROLES_FILE"; then
-  echo "Restore drill: platform-managed log_min_messages ALTER ROLE survived filtering" >&2
-  exit 1
-fi
 
 # Prove actual recoverability against a clean Supabase-managed database, not a
 # bare PostgreSQL database. Stop the source stack, start a fresh managed stack
