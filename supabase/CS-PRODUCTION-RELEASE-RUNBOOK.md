@@ -10,6 +10,7 @@ Questo documento disciplina esclusivamente il rilascio del database Centro Studi
 - bootstrap standalone: `supabase/baseline/00..03` come descritto in `CS-MIGRATION-MANIFEST.md`;
 - piano machine-readable del delta: `supabase/CS-PRODUCTION-RELEASE.json`;
 - backup/recovery: `docs/security/BACKUP-RECOVERY.md`;
+- governance ibrida review: `docs/editorial/HYBRID-REVIEW-GOVERNANCE.md`;
 - `supabase/migrations/` contiene anche storico pre-SPLIT-3 e **non è una catena da inviare integralmente a production**.
 
 ### Regola assoluta
@@ -22,7 +23,7 @@ La lettura delle migration hosted del 23/08/2026 mostra come ultima migration:
 
 `20260820160000_prepare_events_external_ingestion_rls`
 
-Le 22 migration elencate in `candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` non risultavano ancora applicate al momento della verifica.
+Le 23 migration elencate in `candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` non risultavano ancora applicate al momento della verifica.
 
 Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano.
 
@@ -52,6 +53,7 @@ Il gate `scripts/ci/production-migration-plan-smoke.mjs` verifica che:
 - tutti i file dichiarati esistano;
 - l'ordine sia cronologico e senza duplicati;
 - ogni file repository successivo al cutoff hosted sia classificato come alias già applicato oppure come candidato;
+- i gate security/governance critici, inclusa la governance ibrida 4-eyes, restino esplicitamente presenti nel piano;
 - nessun candidato contenga `DROP TABLE`, `DROP SCHEMA`, `TRUNCATE` o `DROP COLUMN` non consentiti dal gate.
 
 Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente.
@@ -78,6 +80,9 @@ Controllare almeno:
 - accesso contributor/editor/admin e MFA AAL2 privilegiata;
 - rate limit pubblico e login;
 - audit log e analytics in stato previsto, senza attivare feature production non autorizzate;
+- governance ibrida: contenuto ordinario same-editor consentito, contenuti sensibili/istituzionali bloccati senza seconda approvazione distinta, self-approval negata e approval stale negata dopo modifica;
+- indicatori Osservatorio bloccati senza seconda approvazione;
+- correzioni `substantive`/`retraction` pubbliche bloccate senza seconda approvazione;
 - lettura di Osservatorio, Atlante, rotte, contenuti, autori e open data;
 - nessuna FK/oggetto PonteImprese reintrodotto;
 - conteggi e visibilità dei contenuti coerenti con lo stato editoriale reale;
@@ -119,6 +124,7 @@ Registrare per il rilascio:
 - timestamp e checksum del backup pre-release;
 - esito restore drill;
 - esito smoke DB/security/app;
+- esito governance ibrida 4-eyes;
 - eventuali forward-fix;
 - autorizzazione esplicita a merge/deploy production.
 
