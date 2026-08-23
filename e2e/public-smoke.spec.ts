@@ -56,6 +56,18 @@ test("contribution and support surfaces remain safe without live data", async ({
   await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
 });
 
+test("contribution server errors are announced and associated with the form", async ({ page }) => {
+  await page.goto("/contribuisci?errore=campi", { waitUntil: "domcontentloaded" });
+  const alert = page.getByRole("alert");
+  await expect(alert).toBeVisible();
+  await expect(alert).toHaveAttribute("id", "submission-form-error");
+  await expect(alert).toContainText(/Controlla i campi obbligatori/i);
+  await expect(page.locator("#modulo-partecipazione")).toHaveAttribute(
+    "aria-describedby",
+    "submission-form-error",
+  );
+});
+
 test("all seven localized home shells expose language, direction and localized controls", async ({ page }) => {
   for (const [locale, path, direction, primaryNavigation, languageLabel] of localizedHomes) {
     const response = await page.goto(path, { waitUntil: "domcontentloaded" });
