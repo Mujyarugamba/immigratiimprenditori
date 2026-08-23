@@ -146,25 +146,44 @@ Cold-start, PostgreSQL lint, publication/RLS smoke, governance ibrida con due re
 
 Prima dell'apply servono ancora:
 
-1. restore drill non-production riuscito;
+1. restore drill non-Production **con dump logico proveniente dalla Production reale**;
 2. fresh migration-history read;
 3. controllo assenza drift;
 4. autorizzazione esplicita;
 5. apply ordinato del solo set candidato;
 6. smoke Security/RLS/rate-limit/governance dopo apply.
 
-La lettura hosted più recente conferma ancora cutoff `20260820160000`; il piano candidato contiene ora **24 migration** e nessuna è stata applicata in Production.
+La lettura hosted più recente conferma ancora cutoff `20260820160000`; il piano candidato contiene **24 migration** e nessuna è stata applicata in Production.
 
 ---
 
 ## 6. Backup / recovery
 
-### BACKUP-01 — Backup cifrato Production
+### BACKUP-01 — Percorso tecnico di restore
+**CI EPHEMERAL RESTORE DRILL = PASS / PRODUCTION-SOURCE DRILL = PENDING**
+
+Il 23/08/2026 il laboratorio CI ha completato con PASS un vero ciclo di recovery contro un secondo stack Supabase-managed fresco:
+
+- dump logico `roles.sql` + `schema.sql` + `data.sql`;
+- normalizzazione chirurgica del solo privilegio platform-managed `log_min_messages`;
+- restore completo su stack fresco senza migration applicative preinstallate;
+- reattach idempotente del solo hook applicativo `on_auth_user_created` su `auth.users` tramite `scripts/ci/post-restore-auth-hooks.sql`;
+- verifica RLS e tabelle critiche;
+- Auth integration smoke con utenti effimeri reali e provisioning `public.profiles`;
+- separazione contributor/redattore e auto-elevazione negata;
+- build applicativa, HTTP/security smoke e browser E2E autenticato sul database ripristinato;
+- cleanup finale.
+
+Il precedente blocker `log_min_messages` è quindi **CHIUSO** e il mancato ripristino del trigger Auth è anch'esso **CHIUSO**.
+
+Resta distinto il gate pre-release **Production-source**: ottenere un dump logico della Production reale da una macchina amministrativa controllata e ripristinarlo su un target non-Production pulito. Le credenziali necessarie non vengono introdotte nel repository e questo passaggio non è ancora stato eseguito.
+
+### BACKUP-02 — Backup cifrato Production
 **PENDING PRE-RELEASE**
 
-Il workflow e le verifiche di archivio sono preparati, ma il gate di release richiede backup Production reale + restore drill non-production riuscito.
+Il workflow di archivio cifrato è preparato ma richiede i secret Production previsti e un'esecuzione reale autorizzata. Il PASS del laboratorio non equivale a un backup Production eseguito.
 
-Il restore drill resta PENDING sul setting Supabase-managed `log_min_messages`; non viene aggirato né dichiarato PASS.
+Procedura canonica: `docs/security/BACKUP-RECOVERY.md`.
 
 ---
 
@@ -190,9 +209,9 @@ La revisione professionale deve ancora validare formulazioni e perimetro giuridi
 ## 8. Accessibilità e responsive
 
 ### UI-A11Y-01 — Automazione
-**PASS SUL CANDIDATO PRECEDENTE / HEAD FINALE DA CONFERMARE IN CI**
+**PASS NELLA CI APPLICATIVA / HUMAN-DEVICE QA PENDING**
 
-I test coprono reflow 320/390/768, text-spacing WCAG a 320 px, target-size minimo, navigazione tastiera, error association e browser E2E. La verifica umana/device resta distinta e PENDING.
+I test coprono reflow 320/390/768, text-spacing WCAG a 320 px, target-size minimo, navigazione tastiera, error association e browser E2E. Lighthouse mobile e Public browser E2E sono PASS nel candidato funzionale. La verifica umana/device resta distinta e PENDING.
 
 ---
 
@@ -200,7 +219,7 @@ I test coprono reflow 320/390/768, text-spacing WCAG a 320 px, target-size minim
 
 Restano da chiudere prima del go-live:
 
-1. restore drill reale non-production;
+1. restore drill con **dump logico Production reale → target non-Production pulito**;
 2. human WCAG 2.2 AA + desktop/tablet/mobile/device QA;
 3. revisione legale professionale finale;
 4. enrollment/verifica MFA reale dell'account privilegiato Production;
@@ -212,6 +231,6 @@ Restano da chiudere prima del go-live:
 10. protected Production smoke Vercel;
 11. apertura dominio + live smoke finale.
 
-La decisione sul modello editoriale ibrido **non è più un hold point**.
+La decisione sul modello editoriale ibrido e il restore drill CI effimero **non sono più hold point**.
 
 `PRODUCTION_READINESS = NOT PASS`.
