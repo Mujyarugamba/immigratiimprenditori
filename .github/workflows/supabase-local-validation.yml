@@ -14,6 +14,10 @@ on:
       - "supabase/baseline/**"
       - "supabase/standalone-evolutions/**"
       - "supabase/migrations/**"
+      - "supabase/CS-MIGRATION-MANIFEST.md"
+      - "supabase/CS-PRODUCTION-RELEASE.json"
+      - "supabase/CS-PRODUCTION-RELEASE-RUNBOOK.md"
+      - "scripts/ci/production-migration-plan-smoke.mjs"
       - "scripts/ci/supabase-security-smoke.sql"
       - "scripts/ci/rate-limit-smoke.sql"
       - "scripts/ci/go-live-db-smoke.sql"
@@ -69,6 +73,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Validate production migration release plan
+        run: node scripts/ci/production-migration-plan-smoke.mjs
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v3
