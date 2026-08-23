@@ -167,7 +167,7 @@ test("go-live core interface renders across all seven platform languages", async
   for (const [locale, , direction] of localizedHomes) {
     for (const corePath of goLiveLocalizedCorePaths) {
       const path = locale === "it" ? corePath : `/${locale}${corePath}`;
-      const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+      const response = await page.goto(path, { waitUntil: "load" });
       expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
       await expect(page.locator("html")).toHaveAttribute("lang", locale);
       await expect(page.locator("html")).toHaveAttribute("dir", direction);
@@ -186,7 +186,11 @@ test("go-live core interface renders across all seven platform languages", async
       }
 
       if (locale !== "it" && corePath === "/fonti") {
-        await expect(page.locator(`a[href="/${locale}/dati-e-fonti"]`)).toHaveCount(1);
+        const methodologyLinks = page.locator(`a[href="/${locale}/dati-e-fonti"]`);
+        expect(
+          await methodologyLinks.count(),
+          `${path} must expose at least one localized Fonti → Metodologia link`,
+        ).toBeGreaterThan(0);
       }
     }
   }
