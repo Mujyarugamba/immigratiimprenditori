@@ -121,7 +121,7 @@ export default function ChiSiamoPage() {
       <section className="mt-10 border-t border-black pt-8">
         <h2 className="text-2xl font-semibold tracking-tight text-black">Contatti</h2>
         <p className="mt-4 text-base leading-7 text-neutral-700">
-          <a href={`mailto:${profile.contactEmail}`} className="underline underline-offset-4">{profile.contactEmail}</a>
+          <a href={`mailto:${profile.contactEmail}`} className="break-all underline underline-offset-4">{profile.contactEmail}</a>
         </p>
       </section>
     </main>
