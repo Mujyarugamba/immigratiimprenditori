@@ -3,13 +3,13 @@ import { expect, test } from "@playwright/test";
 const corePublicPages = ["/", "/contribuisci", "/sostieni"] as const;
 
 const localizedHomes = [
-  ["it", "/", "ltr"],
-  ["en", "/en", "ltr"],
-  ["fr", "/fr", "ltr"],
-  ["es", "/es", "ltr"],
-  ["de", "/de", "ltr"],
-  ["ar", "/ar", "rtl"],
-  ["zh", "/zh", "ltr"],
+  ["it", "/", "ltr", "Navigazione principale", "Lingua"],
+  ["en", "/en", "ltr", "Primary navigation", "Language"],
+  ["fr", "/fr", "ltr", "Navigation principale", "Langue"],
+  ["es", "/es", "ltr", "Navegación principal", "Idioma"],
+  ["de", "/de", "ltr", "Hauptnavigation", "Sprache"],
+  ["ar", "/ar", "rtl", "التنقل الرئيسي", "اللغة"],
+  ["zh", "/zh", "ltr", "主导航", "语言"],
 ] as const;
 
 test("homepage renders the institutional editorial shell", async ({ page }) => {
@@ -23,6 +23,9 @@ test("homepage renders the institutional editorial shell", async ({ page }) => {
   const skipLink = page.getByRole("link", { name: "Vai al contenuto" });
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toHaveAttribute("href", "#contenuto-principale");
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#contenuto-principale")).toBeFocused();
 });
 
 test("contribution and support surfaces remain safe without live data", async ({ page }) => {
@@ -37,13 +40,15 @@ test("contribution and support surfaces remain safe without live data", async ({
   await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
 });
 
-test("all seven localized home shells expose language and direction", async ({ page }) => {
-  for (const [locale, path, direction] of localizedHomes) {
+test("all seven localized home shells expose language, direction and localized controls", async ({ page }) => {
+  for (const [locale, path, direction, primaryNavigation, languageLabel] of localizedHomes) {
     const response = await page.goto(path, { waitUntil: "domcontentloaded" });
     expect(response?.ok(), `${locale} home did not return 2xx`).toBeTruthy();
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
     await expect(page.locator("html")).toHaveAttribute("dir", direction);
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole("navigation", { name: primaryNavigation })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: languageLabel })).toBeVisible();
   }
 });
 
