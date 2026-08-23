@@ -112,20 +112,28 @@ async function expectPreviewMutationBlocked(path) {
 }
 
 async function main() {
+  const runtimeEnv = {
+    ...process.env,
+    NEXT_PUBLIC_SUPABASE_URL:
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co",
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "ci-placeholder-key",
+    NEXT_PUBLIC_SITE_URL:
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://preview.example.invalid",
+  };
+
+  // Netlify config-file variables configure the build but are not guaranteed to
+  // exist in Function/Edge runtime. In preview-mode CI, deliberately remove the
+  // flag before `next start`: the mutation firewall must survive because the
+  // NEXT_PUBLIC flag was inlined into the candidate during `next build`.
+  if (PREVIEW_READ_ONLY) delete runtimeEnv.NEXT_PUBLIC_PREVIEW_READ_ONLY;
+
   const server = spawn(
     process.execPath,
     ["node_modules/next/dist/bin/next", "start", "-p", String(PORT)],
     {
       cwd: process.cwd(),
-      env: {
-        ...process.env,
-        NEXT_PUBLIC_SUPABASE_URL:
-          process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co",
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
-          process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "ci-placeholder-key",
-        NEXT_PUBLIC_SITE_URL:
-          process.env.NEXT_PUBLIC_SITE_URL ?? "https://preview.example.invalid",
-      },
+      env: runtimeEnv,
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
