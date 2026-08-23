@@ -156,10 +156,17 @@ begin
       reviewed_at = now()
   where id = v_inbox_id;
 
-  select count(*)::integer, max(changes)
-    into v_activity_count, v_changes
+  select count(*)::integer
+    into v_activity_count
   from public.editorial_inbox_activity
   where inbox_item_id = v_inbox_id;
+
+  select changes
+    into v_changes
+  from public.editorial_inbox_activity
+  where inbox_item_id = v_inbox_id
+  order by created_at desc, id desc
+  limit 1;
 
   if v_activity_count <> 1 then
     raise exception 'SECURITY_SMOKE_INBOX_ACTIVITY_COUNT_%', v_activity_count;
