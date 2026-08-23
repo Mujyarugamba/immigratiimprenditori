@@ -48,15 +48,15 @@ Il codice riconosce automaticamente `VERCEL_ENV=preview` e applica:
 
 ### Production
 
-Obbligatorie, validate fail-fast durante il build:
+Obbligatorie e validate fail-fast durante il build:
 
 - `NEXT_PUBLIC_SUPABASE_URL=https://hvfvfatlaspcpszgizhg.supabase.co`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = chiave publishable moderna del progetto;
+- `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it` (o l'origine HTTPS Production effettiva durante il collaudo);
 - `SUPABASE_SERVICE_ROLE_KEY` = secret server-only.
 
 Da impostare esplicitamente:
 
-- `NEXT_PUBLIC_SITE_URL` = origine effettiva del sito Production;
 - `NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED=false` al primo rilascio;
 - `PRIVACY_ANALYTICS_WRITE_ENABLED=false` al primo rilascio.
 
@@ -76,15 +76,15 @@ Prima di scrivere sul database hosted:
    - `SUPABASE_DB_URL`;
    - `BACKUP_ENCRYPTION_PASSPHRASE`;
 2. eseguire il workflow `Production encrypted backup` da `main` quando autorizzato;
-3. verificare:
-   - `pg_dump` PostgreSQL 17 riuscito;
-   - `pg_restore --list` riuscito;
-   - artifact cifrato AES-256 presente;
+3. verificare il logical backup Supabase CLI:
+   - `roles.sql`, `schema.sql` e `data.sql` non vuoti;
+   - preflight su oggetti/dati canonici riuscito;
+   - archivio cifrato AES-256 presente;
    - checksum SHA-256 presente;
-   - nessun dump plaintext nell'artifact;
+   - nessun materiale plaintext nell'artifact;
 4. eseguire restore drill non-production e verificare schema/dati/RLS critici.
 
-Il laboratorio CI esegue già un restore reale su database locale effimero; questo non sostituisce il backup reale hosted.
+Il laboratorio CI prova un restore reale su uno stack Supabase locale effimero. Al 23 agosto 2026 questo drill ha isolato un'incompatibilità locale nel ripristino di una configurazione di ruolo gestita (`log_min_messages`) e resta **PENDING**: non va dichiarato PASS finché non esiste un restore non-production completo. Questo non autorizza alcuna migration hosted.
 
 ## 5. Database Production
 
@@ -135,9 +135,10 @@ Prima del deploy devono essere verdi:
 - dependency audit;
 - public browser E2E;
 - Supabase migration/Auth/MFA/RLS laboratory;
+- restore drill non-production;
 - Netlify/Vercel Preview safety tests.
 
-Il build Production deve fallire automaticamente se mancano URL Supabase, publishable key o service-role key.
+Il build Production deve fallire automaticamente se mancano URL Supabase, publishable key, origine HTTPS Production o service-role key.
 
 ## 8. Smoke del deployment Production protetto
 
@@ -184,7 +185,7 @@ I test automatici riducono il rischio ma non sostituiscono questo gate.
 Solo dopo i PASS precedenti:
 
 1. associare/verificare `immigratiimprenditori.it` sul progetto Production;
-2. impostare `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it`;
+2. confermare `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it`;
 3. verificare DNS/TLS;
 4. rimuovere la Deployment Protection destinata al collaudo;
 5. verificare canonical, hreflang, sitemap e robots sul dominio reale;
