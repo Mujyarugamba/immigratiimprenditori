@@ -9,7 +9,7 @@ function source(path: string) {
 test("mandatory proposal acknowledgement is not presented as optional GDPR consent", () => {
   const italian = source("src/app/contribuisci/page.tsx");
   assert.match(italian, /name="consent_contact"[^>]*required/);
-  assert.match(italian, /Prendo atto che nome, email/);
+  assert.match(italian, /Prendo atto che i recapiti indicati saranno trattati/);
   assert.match(italian, /href="\/privacy"/);
   assert.doesNotMatch(
     italian,
