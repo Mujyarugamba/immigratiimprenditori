@@ -96,7 +96,7 @@ export default function PrivacyPage() {
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li>Supabase, per database, autenticazione e servizi applicativi; il progetto attualmente collegato è configurato nella regione primaria UE <strong className="text-black">eu-west-3 (Parigi)</strong>;</li>
-            <li>Netlify, per hosting e deployment dell&apos;applicazione web;</li>
+            <li>Vercel, per hosting e deployment dell&apos;applicazione web in produzione; Netlify può essere mantenuto per ambienti tecnici di anteprima e collaudo non destinati alla pubblicazione;</li>
             <li>fornitori di dominio e posta elettronica utilizzati da AIPEL, inclusi Aruba e i servizi Google quando impiegati per la gestione delle comunicazioni;</li>
             <li>consulenti o soggetti istituzionali quando la comunicazione sia necessaria per obblighi di legge o per la tutela di diritti.</li>
           </ul>
