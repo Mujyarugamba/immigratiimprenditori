@@ -21,11 +21,12 @@ Nel ciclo corrente:
 
 ## Ultimo codice verificato
 
-Commit applicativo verificato: `5617d9a00ddab75e5d6b71ffba1e944ac7276904`.
+Commit applicativo verificato: `d76d892f81c930a0ebe89834ab3f97007d57204b`.
 
-- `Editorial v1 CI` run `32602163909`: **COMPLETED / SUCCESS**.
-- `Supabase local migration validation` run `32602163939`: tutti i gate DB/infra/app passano; il job conclude failure perché il browser mantiene intenzionalmente rosso il requisito editoriale **Storie reali**.
-- Browser nel laboratorio Supabase: **16 PASS / 1 FAIL**; unico failure = nessuna storia/intervista/testimonianza reale pubblicata.
+- `Editorial v1 CI` run `32619432154`: **COMPLETED / SUCCESS**.
+- `Supabase local migration validation` run `32619432133`: tutti i gate DB/infra/app passano; il job conclude failure esclusivamente perché il browser mantiene intenzionalmente rosso il requisito editoriale **Storie reali**.
+- Browser nel laboratorio Supabase: **18 PASS / 1 FAIL**; unico failure = nessuna storia/intervista/testimonianza reale pubblicata.
+- La matrice core multilingua **70/70** passa anche contro il vero stack Supabase locale.
 
 Le revisioni documentali successive non cambiano il codice verificato.
 
@@ -33,11 +34,13 @@ Le revisioni documentali successive non cambiano il codice verificato.
 
 | Gate | Stato | Evidenza / nota |
 | --- | --- | --- |
-| TypeScript | PASS | `Editorial v1 CI` run `32602163909` |
-| Unit / contract tests | PASS | 80/80 test |
-| Next.js build | PASS | build applicativa standard + build contro Supabase locale |
+| TypeScript | PASS | `Editorial v1 CI` run `32619432154` |
+| Unit / contract tests | PASS | inclusi gate profilo autore e contrasto WCAG |
+| Next.js build | PASS | build standard + build contro Supabase locale; 180 route |
 | HTTP smoke | PASS | route critiche + header di sicurezza |
-| Public browser smoke | PASS | homepage/shell, 7 lingue e reflow narrow viewport |
+| Public browser smoke | PASS | homepage/shell, lingue, responsive e navigazione core |
+| Matrice 7 lingue × 10 superfici | PASS | 70/70 risposte complete, `lang`, `dir`, H1 e link localizzati |
+| Internal-link integrity | PASS | verificato sul vero stack Supabase locale |
 | Responsive automatico | PASS | 320 / 390 / 768 px senza overflow sulle superfici core |
 | Slow-network core | PASS | homepage con latenza artificiale entro budget DOM/request |
 | Local DB cold-start | PASS | catena standalone ricostruita da database vuoto |
@@ -51,6 +54,7 @@ Le revisioni documentali successive non cambiano il codice verificato.
 | Open Data XLSX | PASS | endpoint XLSX valido e archivio verificato E2E |
 | Dependency install/audit | PASS | 0 vulnerabilità al gate configurato |
 | Supabase Auth deprecation guard | PASS | nessun `auth.role()` eseguibile nella catena verificata |
+| Contrast/focus automatico | PASS | testo piccolo >=4.5:1; focus >=3:1 su shell chiare/scure |
 
 ## Ambiente database non-production gratuito
 
@@ -89,7 +93,7 @@ Un branch hosted potrà essere rivalutato soltanto nell'ultimo pre-rilascio se s
 
 ## Dati e superfici go-live
 
-Il browser del laboratorio verifica prima del gate Storie che:
+Il browser/laboratorio verifica prima del gate Storie che:
 
 - `/osservatorio` risponde 2xx, rende la superficie reale ed espone almeno un indicatore navigabile;
 - `/atlante` risponde 2xx ed espone almeno un Paese evidence-backed navigabile;
@@ -98,7 +102,8 @@ Il browser del laboratorio verifica prima del gate Storie che:
 - le 11 rotte sono collegate all'evidenza Futurae/InfoCamere/Unioncamere preparata nel branch;
 - Open Data offre JSON/CSV/XLSX, con XLSX validato realmente;
 - analytics first-party aggrega senza cookie;
-- RTL arabo e navigazione mobile sono utilizzabili senza overflow sulle superfici core.
+- RTL arabo e navigazione mobile sono utilizzabili senza overflow sulle superfici core;
+- le 70 combinazioni core delle sette lingue restituiscono risposte complete e strutturalmente valide.
 
 ## Gate editoriali e di autorevolezza
 
@@ -110,11 +115,12 @@ Il browser del laboratorio verifica prima del gate Storie che:
 | Home editoriale v1 | TECHNICAL SHELL PASS / STORIES BLOCKED | la struttura è operativa, ma non viene dichiarata completa finché manca una storia reale |
 | Identità visiva | PASS / FINAL DEVICE QA PENDING | design applicato; browser reflow passa, resta QA umano device reale |
 | SEO internazionale | PASS — FOUNDATION | canonical/hreflang verificati sulle home localizzate; sitemap/noindex preview predisposti |
-| Sette lingue | CORE BROWSER PASS / COVERAGE PENDING | IT/EN/FR/ES/DE/AR/ZH shell e `lang`/`dir` passano; completare copertura editoriale prevista |
+| Sette lingue | READY — CORE 70/70 PASS | IT/EN/FR/ES/DE/AR/ZH × 10 superfici core verificate sul vero stack locale |
 | RTL arabo | PASS — CORE | `/ar`, `/ar/chi-siamo`, `/ar/esplora` senza overflow mobile |
-| Profili autore | FUNCTION E2E PASS / REAL DATA PENDING | pagina/listing/ORCID/JSON-LD passano con profilo effimero; cold-start = 0 profili pubblici reali |
-| Accessibilità | AUTOMATED CORE PASS / HUMAN WCAG QA PENDING | landmark/H1/alt/label/naming/skip-link/reflow passano; non equivale a certificazione WCAG completa |
+| Profili autore | BACK-OFFICE + GATE PASS / REAL DATA PENDING | gestione redazionale protetta da MFA AAL2; pubblicazione consentita solo con evidenza e contenuto pubblico collegato; cold-start = 0 profili pubblici reali |
+| Accessibilità | AUTOMATED CORE + CONTRAST PASS / HUMAN WCAG QA PENDING | struttura/reflow/contrasto/focus passano; non equivale a certificazione WCAG completa |
 | Correzioni/versioni | PREPARED / PROD NOT ACTIVATED | schema predisposto; pagina pubblica solo con record reali |
+| Controlli automatici | PASS | CI applicativo, DB/security, link integrity, multilingua e release source gates automatici |
 | Numero zero | **5/6 EVIDENZE / STORIES BLOCKER** | requisito Storie è l'unico failure del browser locale completo |
 
 ## Blocco editoriale reale: Storie
@@ -141,6 +147,29 @@ Gate:
 - `INTERVIEW_SHORTLIST = READY`
 - `OUTREACH_SENT = 0`
 - `NUMBER_ZERO_STORIES = BLOCKED_BY_REAL_CONTENT`
+
+## Profili autore reali
+
+Il back-office ora espone:
+
+- `/app/redazione/autori` per elenco e creazione privata;
+- `/app/redazione/autori/[id]` per verifica, modifica e attribuzioni;
+- validazione slug, URL e ORCID;
+- MFA AAL2 per tutte le scritture editoriali;
+- blocco della pubblicazione se mancano bio/evidenza minima;
+- blocco della pubblicazione se non esiste almeno un contenuto `ready + published + public` collegato.
+
+Il security smoke continua a restituire `anon_public_authors = 0`: il ramo **non introduce profili fittizi**. #36 resta quindi da rifinire con identità reali, non con dati di test persistenti.
+
+## Accessibilità automatizzata
+
+Oltre ai gate strutturali già presenti, il branch ora protegge anche i token critici di contrasto:
+
+- testo piccolo/stati secondari: rapporto minimo **4.5:1** su bianco;
+- focus visibile: rapporto minimo **3:1** sia su superficie chiara sia sulla shell navy;
+- reduced motion e reflow restano coperti.
+
+Questo riduce il rischio tecnico del #92 ma non sostituisce tastiera completa, screen reader, zoom, percezione contenuti e altri controlli umani WCAG 2.2 AA.
 
 ## Sostegno economico
 
@@ -185,31 +214,29 @@ La validazione locale **non equivale** ad attivazione sul database live.
 
 Riferimento: `docs/roadmap/ROADMAP-110-PRIORITIES.md`.
 
-- **READY: 28/33**
-- **DA RIFINIRE: 4/33**
+- **READY: 30/33**
+- **DA RIFINIRE: 2/33**
 - **BLOCCANTE — CONTENUTO REALE: 1/33 (#10 Storie d'impresa)**
 
-I quattro punti ancora da rifinire sono:
+I due punti ancora da rifinire sono:
 
-1. #30 — copertura completa delle sette lingue;
-2. #36 — popolamento di profili autore reali;
-3. #92 — QA completo WCAG 2.2 AA, inclusa verifica umana;
-4. #99 — chiusura pacchetto finale controlli automatici/release gate.
+1. #36 — popolamento e verifica di profili autore reali;
+2. #92 — QA umano completo WCAG 2.2 AA.
+
+#30 multilingua e #99 controlli automatici sono passati a READY sulla base dei gate verificati sopra.
 
 ## Blocchi reali prima della produzione
 
 1. **Numero zero — Storie:** acquisire, approvare e pubblicare almeno una storia/intervista/testimonianza reale.
-2. **Multilingua:** chiudere la copertura editoriale delle pagine pubbliche previste nelle sette lingue.
-3. **Autori:** inserire profili reali quando richiesti dai contenuti del numero zero.
-4. **Accessibilità:** completare QA umano WCAG 2.2 AA; il gate automatico è una baseline, non una certificazione.
-5. **Controlli/release:** chiudere link/external checks, Lighthouse/performance e quality gate finale.
-6. **Legal:** revisione finale Privacy / Cookie / Termini e dati amministrativi esposti.
-7. **Security pre-release:** CSP finale e verifica configurazione production.
-8. **Required checks:** `main` è protetto via ruleset, ma i required status checks vanno verificati separatamente prima di dichiararli attivi.
-9. **Migration produzione:** definire ordine/rollback e applicare solo con autorizzazione esplicita.
-10. **Production secrets/activation:** MFA Auth, backup schedulato, analytics e altre funzioni validate localmente devono essere configurate esplicitamente sul live.
-11. **Netlify final QA:** preview del commit candidato, controllo umano desktop/tablet/mobile e smoke finale.
-12. **Merge/deploy:** PR #9 resta draft; merge e go-live restano ultimi passi autorizzati separatamente.
+2. **Autori:** inserire profili reali quando richiesti dai contenuti del numero zero.
+3. **Accessibilità:** completare QA umano WCAG 2.2 AA; il gate automatico è una baseline forte, non una certificazione.
+4. **Legal:** revisione finale Privacy / Cookie / Termini e dati amministrativi esposti.
+5. **Security pre-release:** CSP finale e verifica configurazione production.
+6. **Required checks:** `main` è protetto via ruleset, ma i required status checks vanno verificati separatamente prima di dichiararli attivi.
+7. **Migration produzione:** definire ordine/rollback e applicare solo con autorizzazione esplicita.
+8. **Production secrets/activation:** MFA Auth, backup schedulato, analytics e altre funzioni validate localmente devono essere configurate esplicitamente sul live.
+9. **Netlify final QA:** preview del commit candidato, controllo umano desktop/tablet/mobile, performance e smoke finale.
+10. **Merge/deploy:** PR #9 resta draft; merge e go-live restano ultimi passi autorizzati separatamente.
 
 Social e pagamenti possono rimanere disabilitati senza bloccare il sito se non vengono promessi come funzioni attive.
 
@@ -217,6 +244,8 @@ Social e pagamenti possono rimanere disabilitati senza bloccare il sito se non v
 
 - `APPLICATION_CI = PASS`
 - `PUBLIC_BROWSER_RESPONSIVE = PASS`
+- `MULTILINGUAL_CORE_70_70 = PASS`
+- `INTERNAL_LINK_INTEGRITY = PASS`
 - `DB_LOCAL_NONPROD = PASS`
 - `DB_SECURITY = PASS`
 - `SOURCES_METHODOLOGY = PASS`
@@ -225,11 +254,14 @@ Social e pagamenti possono rimanere disabilitati senza bloccare il sito se non v
 - `PRIVACY_ANALYTICS_LOCAL = PASS`
 - `BACKUP_ARCHIVE_LOCAL = PASS`
 - `MFA_AAL2_LOCAL = PASS`
+- `AUTHOR_BACKOFFICE = PASS_LOCAL_CI`
+- `AUTHOR_REAL_PUBLIC_PROFILES = 0`
+- `WCAG_AUTOMATED_CONTRAST = PASS`
 - `MAIN_UNTOUCHED = PASS`
 - `PRODUCTION_DB_UNTOUCHED = PASS`
 - `PAID_SUPABASE_BRANCH = NOT_NEEDED_NOW`
-- `GO_LIVE_A_READY = 28/33`
+- `GO_LIVE_A_READY = 30/33`
 - `NUMBER_ZERO_STORIES = BLOCKER`
 - `PRODUCTION_RELEASE = BLOCKED_BY_EXPLICIT_FINAL_GATES`
 
-Il ramo non è più bloccato da errori di compilazione, database, responsive o infrastruttura di test. Il failure residuo del laboratorio è deliberatamente editoriale: **manca una storia reale**. Restano inoltre i quattro rifinimenti A e i gate amministrativi/production sopra elencati.
+Il ramo non è bloccato da errori di compilazione, database, multilingua, link integrity, responsive o infrastruttura di test. Il **solo failure automatico residuo** del laboratorio è deliberatamente editoriale: manca una storia reale. Restano inoltre due rifiniture A (#36 dati autore reali, #92 QA umano) e i gate amministrativi/production sopra elencati.
