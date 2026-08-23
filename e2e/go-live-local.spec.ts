@@ -33,7 +33,9 @@ test.describe("Go-live local surfaces", () => {
     ).toBeGreaterThan(0);
 
     await page.goto("/storie");
-    await expect(page.getByRole("link", { name: /Partecipa/i })).toBeVisible();
+    await expect(
+      page.getByRole("main").getByRole("link", { name: /Partecipa/i }).first(),
+    ).toBeVisible();
 
     // Pre-go-live may legitimately contain zero real stories: outreach starts only
     // after the site is online. If stories already exist, their public links must
