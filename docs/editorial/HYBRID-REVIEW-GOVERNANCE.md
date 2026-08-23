@@ -31,6 +31,8 @@ Per i `contents` la seconda revisione è obbligatoria quando il tipo è uno dei 
 
 Un contenuto ordinario può essere volontariamente elevato a 4-eyes tramite `force_secondary_review`.
 
+I contenuti ordinari con `primary_category_code = NULL` restano ordinari: il classificatore tratta esplicitamente l'assenza di categoria come **non sensibile**, salvo tipo sensibile o escalation manuale.
+
 ## Dati e correzioni
 
 Sono sempre soggetti a seconda approvazione prima della pubblicazione:
@@ -67,8 +69,25 @@ Il modello ibrido non introduce un doppio passaggio obbligatorio per notizie, gu
 - nessun bypass service-role;
 - versioning/audit quando attivo.
 
+## Verifica tecnica del candidato
+
+Il laboratorio CI locale prova con due account redattore effimeri distinti:
+
+- pubblicazione same-editor di contenuto ordinario: PASS;
+- pubblicazione sensibile senza approvazione: NEGATA;
+- self-approval: NEGATA;
+- approvazione del secondo redattore: PASS;
+- modifica dopo approvazione: vecchia approvazione STALE/NEGATA;
+- nuova review sul fingerprint aggiornato: PASS;
+- cleanup degli utenti e dei dati effimeri: PASS.
+
+Il primo test ha rilevato una semantica SQL a tre valori: `primary_category_code = NULL` rendeva il classificatore `NULL` e il trigger trattava il contenuto ordinario come sensibile. La correzione è stata registrata come forward-fix separata e il test completo è poi passato.
+
 ## Confine di rilascio
 
-La migration candidata è `20260822213000_hybrid_editorial_review_governance.sql`.
+Le migration candidate di questa decisione sono:
 
-La sua presenza nel branch e nel piano di rilascio **non autorizza** l'apply Production. Restano obbligatori restore drill, fresh migration-history read, autorizzazione esplicita, apply ordinato e smoke post-migration.
+1. `20260822213000_hybrid_editorial_review_governance.sql`;
+2. `20260822213100_fix_hybrid_null_category_classifier.sql` — forward-fix del classificatore `NULL`, scoperta dal test due-redattori.
+
+La loro presenza nel branch e nel piano di rilascio **non autorizza** l'apply Production. Restano obbligatori restore drill, fresh migration-history read, autorizzazione esplicita, apply ordinato e smoke post-migration.
