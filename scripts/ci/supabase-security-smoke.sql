@@ -84,6 +84,52 @@ begin
 end;
 $$;
 
+-- The Inbox audit trail is database-canonical and atomic. One state transition
+-- must produce exactly one activity row using the trigger JSON shape consumed by
+-- the redazione UI.
+do $$
+declare
+  v_inbox_id uuid;
+  v_activity_count integer;
+  v_changes jsonb;
+begin
+  insert into public.editorial_inbox_items (
+    source_kind,
+    item_kind,
+    title,
+    priority,
+    status
+  ) values (
+    'editorial_manual',
+    'other',
+    'CI inbox activity fixture',
+    'normal',
+    'new'
+  ) returning id into v_inbox_id;
+
+  update public.editorial_inbox_items
+  set status = 'to_review',
+      reviewed_at = now()
+  where id = v_inbox_id;
+
+  select count(*)::integer, max(changes)
+    into v_activity_count, v_changes
+  from public.editorial_inbox_activity
+  where inbox_item_id = v_inbox_id;
+
+  if v_activity_count <> 1 then
+    raise exception 'SECURITY_SMOKE_INBOX_ACTIVITY_COUNT_%', v_activity_count;
+  end if;
+
+  if v_changes #>> '{status,from}' is distinct from 'new'
+     or v_changes #>> '{status,to}' is distinct from 'to_review' then
+    raise exception 'SECURITY_SMOKE_INBOX_ACTIVITY_SHAPE_INVALID: %', v_changes;
+  end if;
+
+  delete from public.editorial_inbox_items where id = v_inbox_id;
+end;
+$$;
+
 -- Private editorial tables must remain behind RLS and must not grant anonymous
 -- table-level SELECT access. Historical content snapshots are additionally
 -- append-only: authenticated editors can SELECT/INSERT but cannot UPDATE/DELETE.
