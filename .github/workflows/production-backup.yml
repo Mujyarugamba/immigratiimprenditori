@@ -60,8 +60,18 @@ jobs:
           for file in "$dir/roles.sql" "$dir/schema.sql" "$dir/data.sql"; do
             test -s "$file" || { echo "Backup component empty: $file" >&2; exit 1; }
           done
-          grep -q 'CREATE TABLE.*public.contents' "$dir/schema.sql"
-          grep -q 'CREATE TABLE.*public.observatory_indicators' "$dir/schema.sql"
+          grep -Eq 'CREATE TABLE .*contents' "$dir/schema.sql" || {
+            echo "Backup preflight: public.contents DDL missing" >&2
+            exit 1
+          }
+          grep -Eq 'CREATE TABLE .*observatory_indicators' "$dir/schema.sql" || {
+            echo "Backup preflight: public.observatory_indicators DDL missing" >&2
+            exit 1
+          }
+          grep -Eq 'COPY .*languages' "$dir/data.sql" || {
+            echo "Backup preflight: public.languages data missing" >&2
+            exit 1
+          }
 
           tar -czf "$archive" "$dir"
           test -s "$archive"
