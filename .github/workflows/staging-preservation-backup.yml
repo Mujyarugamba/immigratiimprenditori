@@ -1,0 +1,76 @@
+name: Staging preservation backup
+
+on:
+  push:
+    branches:
+      - ops/production-restore-drill-20260823
+    paths:
+      - .github/workflows/staging-preservation-backup.yml
+
+permissions:
+  contents: read
+
+jobs:
+  backup-staging:
+    if: github.ref == 'refs/heads/ops/production-restore-drill-20260823'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+    steps:
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$STAGING_DB_URL"
+          test -n "$BACKUP_PASSPHRASE"
+          echo "STAGING_BACKUP_SECRET_PREFLIGHT = PASS"
+
+      - name: Create and validate logical staging dump
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          docker run --rm \
+            -e STAGING_DB_URL \
+            -v "$PWD/backup:/backup" \
+            postgres:17-alpine \
+            sh -lc '
+              set -eu
+              pg_dump "$STAGING_DB_URL" \
+                --format=custom \
+                --no-owner \
+                --no-privileges \
+                --file=/backup/staging-before-production-restore.dump
+              pg_restore --list /backup/staging-before-production-restore.dump >/dev/null
+            '
+          test -s backup/staging-before-production-restore.dump
+          echo "STAGING_LOGICAL_DUMP = PASS"
+          echo "STAGING_DUMP_INTEGRITY = PASS"
+
+      - name: Encrypt dump and remove plaintext
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -pass env:BACKUP_PASSPHRASE \
+            -in backup/staging-before-production-restore.dump \
+            -out backup/staging-before-production-restore.dump.enc
+          sha256sum backup/staging-before-production-restore.dump.enc \
+            > backup/staging-before-production-restore.dump.enc.sha256
+          rm -f backup/staging-before-production-restore.dump
+          test -s backup/staging-before-production-restore.dump.enc
+          test ! -e backup/staging-before-production-restore.dump
+          echo "STAGING_BACKUP_ENCRYPTION = PASS"
+          echo "STAGING_PLAINTEXT_CLEANUP = PASS"
+
+      - name: Upload encrypted preservation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-preservation-backup-${{ github.run_id }}
+          path: |
+            backup/staging-before-production-restore.dump.enc
+            backup/staging-before-production-restore.dump.enc.sha256
+          if-no-files-found: error
+          retention-days: 7
