@@ -32,7 +32,7 @@ export default function TerminiPage() {
             Sede: <strong className="text-black">Viale Molise n. 54, 20137 Milano (MI)</strong>. Codice fiscale: <strong className="text-black">97342380157</strong>. Partita IVA: <strong className="text-black">04222160964</strong>.
           </p>
           <p className="mt-3">
-            PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>. Contatto per informazioni sui termini: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
+            PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>. Contatto per informazioni sui termini: <a className="underline underline-offset-4" href="mailto:termini@aipel.it">termini@aipel.it</a>.
           </p>
         </section>
 
