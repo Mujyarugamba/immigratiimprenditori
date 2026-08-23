@@ -30,18 +30,32 @@ test("localized SEO URLs keep Italian unprefixed and expose seven-language alter
   assert.equal(alternates["x-default"], "https://immigratiimprenditori.it/fonti");
 });
 
-test("Netlify previews are globally noindex while production remains crawlable", () => {
-  const previousNetlify = process.env.NETLIFY;
-  const previousContext = process.env.CONTEXT;
+test("hosted previews are globally noindex while hosted production remains crawlable", () => {
+  const previous = {
+    NETLIFY: process.env.NETLIFY,
+    CONTEXT: process.env.CONTEXT,
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+  };
 
   try {
+    delete process.env.VERCEL;
+    delete process.env.VERCEL_ENV;
     process.env.NETLIFY = "true";
     process.env.CONTEXT = "deploy-preview";
     assert.deepEqual(robots(), {
       rules: [{ userAgent: "*", disallow: "/" }],
     });
 
-    process.env.CONTEXT = "production";
+    delete process.env.NETLIFY;
+    delete process.env.CONTEXT;
+    process.env.VERCEL = "1";
+    process.env.VERCEL_ENV = "preview";
+    assert.deepEqual(robots(), {
+      rules: [{ userAgent: "*", disallow: "/" }],
+    });
+
+    process.env.VERCEL_ENV = "production";
     const production = robots();
     assert.deepEqual(production.rules, [
       { userAgent: "*", allow: "/", disallow: ["/app/", "/accedi"] },
@@ -52,9 +66,9 @@ test("Netlify previews are globally noindex while production remains crawlable",
     ]);
     assert.equal(production.host, "https://immigratiimprenditori.it");
   } finally {
-    if (previousNetlify === undefined) delete process.env.NETLIFY;
-    else process.env.NETLIFY = previousNetlify;
-    if (previousContext === undefined) delete process.env.CONTEXT;
-    else process.env.CONTEXT = previousContext;
+    for (const [name, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
   }
 });
