@@ -9,6 +9,44 @@ const isHostedPreviewLikeContext =
 const isReadOnlyPreview =
   process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || isHostedPreviewLikeContext;
 
+const isNetlifyProductionContext =
+  process.env.NETLIFY === "true" && process.env.CONTEXT === "production";
+const isVercelProductionContext =
+  process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
+const isHostedProductionContext =
+  isNetlifyProductionContext || isVercelProductionContext;
+
+function validateHostedProductionEnvironment() {
+  if (!isHostedProductionContext) return;
+
+  const required = [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+  ] as const;
+  const missing = required.filter((name) => !process.env[name]?.trim());
+  if (missing.length) {
+    throw new Error(
+      `Production environment is missing required variables: ${missing.join(", ")}`,
+    );
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
+  try {
+    const parsed = new URL(supabaseUrl);
+    if (parsed.protocol !== "https:") {
+      throw new Error("Production Supabase URL must use HTTPS.");
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message === "Production Supabase URL must use HTTPS.") {
+      throw cause;
+    }
+    throw new Error("Production Supabase URL is not a valid absolute HTTPS URL.");
+  }
+}
+
+validateHostedProductionEnvironment();
+
 function configuredSupabaseConnectSources() {
   const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   if (!raw) return [];
