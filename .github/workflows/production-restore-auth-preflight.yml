@@ -6,6 +6,11 @@ on:
       - ops/production-restore-drill-20260823
     paths:
       - .github/workflows/production-restore-auth-preflight.yml
+  pull_request:
+    branches:
+      - feature/research-radar-ai-knowledge-20260822
+    paths:
+      - .github/workflows/production-restore-auth-preflight.yml
 
 permissions:
   contents: read
