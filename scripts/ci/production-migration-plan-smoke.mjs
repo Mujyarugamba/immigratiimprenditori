@@ -59,6 +59,50 @@ if (JSON.stringify(sortedCandidates) !== JSON.stringify(candidates)) {
   fail("candidateDelta must stay in chronological filename order");
 }
 
+// These migrations are release-critical security invariants. The general drift
+// check below prevents unclassified files, while this explicit set prevents a
+// future cleanup from deleting a critical file and its plan entry together.
+const requiredSecurityCandidates = [
+  "20260822172000_harden_content_publication_gate.sql",
+  "20260822183000_persistent_public_submission_rate_limits.sql",
+  "20260822184500_editorial_login_rate_limits.sql",
+  "20260822190000_enforce_privileged_mfa_aal2.sql",
+  "20260822210500_go_live_audit_analytics.sql",
+  "20260822211500_fix_public_rls_mfa_compatibility.sql",
+];
+for (const filename of requiredSecurityCandidates) {
+  if (!uniqueCandidates.has(filename)) {
+    fail(`release-critical security migration missing from candidateDelta: ${filename}`);
+  }
+}
+
+const publicationGateIndex = candidates.indexOf(
+  "20260822172000_harden_content_publication_gate.sql",
+);
+const publicRateLimitIndex = candidates.indexOf(
+  "20260822183000_persistent_public_submission_rate_limits.sql",
+);
+const loginRateLimitIndex = candidates.indexOf(
+  "20260822184500_editorial_login_rate_limits.sql",
+);
+const mfaIndex = candidates.indexOf(
+  "20260822190000_enforce_privileged_mfa_aal2.sql",
+);
+const auditIndex = candidates.indexOf("20260822210500_go_live_audit_analytics.sql");
+
+if (
+  !(
+    publicationGateIndex < publicRateLimitIndex &&
+    publicRateLimitIndex < loginRateLimitIndex &&
+    loginRateLimitIndex < mfaIndex &&
+    mfaIndex < auditIndex
+  )
+) {
+  fail(
+    "release-critical security migrations must remain ordered: publication gate -> public rate limit -> login rate limit -> MFA -> audit",
+  );
+}
+
 for (const filename of aliases) {
   if (uniqueCandidates.has(filename)) {
     fail(`migration cannot be both already-applied alias and candidate: ${filename}`);
@@ -126,6 +170,7 @@ console.log(
       canonicalBaselineFiles: baseline.length,
       alreadyAppliedAliases: aliases.length,
       candidateDelta: candidates.length,
+      requiredSecurityCandidates: requiredSecurityCandidates.length,
       postCutoffRepositoryFiles: postCutoffRepositoryFiles.length,
       destructiveSchemaOperations: 0,
     },
