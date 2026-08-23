@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 const PRODUCTION_ORIGIN = "https://immigratiimprenditori.it";
 
 const staticSeoPages = [
+  "/",
   "/chi-siamo",
   "/dati-e-fonti",
   "/glossario",
@@ -55,21 +56,6 @@ function assertSeoDocument(html: string, path: string) {
     expect(attribute(robots, "content") ?? "", `${path} public robots metadata`).not.toMatch(/noindex/i);
   }
 }
-
-test("homepage keeps the global SEO foundation", async ({ request }) => {
-  const response = await request.get("/", { timeout: 30_000 });
-  expect(response.ok()).toBeTruthy();
-  const html = await response.text();
-
-  const titles = html.match(/<title>[\s\S]*?<\/title>/gi) ?? [];
-  expect(titles).toHaveLength(1);
-  const descriptions = tags(html, "meta").filter(
-    (tag) => attribute(tag, "name")?.toLowerCase() === "description",
-  );
-  expect(descriptions).toHaveLength(1);
-  expect(html.match(/<h1(?:\s|>)/gi)?.length ?? 0).toBe(1);
-  expect(html.match(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>/gi)?.length ?? 0).toBeGreaterThanOrEqual(2);
-});
 
 test("static public core pages publish complete canonical SEO metadata", async ({ request }) => {
   for (const path of staticSeoPages) {

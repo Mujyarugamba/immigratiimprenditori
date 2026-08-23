@@ -115,16 +115,23 @@ file("scripts/ci/backup-archive-smoke.sh");
 file("e2e/go-live-local.spec.ts");
 file("e2e/public-readonly.spec.ts");
 file("e2e/public-smoke.spec.ts");
+file("e2e/seo-smoke.spec.ts");
+file("e2e/seo-real-stack.spec.ts");
 file(".github/dependabot.yml");
 file(".github/workflows/source-health-weekly.yml");
 
-// The placeholder public browser run must stay data-independent; the full
-// public/accessibility audit belongs to the real local Supabase laboratory.
-includes("playwright.public.config.ts", ['testMatch: "public-smoke.spec.ts"']);
+// The placeholder public browser run must stay data-independent while also
+// enforcing static SEO metadata. Data-backed SEO stays in the real Supabase laboratory.
+includes("playwright.public.config.ts", [
+  '"public-smoke.spec.ts"',
+  '"seo-smoke.spec.ts"',
+]);
 includes("playwright.auth-ci.config.ts", [
   '"editorial.spec.ts"',
   '"go-live-local.spec.ts"',
   '"public-readonly.spec.ts"',
+  '"seo-smoke.spec.ts"',
+  '"seo-real-stack.spec.ts"',
 ]);
 includes(".github/workflows/supabase-local-validation.yml", [
   '"e2e/public-readonly.spec.ts"',
@@ -186,6 +193,20 @@ includes("e2e/public-readonly.spec.ts", [
   "duplicate IDs",
   "unlabeled form controls",
   "offenders=",
+]);
+includes("e2e/seo-smoke.spec.ts", [
+  "complete canonical SEO metadata",
+  "meta description",
+  "canonical must target production",
+  "global structured data",
+]);
+includes("e2e/seo-real-stack.spec.ts", [
+  "data-backed public core pages publish complete canonical SEO metadata",
+  '"/osservatorio"',
+  '"/atlante"',
+  '"/storie"',
+  '"/eventi"',
+  '"/fonti"',
 ]);
 
 // Local go-live E2E must prove evidence-backed data surfaces and slow-network usability.
