@@ -33,9 +33,13 @@ function externalRequestOrigin(request: Request) {
 }
 
 export async function POST(request: Request) {
-  // Fail closed until the production environment explicitly enables collection.
-  // This keeps previews, local development and CI free of analytics writes.
-  if (process.env.PRIVACY_ANALYTICS_WRITE_ENABLED !== "true") {
+  // Fail closed until both halves of the analytics contract are explicitly
+  // enabled. Requiring both flags server-side prevents a partial/mistaken
+  // environment change from accepting analytics writes on its own.
+  if (
+    process.env.NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED !== "true" ||
+    process.env.PRIVACY_ANALYTICS_WRITE_ENABLED !== "true"
+  ) {
     return noContent();
   }
 
