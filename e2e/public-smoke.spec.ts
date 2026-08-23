@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const corePublicPages = ["/", "/contribuisci", "/sostieni"] as const;
 
@@ -11,6 +11,22 @@ const localizedHomes = [
   ["ar", "/ar", "rtl", "التنقل الرئيسي", "اللغة"],
   ["zh", "/zh", "ltr", "主导航", "语言"],
 ] as const;
+
+async function tabUntilFocused(page: Page, target: Locator, maxTabs = 12) {
+  for (let index = 0; index < maxTabs; index += 1) {
+    await page.keyboard.press("Tab");
+    if (await target.evaluate((element) => element === document.activeElement)) return;
+  }
+  throw new Error(`Keyboard focus did not reach target within ${maxTabs} Tab presses.`);
+}
+
+async function expectFocusedInViewport(target: Locator, viewportWidth: number) {
+  await expect(target).toBeFocused();
+  const box = await target.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(-1);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth + 1);
+}
 
 test("homepage renders the institutional editorial shell", async ({ page }) => {
   const response = await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -65,5 +81,25 @@ test("core static surfaces reflow on narrow viewports", async ({ page }) => {
         dimensions.clientWidth + 1,
       );
     }
+  }
+});
+
+test("narrow header navigation remains keyboard reachable and scrolls focus into view", async ({ page }) => {
+  const width = 320;
+  await page.setViewportSize({ width, height: 568 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const language = page.getByRole("combobox", { name: "Lingua" });
+  await tabUntilFocused(page, language);
+  await expectFocusedInViewport(language, width);
+
+  const primaryNavigation = page.getByRole("navigation", { name: "Navigazione principale" });
+  const primaryLinks = primaryNavigation.getByRole("link");
+  await expect(primaryLinks).toHaveCount(5);
+
+  for (let index = 0; index < 5; index += 1) {
+    const link = primaryLinks.nth(index);
+    await tabUntilFocused(page, link);
+    await expectFocusedInViewport(link, width);
   }
 });
