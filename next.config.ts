@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const isNetlifyPreviewLikeContext =
   process.env.NETLIFY === "true" && process.env.CONTEXT !== "production";
+const isReadOnlyPreview =
+  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || isNetlifyPreviewLikeContext;
 
 function configuredSupabaseConnectSources() {
   const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -19,7 +21,12 @@ function configuredSupabaseConnectSources() {
   }
 }
 
-const connectSources = ["'self'", ...configuredSupabaseConnectSources()].join(" ");
+// Preview browsers have no reason to talk directly to Supabase. Public data is
+// rendered server-side and every non-safe HTTP method is blocked by src/proxy.ts.
+// Keeping connect-src at self adds a second barrier against client-side writes.
+const connectSources = isReadOnlyPreview
+  ? "'self'"
+  : ["'self'", ...configuredSupabaseConnectSources()].join(" ");
 
 const contentSecurityPolicy = [
   "default-src 'self'",
