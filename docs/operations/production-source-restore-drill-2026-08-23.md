@@ -7,7 +7,7 @@ This record closes the runbook gate `PRODUCTION_SOURCE_RESTORE_DRILL` for the re
 ## Scope and authorization
 
 - Source: real Supabase Production project `immigratiimprenditori` (`hvfvfatlaspcpszgizhg`).
-- Target: existing Supabase non-Production project `immigratiimprenditori-staging`.
+- Target: existing Supabase non-Production project `immigratiimprenditori-staging` (`uhtolyagqbzphdaxoany`).
 - Operator path: GitHub Actions on isolated branch `ops/production-restore-drill-20260823`.
 - Database connections: Supabase Session pooler, PostgreSQL port 5432; credentials supplied only through repository Actions secrets and never printed.
 - User authorization: explicit authorization to overwrite staging with the Production copy was given in this work session.
@@ -117,6 +117,42 @@ Additional independent checks:
 Final marker:
 
 `PRODUCTION_TO_STAGING_READONLY_VERIFY = PASS`
+
+## Direct Supabase control-plane verification
+
+After the GitHub Actions postflight, an independent read-only verification was repeated directly through the Supabase management connection against both hosted projects.
+
+Exact migration-ledger parity:
+
+- Production count: `209`
+- staging count: `209`
+- Production/staging max version: `20260820160000`
+- Production/staging ledger signature: `9ef2974e95d55ecd2e9487b8cc9deb8b`
+
+Key data-set signatures were identical on both projects:
+
+| Dataset | Signature |
+| --- | --- |
+| `public.contents` | `2c251fb262445e82fa4204b7fa232799` |
+| `public.observatory_indicators` | `43b7b92c51f4a71a3db3ac89956726cc` |
+| `public.languages` | `44cc0fa80a23b95b08513035c990b88e` |
+| `public.accounts` | `36ee7c5d29f74943997b57b1d0369397` |
+| `public.profiles` | `be8ffbd3139a5ff1e6954f67e28d2ef9` |
+
+Structural/security signatures were also identical:
+
+| Surface | Signature |
+| --- | --- |
+| public columns | `a15d5f5a70fdb6b9f3d2818e85cad709` |
+| public RLS policies | `3e49def2d68367ce2a2421f5f438ccc4` |
+| public functions | `0a27068e457126f4b333a11bbee2180a` |
+| table RLS flags | `83488dd644dc06fa3d23bf0d29221c1c` |
+| public table grants | `beefc525170964518a539ba2a6e59f97` |
+| public routine grants | `0701953c81dd7d76ea5e2685e6a851c6` |
+
+The Supabase Security Advisor baseline is identical on Production and staging. Both currently report the same five warnings: the intentional public contribution `SECURITY DEFINER` RPC, the two authenticated self-service account RPCs plus the authenticated contribution RPC, and leaked-password protection disabled. No staging-only security warning was introduced by the restore.
+
+`auth.mfa_factors = 0` remains true on both hosted projects; this is expected at this gate and does not close the separate privileged Production MFA requirement.
 
 ## Repository / Production safety outcome
 
