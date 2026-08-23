@@ -1,23 +1,10 @@
 import type { NextConfig } from "next";
+import { resolveDeploymentEnvironment } from "./src/lib/deployment/environment";
 
-const isNetlifyPreviewLikeContext =
-  process.env.NETLIFY === "true" && process.env.CONTEXT !== "production";
-const isVercelPreviewLikeContext =
-  process.env.VERCEL === "1" && process.env.VERCEL_ENV === "preview";
-const isHostedPreviewLikeContext =
-  isNetlifyPreviewLikeContext || isVercelPreviewLikeContext;
-const isReadOnlyPreview =
-  process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || isHostedPreviewLikeContext;
-
-const isNetlifyProductionContext =
-  process.env.NETLIFY === "true" && process.env.CONTEXT === "production";
-const isVercelProductionContext =
-  process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
-const isHostedProductionContext =
-  isNetlifyProductionContext || isVercelProductionContext;
+const deployment = resolveDeploymentEnvironment(process.env);
 
 function validateHostedProductionEnvironment() {
-  if (!isHostedProductionContext) return;
+  if (!deployment.isHostedProduction) return;
 
   const required = [
     "NEXT_PUBLIC_SUPABASE_URL",
@@ -66,7 +53,7 @@ function configuredSupabaseConnectSources() {
 // Hosted previews have no reason to talk directly to Supabase. Public data is
 // rendered server-side and every non-safe HTTP method is blocked by src/proxy.ts.
 // Keeping connect-src at self adds a second barrier against client-side writes.
-const connectSources = isReadOnlyPreview
+const connectSources = deployment.isReadOnlyPreview
   ? "'self'"
   : ["'self'", ...configuredSupabaseConnectSources()].join(" ");
 
@@ -113,7 +100,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
-  ...(isHostedPreviewLikeContext
+  ...(deployment.isHostedPreview
     ? [
         {
           key: "X-Robots-Tag",
@@ -128,7 +115,7 @@ const nextConfig: NextConfig = {
   // Inline the computed preview mode so client-only code (analytics/forms) sees
   // the same fail-closed state as the server proxy on Netlify and Vercel.
   env: {
-    NEXT_PUBLIC_PREVIEW_READ_ONLY: isReadOnlyPreview ? "true" : "false",
+    NEXT_PUBLIC_PREVIEW_READ_ONLY: deployment.isReadOnlyPreview ? "true" : "false",
   },
   transpilePackages: ["@immigrati/product-config", "@immigrati/ui-foundation"],
   async headers() {
