@@ -371,7 +371,7 @@ test("institutional and language navigation remains reachable on mobile", async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  const institutionalNav = page.getByRole("navigation", { name: "Institutional links" });
+  const institutionalNav = page.getByRole("navigation", { name: "Navigazione istituzionale" });
   await expect(institutionalNav).toBeVisible();
   await expect(institutionalNav.getByRole("link", { name: "Cerca", exact: true })).toBeVisible();
   await expect(institutionalNav.getByRole("link", { name: "Chi siamo", exact: true })).toBeVisible();
