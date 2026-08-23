@@ -27,7 +27,9 @@ Commit applicativo verificato: `764ab1fac82aa61361fc00d7e7fbeb5a9cc1e94a`.
 - `Supabase local migration validation` run `32620148584`: tutti i gate DB/infra/app passano; il job conclude failure esclusivamente perché il browser mantiene intenzionalmente rosso il requisito editoriale **Storie reali**.
 - Browser nel laboratorio Supabase: **19 PASS / 1 FAIL**; unico failure = nessuna storia/intervista/testimonianza reale pubblicata.
 - La matrice core multilingua **70/70** passa anche contro il vero stack Supabase locale.
-- Il nuovo gate tastiera verifica focus visibile del salto al contenuto e trasferimento del focus a `#contenuto-principale`: **PASS**.
+- Il gate tastiera verifica focus visibile del salto al contenuto e trasferimento del focus a `#contenuto-principale`: **PASS**.
+
+Le revisioni documentali successive non modificano il codice applicativo già verificato.
 
 ## Gate tecnici verificati
 
