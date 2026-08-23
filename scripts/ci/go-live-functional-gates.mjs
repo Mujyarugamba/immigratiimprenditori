@@ -209,12 +209,16 @@ includes("e2e/seo-real-stack.spec.ts", [
   '"/fonti"',
 ]);
 
-// Local go-live E2E must prove evidence-backed data surfaces and slow-network usability.
+// Local pre-go-live E2E must prove evidence-backed data surfaces, a healthy
+// empty-capable Stories surface, and slow-network usability. Real story
+// acquisition is a post-go-live editorial objective because outreach starts
+// only after the site is online.
 includes("e2e/go-live-local.spec.ts", [
   "Atlas must expose at least one navigable evidence-backed country",
   "Routes must expose at least one navigable evidence-backed origin-destination route",
-  "Stories must expose at least one published navigable story, interview or testimony",
-  "published-types=",
+  "Pre-go-live may legitimately contain zero real stories",
+  "outreach starts only",
+  "must never be satisfied with fabricated content",
   "Open Data exposes a valid XLSX archive",
   "privacy analytics endpoint aggregates a page view without cookies",
   "simulated high-latency delivery",
