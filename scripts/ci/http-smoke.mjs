@@ -54,6 +54,14 @@ function expectHeaderAbsent(response, header) {
   if (actual !== null) fail(`${header}: expected header to be absent, received ${JSON.stringify(actual)}`);
 }
 
+function expectedSupabaseConnectDirective() {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co";
+  const httpUrl = new URL(raw);
+  const websocketUrl = new URL(httpUrl.origin);
+  websocketUrl.protocol = httpUrl.protocol === "https:" ? "wss:" : "ws:";
+  return `connect-src 'self' ${httpUrl.origin} ${websocketUrl.origin}`;
+}
+
 function expectCsp(response) {
   const csp = response.headers.get("content-security-policy") ?? "";
   const requiredDirectives = [
@@ -61,10 +69,11 @@ function expectCsp(response) {
     "base-uri 'self'",
     "object-src 'none'",
     "frame-ancestors 'none'",
+    "frame-src 'none'",
     "form-action 'self'",
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    expectedSupabaseConnectDirective(),
     "upgrade-insecure-requests",
   ];
 
@@ -72,6 +81,9 @@ function expectCsp(response) {
     if (!csp.includes(directive)) {
       fail(`content-security-policy: missing directive ${JSON.stringify(directive)} in ${JSON.stringify(csp)}`);
     }
+  }
+  if (csp.includes("https://*.supabase.co") || csp.includes("wss://*.supabase.co")) {
+    fail("content-security-policy: wildcard Supabase connect origins must not be enabled");
   }
   if (csp.includes("'unsafe-eval'")) {
     fail("content-security-policy: unsafe-eval must not be enabled");
@@ -175,7 +187,7 @@ async function main() {
       checks: [
         "home",
         "security response headers",
-        "strict CSP directives and unsafe-eval exclusion",
+        "strict CSP directives, exact Supabase connect origin and unsafe-eval exclusion",
         "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
