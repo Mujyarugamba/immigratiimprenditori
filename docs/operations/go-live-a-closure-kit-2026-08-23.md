@@ -22,12 +22,15 @@ Non autorizza merge, migration o deploy production.
 Prima del QA registrare:
 
 - commit candidato esatto;
-- URL deploy-preview Netlify corrispondente;
+- URL esatto del candidato Vercel usato per il controllo (Preview durante il QA pre-release; Production protetto durante lo smoke finale autorizzato);
+- eventuale URL Netlify deploy-preview solo come preview tecnico secondario, non come target Production;
 - data e persona che esegue il controllo;
 - browser/versione;
 - dispositivo reale o viewport utilizzato.
 
 I controlli automatici già esistenti restano prerequisiti e non vengono sostituiti: landmark, H1, alt/label, skip-link, contrasto core, focus, reflow, RTL, responsive, browser E2E e Lighthouse devono essere verdi sul candidato.
+
+La copertura automatica comprende inoltre reflow a 320/390/768 px, sette lingue e RTL arabo, navigazione stretta raggiungibile via `Tab` con focus portato nel viewport e associazione semantica dell'errore server al modulo di contribuzione. Questi controlli riducono il rischio ma **non sostituiscono** screen reader, zoom/reflow manuale, dispositivi reali e valutazione qualitativa del focus richiesti da #92.
 
 ### Matrice minima dispositivi
 
@@ -36,10 +39,10 @@ Eseguire almeno:
 | Classe | Configurazione minima | Superfici core |
 |---|---|---|
 | Desktop | 1440×900 o equivalente | Home, Osservatorio, Atlante, Rotte, Storie, Contribuisci, Accedi |
-| Laptop | 1366×768 o equivalente | Home, menu, ricerca, tabelle, moduli |
+| Laptop | 1366×768 o equivalente | Home, navigazione, ricerca, tabelle, moduli |
 | Tablet | 768×1024 reale o equivalente | Home, navigazione, Osservatorio, Contribuisci |
-| Mobile | 390×844 reale o equivalente | Home, menu, lingua, Storie, Contribuisci |
-| Mobile stretto | 320×568 o equivalente | Home, navigazione, contenuti lunghi, moduli |
+| Mobile | 390×844 reale o equivalente | Home, navigazione responsive, lingua, Storie, Contribuisci |
+| Mobile stretto | 320×568 o equivalente | Home, navigazione responsive, contenuti lunghi, moduli |
 
 Quando possibile includere almeno un dispositivo fisico iOS/Safari e uno Android/Chrome. Un viewport emulato non va registrato come dispositivo fisico.
 
@@ -52,10 +55,12 @@ Su Home, ricerca, Contribuisci e Accedi verificare senza mouse:
 3. ordine del focus coerente con l'ordine visivo e logico;
 4. nessun elemento interattivo irraggiungibile;
 5. nessun focus intrappolato;
-6. focus sempre visibile su link, pulsanti, campi e menu;
-7. menu mobile e selettore lingua apribili/chiudibili da tastiera;
-8. messaggi di errore dei form comprensibili e associati al campo;
+6. focus sempre visibile su link, pulsanti, campi, navigazione e selettori;
+7. navigazione responsive e selettore lingua raggiungibili e utilizzabili da tastiera, con il controllo focalizzato portato in vista anche su 320 px;
+8. messaggi di errore dei form comprensibili e associati semanticamente al campo o al modulo pertinente;
 9. nessuna funzione richiede hover o gesto puntatore esclusivo.
+
+Il design corrente non usa un menu hamburger: il controllo mobile riguarda quindi la navigazione responsive/scrollabile effettiva, non un componente inesistente.
 
 Esito richiesto: **PASS senza eccezioni bloccanti**.
 
@@ -117,14 +122,15 @@ Verificare manualmente:
 - area contributor: navigabilità base tastiera;
 - area redazione: MFA e operazioni privilegiate senza dipendere dal mouse.
 
-Non usare identità production reali durante il QA del preview se non esplicitamente autorizzato.
+Non usare identità production reali durante il QA del Preview se non esplicitamente autorizzato.
 
 ### Registro esito #92
 
 Il gate può essere marcato chiuso solo con un record compilato:
 
 - commit:
-- deploy-preview:
+- URL candidato Vercel:
+- eventuale preview secondario:
 - data:
 - esecutore:
 - desktop PASS/FAIL:
@@ -231,18 +237,19 @@ Questi nomi restano solo shortlist interna. Nessuna dichiarazione va attribuita 
 
 ### Prima del go-live
 
-1. completare QA umano #92 sul candidato Netlify;
-2. chiudere i gate tecnici/amministrativi esterni: legal, governance review, backup/restore, migration production autorizzate, required checks e QA preview finale;
+1. completare QA umano #92 sul candidato Vercel;
+2. chiudere i gate tecnici/amministrativi esterni: legal, governance review, backup/restore, migration production autorizzate, required checks e QA finale del candidato;
 3. merge e deploy soltanto con autorizzazione esplicita;
-4. smoke test live.
+4. eseguire smoke sul Production Vercel protetto e, dopo i PASS, aprire il dominio pubblico;
+5. eseguire il live smoke sul dominio reale.
 
 ### Dopo il go-live
 
-5. iniziare i primi contatti esterni;
-6. acquisire una storia/intervista/testimonianza reale;
-7. fact-check + review + consenso;
-8. pubblicare il primo contenuto Storie;
-9. eseguire il gate editoriale post-go-live e verificare la navigazione pubblica.
+6. iniziare i primi contatti esterni;
+7. acquisire una storia/intervista/testimonianza reale;
+8. fact-check + review + consenso;
+9. pubblicare il primo contenuto Storie;
+10. eseguire il gate editoriale post-go-live e verificare la navigazione pubblica.
 
 Finché #92 e i gate esterni pre-release non sono chiusi:
 
