@@ -13,9 +13,16 @@ function required(name) {
   return value;
 }
 
+function normalizedHostname(url) {
+  return url.hostname.toLowerCase().replace(/^\[/, "").replace(/\]$/, "");
+}
+
 function isPrivateIPv4(address) {
   const octets = address.split(".").map(Number);
-  if (octets.length !== 4 || octets.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) {
+  if (
+    octets.length !== 4 ||
+    octets.some((value) => !Number.isInteger(value) || value < 0 || value > 255)
+  ) {
     return true;
   }
   const [a, b] = octets;
@@ -34,7 +41,7 @@ function isPrivateIPv4(address) {
 }
 
 function isPrivateAddress(address) {
-  const normalized = address.toLowerCase().split("%")[0];
+  const normalized = address.toLowerCase().split("%")[0].replace(/^\[/, "").replace(/\]$/, "");
   const family = isIP(normalized);
   if (family === 4) return isPrivateIPv4(normalized);
   if (family !== 6) return true;
@@ -44,13 +51,12 @@ function isPrivateAddress(address) {
     normalized === "::1" ||
     normalized.startsWith("fc") ||
     normalized.startsWith("fd") ||
-    /^fe[89ab]/.test(normalized)
+    /^fe[89ab]/.test(normalized) ||
+    normalized.startsWith("2001:db8:") ||
+    normalized.startsWith("::ffff:")
   ) {
     return true;
   }
-
-  const mapped = normalized.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return isPrivateIPv4(mapped[1]);
 
   return false;
 }
@@ -60,7 +66,7 @@ function parsePublicHttpUrl(raw) {
     const url = new URL(raw);
     if (!["http:", "https:"].includes(url.protocol)) return null;
     if (url.username || url.password) return null;
-    const host = url.hostname.toLowerCase();
+    const host = normalizedHostname(url);
     if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) {
       return null;
     }
@@ -72,7 +78,7 @@ function parsePublicHttpUrl(raw) {
 }
 
 async function assertPublicDestination(url) {
-  const host = url.hostname;
+  const host = normalizedHostname(url);
   if (isIP(host)) {
     if (isPrivateAddress(host)) throw new Error("private destination blocked");
     return;
@@ -224,11 +230,13 @@ function selfTest() {
   assert.equal(parsePublicHttpUrl("http://10.0.0.1/data"), null);
   assert.equal(parsePublicHttpUrl("http://169.254.169.254/latest/meta-data"), null);
   assert.equal(parsePublicHttpUrl("http://[::1]/admin"), null);
+  assert.equal(parsePublicHttpUrl("http://[::ffff:7f00:1]/admin"), null);
   assert.equal(parsePublicHttpUrl("file:///etc/passwd"), null);
   assert.equal(parsePublicHttpUrl("https://user:pass@example.com/private"), null);
   assert.equal(isPrivateAddress("192.168.1.1"), true);
   assert.equal(isPrivateAddress("8.8.8.8"), false);
   assert.equal(isPrivateAddress("fc00::1"), true);
+  assert.equal(isPrivateAddress("2001:db8::1"), true);
   assert.equal(isPrivateAddress("2001:4860:4860::8888"), false);
   console.log("SOURCE_HEALTH_SELF_TEST = PASS");
 }
