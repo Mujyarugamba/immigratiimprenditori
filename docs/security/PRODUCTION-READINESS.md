@@ -55,7 +55,7 @@ Prima del go-live è vietato:
 Dopo sito online + live smoke PASS può iniziare l'acquisizione delle prime storie reali.
 
 ### EDIT-03 — Review governance
-**DECISIONE APPROVATA / IMPLEMENTAZIONE CANDIDATA**
+**DECISIONE APPROVATA / IMPLEMENTAZIONE CANDIDATA E VALIDATA NEL LABORATORIO**
 
 Il 23/08/2026 è stato scelto il modello **ibrido**:
 
@@ -68,8 +68,12 @@ Il 23/08/2026 è stato scelto il modello **ibrido**:
 
 L'approvazione è legata al fingerprint dello stato revisionato: una modifica sostanziale rende inutilizzabile una precedente approvazione. Richiedente e approvatore non possono coincidere.
 
+Il test con due redattori effimeri distinti è PASS dopo una forward-fix esplicita della semantica `NULL` del classificatore delle categorie. Sono provati: same-editor ordinario, blocco sensibile senza review, self-approval negata, approvazione del secondo redattore, approvazione stale negata dopo modifica, nuova review valida e cleanup effimero.
+
 Specifica: `docs/editorial/HYBRID-REVIEW-GOVERNANCE.md`.
-Migration candidata: `20260822213000_hybrid_editorial_review_governance.sql`.
+Migration candidate:
+- `20260822213000_hybrid_editorial_review_governance.sql`;
+- `20260822213100_fix_hybrid_null_category_classifier.sql`.
 
 Questa decisione **non autorizza** l'apply Production.
 
@@ -133,9 +137,9 @@ Contributor, editor e amministratore sono separati; auto-elevazione negata nel l
 TOTP/AAL2 è validato nel laboratorio. La lettura Production del 23/08/2026 mostra 1 assegnazione attiva `amministratore_applicativo` e 0 fattori in `auth.mfa_factors`: l'enrollment privilegiato reale resta PENDING.
 
 ### SEC-RLS-01 — RLS e publication gate
-**PASS LABORATORIO PRECEDENTE / CURRENT CANDIDATE RECHECK IN CI**
+**PASS LABORATORIO SUL CANDIDATO GOVERNANCE**
 
-RLS, publication gate, rate-limit persistenti, audit e governance ibrida fanno parte del candidato. Nessuna nuova applicazione Production è implicata da questo documento.
+Cold-start, PostgreSQL lint, publication/RLS smoke, governance ibrida con due redattori, rate-limit e go-live DB smoke sono PASS sul candidato che include la forward-fix del classificatore `NULL`. Nessuna nuova applicazione Production è implicata da questo documento.
 
 ### SEC-MIGRATION-01 — Apply Production
 **NON AUTORIZZATO**
@@ -149,7 +153,7 @@ Prima dell'apply servono ancora:
 5. apply ordinato del solo set candidato;
 6. smoke Security/RLS/rate-limit/governance dopo apply.
 
-La lettura hosted più recente conferma ancora cutoff `20260820160000`; il piano candidato contiene ora **23 migration** e nessuna è stata applicata in Production.
+La lettura hosted più recente conferma ancora cutoff `20260820160000`; il piano candidato contiene ora **24 migration** e nessuna è stata applicata in Production.
 
 ---
 
@@ -160,7 +164,7 @@ La lettura hosted più recente conferma ancora cutoff `20260820160000`; il piano
 
 Il workflow e le verifiche di archivio sono preparati, ma il gate di release richiede backup Production reale + restore drill non-production riuscito.
 
-Il restore drill resta PENDING dopo due tentativi locali terminati sul setting Supabase-managed `log_min_messages`; non viene aggirato né dichiarato PASS.
+Il restore drill resta PENDING sul setting Supabase-managed `log_min_messages`; non viene aggirato né dichiarato PASS.
 
 ---
 
@@ -186,7 +190,7 @@ La revisione professionale deve ancora validare formulazioni e perimetro giuridi
 ## 8. Accessibilità e responsive
 
 ### UI-A11Y-01 — Automazione
-**PASS SUL CURRENT CANDIDATE PRECEDENTE / CURRENT HEAD IN CI**
+**PASS SUL CANDIDATO PRECEDENTE / HEAD FINALE DA CONFERMARE IN CI**
 
 I test coprono reflow 320/390/768, text-spacing WCAG a 320 px, target-size minimo, navigazione tastiera, error association e browser E2E. La verifica umana/device resta distinta e PENDING.
 
@@ -201,8 +205,8 @@ Restano da chiudere prima del go-live:
 3. revisione legale professionale finale;
 4. enrollment/verifica MFA reale dell'account privilegiato Production;
 5. fresh migration-history read immediatamente prima di un eventuale apply;
-6. autorizzazione esplicita all'apply delle 23 migration candidate;
-7. smoke Production post-migration, incluso il nuovo gate 4-eyes;
+6. autorizzazione esplicita all'apply delle **24 migration candidate**;
+7. smoke Production post-migration, incluso il gate 4-eyes;
 8. governance required checks di `main`;
 9. autorizzazione esplicita a merge/deploy Production;
 10. protected Production smoke Vercel;
