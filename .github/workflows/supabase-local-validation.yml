@@ -23,6 +23,10 @@ on:
       - "scripts/ci/go-live-db-smoke.sql"
       - "scripts/ci/backup-archive-smoke.sh"
       - "scripts/ci/auth-integration-smoke.mjs"
+      - "scripts/ci/http-smoke.mjs"
+      - "next.config.ts"
+      - "netlify.toml"
+      - "src/proxy.ts"
       - "src/lib/auth/**"
       - "src/lib/supabase/**"
       - "src/lib/export/**"
@@ -234,6 +238,9 @@ jobs:
           NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED="true" \
           PRIVACY_ANALYTICS_WRITE_ENABLED="true" \
           npm run build
+
+      - name: Non-preview HTTP/security smoke
+        run: npm run test:smoke
 
       - name: Authenticated browser E2E, go-live surfaces and login throttling
         run: npx playwright test --config=playwright.auth-ci.config.ts
