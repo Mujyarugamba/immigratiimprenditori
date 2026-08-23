@@ -40,6 +40,9 @@ jobs:
       - name: Go-live functional source gates
         run: node scripts/ci/go-live-functional-gates.mjs
 
+      - name: Privacy runtime tracker/embed guard
+        run: node scripts/ci/privacy-runtime-guard.mjs
+
       - name: Production dependency vulnerability gate
         run: npm audit --omit=dev --audit-level=high
 
