@@ -17,11 +17,13 @@ export type InstitutionalProfile = {
 export const INSTITUTIONAL_PROFILE: InstitutionalProfile = {
   projectName: "Immigrati Imprenditori",
   promoterShortName: "AIPEL",
-  promoterLegalName: null,
+  promoterLegalName:
+    "Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia",
   president: "Ing. Augustin Mujyarugamba",
   editorialDirector: "Ing. Augustin Mujyarugamba",
-  registeredOffice: null,
-  administrativeDisclosure: null,
+  registeredOffice: "Viale Molise n. 54, 20137 Milano (MI)",
+  administrativeDisclosure:
+    "Codice fiscale 97342380157 · Partita IVA 04222160964",
   contactEmail: "info@immigratiimprenditori.it",
 };
 

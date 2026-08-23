@@ -28,13 +28,13 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-2xl font-semibold text-black">1. Titolare del trattamento</h2>
           <p className="mt-4">
-            Il titolare del trattamento è <strong className="text-black">AIPEL</strong>, ente promotore del progetto ImmigratiImprenditori.it.
+            Il titolare del trattamento è <strong className="text-black">Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)</strong>, ente promotore del progetto ImmigratiImprenditori.it.
           </p>
           <p className="mt-3">
-            Codice fiscale: <strong className="text-black">97342380157</strong>. PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>.
+            Sede: <strong className="text-black">Viale Molise n. 54, 20137 Milano (MI)</strong>. Codice fiscale: <strong className="text-black">97342380157</strong>. Partita IVA: <strong className="text-black">04222160964</strong>.
           </p>
           <p className="mt-3">
-            Contatto per informazioni e richieste privacy: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
+            PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>. Contatto per informazioni e richieste privacy: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
           </p>
         </section>
 
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
             utilizzati rientrano, in particolare:
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-6">
-            <li>Supabase, per database, autenticazione e servizi applicativi;</li>
+            <li>Supabase, per database, autenticazione e servizi applicativi; il progetto attualmente collegato è configurato nella regione primaria UE <strong className="text-black">eu-west-3 (Parigi)</strong>;</li>
             <li>Netlify, per hosting e deployment dell&apos;applicazione web;</li>
             <li>fornitori di dominio e posta elettronica utilizzati da AIPEL, inclusi Aruba e i servizi Google quando impiegati per la gestione delle comunicazioni;</li>
             <li>consulenti o soggetti istituzionali quando la comunicazione sia necessaria per obblighi di legge o per la tutela di diritti.</li>
@@ -106,9 +106,7 @@ export default function PrivacyPage() {
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">6. Trasferimenti internazionali</h2>
           <p className="mt-4">
-            Ove un fornitore o un suo sub-responsabile comporti un trattamento fuori dallo Spazio
-            Economico Europeo, il trasferimento viene gestito mediante gli strumenti previsti dal
-            GDPR, come decisioni di adeguatezza o clausole contrattuali standard, quando applicabili.
+            La regione primaria del progetto Supabase determina la localizzazione dei dati primari del progetto, ma alcuni fornitori o loro sub-responsabili possono comportare trattamenti fuori dallo Spazio Economico Europeo. In tali casi i trasferimenti vengono gestiti mediante gli strumenti previsti dal GDPR, come decisioni di adeguatezza o clausole contrattuali standard, quando applicabili.
           </p>
         </section>
 
@@ -124,7 +122,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">8. Conferimento dei dati</h2>
+          <h2 className="text-2xl font-semibold text-black">8. Conferimento dei dati e maggiore età</h2>
           <p className="mt-4">
             Per inviare una proposta sono necessari il tipo di proposta, il testo, il nome e un indirizzo email valido.
             Il modulo richiede inoltre la presa d&apos;atto dell&apos;informativa relativa alla gestione e all&apos;eventuale
@@ -134,6 +132,9 @@ export default function PrivacyPage() {
             Titolo, telefono, organizzazione, contesto geografico e link sono facoltativi, salvo che diventino necessari
             nel caso concreto per verificare il materiale. L&apos;autorizzazione alla possibile pubblicazione è facoltativa e
             distinta dalla presa d&apos;atto necessaria per l&apos;invio.
+          </p>
+          <p className="mt-3">
+            L&apos;invio di proposte e l&apos;attivazione di account riservati sono destinati a persone che abbiano compiuto <strong className="text-black">18 anni</strong>.
           </p>
         </section>
 

@@ -11,7 +11,7 @@ export default function TerminiPage() {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Documenti legali · aggiornamento 21 agosto 2026
+          Documenti legali · aggiornamento 23 agosto 2026
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
           Termini di utilizzo
@@ -26,13 +26,13 @@ export default function TerminiPage() {
         <section>
           <h2 className="text-2xl font-semibold text-black">1. Titolare del progetto</h2>
           <p className="mt-4">
-            ImmigratiImprenditori.it è un progetto promosso da AIPEL.
+            ImmigratiImprenditori.it è un progetto promosso da <strong className="text-black">Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)</strong>.
           </p>
           <p className="mt-3">
-            Codice fiscale: <strong className="text-black">97342380157</strong>. PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>.
+            Sede: <strong className="text-black">Viale Molise n. 54, 20137 Milano (MI)</strong>. Codice fiscale: <strong className="text-black">97342380157</strong>. Partita IVA: <strong className="text-black">04222160964</strong>.
           </p>
           <p className="mt-3">
-            Contatto per informazioni sui termini: <a className="underline underline-offset-4" href="mailto:termini@aipel.it">termini@aipel.it</a>.
+            PEC: <a className="underline underline-offset-4" href="mailto:direzione@pec.aipel.it">direzione@pec.aipel.it</a>. Contatto per informazioni sui termini: <a className="underline underline-offset-4" href="mailto:termini@aipel.it">termini@aipel.it</a>.
           </p>
         </section>
 
@@ -50,11 +50,14 @@ export default function TerminiPage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">3. Consultazione del sito</h2>
+          <h2 className="text-2xl font-semibold text-black">3. Consultazione del sito e maggiore età</h2>
           <p className="mt-4">
             La consultazione dei contenuti pubblici non richiede un account. L&apos;utente si impegna
             a non utilizzare il sito per attività illecite, per compromettere sicurezza e
             disponibilità del servizio o per accedere senza autorizzazione ad aree, dati o account.
+          </p>
+          <p className="mt-3">
+            L&apos;invio di proposte e l&apos;attivazione di account riservati sono destinati a persone che abbiano compiuto <strong className="text-black">18 anni</strong>.
           </p>
         </section>
 
@@ -164,10 +167,12 @@ export default function TerminiPage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">13. Legge applicabile</h2>
+          <h2 className="text-2xl font-semibold text-black">13. Legge applicabile e foro competente</h2>
           <p className="mt-4">
-            I presenti termini sono regolati dalla legge italiana. Restano fermi eventuali diritti
-            inderogabili e criteri di competenza territoriale previsti dalla normativa applicabile.
+            I presenti termini sono regolati dalla <strong className="text-black">legge italiana</strong>. Per gli utenti che agiscono come consumatori restano fermi il foro del consumatore e ogni altra tutela inderogabile prevista dalla normativa applicabile.
+          </p>
+          <p className="mt-3">
+            Per gli utenti che agiscono nell&apos;ambito della propria attività professionale, imprenditoriale o istituzionale, e salvo norme inderogabili diverse, è competente in via esclusiva il <strong className="text-black">Foro di Milano</strong>.
           </p>
         </section>
 

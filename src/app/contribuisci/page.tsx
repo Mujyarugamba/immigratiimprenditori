@@ -195,7 +195,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 <label className="flex items-start gap-3">
                   <input name="consent_contact" type="checkbox" required className="mt-1 size-4" />
                   <span>
-                    Prendo atto che nome, email e gli eventuali altri recapiti indicati saranno trattati dalla redazione per ricevere, valutare e, se necessario, approfondire questa proposta. Ho letto la {" "}
+                    Prendo atto che i recapiti indicati saranno trattati dalla redazione per ricevere, valutare e, se necessario, approfondire questa proposta. Ho letto la {" "}
                     <Link href="/privacy" className="font-semibold text-black underline underline-offset-4">Privacy Policy</Link>.
                     {" "}<strong className="text-black">Obbligatorio per inviare la proposta.</strong>
                   </span>
@@ -214,7 +214,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
                 Invia alla redazione
               </button>
               <p className="mt-4 max-w-2xl text-xs leading-5 text-neutral-500">
-                Non è necessario registrarsi. Chi collabora con continuità può richiedere un account contributore dedicato.
+                L&apos;invio di proposte è riservato a persone che hanno compiuto 18 anni. Non è necessario registrarsi. Chi collabora con continuità può richiedere un account contributore dedicato.
               </p>
             </div>
           </form>
