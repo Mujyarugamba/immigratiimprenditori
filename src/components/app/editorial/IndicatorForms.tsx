@@ -3,12 +3,9 @@
 import { useActionState } from "react";
 import { FormField } from "@/components/forms/FormField";
 import { Button } from "@/components/ui/Button";
-import { EditorialLifecycleButtons } from "@/components/app/editorial/EditorialLifecycleButtons";
 import {
   createIndicatorAction,
-  publishIndicatorAction,
   updateIndicatorAction,
-  withdrawIndicatorAction,
   type FormActionState,
 } from "@/lib/editorial/actions";
 import type { ObservatoryIndicator } from "@/lib/data/editorial/observatory";
@@ -43,15 +40,35 @@ export function IndicatorCreateForm() {
 
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
-      <FormField label="Codice" name="code" hint="Lascia vuoto per autogenerare" disabled={pending} />
+      <FormField
+        label="Codice"
+        name="code"
+        hint="Lascia vuoto per autogenerare"
+        disabled={pending}
+      />
       <FormField label="Slug" name="slug" disabled={pending} />
       <FormField label="Titolo" name="title" required disabled={pending} />
-      <FormField label="Descrizione" name="description" required disabled={pending} />
+      <FormField
+        label="Descrizione"
+        name="description"
+        required
+        disabled={pending}
+      />
       <FormField label="Scopo" name="purpose_text" required disabled={pending} />
-      <FormField label="Metodologia" name="methodology_summary" required disabled={pending} />
+      <FormField
+        label="Metodologia"
+        name="methodology_summary"
+        required
+        disabled={pending}
+      />
       <label className="text-ink flex flex-col gap-1 text-sm">
         <span className="font-medium">Natura valore</span>
-        <select name="value_nature" className={selectClass} defaultValue="count" disabled={pending}>
+        <select
+          name="value_nature"
+          className={selectClass}
+          defaultValue="count"
+          disabled={pending}
+        >
           {NATURE_OPTIONS.map((n) => (
             <option key={n.value} value={n.value}>
               {label(OBSERVATORY_VALUE_NATURE_LABELS, n.value)}
@@ -61,7 +78,12 @@ export function IndicatorCreateForm() {
       </label>
       <label className="text-ink flex flex-col gap-1 text-sm">
         <span className="font-medium">Unità</span>
-        <select name="unit_code" className={selectClass} defaultValue="units" disabled={pending}>
+        <select
+          name="unit_code"
+          className={selectClass}
+          defaultValue="units"
+          disabled={pending}
+        >
           {Object.keys(OBSERVATORY_UNIT_LABELS).map((code) => (
             <option key={code} value={code}>
               {label(OBSERVATORY_UNIT_LABELS, code)}
@@ -71,7 +93,12 @@ export function IndicatorCreateForm() {
       </label>
       <label className="text-ink flex flex-col gap-1 text-sm">
         <span className="font-medium">Periodicità</span>
-        <select name="periodicity" className={selectClass} defaultValue="annual" disabled={pending}>
+        <select
+          name="periodicity"
+          className={selectClass}
+          defaultValue="annual"
+          disabled={pending}
+        >
           {Object.keys(OBSERVATORY_PERIODICITY_LABELS).map((code) => (
             <option key={code} value={code}>
               {label(OBSERVATORY_PERIODICITY_LABELS, code)}
@@ -82,83 +109,140 @@ export function IndicatorCreateForm() {
       {state.message && !state.ok ? (
         <p className="text-accent-dark text-sm">{state.message}</p>
       ) : null}
-      <Button type="submit" disabled={pending}>Crea indicatore</Button>
+      <Button type="submit" disabled={pending}>
+        Crea indicatore
+      </Button>
     </form>
   );
 }
 
-export function IndicatorEditForm({ indicator }: { indicator: ObservatoryIndicator }) {
+export function IndicatorEditForm({
+  indicator,
+}: {
+  indicator: ObservatoryIndicator;
+}) {
   const [state, action, pending] = useActionState(updateIndicatorAction, initial);
 
   return (
-    <>
-      <form action={action} className="mt-6 flex flex-col gap-4">
-        <input type="hidden" name="id" value={indicator.id} />
-        <FormField label="Codice" name="code" defaultValue={indicator.code} required disabled={pending} />
-        <FormField label="Slug" name="slug" defaultValue={indicator.slug} required disabled={pending} />
-        <FormField label="Titolo" name="title" defaultValue={indicator.title} required disabled={pending} />
-        <FormField label="Descrizione" name="description" defaultValue={indicator.description} required disabled={pending} />
-        <FormField label="Scopo" name="purpose_text" defaultValue={indicator.purpose_text} required disabled={pending} />
-        <FormField label="Metodologia" name="methodology_summary" defaultValue={indicator.methodology_summary} required disabled={pending} />
-        <label className="text-ink flex flex-col gap-1 text-sm">
-          <span className="font-medium">Natura / Unità / Periodicità</span>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <select name="value_nature" className={selectClass} defaultValue={indicator.value_nature} disabled={pending}>
-              {NATURE_OPTIONS.map((n) => (
-                <option key={n.value} value={n.value}>
-                  {label(OBSERVATORY_VALUE_NATURE_LABELS, n.value)}
-                </option>
-              ))}
-            </select>
-            <select name="unit_code" className={selectClass} defaultValue={indicator.unit_code} disabled={pending}>
-              {Object.keys(OBSERVATORY_UNIT_LABELS).map((code) => (
-                <option key={code} value={code}>
-                  {label(OBSERVATORY_UNIT_LABELS, code)}
-                </option>
-              ))}
-            </select>
-            <select name="periodicity" className={selectClass} defaultValue={indicator.periodicity} disabled={pending}>
-              {Object.keys(OBSERVATORY_PERIODICITY_LABELS).map((code) => (
-                <option key={code} value={code}>
-                  {label(OBSERVATORY_PERIODICITY_LABELS, code)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </label>
-        <label className="text-ink flex flex-col gap-1 text-sm">
-          <span className="font-medium">Stato operativo</span>
-          <select name="operational_status" className={selectClass} defaultValue={indicator.operational_status} disabled={pending}>
-            <option value="draft">
-              {label(INDICATOR_OPERATIONAL_LABELS, "draft")}
-            </option>
-            <option value="active">
-              {label(INDICATOR_OPERATIONAL_LABELS, "active")}
-            </option>
-            <option value="deprecated">
-              {label(INDICATOR_OPERATIONAL_LABELS, "deprecated")}
-            </option>
-            <option value="retired">
-              {label(INDICATOR_OPERATIONAL_LABELS, "retired")}
-            </option>
-          </select>
-        </label>
-        {state.message ? (
-          <p className={state.ok ? "text-brand-dark text-sm" : "text-accent-dark text-sm"}>{state.message}</p>
-        ) : null}
-        <Button type="submit" disabled={pending}>Salva</Button>
-      </form>
-      <EditorialLifecycleButtons
-        id={indicator.id}
-        publishAction={publishIndicatorAction}
-        withdrawAction={withdrawIndicatorAction}
-        publicationStatus={indicator.publication_status}
-        publicHref={
-          indicator.publication_status === "published"
-            ? `/osservatorio/${indicator.slug}`
-            : undefined
-        }
+    <form action={action} className="mt-6 flex flex-col gap-4">
+      <input type="hidden" name="id" value={indicator.id} />
+      <FormField
+        label="Codice"
+        name="code"
+        defaultValue={indicator.code}
+        required
+        disabled={pending}
       />
-    </>
+      <FormField
+        label="Slug"
+        name="slug"
+        defaultValue={indicator.slug}
+        required
+        disabled={pending}
+      />
+      <FormField
+        label="Titolo"
+        name="title"
+        defaultValue={indicator.title}
+        required
+        disabled={pending}
+      />
+      <FormField
+        label="Descrizione"
+        name="description"
+        defaultValue={indicator.description}
+        required
+        disabled={pending}
+      />
+      <FormField
+        label="Scopo"
+        name="purpose_text"
+        defaultValue={indicator.purpose_text}
+        required
+        disabled={pending}
+      />
+      <FormField
+        label="Metodologia"
+        name="methodology_summary"
+        defaultValue={indicator.methodology_summary}
+        required
+        disabled={pending}
+      />
+      <label className="text-ink flex flex-col gap-1 text-sm">
+        <span className="font-medium">Natura / Unità / Periodicità</span>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <select
+            name="value_nature"
+            className={selectClass}
+            defaultValue={indicator.value_nature}
+            disabled={pending}
+          >
+            {NATURE_OPTIONS.map((n) => (
+              <option key={n.value} value={n.value}>
+                {label(OBSERVATORY_VALUE_NATURE_LABELS, n.value)}
+              </option>
+            ))}
+          </select>
+          <select
+            name="unit_code"
+            className={selectClass}
+            defaultValue={indicator.unit_code}
+            disabled={pending}
+          >
+            {Object.keys(OBSERVATORY_UNIT_LABELS).map((code) => (
+              <option key={code} value={code}>
+                {label(OBSERVATORY_UNIT_LABELS, code)}
+              </option>
+            ))}
+          </select>
+          <select
+            name="periodicity"
+            className={selectClass}
+            defaultValue={indicator.periodicity}
+            disabled={pending}
+          >
+            {Object.keys(OBSERVATORY_PERIODICITY_LABELS).map((code) => (
+              <option key={code} value={code}>
+                {label(OBSERVATORY_PERIODICITY_LABELS, code)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </label>
+      <label className="text-ink flex flex-col gap-1 text-sm">
+        <span className="font-medium">Stato operativo</span>
+        <select
+          name="operational_status"
+          className={selectClass}
+          defaultValue={indicator.operational_status}
+          disabled={pending}
+        >
+          <option value="draft">
+            {label(INDICATOR_OPERATIONAL_LABELS, "draft")}
+          </option>
+          <option value="active">
+            {label(INDICATOR_OPERATIONAL_LABELS, "active")}
+          </option>
+          <option value="deprecated">
+            {label(INDICATOR_OPERATIONAL_LABELS, "deprecated")}
+          </option>
+          <option value="retired">
+            {label(INDICATOR_OPERATIONAL_LABELS, "retired")}
+          </option>
+        </select>
+      </label>
+      {state.message ? (
+        <p
+          className={
+            state.ok ? "text-brand-dark text-sm" : "text-accent-dark text-sm"
+          }
+        >
+          {state.message}
+        </p>
+      ) : null}
+      <Button type="submit" disabled={pending}>
+        Salva
+      </Button>
+    </form>
   );
 }
