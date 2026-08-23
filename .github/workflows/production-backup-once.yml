@@ -52,7 +52,6 @@ jobs:
           test -s backup/roles.sql
           test -s backup/schema.sql
           test -s backup/data.sql
-          echo "BACKUP_DUMP = PASS"
 
       - id: integrity
         name: Validate and encrypt backup
@@ -73,7 +72,6 @@ jobs:
               --symmetric --cipher-algo AES256 --output backup.tar.gz.gpg backup.tar.gz
           test -s backup.tar.gz.gpg
           sha256sum backup.tar.gz.gpg > backup.tar.gz.gpg.sha256
-          echo "BACKUP_INTEGRITY_ENCRYPTION = PASS"
 
       - id: artifact
         name: Upload encrypted backup
@@ -94,7 +92,6 @@ jobs:
           rm -rf backup backup.tar.gz
           test ! -e backup
           test ! -e backup.tar.gz
-          echo "BACKUP_PLAINTEXT_REMOVAL = PASS"
 
       - name: Publish observable diagnostic status
         if: always()
@@ -109,17 +106,18 @@ jobs:
         run: |
           set -euo pipefail
           state="success"
+          context="backup/production"
           description="Encrypted production backup verified"
           if [[ "$SECRETS_OUTCOME" != "success" ]]; then
-            state="failure"; description="Backup failed: secrets gate"
+            state="failure"; context="backup/secrets-failed"; description="Backup secrets gate failed"
           elif [[ "$DUMP_OUTCOME" != "success" ]]; then
-            state="failure"; description="Backup failed: database dump"
+            state="failure"; context="backup/dump-failed"; description="Database dump failed"
           elif [[ "$INTEGRITY_OUTCOME" != "success" ]]; then
-            state="failure"; description="Backup failed: integrity/encryption"
+            state="failure"; context="backup/integrity-failed"; description="Integrity or encryption failed"
           elif [[ "$ARTIFACT_OUTCOME" != "success" ]]; then
-            state="failure"; description="Backup failed: artifact upload"
+            state="failure"; context="backup/artifact-failed"; description="Artifact upload failed"
           elif [[ "$CLEANUP_OUTCOME" != "success" ]]; then
-            state="failure"; description="Backup failed: plaintext cleanup"
+            state="failure"; context="backup/cleanup-failed"; description="Plaintext cleanup failed"
           fi
           curl --fail-with-body --silent --show-error \
             -X POST \
@@ -127,4 +125,4 @@ jobs:
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"${state}\",\"context\":\"backup/production\",\"description\":\"${description}\"}"
+            -d "{\"state\":\"${state}\",\"context\":\"${context}\",\"description\":\"${description}\"}"
