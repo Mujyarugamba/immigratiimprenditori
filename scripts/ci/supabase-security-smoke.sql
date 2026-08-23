@@ -175,8 +175,8 @@ end;
 $$;
 
 -- Private editorial tables must remain behind RLS and must not grant anonymous
--- table-level SELECT access. Historical content snapshots are additionally
--- append-only: authenticated editors can SELECT/INSERT but cannot UPDATE/DELETE.
+-- table-level SELECT access. Historical content snapshots are trigger-only:
+-- authenticated editors can SELECT but cannot INSERT/UPDATE/DELETE.
 do $$
 begin
   if not exists (
@@ -213,14 +213,14 @@ begin
     raise exception 'SECURITY_SMOKE_ANON_CAN_SELECT_CONTENT_VERSIONS';
   end if;
 
-  if not has_table_privilege('authenticated', 'public.content_versions', 'SELECT')
-     or not has_table_privilege('authenticated', 'public.content_versions', 'INSERT') then
-    raise exception 'SECURITY_SMOKE_EDITORIAL_VERSION_APPEND_GRANTS_MISSING';
+  if not has_table_privilege('authenticated', 'public.content_versions', 'SELECT') then
+    raise exception 'SECURITY_SMOKE_EDITORIAL_VERSION_READ_GRANT_MISSING';
   end if;
 
-  if has_table_privilege('authenticated', 'public.content_versions', 'UPDATE')
+  if has_table_privilege('authenticated', 'public.content_versions', 'INSERT')
+     or has_table_privilege('authenticated', 'public.content_versions', 'UPDATE')
      or has_table_privilege('authenticated', 'public.content_versions', 'DELETE') then
-    raise exception 'SECURITY_SMOKE_CONTENT_VERSIONS_NOT_APPEND_ONLY';
+    raise exception 'SECURITY_SMOKE_CONTENT_VERSIONS_NOT_TRIGGER_ONLY';
   end if;
 
   if not has_table_privilege('anon', 'public.content_corrections', 'SELECT') then
