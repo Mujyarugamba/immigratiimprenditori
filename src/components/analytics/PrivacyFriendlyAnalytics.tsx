@@ -29,6 +29,9 @@ function platformLocale() {
 
 export function PrivacyFriendlyAnalytics() {
   useEffect(() => {
+    // Deploy/branch previews render production public data in read-only mode.
+    // They must not generate analytics writes or QA traffic in live counters.
+    if (process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true") return;
     if (process.env.NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED !== "true") return;
     if (!analyticsAllowed()) return;
 
