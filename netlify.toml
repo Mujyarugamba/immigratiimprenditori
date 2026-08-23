@@ -2,6 +2,15 @@
   command = "npm run build"
   publish = ".next"
 
+# Deploy Previews and branch deploys intentionally read the public production
+# data plane but must never mutate it. This non-secret build flag is inlined by
+# Next.js into the preview proxy/CSP; production does not set it.
+[context.deploy-preview.environment]
+  NEXT_PUBLIC_PREVIEW_READ_ONLY = "true"
+
+[context.branch-deploy.environment]
+  NEXT_PUBLIC_PREVIEW_READ_ONLY = "true"
+
 # Code-based rate limiting is available on all Netlify plans. Rules are kept
 # intentionally scarce: the public API receives a moderate per-client budget,
 # while the canonical anonymous contribution form is much tighter.
