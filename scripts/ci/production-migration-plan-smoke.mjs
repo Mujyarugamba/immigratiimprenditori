@@ -59,9 +59,9 @@ if (JSON.stringify(sortedCandidates) !== JSON.stringify(candidates)) {
   fail("candidateDelta must stay in chronological filename order");
 }
 
-// These migrations are release-critical security invariants. The general drift
-// check below prevents unclassified files, while this explicit set prevents a
-// future cleanup from deleting a critical file and its plan entry together.
+// These migrations are release-critical security/governance invariants. The
+// general drift check below prevents unclassified files, while this explicit set
+// prevents a future cleanup from deleting a critical file and its plan entry together.
 const requiredSecurityCandidates = [
   "20260822172000_harden_content_publication_gate.sql",
   "20260822183000_persistent_public_submission_rate_limits.sql",
@@ -69,6 +69,7 @@ const requiredSecurityCandidates = [
   "20260822190000_enforce_privileged_mfa_aal2.sql",
   "20260822210500_go_live_audit_analytics.sql",
   "20260822211500_fix_public_rls_mfa_compatibility.sql",
+  "20260822213000_hybrid_editorial_review_governance.sql",
 ];
 for (const filename of requiredSecurityCandidates) {
   if (!uniqueCandidates.has(filename)) {
@@ -89,17 +90,21 @@ const mfaIndex = candidates.indexOf(
   "20260822190000_enforce_privileged_mfa_aal2.sql",
 );
 const auditIndex = candidates.indexOf("20260822210500_go_live_audit_analytics.sql");
+const hybridReviewIndex = candidates.indexOf(
+  "20260822213000_hybrid_editorial_review_governance.sql",
+);
 
 if (
   !(
     publicationGateIndex < publicRateLimitIndex &&
     publicRateLimitIndex < loginRateLimitIndex &&
     loginRateLimitIndex < mfaIndex &&
-    mfaIndex < auditIndex
+    mfaIndex < auditIndex &&
+    auditIndex < hybridReviewIndex
   )
 ) {
   fail(
-    "release-critical security migrations must remain ordered: publication gate -> public rate limit -> login rate limit -> MFA -> audit",
+    "release-critical security migrations must remain ordered: publication gate -> public rate limit -> login rate limit -> MFA -> audit -> hybrid review governance",
   );
 }
 
