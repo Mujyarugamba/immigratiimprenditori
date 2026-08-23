@@ -19,6 +19,11 @@ jobs:
       - name: Checkout metadata
         uses: actions/checkout@v4
 
+      - name: Setup pinned Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.115.0
+
       - name: Verify backup secrets
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
@@ -30,7 +35,7 @@ jobs:
           test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE secret missing" >&2; exit 1; }
           echo "BACKUP_SECRET_GATE = PASS"
 
-      - name: Create encrypted PostgreSQL backup
+      - name: Create encrypted Supabase logical backup
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
@@ -38,31 +43,41 @@ jobs:
         run: |
           set -euo pipefail
           stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-          dump="centro-studi-${stamp}.dump"
-          encrypted="${dump}.gpg"
+          dir="centro-studi-${stamp}"
+          archive="${dir}.tar.gz"
+          encrypted="${archive}.gpg"
+          mkdir -p "$dir"
 
-          # Pin the client major version instead of relying on the Ubuntu runner's
-          # preinstalled pg_dump. PostgreSQL rejects dumps from an older client
-          # when the server is newer (Supabase currently uses PostgreSQL 17 here).
-          docker run --rm postgres:17-alpine \
-            pg_dump "$SUPABASE_DB_URL" \
-              --format=custom \
-              --no-owner \
-              --no-privileges \
-            > "$dump"
+          # Use Supabase CLI rather than raw pg_dump. The CLI applies the
+          # platform-specific filters required to avoid managed realtime/vault
+          # objects that are not portable with normal project privileges.
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$dir/roles.sql" --role-only
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$dir/schema.sql"
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$dir/data.sql" --use-copy --data-only \
+            -x "storage.buckets_vectors" \
+            -x "storage.vector_indexes"
 
-          test -s "$dump"
-          docker run --rm -i postgres:17-alpine pg_restore --list \
-            < "$dump" >/dev/null
+          for file in "$dir/roles.sql" "$dir/schema.sql" "$dir/data.sql"; do
+            test -s "$file" || { echo "Backup component empty: $file" >&2; exit 1; }
+          done
+          grep -q 'CREATE TABLE.*public.contents' "$dir/schema.sql"
+          grep -q 'CREATE TABLE.*public.observatory_indicators' "$dir/schema.sql"
+
+          tar -czf "$archive" "$dir"
+          test -s "$archive"
+          tar -tzf "$archive" | grep -q '/roles.sql$'
+          tar -tzf "$archive" | grep -q '/schema.sql$'
+          tar -tzf "$archive" | grep -q '/data.sql$'
 
           printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" \
             | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
-              --symmetric --cipher-algo AES256 --output "$encrypted" "$dump"
+              --symmetric --cipher-algo AES256 --output "$encrypted" "$archive"
 
-          rm -f "$dump"
+          rm -rf "$dir" "$archive"
           test -s "$encrypted"
           sha256sum "$encrypted" > "${encrypted}.sha256"
           printf '%s\n' "$encrypted" > backup-filename.txt
+          echo "BACKUP_SUPABASE_LOGICAL_EXPORT = PASS"
           echo "BACKUP_ENCRYPTION = PASS"
 
       - name: Upload encrypted backup
@@ -70,8 +85,8 @@ jobs:
         with:
           name: centro-studi-encrypted-backup-${{ github.run_id }}
           path: |
-            *.dump.gpg
-            *.dump.gpg.sha256
+            *.tar.gz.gpg
+            *.tar.gz.gpg.sha256
           if-no-files-found: error
           retention-days: 14
 
@@ -79,8 +94,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if compgen -G '*.dump' >/dev/null; then
-            echo "Plaintext database dump still present" >&2
+          if compgen -G '*.sql' >/dev/null || compgen -G '*.tar.gz' >/dev/null || compgen -G 'centro-studi-*' >/dev/null; then
+            echo "Plaintext backup material still present" >&2
+            ls -la
             exit 1
           fi
           echo "BACKUP_PLAINTEXT_REMOVAL = PASS"
