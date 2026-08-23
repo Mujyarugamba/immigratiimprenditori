@@ -128,7 +128,7 @@ export default function CookiePage() {
             Il titolare è <strong className="text-black">Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)</strong>, con sede in <strong className="text-black">Viale Molise n. 54, 20137 Milano (MI)</strong>, codice fiscale <strong className="text-black">97342380157</strong> e Partita IVA <strong className="text-black">04222160964</strong>.
           </p>
           <p className="mt-3">
-            Per informazioni sui cookie e sugli strumenti tecnici: <a className="underline underline-offset-4" href="mailto:cookies@aipel.it">cookies@aipel.it</a>.
+            Per informazioni sui cookie e sugli strumenti tecnici: <a className="underline underline-offset-4" href="mailto:info@aipel.it">info@aipel.it</a>.
           </p>
           <p className="mt-3">
             Per il quadro completo dei trattamenti consulta la <Link href="/privacy" className="underline underline-offset-4">Privacy Policy</Link>.
