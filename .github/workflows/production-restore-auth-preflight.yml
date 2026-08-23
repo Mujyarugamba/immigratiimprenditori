@@ -49,9 +49,19 @@ jobs:
           PY
 
           echo "PROD_AUTH_USERS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from auth.users;')"
+          echo "PROD_AUTH_IDENTITIES=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from auth.identities;')"
+          echo "PROD_MFA_FACTORS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from auth.mfa_factors;')"
+          echo "PROD_SESSIONS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from auth.sessions;')"
+          echo "PROD_REFRESH_TOKENS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from auth.refresh_tokens;')"
+          echo "PROD_PROFILES=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from public.profiles;')"
           echo "PROD_ACCOUNTS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from public.accounts;')"
           echo "PROD_ROLE_ASSIGNMENTS=$(psql "$PROD_DB_URL" -Atqc 'select count(*) from public.account_role_assignments;')"
           echo "STAGE_AUTH_USERS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from auth.users;')"
+          echo "STAGE_AUTH_IDENTITIES=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from auth.identities;')"
+          echo "STAGE_MFA_FACTORS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from auth.mfa_factors;')"
+          echo "STAGE_SESSIONS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from auth.sessions;')"
+          echo "STAGE_REFRESH_TOKENS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from auth.refresh_tokens;')"
+          echo "STAGE_PROFILES=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from public.profiles;')"
           echo "STAGE_ACCOUNTS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from public.accounts;')"
           echo "STAGE_ROLE_ASSIGNMENTS=$(psql "$STAGING_DB_URL" -Atqc 'select count(*) from public.account_role_assignments;')"
 
@@ -68,12 +78,20 @@ jobs:
           "
           echo 'AUTH_LINKED_FKS_END'
 
-          prod_orphans="$(psql "$PROD_DB_URL" -Atqc "
+          account_orphans="$(psql "$PROD_DB_URL" -Atqc "
             select count(*)
             from public.accounts a
-            left join auth.users u on u.id=a.id
+            left join auth.users u on u.id=a.auth_user_id
+            where a.auth_user_id is not null and u.id is null;
+          ")"
+          profile_orphans="$(psql "$PROD_DB_URL" -Atqc "
+            select count(*)
+            from public.profiles p
+            left join auth.users u on u.id=p.id
             where u.id is null;
           ")"
-          echo "PROD_ACCOUNT_ORPHANS=$prod_orphans"
-          [[ "$prod_orphans" == "0" ]]
+          echo "PROD_ACCOUNT_ORPHANS=$account_orphans"
+          echo "PROD_PROFILE_ORPHANS=$profile_orphans"
+          [[ "$account_orphans" == "0" ]]
+          [[ "$profile_orphans" == "0" ]]
           echo "RESTORE_AUTH_PREFLIGHT = PASS"
