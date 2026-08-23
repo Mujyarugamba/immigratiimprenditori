@@ -19,6 +19,7 @@ Questo runbook traduce `supabase/CS-PRODUCTION-RELEASE.json` in una sequenza ope
 8. Al primo errore inatteso: **STOP**. Non ripetere alla cieca una migration parzialmente eseguita.
 9. Nessun contenuto viene auto-pubblicato durante il rilascio; Radar/AI restano review-only.
 10. Il form pubblico non è considerato production-hardened finché il rate-limit persistente non è applicato e verificato live.
+11. Le Storie reali non sono un gate pre-go-live: outreach/interviste iniziano solo dopo sito online + live smoke PASS.
 
 ## Stato hosted osservato
 
@@ -66,15 +67,14 @@ Il guard `scripts/ci/production-migration-plan-smoke.mjs` verifica automaticamen
 
 Prima di iniziare qualsiasi procedura live devono essere esplicitamente noti:
 
-- stato del gate Storie reali;
-- esito QA umano WCAG/device;
+- esito QA umano WCAG/device (#92);
 - esito revisione legale finale;
 - decisione sulla governance review same-editor vs 4-eyes;
 - decisione required checks `main`;
-- esito del primo source-health schedulato reale, se richiesto come gate finale;
-- identità del commit candidato e deploy-preview associato.
+- identità del commit candidato e deployment Vercel candidato;
+- restore drill non-production completo e verificato.
 
-L'assenza di uno di questi elementi non autorizza scorciatoie tecniche.
+Le Storie reali non sono una precondizione: la superficie `/storie` deve essere sana anche a zero contenuti reali e l'acquisizione editoriale parte soltanto dopo il live smoke.
 
 ## Fase 1 — fresh read-only audit production
 
@@ -93,12 +93,14 @@ Eseguire senza write:
 
 Prima delle migration:
 
-1. creare backup production consistente con tool/versione PostgreSQL compatibile;
+1. creare backup logical Supabase CLI coerente con la piattaforma;
 2. cifrare l'archivio prima di conservarlo fuori dal runner;
 3. calcolare e registrare checksum;
-4. verificare leggibilità archivio;
+4. verificare ruoli/schema/dati esportati;
 5. ripristinare il backup in ambiente **non-production** isolato;
-6. eseguire controlli minimi di schema e dati sul restore.
+6. eseguire controlli minimi di schema, dati e RLS sul restore.
+
+Al 23 agosto 2026 il restore drill locale ha individuato una resistenza sulla configurazione gestita del ruolo `log_min_messages`; il gate resta **PENDING** e non va aggirato con una dichiarazione manuale di PASS.
 
 **Hold point B:** nessuna migration production senza backup verificato e restore drill riuscito.
 
@@ -139,8 +141,6 @@ Dopo `20260822183000_persistent_public_submission_rate_limits.sql` verificare li
 - submission valida continua ad arrivare in Inbox;
 - nessuna auto-pubblicazione.
 
-**Il form pubblico non supera il security gate prima di questo checkpoint.**
-
 ### Checkpoint Auth obbligatorio dopo #18–#19
 
 Verificare:
@@ -179,26 +179,23 @@ Se un controllo critico fallisce, il deploy applicativo non parte.
 
 Non esiste un generico “rollback automatico” affidabile per una catena di migration DDL/DML già parzialmente applicata.
 
-Regola:
-
-- **prima scelta:** stop immediato + diagnosi + forward-fix piccolo e revisionato quando lo stato DB è integro e il problema è correggibile senza perdita dati;
-- **restore:** usare il backup pre-release quando lo stato è corrotto, non deterministico o non recuperabile in sicurezza con forward-fix;
+- **prima scelta:** stop immediato + diagnosi + forward-fix piccolo e revisionato quando lo stato DB è integro;
+- **restore:** usare il backup pre-release quando lo stato è corrotto, non deterministico o non recuperabile in sicurezza;
 - non improvvisare `DROP`, `TRUNCATE` o reverse migration non provate;
 - non continuare la catena dopo un errore per “vedere se si sistema”.
 
-La decisione forward-fix vs restore è un hold point tecnico esplicito.
-
-## Fase 6 — build/deploy production separato
+## Fase 6 — build/deploy Production Vercel separato
 
 Migration production riuscite **non autorizzano automaticamente il deploy**.
 
 Prima del deploy:
 
 - CI candidato verde;
-- Netlify deploy-preview candidato `ready`;
+- deployment Vercel candidato identificato e configurato;
 - visual/device QA completato;
-- CSP/header verificati sul preview;
+- CSP/header verificati;
 - secrets production verificati senza esposizione;
+- `NEXT_PUBLIC_SITE_URL` HTTPS verificata;
 - configurazione Auth production verificata;
 - gate editoriali/legal chiusi.
 
@@ -218,7 +215,7 @@ Subito dopo l'eventuale deploy autorizzato verificare:
 - security headers/CSP exact-origin;
 - nessun `unsafe-eval`;
 - performance/LCP candidato live;
-- error log Netlify/Supabase;
+- error log Vercel/Supabase;
 - nessun contenuto pubblicato automaticamente.
 
 ## Stato attuale
