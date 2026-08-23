@@ -102,7 +102,6 @@ jobs:
           mkdir -p restore-set
           supabase db dump --db-url "$PROD_DB_URL" -f restore-set/schema.sql
           supabase db dump --db-url "$PROD_DB_URL" -f restore-set/data.sql --use-copy --data-only \
-            -x "auth.*" \
             -x "storage.buckets_vectors" \
             -x "storage.vector_indexes"
           supabase db dump --db-url "$PROD_DB_URL" -f restore-set/history_schema.sql --schema supabase_migrations
@@ -112,6 +111,39 @@ jobs:
             -v "$PWD/restore-set:/out" \
             postgres:17-alpine \
             sh -lc 'pg_dump "$DB_URL" --data-only --no-owner --no-privileges --table=auth.users --table=auth.identities --file=/out/auth_data.sql'
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('restore-set/data.sql')
+          lines = p.read_text(encoding='utf-8').splitlines(keepends=True)
+          out = []
+          skip_copy = False
+          removed = 0
+          for line in lines:
+              if not skip_copy and re.match(r'^COPY\s+(?:"auth"|auth)\.', line):
+                  skip_copy = True
+                  removed += 1
+                  continue
+              if skip_copy:
+                  if line.rstrip('\r\n') == r'\.':
+                      skip_copy = False
+                  continue
+              if re.match(r"^SELECT\s+pg_catalog\.setval\('(?:\"?auth\"?\.)", line):
+                  removed += 1
+                  continue
+              out.append(line)
+          if skip_copy:
+              raise SystemExit('AUTH_FILTER = FAIL unterminated COPY block')
+          filtered = ''.join(out)
+          if re.search(r'^COPY\s+(?:"auth"|auth)\.', filtered, re.M):
+              raise SystemExit('AUTH_FILTER = FAIL COPY remains')
+          if removed < 2:
+              raise SystemExit(f'AUTH_FILTER = FAIL removed={removed}')
+          p.write_text(filtered, encoding='utf-8')
+          print(f'AUTH_FILTER = PASS removed_blocks={removed}')
+          PY
+
           for f in schema.sql data.sql history_schema.sql history_data.sql auth_data.sql; do test -s "restore-set/$f"; done
           grep -Eq 'CREATE TABLE .*contents' restore-set/schema.sql
           grep -Eq 'COPY .*languages' restore-set/data.sql
