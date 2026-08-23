@@ -25,6 +25,14 @@ GitHub Actions run `32669477735` — **PASS**:
 - plaintext removal;
 - encrypted artifact upload.
 
+Artifact evidence:
+
+- artifact: `staging-preservation-backup-32669477735`
+- artifact id: `9500962451`
+- size: 430286 bytes
+- digest: `sha256:b391da1fe8eb1edf5f2605702a2ca611557dd76d2f15e5ff45457700aa98eb07`
+- GitHub retention expiry: `2026-08-30T22:05:35Z`
+
 Pre-restore staging sentinel used by the atomic restore:
 
 - `public.contents = 18`
@@ -44,6 +52,16 @@ GitHub Actions run `32669477733` — **PASS**:
 - bundle encrypted;
 - plaintext removed;
 - encrypted Production-source artifact uploaded.
+
+Artifact evidence:
+
+- artifact: `production-source-backup-32669477733`
+- artifact id: `9500967813`
+- size: 430657 bytes
+- digest: `sha256:47dcb33614fe904d55b39a87142eb71f6039b6bd637073ab8e0a7f41b69cf59a`
+- GitHub retention expiry: `2026-08-30T22:05:57Z`
+
+The finite GitHub artifact retention does not replace the release-time backup requirement: immediately before any future authorized Production migration apply, a fresh Production backup and fresh hosted-state read must still be taken.
 
 ## Restore execution
 
@@ -103,6 +121,7 @@ Final marker:
 ## Repository / Production safety outcome
 
 - PR #11 was closed **without merge** after the drill.
+- The destructive restore workflow was removed from the isolated operational branch after completion.
 - `main` was not modified.
 - No Production schema/data migration was applied.
 - No Production deploy was performed.
