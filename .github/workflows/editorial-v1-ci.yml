@@ -72,19 +72,36 @@ jobs:
           fi
           echo "SUPABASE_AUTH_DEPRECATION_GUARD = PASS"
 
+      - name: Start deterministic unavailable Supabase stub
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup node scripts/ci/supabase-unavailable-stub.mjs >/tmp/ci-supabase-stub.log 2>&1 &
+          echo $! >/tmp/ci-supabase-stub.pid
+          for _ in {1..30}; do
+            status="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:54329/__health || true)"
+            if [[ "$status" == "200" ]]; then
+              echo "CI_SUPABASE_STUB = READY"
+              exit 0
+            fi
+            sleep 0.1
+          done
+          cat /tmp/ci-supabase-stub.log || true
+          exit 1
+
       - name: Next build
         env:
-          # This workflow validates the public fallback shell without a DB.
-          # A closed loopback endpoint fails immediately and keeps the result
-          # independent from DNS/Internet latency to a fabricated remote host.
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
+          # Public-shell CI has no database. The local stub returns HTTP 503
+          # immediately, exercising the app's real fallback path without DNS,
+          # retry or black-hole network latency from a fabricated backend.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npm run build
 
       - name: HTTP smoke
         env:
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npm run test:smoke
@@ -96,7 +113,7 @@ jobs:
         id: lighthouse
         continue-on-error: true
         env:
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
           NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
         run: npx --yes @lhci/cli@0.15.1 autorun
