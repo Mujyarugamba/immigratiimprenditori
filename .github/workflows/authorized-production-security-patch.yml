@@ -1,0 +1,144 @@
+name: Authorized Production security patch
+
+on:
+  pull_request:
+    branches:
+      - feature/research-radar-ai-knowledge-20260822
+    paths:
+      - .github/workflows/authorized-production-security-patch.yml
+
+permissions:
+  contents: read
+
+jobs:
+  apply-production-security-patch:
+    if: github.head_ref == 'ops/production-security-patch-20260824'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PROD_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+      EXPECTED_PROD_REF: hvfvfatlaspcpszgizhg
+      CANDIDATE_SHA: f6731f44b053f865c812c5c6d63c35179ad19af2
+      PATCH_FILE: 20260824103000_harden_publication_gate_execute_privileges.sql
+      PATCH_VERSION: '20260824103000'
+      PATCH_NAME: harden_publication_gate_execute_privileges
+    steps:
+      - name: Check out pinned release candidate
+        uses: actions/checkout@v4
+        with:
+          ref: f6731f44b053f865c812c5c6d63c35179ad19af2
+          fetch-depth: 1
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Production security patch preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PROD_DB_URL"
+          test -n "$BACKUP_PASSPHRASE"
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlsplit, unquote
+          u = urlsplit(os.environ['PROD_DB_URL'])
+          username = unquote(u.username or '')
+          if username != 'postgres.' + os.environ['EXPECTED_PROD_REF']:
+              raise SystemExit('PRODUCTION_IDENTITY = FAIL')
+          if not (u.hostname or '').endswith('.pooler.supabase.com') or u.port != 5432:
+              raise SystemExit('PRODUCTION_SESSION_POOLER = FAIL')
+          print('PRODUCTION_IDENTITY = PASS')
+          print('PRODUCTION_SESSION_POOLER = PASS')
+          PY
+          [[ "$(git rev-parse HEAD)" == "$CANDIDATE_SHA" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from supabase_migrations.schema_migrations;")" == "233" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select max(version::text) from supabase_migrations.schema_migrations;")" == "20260822213100" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from supabase_migrations.schema_migrations where version='$PATCH_VERSION';")" == "0" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from auth.mfa_factors f join public.accounts a on a.auth_user_id=f.user_id join public.account_role_assignments r on r.account_id=a.id where f.status::text='verified' and r.role_code='amministratore_applicativo' and r.assignment_status='active' and a.account_status='active';")" -ge "1" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where not t.tgisinternal and n.nspname='public' and c.relname='contents' and t.tgname='contents_human_publication_gate';")" == "1" ]]
+          echo "PRODUCTION_SECURITY_PATCH_PREFLIGHT = PASS"
+
+      - name: Create fresh encrypted Production backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p backup-security-patch
+          supabase db dump --db-url "$PROD_DB_URL" -f backup-security-patch/roles.sql --role-only
+          supabase db dump --db-url "$PROD_DB_URL" -f backup-security-patch/schema.sql
+          supabase db dump --db-url "$PROD_DB_URL" -f backup-security-patch/data.sql --use-copy --data-only \
+            -x "storage.buckets_vectors" \
+            -x "storage.vector_indexes"
+          for f in backup-security-patch/roles.sql backup-security-patch/schema.sql backup-security-patch/data.sql; do test -s "$f"; done
+          python3 - backup-security-patch/roles.sql <<'PY'
+          from pathlib import Path
+          import re, sys
+          path = Path(sys.argv[1])
+          text = path.read_text(encoding='utf-8')
+          parts = re.split(r'(?<=;)', text)
+          kept = []
+          alter_role = re.compile(r'(?is)^\s*ALTER\s+ROLE\b.*\blog_min_messages\b')
+          grant_parameter = re.compile(r'(?is)^\s*GRANT\s+SET\s+ON\s+PARAMETER\s+"?log_min_messages"?\s+TO\b')
+          for part in parts:
+              statement = part.strip()
+              if statement and (alter_role.match(statement) or grant_parameter.match(statement)):
+                  continue
+              kept.append(part)
+          filtered = ''.join(kept)
+          if re.search(r'(?i)\blog_min_messages\b', filtered):
+              raise SystemExit('unrecognized log_min_messages statement survived normalization')
+          path.write_text(filtered, encoding='utf-8')
+          PY
+          tar -C backup-security-patch -cf backup-security-patch/production-security-patch-pre.tar roles.sql schema.sql data.sql
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+            -pass env:BACKUP_PASSPHRASE \
+            -in backup-security-patch/production-security-patch-pre.tar \
+            -out backup-security-patch/production-security-patch-pre.tar.enc
+          sha256sum backup-security-patch/production-security-patch-pre.tar.enc > backup-security-patch/production-security-patch-pre.tar.enc.sha256
+          rm -f backup-security-patch/roles.sql backup-security-patch/schema.sql backup-security-patch/data.sql backup-security-patch/production-security-patch-pre.tar
+          echo "PRODUCTION_SECURITY_PATCH_BACKUP = PASS"
+
+      - name: Upload encrypted pre-patch backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-security-patch-pre-${{ github.run_id }}
+          path: |
+            backup-security-patch/production-security-patch-pre.tar.enc
+            backup-security-patch/production-security-patch-pre.tar.enc.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Dry-run and apply exact security patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "supabase/migrations/$PATCH_FILE"
+          tmp="$(mktemp -d)"
+          mkdir -p "$tmp/supabase/migrations"
+          printf 'project_id = "production-security-patch"\n' > "$tmp/supabase/config.toml"
+          while IFS= read -r remote_version; do
+            test -n "$remote_version"
+            : > "$tmp/supabase/migrations/${remote_version}_remote.sql"
+          done < <(psql "$PROD_DB_URL" -Atqc "select version from supabase_migrations.schema_migrations order by version;")
+          cp "supabase/migrations/$PATCH_FILE" "$tmp/supabase/migrations/$PATCH_FILE"
+          dry="$(cd "$tmp" && supabase db push --db-url "$PROD_DB_URL" --include-all --dry-run 2>&1)"
+          printf '%s\n' "$dry"
+          grep -q "$PATCH_VERSION" <<< "$dry"
+          (cd "$tmp" && supabase db push --db-url "$PROD_DB_URL" --include-all)
+          rm -rf "$tmp"
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from supabase_migrations.schema_migrations;")" == "234" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select max(version::text) from supabase_migrations.schema_migrations;")" == "$PATCH_VERSION" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from supabase_migrations.schema_migrations where version='$PATCH_VERSION' and name='$PATCH_NAME';")" == "1" ]]
+          echo "PRODUCTION_SECURITY_PATCH_APPLY = PASS"
+
+      - name: Production security patch postflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select has_function_privilege('anon','public.enforce_content_human_publication_gate()','EXECUTE')::int;")" == "0" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select has_function_privilege('authenticated','public.enforce_content_human_publication_gate()','EXECUTE')::int;")" == "0" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select has_function_privilege('service_role','public.enforce_content_human_publication_gate()','EXECUTE')::int;")" == "0" ]]
+          [[ "$(psql "$PROD_DB_URL" -Atqc "select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where not t.tgisinternal and n.nspname='public' and c.relname='contents' and t.tgname='contents_human_publication_gate';")" == "1" ]]
+          echo "PRODUCTION_SECURITY_PATCH_POSTFLIGHT = PASS"
