@@ -21,10 +21,27 @@ function stripSqlComments(sql) {
     .replace(/--[^\n\r]*/g, " ");
 }
 
+function assertSortedUnique(label, files) {
+  if (!Array.isArray(files)) fail(`${label} must be an array`);
+  if (new Set(files).size !== files.length) fail(`${label} contains duplicates`);
+  const sorted = [...files].sort((a, b) => a.localeCompare(b));
+  if (JSON.stringify(sorted) !== JSON.stringify(files)) {
+    fail(`${label} must stay in chronological filename order`);
+  }
+}
+
 const plan = JSON.parse(fs.readFileSync(PLAN_PATH, "utf8"));
-const cutoff = plan?.observedHostedLatestMigration?.version;
-if (!/^\d{14}$/.test(cutoff ?? "")) {
-  fail("production migration plan: invalid observed hosted cutoff");
+const observed = plan?.observedHostedLatestMigration?.version;
+const releaseBaseline = plan?.releaseBaselineHostedLatestMigration?.version;
+
+if (!/^\d{14}$/.test(observed ?? "")) {
+  fail("production migration plan: invalid observed hosted latest migration");
+}
+if (!/^\d{14}$/.test(releaseBaseline ?? "")) {
+  fail("production migration plan: invalid release baseline hosted migration");
+}
+if (observed < releaseBaseline) {
+  fail("observed hosted migration cannot precede the release baseline");
 }
 
 if (plan.releasePolicy?.forbidWholeDirectoryDbPush !== true) {
@@ -44,25 +61,20 @@ for (const filename of baseline) {
 }
 
 const aliases = Object.keys(plan.alreadyAppliedRepositoryAliases ?? {});
+const applied = plan.appliedReleaseDelta ?? [];
 const candidates = plan.candidateDelta ?? [];
-if (!Array.isArray(candidates) || candidates.length === 0) {
-  fail("production migration plan must declare a non-empty candidateDelta");
+assertSortedUnique("appliedReleaseDelta", applied);
+assertSortedUnique("candidateDelta", candidates);
+
+const releaseDelta = [...applied, ...candidates];
+assertSortedUnique("combined release delta", releaseDelta);
+
+const allTracked = [...aliases, ...releaseDelta];
+if (new Set(allTracked).size !== allTracked.length) {
+  fail("a migration cannot appear in more than one release-plan bucket");
 }
 
-const uniqueCandidates = new Set(candidates);
-if (uniqueCandidates.size !== candidates.length) {
-  fail("candidateDelta contains duplicate filenames");
-}
-
-const sortedCandidates = [...candidates].sort((a, b) => a.localeCompare(b));
-if (JSON.stringify(sortedCandidates) !== JSON.stringify(candidates)) {
-  fail("candidateDelta must stay in chronological filename order");
-}
-
-// These migrations are release-critical security/governance invariants. The
-// general drift check below prevents unclassified files, while this explicit set
-// prevents a future cleanup from deleting a critical file and its plan entry together.
-const requiredSecurityCandidates = [
+const requiredSecurityMigrations = [
   "20260822172000_harden_content_publication_gate.sql",
   "20260822183000_persistent_public_submission_rate_limits.sql",
   "20260822184500_editorial_login_rate_limits.sql",
@@ -71,58 +83,53 @@ const requiredSecurityCandidates = [
   "20260822211500_fix_public_rls_mfa_compatibility.sql",
   "20260822213000_hybrid_editorial_review_governance.sql",
   "20260822213100_fix_hybrid_null_category_classifier.sql",
+  "20260824103000_harden_publication_gate_execute_privileges.sql",
 ];
-for (const filename of requiredSecurityCandidates) {
-  if (!uniqueCandidates.has(filename)) {
-    fail(`release-critical security migration missing from candidateDelta: ${filename}`);
+for (const filename of requiredSecurityMigrations) {
+  if (!releaseDelta.includes(filename)) {
+    fail(`release-critical security migration missing from release delta: ${filename}`);
   }
 }
 
-const publicationGateIndex = candidates.indexOf(
+const requiredOrder = [
   "20260822172000_harden_content_publication_gate.sql",
-);
-const publicRateLimitIndex = candidates.indexOf(
   "20260822183000_persistent_public_submission_rate_limits.sql",
-);
-const loginRateLimitIndex = candidates.indexOf(
   "20260822184500_editorial_login_rate_limits.sql",
-);
-const mfaIndex = candidates.indexOf(
   "20260822190000_enforce_privileged_mfa_aal2.sql",
-);
-const auditIndex = candidates.indexOf("20260822210500_go_live_audit_analytics.sql");
-const hybridReviewIndex = candidates.indexOf(
+  "20260822210500_go_live_audit_analytics.sql",
   "20260822213000_hybrid_editorial_review_governance.sql",
-);
-const hybridNullFixIndex = candidates.indexOf(
   "20260822213100_fix_hybrid_null_category_classifier.sql",
-);
-
-if (
-  !(
-    publicationGateIndex < publicRateLimitIndex &&
-    publicRateLimitIndex < loginRateLimitIndex &&
-    loginRateLimitIndex < mfaIndex &&
-    mfaIndex < auditIndex &&
-    auditIndex < hybridReviewIndex &&
-    hybridReviewIndex < hybridNullFixIndex
-  )
-) {
-  fail(
-    "release-critical security migrations must remain ordered: publication gate -> public rate limit -> login rate limit -> MFA -> audit -> hybrid review governance -> null-category classifier fix",
-  );
+  "20260824103000_harden_publication_gate_execute_privileges.sql",
+];
+let previousIndex = -1;
+for (const filename of requiredOrder) {
+  const index = releaseDelta.indexOf(filename);
+  if (index <= previousIndex) {
+    fail("release-critical security migrations are not in the required chronological order");
+  }
+  previousIndex = index;
 }
 
 for (const filename of aliases) {
-  if (uniqueCandidates.has(filename)) {
-    fail(`migration cannot be both already-applied alias and candidate: ${filename}`);
-  }
   const alias = plan.alreadyAppliedRepositoryAliases[filename];
   if (!/^\d{14}$/.test(alias?.hostedVersion ?? "")) {
     fail(`invalid hostedVersion for alias ${filename}`);
   }
-  if (alias.hostedVersion > cutoff) {
-    fail(`already-applied alias ${filename} points beyond observed hosted cutoff`);
+  if (alias.hostedVersion > observed) {
+    fail(`already-applied alias ${filename} points beyond observed hosted state`);
+  }
+}
+
+for (const filename of applied) {
+  const timestamp = timestampOf(filename);
+  if (timestamp === null || timestamp > observed) {
+    fail(`applied release migration is beyond observed hosted state: ${filename}`);
+  }
+}
+for (const filename of candidates) {
+  const timestamp = timestampOf(filename);
+  if (timestamp === null || timestamp <= observed) {
+    fail(`candidate migration must be newer than observed hosted state: ${filename}`);
   }
 }
 
@@ -131,27 +138,27 @@ const repositoryFiles = fs
   .filter((filename) => timestampOf(filename))
   .sort((a, b) => a.localeCompare(b));
 
-for (const filename of [...aliases, ...candidates]) {
+for (const filename of allTracked) {
   if (!repositoryFiles.includes(filename)) {
     fail(`release plan references missing repository migration: ${filename}`);
   }
 }
 
-const postCutoffRepositoryFiles = repositoryFiles.filter((filename) => {
+const postBaselineRepositoryFiles = repositoryFiles.filter((filename) => {
   const timestamp = timestampOf(filename);
-  return timestamp !== null && timestamp > cutoff;
+  return timestamp !== null && timestamp > releaseBaseline;
 });
-const accountedPostCutoff = [...aliases, ...candidates].sort((a, b) => a.localeCompare(b));
+const accountedPostBaseline = [...allTracked].sort((a, b) => a.localeCompare(b));
 
-if (JSON.stringify(postCutoffRepositoryFiles) !== JSON.stringify(accountedPostCutoff)) {
-  const missingFromPlan = postCutoffRepositoryFiles.filter(
-    (filename) => !accountedPostCutoff.includes(filename),
+if (JSON.stringify(postBaselineRepositoryFiles) !== JSON.stringify(accountedPostBaseline)) {
+  const missingFromPlan = postBaselineRepositoryFiles.filter(
+    (filename) => !accountedPostBaseline.includes(filename),
   );
-  const stalePlanEntries = accountedPostCutoff.filter(
-    (filename) => !postCutoffRepositoryFiles.includes(filename),
+  const stalePlanEntries = accountedPostBaseline.filter(
+    (filename) => !postBaselineRepositoryFiles.includes(filename),
   );
   fail(
-    `post-cutoff migration drift: unclassified=${JSON.stringify(missingFromPlan)} stale=${JSON.stringify(stalePlanEntries)}`,
+    `post-baseline migration drift: unclassified=${JSON.stringify(missingFromPlan)} stale=${JSON.stringify(stalePlanEntries)}`,
   );
 }
 
@@ -176,13 +183,15 @@ console.log(
     {
       ok: true,
       hostedProjectRef: plan.hostedProjectRef,
+      releaseBaselineHostedLatestMigration: plan.releaseBaselineHostedLatestMigration,
       observedHostedLatestMigration: plan.observedHostedLatestMigration,
       canonicalBaselineFiles: baseline.length,
       alreadyAppliedAliases: aliases.length,
+      appliedReleaseDelta: applied.length,
       candidateDelta: candidates.length,
-      requiredSecurityCandidates: requiredSecurityCandidates.length,
-      postCutoffRepositoryFiles: postCutoffRepositoryFiles.length,
-      destructiveSchemaOperations: 0,
+      requiredSecurityMigrations: requiredSecurityMigrations.length,
+      postBaselineRepositoryFiles: postBaselineRepositoryFiles.length,
+      candidateDestructiveSchemaOperations: 0,
     },
     null,
     2,
