@@ -1,10 +1,14 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "hostedProjectRef": "hvfvfatlaspcpszgizhg",
   "verifiedReadOnlyAt": "2026-08-24",
-  "observedHostedLatestMigration": {
+  "releaseBaselineHostedLatestMigration": {
     "version": "20260820160000",
     "name": "prepare_events_external_ingestion_rls"
+  },
+  "observedHostedLatestMigration": {
+    "version": "20260824103000",
+    "name": "harden_publication_gate_execute_privileges"
   },
   "canonicalColdStartBaseline": [
     "00000000000000_baseline_immigratiimprenditori.sql",
@@ -22,7 +26,7 @@
       "hostedName": "editorial_submission_country_labels"
     }
   },
-  "candidateDelta": [
+  "appliedReleaseDelta": [
     "20260820173000_harden_editorial_public_submission.sql",
     "20260821235000_prioritize_platform_languages.sql",
     "20260822120000_prepare_content_translation_groups.sql",
@@ -49,6 +53,14 @@
     "20260822213100_fix_hybrid_null_category_classifier.sql",
     "20260824103000_harden_publication_gate_execute_privileges.sql"
   ],
+  "candidateDelta": [],
+  "productionApplyEvidence": {
+    "phase1Run": 32699707002,
+    "phase2Run": 32706028947,
+    "securityPatchRun": 32707529881,
+    "migrationRowsAfterApply": 234,
+    "maxVersionAfterApply": "20260824103000"
+  },
   "releasePolicy": {
     "historicalMigrationsDirectoryIsNotBootstrap": true,
     "forbidWholeDirectoryDbPush": true,
