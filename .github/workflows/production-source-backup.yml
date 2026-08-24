@@ -1,3 +1,4 @@
+# Release-time backup refresh: 2026-08-24
 name: Production source logical backup
 
 on:
