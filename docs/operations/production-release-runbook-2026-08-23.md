@@ -1,35 +1,44 @@
 # Production release runbook — Centro Studi
 
-Data di riferimento: 2026-08-23  
-Stato: **PREPARATO — NON AUTORIZZA IL RILASCIO**  
+Data di riferimento: 2026-08-24  
+Stato: **DATABASE PRODUCTION ALLINEATO — GO-LIVE APPLICATIVO NON AUTORIZZATO**  
 Branch sorgente: `feature/research-radar-ai-knowledge-20260822`  
-Production branch corrente: `main` — da non modificare prima dei gate finali.
+Production branch corrente: `main` — non modificare prima dei gate finali e dell'autorizzazione esplicita.
 
-Questo runbook traduce `supabase/CS-PRODUCTION-RELEASE.json` in una sequenza operativa controllata. Non contiene credenziali e non autorizza alcuna scrittura su Production.
+Questo runbook descrive lo stato reale dopo il rilascio database autorizzato e la sequenza ancora necessaria per il go-live applicativo. Non contiene credenziali e **non autorizza merge, deploy, DNS o branch-protection write**.
 
 ## Regole inderogabili
 
-1. **Mai** eseguire `supabase db push` sull'intera directory storica `supabase/migrations` per questo rilascio.
-2. Le quattro baseline cold-start sono esclusivamente per ricostruzione locale e non vanno applicate al progetto hosted esistente.
-3. Le due migration repository già riconciliate con versioni hosted precedenti non vanno riapplicate.
-4. Prima di qualsiasi write Production occorre una nuova lettura dello storico migration hosted.
-5. Occorrono backup Production cifrato/checksum e restore drill **Production-source → non-Production** completato.
-6. Occorre autorizzazione esplicita prima dell'applicazione delle migration e una seconda autorizzazione separata prima del deploy Production.
-7. Le **24 candidate** vanno applicate **una alla volta, in ordine cronologico**, verificando l'esito prima di passare alla successiva.
-8. Al primo errore inatteso: **STOP**. Non ripetere alla cieca una migration parzialmente eseguita.
-9. Nessun contenuto viene auto-pubblicato durante il rilascio; Radar/AI restano review-only.
-10. Il form pubblico non è considerato Production-hardened finché il rate-limit persistente non è applicato e verificato live.
-11. Le Storie reali non sono un gate pre-go-live: outreach/interviste iniziano solo dopo sito online + live smoke PASS.
-12. La governance editoriale è **ibrida**: same-editor per contenuti ordinari, seconda approvazione distinta per contenuti sensibili/istituzionali, indicatori Osservatorio e correzioni sostanziali/retraction.
-13. Un PASS locale/CI non viene mai trasformato in PASS Production senza il corrispondente controllo live.
+1. Non usare `supabase db push` sull'intera directory storica `supabase/migrations` come meccanismo generico di rilascio.
+2. Le quattro baseline cold-start sono esclusivamente per ricostruzione locale.
+3. Le due migration repository riconciliate con versioni hosted precedenti non vanno riapplicate.
+4. Ogni futura migration Production richiede fresh hosted-state read, backup cifrato e autorizzazione esplicita.
+5. Merge/deploy Production richiedono autorizzazione esplicita **separata** dalle migration database.
+6. Nessun contenuto viene auto-pubblicato; Radar/AI/automazioni restano review-only.
+7. La governance editoriale resta **ibrida**: same-editor per contenuti ordinari; seconda approvazione distinta per contenuti sensibili/istituzionali, indicatori Osservatorio e correzioni sostanziali/retraction.
+8. Le Storie reali non sono gate pre-go-live; outreach e interviste iniziano solo dopo sito online + live smoke PASS.
+9. Un PASS CI non viene trasformato in PASS live senza il corrispondente controllo sul target reale.
+10. Al primo errore critico live: STOP; niente rollback improvvisati o catene di write alla cieca.
 
-## Stato hosted osservato
+## Stato hosted Production attuale
 
-Ultima migration Production osservata in sola lettura:
+Progetto Supabase: `hvfvfatlaspcpszgizhg` (`immigratiimprenditori`).
 
-`20260820160000_prepare_events_external_ingestion_rls`
+Migration ledger verificato dopo l'ultimo apply autorizzato:
 
-Questa fotografia va riletta immediatamente prima del rilascio. Se lo storico hosted è cambiato, il piano deve essere rigenerato e il rilascio si ferma.
+- righe: **234**;
+- ultima versione: **`20260824103000_harden_publication_gate_execute_privileges`**;
+- `candidateDelta` attuale: **0**;
+- `appliedReleaseDelta`: **25** migration del ciclo 2026-08-23/24.
+
+Il piano canonico `supabase/CS-PRODUCTION-RELEASE.json` distingue ora:
+
+- `releaseBaselineHostedLatestMigration = 20260820160000`;
+- `observedHostedLatestMigration = 20260824103000`;
+- `appliedReleaseDelta` = batch già applicato;
+- `candidateDelta = []`.
+
+Il guard `scripts/ci/production-migration-plan-smoke.mjs` verifica questa riconciliazione e blocca drift non classificato.
 
 ## Alias repository già applicate — NON RIAPPLICARE
 
@@ -38,303 +47,217 @@ Questa fotografia va riletta immediatamente prima del rilascio. Se lo storico ho
 | `20260820170000_editorial_foundation_v1.sql` | `20260819102530_editorial_foundation_v1` |
 | `20260820171000_editorial_submission_country_labels.sql` | `20260819103031_editorial_submission_country_labels` |
 
-## Candidate delta — ordine vincolante
+## Release database autorizzato — CHIUSO
 
-1. `20260820173000_harden_editorial_public_submission.sql`
-2. `20260821235000_prioritize_platform_languages.sql`
-3. `20260822120000_prepare_content_translation_groups.sql`
-4. `20260822130000_seed_atlas_italian_territories.sql`
-5. `20260822131000_seed_atlas_foreign_subnational_priorities.sql`
-6. `20260822132000_expand_oecd_birth_self_employment_atlas.sql`
-7. `20260822133000_expand_foreign_firms_all_italian_regions.sql`
-8. `20260822134000_add_atlas_origin_business_communities.sql`
-9. `20260822135000_add_foreign_firms_sector_evidence.sql`
-10. `20260822143000_publication_series_architecture.sql`
-11. `20260822150000_prepare_content_versions_and_corrections.sql`
-12. `20260822151000_prepare_author_profiles.sql`
-13. `20260822155000_knowledge_search_architecture.sql`
-14. `20260822161000_editorial_automation_architecture.sql`
-15. `20260822162500_editorial_activity_insert_policy.sql`
-16. `20260822172000_harden_content_publication_gate.sql`
-17. `20260822183000_persistent_public_submission_rate_limits.sql`
-18. `20260822184500_editorial_login_rate_limits.sql`
-19. `20260822190000_enforce_privileged_mfa_aal2.sql`
-20. `20260822210500_go_live_audit_analytics.sql`
-21. `20260822211500_fix_public_rls_mfa_compatibility.sql`
-22. `20260822212000_backfill_futurae_route_evidence.sql`
-23. `20260822213000_hybrid_editorial_review_governance.sql`
-24. `20260822213100_fix_hybrid_null_category_classifier.sql`
+### Fase 1 — migration #1–#19
 
-La #24 è una **forward-fix esplicita** scoperta dal test due-redattori: il classificatore originario poteva restituire `NULL` per contenuti ordinari senza `primary_category_code`. La correzione tratta tale assenza come non sensibile, salvo tipo sensibile o escalation manuale.
+- workflow run `32699707002`: **SUCCESS**;
+- applicazione esatta e ordinata #1–#19;
+- checkpoint publication gate: PASS;
+- rate-limit persistente: PASS;
+- login/Auth/MFA database gate: PASS;
+- arresto intenzionale al hold point MFA reale.
 
-Il guard `scripts/ci/production-migration-plan-smoke.mjs` verifica automaticamente che l'elenco resti completo, ordinato, senza duplicati e senza drift rispetto ai file post-cutoff del repository.
+### MFA privilegiato Production
 
-## Fase 0 — precondizioni editoriali e decisionali
+- nuovo account Auth reale collegato all'applicazione;
+- amministratori applicativi attivi: **2**;
+- fattori TOTP verificati collegati ad amministratore attivo: **1**;
+- `PRODUCTION_PRIVILEGED_MFA = PASS`.
 
-Prima di iniziare qualsiasi procedura live devono essere esplicitamente noti:
+Non rimuovere il vecchio amministratore di prova finché il nuovo account non è stato validato anche nel flusso applicativo reale Vercel con MFA/AAL2.
 
-- esito QA umano WCAG/device (#92), secondo `docs/operations/go-live-a-closure-kit-2026-08-23.md`;
-- esito revisione legale professionale finale, con handoff in `docs/operations/legal-professional-review-handoff-2026-08-23.md`;
-- governance review: **DECISA — modello ibrido**, validata nel laboratorio e da riverificare live dopo eventuale apply;
-- decisione required checks `main`;
-- identità del commit candidato e deployment Vercel candidato;
-- restore drill **Production-source → non-Production** completo e verificato;
-- enrollment/verifica MFA reale dell'account privilegiato Production.
+### Fase 2 — migration #20–#24
 
-Le Storie reali non sono una precondizione: la superficie `/storie` deve essere sana anche a zero contenuti reali e l'acquisizione editoriale parte soltanto dopo il live smoke.
+- workflow run `32706028947`: **SUCCESS**;
+- fresh encrypted hold-point backup: PASS;
+- artifact `9512307633`;
+- applicazione esatta e ordinata #20–#24: PASS;
+- audit/analytics, public RLS compatibility, Futurae backfill e governance ibrida: PASS;
+- postflight: PASS.
 
-## Fase 1 — fresh read-only audit Production
+### Fase 3 — privilege hardening #25
 
-Eseguire senza write:
+Migrazione:
 
-- stato progetto Supabase;
-- storico migration hosted e ultima versione;
-- Security Advisor;
-- conteggi/visibilità minimi di contenuti, eventi, account, fonti;
-- configurazione Auth rilevante;
-- inventario account privilegiati e fattori MFA;
-- stato DNS/hosting candidato.
-
-**Hold point A:** se l'ultima migration hosted non è ancora `20260820160000`, fermarsi e riconciliare il piano.
-
-## Fase 2 — backup e restore drill
-
-### 2A. Drill tecnico CI — CHIUSO
-
-Il laboratorio ha già completato un vero ciclo di recovery contro un **secondo stack Supabase-managed fresco**:
-
-1. dump logico `roles.sql`, `schema.sql`, `data.sql` tramite Supabase CLI;
-2. verifica preflight dei componenti;
-3. normalizzazione chirurgica del solo privilegio platform-managed `log_min_messages` nel role dump;
-4. stop dello stack sorgente;
-5. avvio di uno stack Supabase fresco senza migration applicative preinstallate;
-6. restore ruoli/schema/dati;
-7. reattach idempotente del solo hook applicativo `on_auth_user_created` su `auth.users` tramite `scripts/ci/post-restore-auth-hooks.sql`;
-8. verifica tabelle critiche e RLS;
-9. Auth integration smoke con due utenti effimeri reali;
-10. verifica provisioning `public.profiles`, login password, JWT/RPC, contributor/editor separation e auto-elevazione negata;
-11. build applicativa contro il database ripristinato;
-12. HTTP/security smoke;
-13. browser E2E autenticato;
-14. cleanup stack/utenti effimeri.
-
-Esito:
-
-`CI_EPHEMERAL_RESTORE_DRILL = PASS`
-
-Il precedente errore su:
-
-`GRANT SET ON PARAMETER "log_min_messages" ...`
-
-è chiuso. È chiuso anche il successivo problema del trigger applicativo su `auth.users` non incluso dal logical dump: il post-restore script ricrea soltanto quell'hook e ne verifica la presenza.
-
-### 2B. Drill da sorgente Production reale — CHIUSO
-
-Il drill con sorgente **Production reale** è stato completato il 2026-08-23 sul progetto non-Production `immigratiimprenditori-staging` dopo backup cifrato dello staging preesistente.
+`20260824103000_harden_publication_gate_execute_privileges.sql`
 
 Evidenza canonica:
 
-`docs/operations/production-source-restore-drill-2026-08-23.md`
+`docs/operations/production-security-patch-2026-08-24.md`
 
-Risultati principali:
+- workflow run `32707529881`: **SUCCESS**;
+- fresh encrypted pre-patch backup: PASS;
+- artifact `9512852962`;
+- digest `sha256:bc96aa18621f58cd397cae13dfc869cdae67924df28796445412ee6e6eee5cb6`;
+- direct EXECUTE su `enforce_content_human_publication_gate()` per `anon`: **NO**;
+- per `authenticated`: **NO**;
+- per `service_role`: **NO**;
+- trigger `contents_human_publication_gate`: **PRESENTE**;
+- fresh Security Advisor: warning specifico sulla funzione publication-gate **rimosso**.
 
-1. backup logico cifrato della Production reale: **PASS** — run `32669477733`;
-2. backup cifrato dello staging pre-overwrite: **PASS** — run `32669477735`;
-3. restore atomico Production → staging: **PASS** — run `32669477734`;
-4. postflight indipendente read-only: **PASS** — run `32669477774`, rerun job `97268700919`;
-5. parità verificata per schema pubblico, dati chiave, migration ledger, RLS, grants, funzioni e Auth applicativo;
-6. nessun orphan `accounts`/`profiles` rispetto ad Auth;
-7. Security Advisor staging senza regressioni rispetto alla Production;
-8. workflow distruttivo rimosso dal branch operativo e PR #11 chiusa senza merge.
+`PRODUCTION_MIGRATIONS_1_25 = PASS`  
+`PRODUCTION_SECURITY_PATCH = PASS`
 
-Parità quantitativa finale: contents `31/31`, indicatori `4/4`, lingue `30/30`, accounts `1/1`, profiles `1/1`, `auth.users` `1/1`, `auth.identities` `1/1`, migration ledger `209/209`, max version `20260820160000` su entrambi.
+## Backup / restore — CHIUSO
+
+### Drill tecnico CI
+
+`CI_EPHEMERAL_RESTORE_DRILL = PASS`
+
+Comprende dump logico, restore su stack Supabase-managed fresco, reattach dell'hook applicativo Auth, RLS/security smoke, utenti Auth effimeri reali, build, HTTP smoke ed E2E autenticato.
+
+### Drill da sorgente Production reale
 
 `PRODUCTION_SOURCE_RESTORE_DRILL = PASS`
 
-Il backup usato come evidenza ha retention GitHub finita; immediatamente prima di un futuro apply Production autorizzato restano obbligatori un **fresh hosted-state read** e un **fresh Production backup**.
+Evidenza:
 
-**Hold point B: CHIUSO.** Il superamento di questo hold point non autorizza le migration Production.
+`docs/operations/production-source-restore-drill-2026-08-23.md`
 
-## Fase 2C — enrollment MFA privilegiato Production
+Run principali:
 
-Il codice applicativo supporta enrollment e verifica TOTP tramite l'area MFA. L'operazione reale resta una write Auth Production e richiede intervento dell'utente privilegiato.
+- Production encrypted logical backup `32669477733`: PASS;
+- staging preservation backup `32669477735`: PASS;
+- atomic Production → staging restore `32669477734`: PASS;
+- independent read-only comparison `32669477774`, rerun job `97268700919`: PASS.
 
-Sequenza operativa dopo che la migration MFA è presente nel target live autorizzato:
+Il vecchio staging è stato preservato prima dell'overwrite. Production e staging risultavano pari sullo stato pre-release verificato. I backup GitHub hanno retention finita e non sostituiscono una strategia archivistica permanente.
 
-1. accedere con l'account privilegiato corretto;
-2. aprire `/app/mfa` / superficie sicurezza prevista dall'applicazione;
-3. selezionare **Aggiungi autenticatore**;
-4. scansionare il QR con un'app TOTP controllata oppure usare il secret mostrato;
-5. inserire il codice TOTP a 6 cifre e completare **Verifica e attiva**;
-6. verificare che il fattore risulti `verified` e che la sessione sia `aal2`;
-7. effettuare logout/login o nuova sessione e verificare che l'accesso privilegiato a AAL1 venga bloccato;
-8. completare il challenge del fattore esistente e verificare il passaggio ad AAL2;
-9. confermare l'accesso alle funzioni privilegiate solo dopo AAL2;
-10. rileggere in sola lettura `auth.mfa_factors` e l'inventario dei ruoli per registrare il risultato.
+## Security Advisor dopo il database release
 
-Non rimuovere l'ultimo fattore verificato durante il collaudo. Non copiare QR/secret TOTP nei log, ticket o repository.
+Il finding critico aggiuntivo sulla funzione trigger-only publication gate è chiuso dalla #25.
 
-`PRODUCTION_PRIVILEGED_MFA = PENDING` finché l'enrollment reale non è completato e verificato.
+Restano avvisi separati da non trattare automaticamente come vulnerabilità senza contesto:
 
-## Fase 3 — autorizzazione migration
+- `submit_editorial_contribution(...)` eseguibile anon/authenticated: **contratto intenzionale del form pubblico**, da mantenere dietro validazione/rate-limit;
+- helper ruolo/sessione e RPC self-service eseguibili da `authenticated`: **contratti applicativi intenzionali**, da mantenere con controlli interni e RLS;
+- `content_translation_groups` e `request_rate_limit_buckets`: RLS attivo senza client policy, asset volutamente non pubblici; advisory INFO;
+- leaked password protection: attualmente disabilitata/non disponibile nella configurazione in uso; resta voce di hardening da rivalutare con piano/configurazione Auth.
 
-Richiedere autorizzazione esplicita per l'applicazione delle **24 candidate**. L'autorizzazione deve riferirsi al commit candidato e allo storico hosted appena verificato.
+Ogni nuovo advisor WARN non già classificato richiede triage prima del go-live.
 
-**Hold point C:** senza autorizzazione non eseguire alcuna write.
+## Gate pre-go-live ancora aperti
 
-## Fase 4 — applicazione una per una
+### A. QA umano WCAG 2.2 AA / device — PENDING
 
-Per ogni migration candidate:
+Usare:
 
-1. rileggere il file che si sta per applicare;
-2. verificare che corrisponda al commit autorizzato;
-3. applicare soltanto quel file;
-4. controllare esito SQL e migration history;
-5. se l'operazione fallisce o restituisce stato ambiguo: STOP;
-6. non passare al file successivo finché l'esito non è deterministico.
+`docs/operations/go-live-a-closure-kit-2026-08-23.md`
 
-### Checkpoint sicurezza obbligatorio dopo #16
+Il gate richiede record umano compilato su candidato Vercel con almeno desktop, tablet, mobile, tastiera, screen reader, zoom/reflow, RTL e moduli/Auth.
 
-Dopo `20260822172000_harden_content_publication_gate.sql` verificare:
+`HUMAN_WCAG_DEVICE_QA = PENDING`
 
-- anon non può pubblicare;
-- contributor non può auto-elevarsi;
-- editor/admin gate ancora coerente;
-- nessun bypass service-role applicativo di pubblicazione.
+### B. Revisione legale professionale — PENDING
 
-### Checkpoint form obbligatorio dopo #17
+Usare:
 
-Dopo `20260822183000_persistent_public_submission_rate_limits.sql` verificare live:
+`docs/operations/legal-professional-review-handoff-2026-08-23.md`
 
-- tabella rate-limit non leggibile/scrivibile dai client;
-- chiavi archiviate come hash, non e-mail raw;
-- soglia per e-mail operativa;
-- soglia globale operativa;
-- submission valida continua ad arrivare in Inbox;
-- nessuna auto-pubblicazione.
+Il dossier tecnico non sostituisce il parere professionale. Privacy, Cookie, Termini, contributi, fornitori/trasferimenti, retention e IP devono avere sign-off.
 
-### Checkpoint Auth obbligatorio dopo #18–#19
+`LEGAL_PROFESSIONAL_REVIEW = PENDING`
 
-Verificare:
+### C. Required checks `main` — PENDING
 
-- login rate limiting;
-- contributor/editor separation;
-- AAL1 negato alle operazioni privilegiate;
-- TOTP/AAL2 configurato e funzionante per ruoli privilegiati;
-- auto-elevazione negata.
+Lo stato corrente di `main` va mantenuto invariato fino alla decisione. Nessuna branch-protection write è autorizzata in questo runbook.
 
-### Checkpoint audit/analytics dopo #20–#21
+Proposta minima da validare prima dell'attivazione:
 
-Verificare:
+- `Editorial v1 CI / verify`;
+- `Supabase local migration validation / validate-local-database`;
+- Vercel preview check del progetto corretto, una volta risolta la visibilità/control-plane.
 
-- audit canonico;
-- analytics aggregate e cookie-less secondo configurazione autorizzata;
-- letture pubbliche compatibili con MFA/RLS;
-- nessuna regressione nelle pagine anonime.
+Netlify non deve diventare required check del percorso finale Vercel.
 
-### Checkpoint governance ibrida dopo #23–#24
+### D. Vercel Pro control-plane / candidato — PENDING
 
-Dopo `20260822213000_hybrid_editorial_review_governance.sql` e la forward-fix `20260822213100_fix_hybrid_null_category_classifier.sql` verificare:
+Il team collegato `Inquotus' projects` risulta **Pro**.
 
-- un contenuto ordinario resta pubblicabile dal medesimo redattore;
-- un contenuto ordinario senza categoria non viene classificato sensibile per il solo `NULL`;
-- un contenuto sensibile non è pubblicabile senza review;
-- il richiedente non può approvare la propria review;
-- un secondo account redazionale può approvare;
-- una modifica successiva rende stale l'approvazione precedente;
-- una nuova review sul nuovo fingerprint consente la pubblicazione;
-- gli indicatori Osservatorio richiedono seconda review;
-- correzioni pubbliche `substantive`/`retraction` richiedono seconda review;
-- registro review non cancellabile dagli utenti applicativi;
-- nessun bypass AI/Radar/service-role.
+GitHub continua a ricevere check Vercel **SUCCESS** per:
 
-## Fase 5 — smoke DB/API immediato
+- `Vercel – immigratiimprenditori`;
+- `Vercel – immigratiimprenditori-preview`.
 
-Dopo tutte le migration eseguire almeno:
+Tuttavia il connettore Vercel corrente elenca soltanto `inquotus-next`; lookup diretti di `immigratiimprenditori`, `immigratiimprenditori-preview` e dei deployment ID esposti dai check GitHub restituiscono 404.
 
-- DB lint pertinente;
-- RLS/publication smoke;
-- smoke 4-eyes con due account redattore distinti;
-- rate-limit smoke;
-- Auth/MFA smoke;
-- version ledger/audit smoke;
-- query pubbliche Osservatorio/Atlante/Rotte;
-- contribution intake senza pubblicazione;
-- Security Advisor read-only di confronto.
+Classificazione: `VERCEL_CONTROL_PLANE_VISIBILITY = PENDING`.
 
-Se un controllo critico fallisce, il deploy applicativo non parte.
+Questo problema **non invalida i check GitHub già riusciti**, ma impedisce di considerare verificato il progetto Vercel definitivo e di fare smoke protetto/control-plane con sufficiente certezza. Nessun deploy è stato tentato per aggirarlo.
+
+Netlify resta fuori dal target finale; la sua integrazione storica va dismessa separatamente solo quando è certo che non serva più come fallback/preview e senza confonderla con il deploy Production Vercel.
+
+## Sequenza successiva consentita senza deploy
+
+1. attendere CI verde sul HEAD riconciliato del candidato;
+2. completare QA umano/device sul candidato Vercel identificato;
+3. ottenere sign-off legale professionale;
+4. risolvere la visibilità del progetto Vercel e identificare con certezza Preview/Production;
+5. decidere required checks `main`;
+6. validare login + MFA/AAL2 del nuovo amministratore sul vero candidato Vercel;
+7. soltanto dopo questi PASS, chiedere autorizzazione separata per merge/deploy.
+
+## Merge/deploy Production — NON AUTORIZZATO
+
+Migration database riuscite **non autorizzano automaticamente** il rilascio applicativo.
+
+Prima dell'eventuale autorizzazione merge/deploy devono essere noti:
+
+- commit candidato esatto;
+- CI completo verde;
+- Vercel project/deployment esatto;
+- QA umano/device PASS;
+- legal PASS;
+- required-check governance decisa;
+- secrets/config Production verificati senza esposizione;
+- Auth/MFA reale verificata nell'app;
+- CSP/header e `NEXT_PUBLIC_SITE_URL` coerenti.
+
+## Smoke live post-deploy — da eseguire soltanto dopo autorizzazione
+
+Verificare almeno:
+
+- homepage 2xx, H1 e canonical;
+- robots/noindex coerenti;
+- sette lingue core e RTL;
+- Osservatorio/Atlante/Rotte;
+- `/storie` anche a zero contenuti reali;
+- `/contribuisci` con rate limiting;
+- `/accedi`, contributor e redazione MFA/AAL2;
+- governance 4-eyes sulle superfici sensibili;
+- CSP/security headers, nessun `unsafe-eval`;
+- performance/LCP live;
+- log Vercel/Supabase senza errori critici;
+- nessuna pubblicazione automatica.
+
+Solo dopo il live smoke PASS possono iniziare outreach, interviste e acquisizione delle prime Storie reali.
 
 ## Strategia di errore / rollback
 
-Non esiste un generico “rollback automatico” affidabile per una catena di migration DDL/DML già parzialmente applicata.
+Non esiste un rollback automatico generico affidabile per una catena DDL/DML già applicata.
 
-- **prima scelta:** stop immediato + diagnosi + forward-fix piccolo e revisionato quando lo stato DB è integro;
-- **restore:** usare il backup pre-release quando lo stato è corrotto, non deterministico o non recuperabile in sicurezza;
+- prima scelta: STOP + diagnosi + forward-fix piccolo e revisionato quando lo stato DB è integro;
+- restore: usare un backup pre-release quando lo stato è corrotto/non deterministico/non recuperabile in sicurezza;
 - non improvvisare `DROP`, `TRUNCATE` o reverse migration non provate;
-- non continuare la catena dopo un errore per “vedere se si sistema”.
+- non proseguire dopo un errore critico solo per verificare “se poi si sistema”.
 
-## Fase 6 — build/deploy Production Vercel separato
+## Stato attuale sintetico
 
-Migration Production riuscite **non autorizzano automaticamente il deploy**.
-
-Prima del deploy:
-
-- CI candidato verde;
-- deployment Vercel candidato identificato e configurato;
-- visual/device QA completato;
-- CSP/header verificati;
-- secrets Production verificati senza esposizione;
-- `NEXT_PUBLIC_SITE_URL` HTTPS verificata;
-- configurazione Auth Production verificata;
-- gate editoriali/legal chiusi.
-
-Richiedere autorizzazione esplicita separata per merge/deploy.
-
-## Fase 7 — smoke live post-deploy
-
-Subito dopo l'eventuale deploy autorizzato verificare:
-
-- homepage 2xx e H1 unico;
-- canonical/noindex/robots coerenti con Production;
-- sette lingue core e RTL;
-- Osservatorio/Atlante/Rotte;
-- `/contribuisci` con rate limiting attivo;
-- `/accedi` e area contributor;
-- redazione MFA/AAL2;
-- governance 4-eyes sulle superfici sensibili;
-- security headers/CSP exact-origin;
-- nessun `unsafe-eval`;
-- performance/LCP candidato live;
-- error log Vercel/Supabase;
-- nessun contenuto pubblicato automaticamente.
-
-## Stato attuale
-
-- candidate migration: **24/24 validate**;
-- destructive schema operations rilevate dal guard: **0**;
-- standalone cold-start: **PASS**;
-- PostgreSQL lint: **PASS**;
-- publication/RLS smoke: **PASS**;
-- governance ibrida due-redattori: **PASS**;
-- persistent rate-limit smoke: **PASS**;
-- go-live DB smoke: **PASS**;
-- logical backup locale Supabase: **PASS**;
-- clean Supabase-managed restore: **PASS**;
-- post-restore Auth hook: **PASS**;
-- Auth integration reale su utenti effimeri: **PASS**;
-- build contro DB ripristinato: **PASS**;
-- HTTP/security smoke contro DB ripristinato: **PASS**;
-- browser E2E autenticato contro DB ripristinato: **PASS**;
-- Editorial CI sul candidato funzionale: **PASS**;
+- Production migration ledger: **234**, max `20260824103000`;
+- candidate DB migration: **0**;
+- Production migration #1–#25: **PASS**;
+- publication-gate direct EXECUTE hardening: **PASS**;
+- MFA privilegiato Production: **PASS**;
 - Production-source restore drill: **PASS**;
-- QA umano/device #92: **PENDING**;
-- revisione legale professionale: **PENDING**;
-- MFA privilegiato Production: **PENDING**;
-- first source-health run default branch: **PENDING POST-MERGE**;
+- CI ephemeral restore: **PASS**;
+- governance ibrida DB: **ATTIVA IN PRODUCTION**;
+- persistent rate-limit DB: **ATTIVO IN PRODUCTION**;
+- QA umano/device: **PENDING**;
+- legal professionale: **PENDING**;
+- Vercel control-plane alignment: **PENDING**;
 - required checks `main`: **PENDING / NON MODIFICATI**;
-- Production DB writes in questo ciclo: **0**;
-- Production deploy in questo ciclo: **0**;
-- `main` modificato: **NO**;
-- governance editoriale: **IBRIDA — DECISA / VALIDATA NEL LABORATORIO, NON ATTIVA IN PRODUCTION**;
-- rate-limit Production: **PENDING APPLY AUTORIZZATO**;
-- merge/deploy: **NON AUTORIZZATI**.
+- application Production deploy: **0 / NON AUTORIZZATO**;
+- `main` modificato durante questo ciclo: **NO**.
+
+`PRODUCTION_READINESS = NOT PASS` finché i gate pre-go-live rimanenti non sono chiusi.
