@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "hostedProjectRef": "hvfvfatlaspcpszgizhg",
-  "verifiedReadOnlyAt": "2026-08-23",
+  "verifiedReadOnlyAt": "2026-08-24",
   "observedHostedLatestMigration": {
     "version": "20260820160000",
     "name": "prepare_events_external_ingestion_rls"
@@ -46,7 +46,8 @@
     "20260822211500_fix_public_rls_mfa_compatibility.sql",
     "20260822212000_backfill_futurae_route_evidence.sql",
     "20260822213000_hybrid_editorial_review_governance.sql",
-    "20260822213100_fix_hybrid_null_category_classifier.sql"
+    "20260822213100_fix_hybrid_null_category_classifier.sql",
+    "20260824103000_harden_publication_gate_execute_privileges.sql"
   ],
   "releasePolicy": {
     "historicalMigrationsDirectoryIsNotBootstrap": true,
