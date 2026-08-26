@@ -167,6 +167,7 @@ jobs:
           # files remain intentionally excluded from this cold start.
           cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
           cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260824103000_harden_publication_gate_execute_privileges.sql supabase/migrations/
 
           echo "Standalone cold-start chain:"
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort

@@ -34,20 +34,22 @@ Stato verificato dopo il cutover:
 - 1 `auth.users` / 1 profilo / 1 account
 - 1 ruolo attivo `amministratore_applicativo`
 
-## Hosted Production — verifica read-only 23/08/2026
+## Hosted Production — verifica read-only 24/08/2026
 
 La migration history del progetto hosted è stata riletta senza scritture. L'ultima migration osservata è:
 
-`20260820160000_prepare_events_external_ingestion_rls`
+`20260824103000_harden_publication_gate_execute_privileges`
 
-Due file repository successivi a quel timestamp sono alias di migration **già applicate** con versioni hosted precedenti:
+Il cutoff Production corrente è `20260824103000` (234 migration hosted). Qualunque file repository con timestamp `<=` a questo cutoff **non** è un candidato di rilascio.
+
+Due file repository restano alias storici di migration **già applicate** con versioni hosted precedenti. Restano in `alreadyAppliedRepositoryAliases` e non appartengono al delta futuro:
 
 - repository `20260820170000_editorial_foundation_v1.sql` → hosted `20260819102530_editorial_foundation_v1`;
 - repository `20260820171000_editorial_submission_country_labels.sql` → hosted `20260819103031_editorial_submission_country_labels`.
 
 Non devono essere riapplicati.
 
-Il delta candidato successivo è registrato, in ordine, in `supabase/CS-PRODUCTION-RELEASE.json`. Alla verifica del 23/08/2026 contiene 22 migration a partire da `20260820173000_harden_editorial_public_submission.sql` e fino a `20260822212000_backfill_futurae_route_evidence.sql`.
+Le 25 migration che in precedenza formavano il delta (da `20260820173000_harden_editorial_public_submission.sql` fino a `20260824103000_harden_publication_gate_execute_privileges.sql`) risultano già applicate in Production. `candidateDelta` in `supabase/CS-PRODUCTION-RELEASE.json` è quindi `[]`. Uno stato vuoto è valido e non autorizza nuove scritture.
 
 La migration history hosted deve essere riletta immediatamente prima di qualsiasi rilascio: il file JSON è un'evidenza dello stato osservato, non un'autorizzazione permanente alla scrittura.
 

@@ -1,7 +1,7 @@
 # Centro Studi — runbook migration production e rollback
 
-Stato: **PREPARATO / NON ESEGUITO IN PRODUCTION**  
-Data verifica read-only: **23 agosto 2026**
+Stato: **PRODUCTION SCHEMA ALLINEATO AL CUTOFF 20260824103000 / NESSUN DELTA CANDIDATO APERTO**  
+Data verifica read-only: **24 agosto 2026**
 
 Questo documento disciplina esclusivamente il rilascio del database Centro Studi sul progetto Supabase hosted `hvfvfatlaspcpszgizhg`. Non autorizza alcuna migration o deploy.
 
@@ -19,13 +19,17 @@ Questo documento disciplina esclusivamente il rilascio del database Centro Studi
 
 ## 2. Stato hosted osservato
 
-La lettura delle migration hosted del 23/08/2026 mostra come ultima migration:
+La lettura delle migration hosted del 24/08/2026 mostra come ultima migration:
 
-`20260820160000_prepare_events_external_ingestion_rls`
+`20260824103000_harden_publication_gate_execute_privileges`
 
-Le **24 migration** elencate in `candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` non risultavano ancora applicate al momento della verifica.
+Il progetto hosted risulta a **234 migration**. Il cutoff Production corrente è `20260824103000`. Le 25 migration repository che in precedenza costituivano il `candidateDelta` (da `20260820173000_harden_editorial_public_submission.sql` fino a `20260824103000_harden_publication_gate_execute_privileges.sql`) sono già applicate e **non** sono più candidate.
 
-Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano.
+`candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` è quindi `[]`. Uno stato vuoto è valido: non autorizza scritture e non richiede applicazione.
+
+Gli alias storici repository/hosted restano dichiarati in `alreadyAppliedRepositoryAliases` e **non** vanno mescolati con eventuali migration future.
+
+Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano. Qualunque file con timestamp `<= 20260824103000` proposto come candidato deve essere rifiutato.
 
 ## 3. Precondizioni obbligatorie
 
@@ -50,13 +54,16 @@ Usare esclusivamente l'array ordinato `candidateDelta` in `CS-PRODUCTION-RELEASE
 
 Il gate `scripts/ci/production-migration-plan-smoke.mjs` verifica che:
 
-- tutti i file dichiarati esistano;
-- l'ordine sia cronologico e senza duplicati;
-- ogni file repository successivo al cutoff hosted sia classificato come alias già applicato oppure come candidato;
-- i gate security/governance critici, inclusa la governance ibrida 4-eyes e la relativa forward-fix del classificatore `NULL`, restino esplicitamente presenti nel piano;
+- `candidateDelta: []` sia uno stato valido;
+- tutti i file dichiarati come alias o candidati esistano;
+- l'ordine dei candidati, se presenti, sia cronologico e senza duplicati;
+- nessun candidato abbia timestamp `<=` al cutoff Production corrente;
+- gli alias storici restino separati dall'elenco delle migration future;
+- ogni file repository successivo al cutoff hosted, esclusi gli alias storici, sia classificato come candidato;
+- i gate security/governance critici restino presenti nel repository anche quando il delta corrente è zero, inclusa `20260824103000_harden_publication_gate_execute_privileges.sql`, la governance ibrida 4-eyes e la relativa forward-fix del classificatore `NULL`;
 - nessun candidato contenga `DROP TABLE`, `DROP SCHEMA`, `TRUNCATE` o `DROP COLUMN` non consentiti dal gate.
 
-Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente.
+Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente. Con delta vuoto non applicare nulla.
 
 ## 5. Esecuzione production — solo dopo autorizzazione
 
