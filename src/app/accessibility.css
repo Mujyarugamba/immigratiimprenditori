@@ -16,6 +16,23 @@
   outline-color: var(--gold-deep);
 }
 
+/*
+ * editorial-identity.css intentionally flattens the palette, but its generic
+ * .eyebrow rule is declared after .eyebrow-gold. Reassert the intended light
+ * label only when both classes are present on dark editorial panels.
+ */
+.eyebrow.eyebrow-gold {
+  color: #f0f0ec;
+}
+
+/*
+ * The empty featured state is a grid child. Give it an explicit paper surface
+ * so its dark editorial text never sits on the grid's black gap background.
+ */
+.featured-empty {
+  background: #ffffff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
