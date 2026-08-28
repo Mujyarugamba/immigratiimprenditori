@@ -1,7 +1,11 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "hostedProjectRef": "hvfvfatlaspcpszgizhg",
   "verifiedReadOnlyAt": "2026-08-24",
+  "releaseBaselineHostedLatestMigration": {
+    "version": "20260820160000",
+    "name": "prepare_events_external_ingestion_rls"
+  },
   "observedHostedLatestMigration": {
     "version": "20260824103000",
     "name": "harden_publication_gate_execute_privileges"
@@ -22,7 +26,41 @@
       "hostedName": "editorial_submission_country_labels"
     }
   },
+  "appliedReleaseDelta": [
+    "20260820173000_harden_editorial_public_submission.sql",
+    "20260821235000_prioritize_platform_languages.sql",
+    "20260822120000_prepare_content_translation_groups.sql",
+    "20260822130000_seed_atlas_italian_territories.sql",
+    "20260822131000_seed_atlas_foreign_subnational_priorities.sql",
+    "20260822132000_expand_oecd_birth_self_employment_atlas.sql",
+    "20260822133000_expand_foreign_firms_all_italian_regions.sql",
+    "20260822134000_add_atlas_origin_business_communities.sql",
+    "20260822135000_add_foreign_firms_sector_evidence.sql",
+    "20260822143000_publication_series_architecture.sql",
+    "20260822150000_prepare_content_versions_and_corrections.sql",
+    "20260822151000_prepare_author_profiles.sql",
+    "20260822155000_knowledge_search_architecture.sql",
+    "20260822161000_editorial_automation_architecture.sql",
+    "20260822162500_editorial_activity_insert_policy.sql",
+    "20260822172000_harden_content_publication_gate.sql",
+    "20260822183000_persistent_public_submission_rate_limits.sql",
+    "20260822184500_editorial_login_rate_limits.sql",
+    "20260822190000_enforce_privileged_mfa_aal2.sql",
+    "20260822210500_go_live_audit_analytics.sql",
+    "20260822211500_fix_public_rls_mfa_compatibility.sql",
+    "20260822212000_backfill_futurae_route_evidence.sql",
+    "20260822213000_hybrid_editorial_review_governance.sql",
+    "20260822213100_fix_hybrid_null_category_classifier.sql",
+    "20260824103000_harden_publication_gate_execute_privileges.sql"
+  ],
   "candidateDelta": [],
+  "productionApplyEvidence": {
+    "phase1Run": 32699707002,
+    "phase2Run": 32706028947,
+    "securityPatchRun": 32707529881,
+    "migrationRowsAfterApply": 234,
+    "maxVersionAfterApply": "20260824103000"
+  },
   "releasePolicy": {
     "historicalMigrationsDirectoryIsNotBootstrap": true,
     "forbidWholeDirectoryDbPush": true,
