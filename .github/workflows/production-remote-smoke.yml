@@ -29,7 +29,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Preflight authorization
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preflight authorization and promoted ref
         env:
           APPROVED_SHA: ${{ inputs.approved_sha }}
           CONFIRMATION: ${{ inputs.confirmation }}
@@ -48,8 +51,17 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout
-        uses: actions/checkout@v4
+          production_sha="$(git ls-remote --heads origin refs/heads/production | awk '{print $1}')"
+          if [[ -z "$production_sha" ]]; then
+            echo "production branch does not exist" >&2
+            exit 1
+          fi
+          if [[ "$production_sha" != "$APPROVED_SHA" ]]; then
+            echo "production has not been promoted to the approved main SHA" >&2
+            echo "production=$production_sha approved=$APPROVED_SHA" >&2
+            exit 1
+          fi
+          echo "PRODUCTION_SMOKE_PREFLIGHT = PASS"
 
       - name: Setup Node
         uses: actions/setup-node@v4
