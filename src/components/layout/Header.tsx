@@ -87,7 +87,7 @@ export function Header() {
               alt="Immigrati Imprenditori"
               width={360}
               height={120}
-              sizes="235px"
+              sizes="(max-width: 580px) 170px, 235px"
               priority
               className="brand-logo"
             />

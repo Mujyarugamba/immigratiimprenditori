@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { localeFromPathname, localizedHref } from "@/lib/i18n/navigation";
@@ -19,11 +20,12 @@ export function Footer() {
       <div className="site-container footer-grid">
         <div className="footer-brand">
           <div className="footer-logo-shell">
-            <img
+            <Image
               src="/logo-immigrati-imprenditori.png"
               alt="Immigrati Imprenditori"
-              width="300"
-              height="100"
+              width={300}
+              height={100}
+              sizes="300px"
               className="footer-logo"
             />
           </div>
