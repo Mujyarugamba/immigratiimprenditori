@@ -30,15 +30,17 @@ test("localized SEO URLs keep Italian unprefixed and expose seven-language alter
   assert.equal(alternates["x-default"], "https://immigratiimprenditori.it/fonti");
 });
 
-test("hosted previews are globally noindex while hosted production remains crawlable", () => {
+test("hosted and explicitly read-only previews are noindex while writable production is crawlable", () => {
   const previous = {
     NETLIFY: process.env.NETLIFY,
     CONTEXT: process.env.CONTEXT,
     VERCEL: process.env.VERCEL,
     VERCEL_ENV: process.env.VERCEL_ENV,
+    NEXT_PUBLIC_PREVIEW_READ_ONLY: process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY,
   };
 
   try {
+    delete process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY;
     delete process.env.VERCEL;
     delete process.env.VERCEL_ENV;
     process.env.NETLIFY = "true";
@@ -56,6 +58,7 @@ test("hosted previews are globally noindex while hosted production remains crawl
     });
 
     process.env.VERCEL_ENV = "production";
+    delete process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY;
     const production = robots();
     assert.deepEqual(production.rules, [
       { userAgent: "*", allow: "/", disallow: ["/app/", "/accedi"] },
@@ -65,6 +68,11 @@ test("hosted previews are globally noindex while hosted production remains crawl
       "https://immigratiimprenditori.it/sitemap-contributors.xml",
     ]);
     assert.equal(production.host, "https://immigratiimprenditori.it");
+
+    process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY = "true";
+    assert.deepEqual(robots(), {
+      rules: [{ userAgent: "*", disallow: "/" }],
+    });
   } finally {
     for (const [name, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[name];
