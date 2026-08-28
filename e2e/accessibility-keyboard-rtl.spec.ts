@@ -21,23 +21,25 @@ async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
 test("core search and authentication controls are keyboard reachable", async ({ page }) => {
   await page.goto("/cerca", { waitUntil: "domcontentloaded" });
 
-  const search = page.getByLabel("Cerca nel Centro Studi", { exact: true });
-  const kind = page.getByLabel("Tipo di risultato", { exact: true });
-  const year = page.getByLabel("Anno", { exact: true });
-  const searchSubmit = page.getByRole("button", { name: "Cerca", exact: true });
+  const search = page.locator("#site-search");
+  const kind = page.locator("#search-kind");
+  const year = page.locator("#search-year");
+  const searchSubmit = page.locator('form[method="get"] button[type="submit"]');
 
   for (const control of [search, kind, year, searchSubmit]) {
+    await expect(control).toHaveCount(1);
     await tabUntilFocused(page, control);
     await expect(control).toBeFocused();
   }
 
   await page.goto("/accedi", { waitUntil: "domcontentloaded" });
 
-  const email = page.getByLabel("Email", { exact: true });
-  const password = page.getByLabel("Password", { exact: true });
-  const loginSubmit = page.getByRole("button", { name: "Accedi", exact: true });
+  const email = page.locator("#email");
+  const password = page.locator("#password");
+  const loginSubmit = page.locator('#login-form button[type="submit"]');
 
   for (const control of [email, password, loginSubmit]) {
+    await expect(control).toHaveCount(1);
     await tabUntilFocused(page, control);
     await expect(control).toBeFocused();
   }
@@ -48,16 +50,17 @@ test("contribution form remains keyboard reachable through privacy and submit", 
   await page.goto("/contribuisci", { waitUntil: "domcontentloaded" });
 
   const controls = [
-    page.getByLabel("Tipo di proposta", { exact: true }),
-    page.getByLabel("Testo della proposta", { exact: true }),
-    page.getByLabel("Nome e cognome", { exact: true }),
-    page.getByLabel("Email", { exact: true }),
-    page.locator('input[name="consent_contact"]'),
-    page.locator('input[name="consent_publication"]'),
-    page.getByRole("button", { name: "Invia alla redazione", exact: true }),
+    page.locator('[name="submission_kind"]'),
+    page.locator('[name="contribution_text"]'),
+    page.locator('[name="submitter_name"]'),
+    page.locator('[name="submitter_email"]'),
+    page.locator('[name="consent_contact"]'),
+    page.locator('[name="consent_publication"]'),
+    page.locator('#modulo-partecipazione button[type="submit"]'),
   ];
 
   for (const control of controls) {
+    await expect(control).toHaveCount(1);
     await tabUntilFocused(page, control, 35);
     await expect(control).toBeFocused();
     const box = await control.boundingBox();
