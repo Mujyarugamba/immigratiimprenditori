@@ -1,9 +1,9 @@
 # Vercel Production runbook — stato riconciliato 28 agosto 2026
 
-Stato: **PREVIEW ALLINEATO / PRODUCTION APPLICATION DEPLOY NON AUTORIZZATO**  
+Stato: **PRODUCTION BOUNDARY VERIFICATO / PREVIEW PROJECT FINAL CONFIG PENDING / PRODUCTION APPLICATION DEPLOY NON AUTORIZZATO**  
 Branch candidato corrente: `work/pre-go-live-integration-20260826`  
 PR: **#13 — DRAFT**  
-Production branch: `main`
+Production branch applicativo: `production`
 
 ## Obiettivo
 
@@ -14,14 +14,16 @@ Questo runbook non autorizza merge, deploy Production, DNS, migration o altre wr
 ## Confini non negoziabili
 
 - Nessun outreach/invito/intervista prima che il sito sia online e il live smoke sia PASS.
-- Nessuna futura write database Production senza fresh hosted-state read, backup pertinente e autorizzazione esplicita.
+- Il Radar può scrivere candidati review-only nella Inbox redazionale privata; non può auto-pubblicare né contattare soggetti esterni.
+- Nessuna futura write database Production diversa dalla normale raccolta review-only già autorizzata senza fresh hosted-state read, backup pertinente e autorizzazione esplicita.
 - I Vercel Preview restano **read-only + noindex**.
 - `SUPABASE_SERVICE_ROLE_KEY` è **Production-only**, server-side e mai esposta ai Preview/client.
 - Un Preview non viene promosso a Production: Preview e Production hanno contratti diversi incorporati nel build.
 - `main` non viene modificato/mergeato automaticamente.
 - Merge e deploy Production richiedono autorizzazioni separate.
+- Il deploy applicativo Production avviene soltanto tramite avanzamento deliberato del branch Git `production`.
 
-## 1. Topologia Vercel corrente — VERIFICATA
+## 1. Topologia Vercel corrente — PRODUCTION PROJECT VERIFICATO
 
 Team: `inquotus-projects`.
 
@@ -30,10 +32,13 @@ Progetti:
 - Production: `immigratiimprenditori`;
 - Preview canonico: `immigratiimprenditori-preview`.
 
-Sul solo progetto Production è configurato l'Ignored Build Step:
+Sul progetto Production è configurato:
+
+- Production Branch: **`production`**;
+- Ignored Build Step:
 
 ```sh
-if [ -n "${VERCEL_GIT_COMMIT_REF:-}" ] && [ "$VERCEL_GIT_COMMIT_REF" != "main" ]; then exit 0; else exit 1; fi
+if [ -n "${VERCEL_GIT_COMMIT_REF:-}" ] && [ "$VERCEL_GIT_COMMIT_REF" != "production" ]; then exit 0; else exit 1; fi
 ```
 
 Semantica Vercel:
@@ -41,7 +46,7 @@ Semantica Vercel:
 - exit `0` = build ignorato;
 - exit `1` = build eseguito.
 
-Comportamento verificato su più commit consecutivi del branch:
+Comportamento verificato su più commit consecutivi del branch candidato:
 
 - `immigratiimprenditori` Production project: **Canceled by Ignored Build Step**;
 - `immigratiimprenditori-preview`: deployment completato;
@@ -49,11 +54,22 @@ Comportamento verificato su più commit consecutivi del branch:
 
 Quindi:
 
-- i branch non-`main` non generano più un secondo build Vercel sul progetto Production;
-- `main` resta autorizzato a costruire sul progetto Production quando verrà deliberatamente usato;
+- branch di lavoro e `main` non generano build applicativi sul progetto Production;
+- soltanto il branch Git `production` è autorizzato dal progetto Production a costruire;
+- il merge su `main` non equivale più a deploy Production;
 - il percorso Preview canonico è `immigratiimprenditori-preview`.
 
-`VERCEL_PREVIEW_DUPLICATION = CLOSED`
+`VERCEL_PRODUCTION_BOUNDARY = PASS`
+
+### Configurazione finale progetto Preview — PENDING dashboard/Cursor
+
+Per preservare un Preview stabile/read-only anche quando il progetto Preview tratta `main` come proprio Production Branch, verificare via dashboard/Cursor:
+
+- Production Branch del progetto `immigratiimprenditori-preview`: `main`;
+- `NEXT_PUBLIC_PREVIEW_READ_ONLY=true` nell'ambiente Production del progetto Preview;
+- Ignored Build Step del progetto Preview che salti esclusivamente il branch Git `production` e permetta `main` + branch di lavoro.
+
+Il connettore Vercel disponibile nella sessione del 28 agosto non espone i due progetti `immigratiimprenditori` (lookup 404; project list parziale), quindi questo controllo resta esplicitamente dashboard/Cursor e non viene dichiarato PASS per inferenza.
 
 ## 2. Environment matrix
 
@@ -62,13 +78,14 @@ Quindi:
 Richieste:
 
 - `NEXT_PUBLIC_SUPABASE_URL`;
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`;
+- `NEXT_PUBLIC_PREVIEW_READ_ONLY=true` quando il progetto Preview viene eseguito nel proprio ambiente Vercel Production/stabile.
 
 Non configurare:
 
 - `SUPABASE_SERVICE_ROLE_KEY`.
 
-Il codice riconosce `VERCEL_ENV=preview` e applica il contratto read-only/noindex previsto, incluso blocco delle mutazioni e analytics applicativi disabilitati.
+Il codice riconosce i Preview Vercel e il flag esplicito read-only e applica il contratto fail-closed/noindex previsto, incluso blocco delle mutazioni e analytics applicativi disabilitati.
 
 ### Production
 
@@ -78,13 +95,14 @@ Da verificare sul progetto Production prima del primo deploy applicativo autoriz
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` corretta;
 - `NEXT_PUBLIC_SITE_URL` uguale all'origine HTTPS Production effettiva;
 - `SUPABASE_SERVICE_ROLE_KEY` presente soltanto nello scope Production e server-side;
+- `NEXT_PUBLIC_PREVIEW_READ_ONLY` assente/false sul vero target Production;
 - flag privacy analytics nello stato deliberatamente approvato.
 
 Non copiare valori segreti in chat, commit, issue, PR body o log.
 
 ## 3. Regione Functions
 
-`vercel.json` mantiene `cdg1` come regione primaria delle Functions. Supabase è in `eu-west-3` (Parigi). Non modificare `vercel.json` per gestire la separazione Preview/Production: quella separazione è ora project-level tramite Ignored Build Step.
+`vercel.json` mantiene `cdg1` come regione primaria delle Functions. Supabase è in `eu-west-3` (Parigi). Non modificare `vercel.json` per gestire la separazione Preview/Production: la separazione è project-level e branch-level.
 
 ## 4. Stato database Production — GIÀ ALLINEATO
 
@@ -105,11 +123,11 @@ Evidenze apply:
 - fase #20–#24: run `32706028947` — SUCCESS;
 - hardening #25: run `32707529881` — SUCCESS.
 
-**Non applicare le vecchie 22/24/25 migration come se fossero ancora candidate.** Con `candidateDelta=[]` non c'è alcuna migration da applicare.
+**Non applicare le vecchie migration come se fossero ancora candidate.** Con `candidateDelta=[]` non c'è alcuna migration da applicare.
 
 Ogni futura migration richiede un nuovo piano basato su fresh hosted-state read.
 
-## 5. Backup / recovery — GATE STORICI CHIUSI
+## 5. Backup / recovery — GATE CHIUSI
 
 - `CI_EPHEMERAL_RESTORE_DRILL = PASS`;
 - `PRODUCTION_SOURCE_RESTORE_DRILL = PASS`.
@@ -130,16 +148,16 @@ Gli artifact GitHub hanno retention finita e non sostituiscono un fresh backup p
 
 ## 6. MFA reale Production
 
-Il vecchio stato “zero fattori MFA” è superato.
-
-Stato del rilascio database chiuso:
+Stato DB/Auth già chiuso:
 
 - amministratori applicativi attivi: **2**;
 - fattori TOTP verificati collegati a un amministratore attivo: **1**;
 - enforcement AAL2 applicato;
 - `PRODUCTION_PRIVILEGED_MFA = PASS`.
 
-Resta un controllo distinto **applicativo** prima del go-live: verificare login + challenge TOTP/AAL2 del nuovo account reale attraverso il frontend Vercel corretto prima di rimuovere eventuali amministratori/credenziali di prova conservati come safety fallback.
+La logica applicativa TOTP/AAL2 è inoltre coperta dall'E2E autenticato locale: enrollment TOTP reale, verifica OTP, passaggio AAL1→AAL2 e accesso redazionale sono PASS.
+
+Resta un controllo distinto **post-merge / pre-go-live**: verificare login + challenge TOTP/AAL2 dell'account amministrativo reale attraverso il vero frontend Vercel Production prima della rimozione di eventuali safety fallback.
 
 ## 7. Required checks `main`
 
@@ -154,38 +172,53 @@ Il ruleset blocca deletion e non-fast-forward e richiede pull request. Non risul
 
 Il check Vercel Preview non è attualmente un required status check del ruleset; resta un controllo operativo esplicito del candidato.
 
-## 8. Gate applicativi pre-merge ancora aperti
+## 8. Gate pre-merge ancora aperti
 
-Prima di una decisione finale di merge devono essere chiusi o esplicitamente deliberati:
+Sul candidato `bf498e288e1aa0a5735e30749b1becd3adb47b3c`:
 
-1. CI verde sul HEAD finale;
-2. QA visivo diretto del Preview canonico, incluso mini-trend con dati reali e viewport 390/320;
-3. QA umano WCAG 2.2 AA/device con record completo;
-4. revisione legale professionale con sign-off;
-5. login + MFA/AAL2 del nuovo amministratore attraverso il frontend Vercel corretto, se non già documentato da evidenza successiva;
-6. autorizzazione esplicita al merge.
+- Editorial v1 CI #1054: **SUCCESS**;
+- Supabase local migration validation #587: **SUCCESS**;
+- QA visivo Preview mini-trend/header/footer/favicon/console: **PASS**;
+- QA automatico #92 ampliato: **PASS** per tastiera core/form, RTL 320, reflow, text-spacing e target-size.
 
-Le Storie reali non sono un gate pre-go-live: `/storie` deve essere sana anche a zero contenuti; outreach e popolamento reale iniziano dopo live smoke PASS.
+Restano prima della decisione finale di merge:
 
-## 9. Build Production Vercel — SOLO DOPO AUTORIZZAZIONE
+1. **QA umano WCAG/device #92** nel residuo non sostituibile onestamente dall'automazione: screen reader reale, zoom browser 200/400%, device fisici e valutazione qualitativa finale;
+2. **revisione legale professionale** con sign-off;
+3. **verifica finale dashboard/Cursor della configurazione del progetto Preview** descritta nella sezione 1;
+4. **autorizzazione esplicita al merge**.
 
-Il primo rilascio applicativo deve essere un **vero build target Production**, non la promozione di un Preview esistente.
+Le Storie reali non sono un gate pre-go-live: `/storie` deve essere sana anche a zero contenuti; outreach e popolamento reale iniziano soltanto dopo sito online + live smoke PASS.
 
-Prima del deploy verificare almeno:
+## 9. Promozione e build Production Vercel — SOLO DOPO AUTORIZZAZIONE
 
-- HEAD esatto e required checks verdi;
+Merge e deploy sono separati.
+
+Dopo un eventuale merge autorizzato su `main`, il deploy Production richiede un'ulteriore autorizzazione e l'avanzamento controllato del branch Git `production` al commit di `main` approvato.
+
+Il workflow `promote-production.yml` è manual-only (`workflow_dispatch`) e deve continuare a richiedere:
+
+- esecuzione dal ref `main`;
+- SHA completo di `main` approvato;
+- conferma letterale `DEPLOY_PRODUCTION`;
+- verifica che `GITHUB_SHA` corrisponda ancora al `main` corrente;
+- verifica ancestry/fast-forward di `production` rispetto a `main`;
+- nessun force-push.
+
+Prima della promozione verificare almeno:
+
+- SHA esatto e required checks verdi;
 - progetto Production esatto;
 - environment variables/scopes senza esporre segreti;
 - `NEXT_PUBLIC_SITE_URL` coerente con il target;
 - QA umano e legal PASS;
-- MFA/AAL2 frontend reale verificato;
-- Deployment Protection/configurazione di collaudo, se prevista per il candidato iniziale.
+- configurazione Preview separata e non duplicante `production`.
 
-Il merge non autorizza automaticamente il deploy Production.
+Il merge **non** autorizza automaticamente il deploy Production.
 
 ## 10. Smoke del deployment Production protetto
 
-Solo dopo deploy autorizzato verificare almeno:
+Solo dopo promozione/deploy autorizzati verificare almeno:
 
 - `/` 200, H1 e canonical;
 - `/osservatorio`, `/atlante`, rotte e dati reali;
@@ -194,7 +227,7 @@ Solo dopo deploy autorizzato verificare almeno:
 - `/privacy`, `/cookie`, `/termini`;
 - `/contribuisci` e rate limiting;
 - `/accedi`;
-- login + MFA AAL2;
+- login + MFA AAL2 reale;
 - redazione privata e separazione contributor/editor;
 - governance ibrida sulle superfici sensibili;
 - proposta pubblica → Inbox senza auto-publish;
@@ -202,6 +235,8 @@ Solo dopo deploy autorizzato verificare almeno:
 - assenza del `noindex` sul vero target Production destinato al pubblico;
 - performance/LCP live;
 - log Vercel/Supabase senza errori critici.
+
+Lo smoke remoto automatizzato resta GET-only e allowlisted sul dominio Production o su host Vercel `immigratiimprenditori*.vercel.app`; non sostituisce i controlli autenticati/manuali.
 
 ## 11. Source-health dopo merge
 
@@ -215,9 +250,9 @@ Usare il record previsto in:
 
 `docs/operations/go-live-a-closure-kit-2026-08-23.md`
 
-Copertura minima: desktop, laptop, tablet, mobile 390, mobile 320, tastiera/focus, screen reader, zoom/reflow, RTL, moduli/Auth/MFA.
+La copertura automatica già PASS include reflow 320/390/768, sette lingue/RTL, skip-link/focus, tastiera su header `/cerca` `/accedi` `/contribuisci`, scroll nativo del focus a 320, text-spacing e target-size.
 
-L'automazione non sostituisce questo gate.
+Il residuo umano resta: screen reader, zoom 200/400%, dispositivi fisici e valutazione qualitativa finale. L'automazione non sostituisce questo gate.
 
 ## 13. Dominio e apertura pubblica
 
@@ -264,15 +299,17 @@ Se il problema è database:
 - Production DB migration #1–#25: **PASS**;
 - `candidateDelta`: **0**;
 - Production-source restore: **PASS**;
-- MFA privilegiato Production: **PASS**;
+- MFA privilegiato Production DB/Auth: **PASS**;
 - governance ibrida DB: **ATTIVA**;
-- Vercel duplicate branch build: **CHIUSO**;
-- Netlify deploy-preview: **CANCELED**;
 - required checks `main`: **ACTIVE**;
-- Production application deploy: **NON ESEGUITO / NON AUTORIZZATO**;
-- QA visivo Preview: **PENDING**;
+- Production project branch boundary (`production`): **PASS**;
+- Netlify deploy-preview: **CANCELED**;
+- QA visivo Preview: **PASS**;
+- CI candidato: **PASS** (#1054 / #587 sul pre-runbook HEAD);
+- Preview project final config: **PENDING dashboard/Cursor**;
 - QA umano/device: **PENDING**;
 - legal professionale: **PENDING**;
+- Production application deploy: **NON ESEGUITO / NON AUTORIZZATO**;
 - DNS cutover: **NON ESEGUITO**.
 
 `PRODUCTION_READINESS = NOT PASS` finché i gate rimanenti non sono chiusi e il deploy Production non è autorizzato separatamente.
