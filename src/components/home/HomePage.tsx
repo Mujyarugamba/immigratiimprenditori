@@ -12,6 +12,7 @@ import {
   listHomeEvents,
   type PublicEventListItem,
 } from "@/lib/data/public/events";
+import { formatTrendPeriodBounds } from "@/lib/home/mini-trend-period";
 
 const typeLabels: Record<string, string> = {
   analysis: "Analisi",
@@ -154,6 +155,10 @@ function MiniTrend({
 
   const first = series[0];
   const last = series[series.length - 1];
+  const [firstPeriodLabel, lastPeriodLabel] = formatTrendPeriodBounds(
+    first.period_start,
+    last.period_start,
+  );
 
   return (
     <div className="home-chart">
@@ -187,11 +192,11 @@ function MiniTrend({
         })}
       </svg>
       <div className="home-chart-foot">
-        <span>{new Date(first.period_start).getFullYear()}</span>
+        <span>{firstPeriodLabel}</span>
         <span>
           {last.source_name ? `Fonte: ${last.source_name}` : "Fonte nella scheda indicatore"}
         </span>
-        <span>{new Date(last.period_start).getFullYear()}</span>
+        <span>{lastPeriodLabel}</span>
       </div>
     </div>
   );
@@ -437,7 +442,6 @@ export default async function HomePage() {
           </div>
           <div>
             <p>
-              Puoi raccontare una storia, proporre un&apos;intervista, segnalare un evento,
               una ricerca o un rapporto. Il materiale entra nella Inbox redazionale:
               viene verificato e valutato prima di qualsiasi pubblicazione.
             </p>
