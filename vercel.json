@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["cdg1"]
+  "regions": ["cdg1"],
+  "ignoreCommand": "if [ -n \"$VERCEL_GIT_COMMIT_REF\" ] && [ \"$VERCEL_PROJECT_ID\" = \"prj_MAnh73vrSOgPJHwMXNS8H82p2eiy\" ] && [ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]; then exit 0; elif [ -n \"$VERCEL_GIT_COMMIT_REF\" ] && [ \"$VERCEL_PROJECT_ID\" = \"prj_qLDUplqiHm34RVw6eRQbEIA3kNUm\" ] && [ \"$VERCEL_GIT_COMMIT_REF\" = \"main\" ]; then exit 0; else exit 1; fi"
 }
