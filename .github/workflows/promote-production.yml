@@ -1,0 +1,113 @@
+name: Promote approved main to production
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: "Exact 40-character SHA currently approved on main"
+        required: true
+        type: string
+      confirmation:
+        description: "Type DEPLOY_PRODUCTION to confirm the release"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    # The workflow is intentionally inert unless dispatched from main.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout main with full history
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify explicit release authorization
+        id: guard
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "$CONFIRMATION" != "DEPLOY_PRODUCTION" ]; then
+            echo "Refusing promotion: confirmation must be DEPLOY_PRODUCTION." >&2
+            exit 1
+          fi
+
+          if ! printf '%s' "$EXPECTED_MAIN_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "Refusing promotion: expected_main_sha must be a full 40-character lowercase SHA." >&2
+            exit 1
+          fi
+
+          git fetch --no-tags origin main production
+          main_sha="$(git rev-parse origin/main)"
+          production_sha="$(git rev-parse origin/production)"
+
+          if [ "$GITHUB_SHA" != "$main_sha" ]; then
+            echo "Refusing promotion: workflow dispatch SHA is not the current main SHA." >&2
+            echo "dispatch=$GITHUB_SHA current_main=$main_sha" >&2
+            exit 1
+          fi
+
+          if [ "$EXPECTED_MAIN_SHA" != "$main_sha" ]; then
+            echo "Refusing promotion: main moved or the approved SHA was entered incorrectly." >&2
+            echo "expected=$EXPECTED_MAIN_SHA current_main=$main_sha" >&2
+            exit 1
+          fi
+
+          if [ "$production_sha" = "$main_sha" ]; then
+            echo "Production already points to the approved main SHA; nothing to promote."
+            echo "already_current=true" >> "$GITHUB_OUTPUT"
+            echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! git merge-base --is-ancestor "$production_sha" "$main_sha"; then
+            echo "Refusing promotion: production is not an ancestor of main; manual reconciliation is required." >&2
+            echo "production=$production_sha main=$main_sha" >&2
+            exit 1
+          fi
+
+          echo "already_current=false" >> "$GITHUB_OUTPUT"
+          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+          echo "production_sha=$production_sha" >> "$GITHUB_OUTPUT"
+          echo "PROMOTION_PREFLIGHT = PASS"
+
+      - name: Fast-forward production to approved main
+        if: steps.guard.outputs.already_current == 'false'
+        env:
+          APPROVED_SHA: ${{ steps.guard.outputs.main_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # No force push. Git rejects the update if production changed after preflight.
+          git push origin "$APPROVED_SHA:refs/heads/production"
+          echo "PRODUCTION_FAST_FORWARD = PASS"
+
+      - name: Verify promoted ref
+        if: steps.guard.outputs.already_current == 'false'
+        env:
+          APPROVED_SHA: ${{ steps.guard.outputs.main_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin production
+          actual="$(git rev-parse origin/production)"
+          test "$actual" = "$APPROVED_SHA" || {
+            echo "Production ref does not match the approved SHA after push." >&2
+            exit 1
+          }
+          echo "PRODUCTION_REF_VERIFY = PASS"
