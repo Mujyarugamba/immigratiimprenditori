@@ -442,6 +442,7 @@ export default async function HomePage() {
           </div>
           <div>
             <p>
+              Puoi raccontare una storia, proporre un&apos;intervista, segnalare un evento,
               una ricerca o un rapporto. Il materiale entra nella Inbox redazionale:
               viene verificato e valutato prima di qualsiasi pubblicazione.
             </p>
