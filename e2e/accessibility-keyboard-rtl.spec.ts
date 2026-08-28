@@ -10,12 +10,20 @@ async function tabUntilFocused(page: Page, target: Locator, maxTabs = 30) {
 
 async function expectFocusedInViewport(target: Locator) {
   await expect(target).toBeFocused();
-  const rect = await target.evaluate((element) => {
-    const { top, bottom } = element.getBoundingClientRect();
-    return { top, bottom, innerHeight: window.innerHeight };
-  });
-  expect(rect.bottom).toBeGreaterThan(0);
-  expect(rect.top).toBeLessThan(rect.innerHeight);
+  await expect
+    .poll(
+      () =>
+        target.evaluate((element) => {
+          const { top, bottom } = element.getBoundingClientRect();
+          return bottom > 0 && top < window.innerHeight;
+        }),
+      {
+        message: "focused control should be brought into the viewport by native keyboard scrolling",
+        timeout: 2_000,
+        intervals: [50, 100, 150, 250],
+      },
+    )
+    .toBe(true);
 }
 
 async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
