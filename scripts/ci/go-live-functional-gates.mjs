@@ -123,21 +123,23 @@ file("e2e/seo-real-stack.spec.ts");
 file(".github/dependabot.yml");
 file(".github/workflows/source-health-weekly.yml");
 
-// Hosted previews must stay mutation-free automatically on both supported
-// deployment paths. Production remains writable and is gated separately.
+// Hosted previews and explicitly read-only deployments must stay mutation-free.
+// Writable Production remains privileged and is gated separately.
 includes("src/lib/deployment/environment.ts", [
   "resolveDeploymentEnvironment",
+  "shouldValidateHostedProductionEnv",
   'env.VERCEL_ENV === "preview"',
   'env.VERCEL_ENV === "production"',
   'env.CONTEXT !== "production"',
   "NEXT_PUBLIC_PREVIEW_READ_ONLY",
+  "deployment.isHostedProduction && !deployment.isReadOnlyPreview",
 ]);
 file("src/lib/deployment/environment.test.ts");
 includes("next.config.ts", [
   "resolveDeploymentEnvironment",
-  "deployment.isHostedProduction",
+  "shouldValidateHostedProductionEnv",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "deployment.isHostedPreview",
+  "deployment.isReadOnlyPreview",
   'key: "X-Robots-Tag"',
   'value: "noindex, nofollow, noarchive"',
 ]);
