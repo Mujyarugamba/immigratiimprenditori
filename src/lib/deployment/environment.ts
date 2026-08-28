@@ -38,3 +38,14 @@ export function resolveDeploymentEnvironment(env: DeploymentEnv): DeploymentEnvi
       env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || isHostedPreview,
   };
 }
+
+/**
+ * Privileged Production secrets are required only for a writable hosted
+ * Production deployment. A dedicated Preview project may deliberately use its
+ * provider Production environment for a stable alias while remaining
+ * fail-closed through NEXT_PUBLIC_PREVIEW_READ_ONLY=true.
+ */
+export function shouldValidateHostedProductionEnv(env: DeploymentEnv): boolean {
+  const deployment = resolveDeploymentEnvironment(env);
+  return deployment.isHostedProduction && !deployment.isReadOnlyPreview;
+}

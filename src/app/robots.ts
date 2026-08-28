@@ -6,7 +6,7 @@ const SITE_URL = "https://immigratiimprenditori.it";
 export default function robots(): MetadataRoute.Robots {
   const deployment = resolveDeploymentEnvironment(process.env);
 
-  if (deployment.isHostedPreview) {
+  if (deployment.isReadOnlyPreview) {
     return {
       rules: [
         {

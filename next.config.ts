@@ -1,12 +1,17 @@
 import type { NextConfig } from "next";
-import { resolveDeploymentEnvironment } from "./src/lib/deployment/environment";
+import {
+  resolveDeploymentEnvironment,
+  shouldValidateHostedProductionEnv,
+} from "./src/lib/deployment/environment";
 import { validateHostedProductionEnv } from "./src/lib/deployment/production-env";
 
 const deployment = resolveDeploymentEnvironment(process.env);
 
-// Hosted production validation includes the server-only SUPABASE_SERVICE_ROLE_KEY;
-// previews intentionally do not require or receive that privileged credential.
-if (deployment.isHostedProduction) {
+// Hosted writable Production validation includes the server-only
+// SUPABASE_SERVICE_ROLE_KEY. A dedicated Preview project may deliberately use
+// its provider Production environment for a stable alias while remaining
+// fail-closed through NEXT_PUBLIC_PREVIEW_READ_ONLY=true.
+if (shouldValidateHostedProductionEnv(process.env)) {
   const validation = validateHostedProductionEnv(process.env);
   if (!validation.ok) throw new Error(validation.error);
 }
@@ -27,7 +32,7 @@ function configuredSupabaseConnectSources() {
   }
 }
 
-// Hosted previews have no reason to talk directly to Supabase. Public data is
+// Read-only previews have no reason to talk directly to Supabase. Public data is
 // rendered server-side and every non-safe HTTP method is blocked by src/proxy.ts.
 // Keeping connect-src at self adds a second barrier against client-side writes.
 const connectSources = deployment.isReadOnlyPreview
@@ -77,7 +82,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
-  ...(deployment.isHostedPreview
+  ...(deployment.isReadOnlyPreview
     ? [
         {
           key: "X-Robots-Tag",
