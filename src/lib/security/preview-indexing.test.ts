@@ -4,6 +4,8 @@ import robots from "../../app/robots";
 
 const originalNetlify = process.env.NETLIFY;
 const originalContext = process.env.CONTEXT;
+const originalVercel = process.env.VERCEL;
+const originalVercelEnv = process.env.VERCEL_ENV;
 
 function restoreEnv() {
   if (originalNetlify === undefined) delete process.env.NETLIFY;
@@ -11,6 +13,12 @@ function restoreEnv() {
 
   if (originalContext === undefined) delete process.env.CONTEXT;
   else process.env.CONTEXT = originalContext;
+
+  if (originalVercel === undefined) delete process.env.VERCEL;
+  else process.env.VERCEL = originalVercel;
+
+  if (originalVercelEnv === undefined) delete process.env.VERCEL_ENV;
+  else process.env.VERCEL_ENV = originalVercelEnv;
 }
 
 test.afterEach(restoreEnv);
@@ -18,6 +26,20 @@ test.afterEach(restoreEnv);
 test("Netlify deploy previews disallow crawler indexing", () => {
   process.env.NETLIFY = "true";
   process.env.CONTEXT = "deploy-preview";
+  delete process.env.VERCEL;
+  delete process.env.VERCEL_ENV;
+
+  const result = robots();
+  assert.deepEqual(result.rules, [{ userAgent: "*", disallow: "/" }]);
+  assert.equal(result.sitemap, undefined);
+  assert.equal(result.host, undefined);
+});
+
+test("Vercel previews disallow crawler indexing", () => {
+  delete process.env.NETLIFY;
+  delete process.env.CONTEXT;
+  process.env.VERCEL = "1";
+  process.env.VERCEL_ENV = "preview";
 
   const result = robots();
   assert.deepEqual(result.rules, [{ userAgent: "*", disallow: "/" }]);
@@ -28,6 +50,8 @@ test("Netlify deploy previews disallow crawler indexing", () => {
 test("Netlify production keeps public crawl rules and sitemaps", () => {
   process.env.NETLIFY = "true";
   process.env.CONTEXT = "production";
+  delete process.env.VERCEL;
+  delete process.env.VERCEL_ENV;
 
   const result = robots();
   assert.deepEqual(result.rules, [
