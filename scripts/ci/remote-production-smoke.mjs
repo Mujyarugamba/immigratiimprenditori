@@ -27,7 +27,8 @@ function normalizeTarget(raw) {
   if (url.search || url.hash) fail("Production smoke target must not contain query or fragment components");
 
   const host = url.hostname.toLowerCase();
-  const allowed = allowedExactHosts.has(host) || host.endsWith(".vercel.app");
+  const allowedVercelHost = host.startsWith("immigratiimprenditori") && host.endsWith(".vercel.app");
+  const allowed = allowedExactHosts.has(host) || allowedVercelHost;
   if (!allowed) {
     fail(`Production smoke target host is not allowlisted: ${host}`);
   }
