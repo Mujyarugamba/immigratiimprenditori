@@ -27,6 +27,14 @@ export const metadata: Metadata = {
   creator: "Immigrati Imprenditori",
   publisher: "AIPEL",
   category: "Ricerca e analisi sull'imprenditoria migrante",
+  icons: {
+    icon: [
+      {
+        url: "/logo-immigrati-imprenditori.png",
+        type: "image/png",
+      },
+    ],
+  },
   alternates: {
     types: {
       "application/rss+xml": `${SITE_URL}/feed.xml`,
