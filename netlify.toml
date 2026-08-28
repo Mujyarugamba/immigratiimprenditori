@@ -1,6 +1,10 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  # Vercel is the canonical preview path during pre-go-live. Keep the existing
+  # Netlify preview available, but skip Git-triggered Netlify builds to avoid
+  # duplicate preview compute. Build-hook/manual deploys remain available.
+  ignore = "exit 0"
 
 # Deploy Previews and branch deploys intentionally read the public production
 # data plane but must never mutate it. This non-secret build flag is inlined by
