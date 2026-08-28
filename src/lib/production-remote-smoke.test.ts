@@ -45,4 +45,19 @@ test("remote Production smoke remains manual, GET-only and tied to promoted main
   assert.ok(checker.includes('.vercel.app'), "Vercel deployment host allowlist missing");
   assert.ok(checker.includes('redirect: "manual"'), "redirect-following must remain disabled");
   assert.ok(checker.includes('url.protocol !== "https:"'), "HTTPS-only target guard missing");
+
+  for (const path of [
+    "/osservatorio",
+    "/atlante",
+    "/storie",
+    "/eventi",
+    "/fonti",
+    "/open-data",
+    "/api/open-data/indicators",
+  ]) {
+    assert.ok(checker.includes(path), `remote Production smoke coverage missing: ${path}`);
+  }
+  for (const contractMarker of ["dataset", "record_count", "filters", "records"]) {
+    assert.ok(checker.includes(contractMarker), `open-data contract marker missing: ${contractMarker}`);
+  }
 });
