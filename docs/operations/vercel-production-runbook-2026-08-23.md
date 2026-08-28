@@ -1,28 +1,59 @@
-# Vercel Production runbook — 23 agosto 2026
+# Vercel Production runbook — stato riconciliato 28 agosto 2026
+
+Stato: **PREVIEW ALLINEATO / PRODUCTION APPLICATION DEPLOY NON AUTORIZZATO**  
+Branch candidato corrente: `work/pre-go-live-integration-20260826`  
+PR: **#13 — DRAFT**  
+Production branch: `main`
 
 ## Obiettivo
 
-Portare ImmigratiImprenditori.it su Vercel Production con un rilascio controllato, senza riutilizzare un artifact Preview e senza aprire il sito al pubblico prima degli smoke finali.
+Portare ImmigratiImprenditori.it su Vercel Production con un rilascio controllato, senza promuovere un artifact Preview e senza aprire il sito al pubblico prima degli smoke finali.
+
+Questo runbook non autorizza merge, deploy Production, DNS, migration o altre write Production.
 
 ## Confini non negoziabili
 
 - Nessun outreach/invito/intervista prima che il sito sia online e il live smoke sia PASS.
-- Nessuna migration Production prima di backup verificato, fresh migration-history read e autorizzazione esplicita.
-- I Vercel Preview restano automaticamente **read-only + noindex**.
+- Nessuna futura write database Production senza fresh hosted-state read, backup pertinente e autorizzazione esplicita.
+- I Vercel Preview restano **read-only + noindex**.
 - `SUPABASE_SERVICE_ROLE_KEY` è **Production-only**, server-side e mai esposta ai Preview/client.
-- Un Preview non viene promosso a Production: il comportamento Preview è intenzionalmente diverso e viene incorporato nel build.
+- Un Preview non viene promosso a Production: Preview e Production hanno contratti diversi incorporati nel build.
 - `main` non viene modificato/mergeato automaticamente.
+- Merge e deploy Production richiedono autorizzazioni separate.
 
-## 1. Verifica Vercel dopo upgrade Pro
+## 1. Topologia Vercel corrente — VERIFICATA
 
-Prima di qualsiasi deploy:
+Team: `inquotus-projects`.
 
-1. verificare che il team `inquotus-projects` risulti Pro;
-2. identificare in modo univoco il progetto Vercel Production collegato al repository;
-3. verificare branch production, root directory e framework Next.js;
-4. verificare che le System Environment Variables Vercel siano disponibili (`VERCEL=1`, `VERCEL_ENV`);
-5. attivare Deployment Protection/Vercel Authentication sul target Production durante il collaudo iniziale, se disponibile sul piano;
-6. non collegare ancora il dominio pubblico se questo renderebbe il candidato accessibile prima dello smoke.
+Progetti:
+
+- Production: `immigratiimprenditori`;
+- Preview canonico: `immigratiimprenditori-preview`.
+
+Sul solo progetto Production è configurato l'Ignored Build Step:
+
+```sh
+if [ -n "${VERCEL_GIT_COMMIT_REF:-}" ] && [ "$VERCEL_GIT_COMMIT_REF" != "main" ]; then exit 0; else exit 1; fi
+```
+
+Semantica Vercel:
+
+- exit `0` = build ignorato;
+- exit `1` = build eseguito.
+
+Comportamento verificato su più commit consecutivi del branch:
+
+- `immigratiimprenditori` Production project: **Canceled by Ignored Build Step**;
+- `immigratiimprenditori-preview`: deployment completato;
+- Netlify deploy-preview: **canceled**.
+
+Quindi:
+
+- i branch non-`main` non generano più un secondo build Vercel sul progetto Production;
+- `main` resta autorizzato a costruire sul progetto Production quando verrà deliberatamente usato;
+- il percorso Preview canonico è `immigratiimprenditori-preview`.
+
+`VERCEL_PREVIEW_DUPLICATION = CLOSED`
 
 ## 2. Environment matrix
 
@@ -30,219 +61,218 @@ Prima di qualsiasi deploy:
 
 Richieste:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`;
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
 Non configurare:
 
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`.
 
-Il codice riconosce automaticamente `VERCEL_ENV=preview` e applica:
-
-- GET/HEAD/OPTIONS soltanto;
-- HTTP 405 sulle mutazioni;
-- `X-Preview-Read-Only: true`;
-- CSP senza connessione client a Supabase;
-- `X-Robots-Tag: noindex, nofollow, noarchive`;
-- analytics applicativi disabilitati.
+Il codice riconosce `VERCEL_ENV=preview` e applica il contratto read-only/noindex previsto, incluso blocco delle mutazioni e analytics applicativi disabilitati.
 
 ### Production
 
-Obbligatorie e validate fail-fast durante il build:
+Da verificare sul progetto Production prima del primo deploy applicativo autorizzato:
 
-- `NEXT_PUBLIC_SUPABASE_URL=https://hvfvfatlaspcpszgizhg.supabase.co`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = chiave publishable moderna del progetto;
-- `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it` (o l'origine HTTPS Production effettiva durante il collaudo);
-- `SUPABASE_SERVICE_ROLE_KEY` = secret server-only.
+- `NEXT_PUBLIC_SUPABASE_URL` del progetto hosted corretto;
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` corretta;
+- `NEXT_PUBLIC_SITE_URL` uguale all'origine HTTPS Production effettiva;
+- `SUPABASE_SERVICE_ROLE_KEY` presente soltanto nello scope Production e server-side;
+- flag privacy analytics nello stato deliberatamente approvato.
 
-Da impostare esplicitamente:
-
-- `NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED=false` al primo rilascio;
-- `PRIVACY_ANALYTICS_WRITE_ENABLED=false` al primo rilascio.
-
-Gli analytics si abilitano soltanto in un secondo momento, portando **entrambi** i flag a `true` dopo verifica privacy/runtime.
-
-Non incollare segreti in chat, commit, issue, PR body o log.
+Non copiare valori segreti in chat, commit, issue, PR body o log.
 
 ## 3. Regione Functions
 
-`vercel.json` fissa `cdg1` come regione primaria delle Vercel Functions. Supabase è in `eu-west-3` (Parigi), quindi le chiamate server-side restano geograficamente vicine al database. La distribuzione degli asset statici/CDN rimane globale.
+`vercel.json` mantiene `cdg1` come regione primaria delle Functions. Supabase è in `eu-west-3` (Parigi). Non modificare `vercel.json` per gestire la separazione Preview/Production: quella separazione è ora project-level tramite Ignored Build Step.
 
-## 4. Backup prima delle migration
+## 4. Stato database Production — GIÀ ALLINEATO
 
-Prima di scrivere sul database hosted:
+La precedente versione di questo runbook descriveva una futura applicazione di migration. Quella fase è conclusa e non deve essere ripetuta.
 
-1. configurare i secret GitHub Actions:
-   - `SUPABASE_DB_URL`;
-   - `BACKUP_ENCRYPTION_PASSPHRASE`;
-2. eseguire il workflow `Production encrypted backup` da `main` quando autorizzato;
-3. verificare il logical backup Supabase CLI:
-   - `roles.sql`, `schema.sql` e `data.sql` non vuoti;
-   - preflight su oggetti/dati canonici riuscito;
-   - archivio cifrato AES-256 presente;
-   - checksum SHA-256 presente;
-   - nessun materiale plaintext nell'artifact;
-4. eseguire restore drill non-production e verificare schema/dati/RLS critici.
+Stato canonico corrente in `supabase/CS-PRODUCTION-RELEASE.json`:
 
-Il laboratorio CI prova un restore reale su uno stack Supabase locale effimero. Al 23 agosto 2026 questo drill ha isolato un'incompatibilità locale nel ripristino di una configurazione di ruolo gestita (`log_min_messages`) e resta **PENDING**: non va dichiarato PASS finché non esiste un restore non-production completo. Questo non autorizza alcuna migration hosted.
+- schema manifest: **v2**;
+- baseline hosted pre-release: `20260820160000_prepare_events_external_ingestion_rls`;
+- hosted latest post-release: `20260824103000_harden_publication_gate_execute_privileges`;
+- migration rows post-apply: **234**;
+- `appliedReleaseDelta`: **25**;
+- `candidateDelta`: **0**.
 
-## 5. Database Production
+Evidenze apply:
 
-Subito prima dell'apply:
+- fase #1–#19: run `32699707002` — SUCCESS;
+- fase #20–#24: run `32706028947` — SUCCESS;
+- hardening #25: run `32707529881` — SUCCESS.
 
-1. rileggere la migration history hosted;
-2. verificare che il cutoff atteso sia ancora `20260820160000_prepare_events_external_ingestion_rls`;
-3. verificare che nessuno abbia applicato migration nel frattempo;
-4. applicare esclusivamente le 22 candidate ordinate in `supabase/CS-PRODUCTION-RELEASE.json`;
-5. non riprodurre le 2 migration alias già presenti hosted;
-6. vietato `supabase db push` sull'intera storia;
-7. interrompere immediatamente l'apply in caso di drift o errore non previsto.
+**Non applicare le vecchie 22/24/25 migration come se fossero ancora candidate.** Con `candidateDelta=[]` non c'è alcuna migration da applicare.
 
-Dopo l'apply eseguire:
+Ogni futura migration richiede un nuovo piano basato su fresh hosted-state read.
 
-- security/RLS smoke;
-- publication gate smoke;
-- public submission rate-limit smoke;
-- login rate-limit smoke;
-- audit/analytics smoke;
-- verifica assenza di bypass di pubblicazione.
+## 5. Backup / recovery — GATE STORICI CHIUSI
 
-## 6. MFA reale
+- `CI_EPHEMERAL_RESTORE_DRILL = PASS`;
+- `PRODUCTION_SOURCE_RESTORE_DRILL = PASS`.
 
-Production contiene un account privilegiato e, all'audit del 23 agosto, zero fattori MFA verificati.
+Evidenza canonica restore:
 
-Prima di usare la redazione Production:
+`docs/operations/production-source-restore-drill-2026-08-23.md`
 
-1. login con account privilegiato;
-2. routing obbligatorio a `/app/mfa` da sessione AAL1;
-3. registrare TOTP tramite QR/secret con app autenticatore;
-4. verificare codice a 6 cifre;
-5. confermare sessione AAL2;
-6. confermare accesso alla redazione;
-7. confermare che AAL1 non autorizzi operazioni editor/admin privilegiate.
+Evidenza security patch:
 
-## 7. Build Production Vercel
+`docs/operations/production-security-patch-2026-08-24.md`
 
-Creare un **nuovo deployment target Production**, non promuovere un Preview esistente.
+Per la patch #25 è registrato l'artifact cifrato `9512852962` con digest:
 
-Motivo: Preview e Production hanno contratti diversi (read-only/noindex vs writable/crawlable) e alcune variabili vengono incorporate durante il build.
+`sha256:bc96aa18621f58cd397cae13dfc869cdae67924df28796445412ee6e6eee5cb6`
 
-Per il primo candidato Production, se si usa la CLI o un flusso equivalente che lo consente, preferire:
+Gli artifact GitHub hanno retention finita e non sostituiscono un fresh backup prima di future write Production.
 
-`vercel --prod --skip-domain`
+## 6. MFA reale Production
 
-In questo modo viene costruito un vero deployment Production ma non viene assegnato automaticamente al dominio pubblico. Il collaudo può quindi avvenire sul relativo URL Vercel protetto prima del cutover DNS. Se il deploy viene creato dal dashboard/Git integration, ottenere lo stesso risultato mantenendo il custom domain non assegnato al candidato fino al PASS.
+Il vecchio stato “zero fattori MFA” è superato.
 
-Prima del deploy devono essere verdi:
+Stato del rilascio database chiuso:
 
-- typecheck;
-- unit tests;
-- functional gates;
-- dependency audit;
-- public browser E2E;
-- Supabase migration/Auth/MFA/RLS laboratory;
-- restore drill non-production;
-- Netlify/Vercel Preview safety tests.
+- amministratori applicativi attivi: **2**;
+- fattori TOTP verificati collegati a un amministratore attivo: **1**;
+- enforcement AAL2 applicato;
+- `PRODUCTION_PRIVILEGED_MFA = PASS`.
 
-Il build Production deve fallire automaticamente se mancano URL Supabase, publishable key, origine HTTPS Production o service-role key.
+Resta un controllo distinto **applicativo** prima del go-live: verificare login + challenge TOTP/AAL2 del nuovo account reale attraverso il frontend Vercel corretto prima di rimuovere eventuali amministratori/credenziali di prova conservati come safety fallback.
 
-## 8. Smoke del deployment Production protetto
+## 7. Required checks `main`
 
-Con accesso ancora protetto verificare almeno:
+Ruleset GitHub `Protect main`: **ACTIVE**.
 
-- `/` 200;
-- `/osservatorio` 200 e dati reali leggibili;
-- `/atlante` e rotte evidence-backed;
+Required status checks con strict policy:
+
+- `verify`;
+- `validate-local-database`.
+
+Il ruleset blocca deletion e non-fast-forward e richiede pull request. Non risultano bypass actors.
+
+Il check Vercel Preview non è attualmente un required status check del ruleset; resta un controllo operativo esplicito del candidato.
+
+## 8. Gate applicativi pre-merge ancora aperti
+
+Prima di una decisione finale di merge devono essere chiusi o esplicitamente deliberati:
+
+1. CI verde sul HEAD finale;
+2. QA visivo diretto del Preview canonico, incluso mini-trend con dati reali e viewport 390/320;
+3. QA umano WCAG 2.2 AA/device con record completo;
+4. revisione legale professionale con sign-off;
+5. login + MFA/AAL2 del nuovo amministratore attraverso il frontend Vercel corretto, se non già documentato da evidenza successiva;
+6. autorizzazione esplicita al merge.
+
+Le Storie reali non sono un gate pre-go-live: `/storie` deve essere sana anche a zero contenuti; outreach e popolamento reale iniziano dopo live smoke PASS.
+
+## 9. Build Production Vercel — SOLO DOPO AUTORIZZAZIONE
+
+Il primo rilascio applicativo deve essere un **vero build target Production**, non la promozione di un Preview esistente.
+
+Prima del deploy verificare almeno:
+
+- HEAD esatto e required checks verdi;
+- progetto Production esatto;
+- environment variables/scopes senza esporre segreti;
+- `NEXT_PUBLIC_SITE_URL` coerente con il target;
+- QA umano e legal PASS;
+- MFA/AAL2 frontend reale verificato;
+- Deployment Protection/configurazione di collaudo, se prevista per il candidato iniziale.
+
+Il merge non autorizza automaticamente il deploy Production.
+
+## 10. Smoke del deployment Production protetto
+
+Solo dopo deploy autorizzato verificare almeno:
+
+- `/` 200, H1 e canonical;
+- `/osservatorio`, `/atlante`, rotte e dati reali;
 - `/storie` sana anche con zero storie reali;
-- `/eventi`;
-- `/fonti`;
-- `/open-data` + JSON/CSV/XLSX;
+- `/eventi`, `/fonti`, `/open-data` + JSON/CSV/XLSX;
 - `/privacy`, `/cookie`, `/termini`;
+- `/contribuisci` e rate limiting;
 - `/accedi`;
-- login rate-limit;
-- MFA AAL2;
-- redazione privata;
-- contributore separato dal redattore;
-- proposta pubblica → Inbox, mai auto-publish;
-- header CSP/HSTS/X-Content-Type-Options/X-Frame-Options/Referrer-Policy/Permissions-Policy;
-- nessun `X-Robots-Tag: noindex` sul vero target Production destinato al pubblico;
-- nessun errore applicativo nei log Vercel del rilascio.
+- login + MFA AAL2;
+- redazione privata e separazione contributor/editor;
+- governance ibrida sulle superfici sensibili;
+- proposta pubblica → Inbox senza auto-publish;
+- CSP/HSTS/X-Content-Type-Options/X-Frame-Options/Referrer-Policy/Permissions-Policy;
+- assenza del `noindex` sul vero target Production destinato al pubblico;
+- performance/LCP live;
+- log Vercel/Supabase senza errori critici.
 
-## 9. QA umano prima dell'apertura pubblica
+## 11. Source-health dopo merge
 
-Il gate #92 resta umano. Registrare PASS/FAIL per:
+Il checker source-health è technical/security PASS e read-only. Il workflow schedulato esiste sul branch candidato ma non ancora su `main`.
 
-- desktop 1440×900;
-- laptop 1366×768;
-- tablet 768×1024;
-- mobile 390×844;
-- narrow mobile 320×568;
-- tastiera/skip-link/focus;
-- NVDA + Chrome/Firefox;
-- VoiceOver/Safari se disponibile;
-- zoom 200% e reflow core a 400%;
-- Arabic RTL;
-- form/errori/auth/MFA.
+Il primo vero `workflow_dispatch`/cron sul default branch è quindi un gate **post-merge / pre-go-live**, non un blocker pre-merge.
 
-I test automatici riducono il rischio ma non sostituiscono questo gate.
+## 12. QA umano prima dell'apertura pubblica
 
-## 10. Dominio e apertura pubblica
+Usare il record previsto in:
 
-Solo dopo i PASS precedenti.
+`docs/operations/go-live-a-closure-kit-2026-08-23.md`
 
-### 10.1 Sicurezza DNS prima del cutover
+Copertura minima: desktop, laptop, tablet, mobile 390, mobile 320, tastiera/focus, screen reader, zoom/reflow, RTL, moduli/Auth/MFA.
 
-1. **Non cambiare i nameserver del dominio come parte del go-live applicativo.** Mantenere la zona DNS presso il provider attuale (Aruba) salvo una decisione separata e pianificata.
-2. Prima di modificare i record web, esportare o fotografare la zona DNS corrente e annotare almeno A/AAAA/CNAME, MX, TXT, CAA e record di verifica.
-3. Non modificare né eliminare MX, SPF, DKIM, DMARC o altri record di posta. Il dominio è stato storicamente utilizzato anche per indirizzi email `@immigratiimprenditori.it`; il cutover web non deve interrompere la posta.
-4. Associare `immigratiimprenditori.it` e `www.immigratiimprenditori.it` al progetto Vercel Production e completare l'eventuale verifica di proprietà **prima** di cambiare i record di traffico.
-5. Eseguire `vercel domains inspect immigratiimprenditori.it` (o controllo equivalente nel dashboard) e usare i valori DNS richiesti da Vercel in quel momento. Non assumere valori diversi se il dashboard restituisce istruzioni specifiche.
+L'automazione non sostituisce questo gate.
 
-Le istruzioni Vercel correnti mostrano come configurazione tipica un record A apex verso `76.76.21.21` e un CNAME `www` verso `cname.vercel-dns-0.com`; questi valori sono soltanto riferimento operativo e vanno confermati con `domains inspect` prima dell'applicazione.
+## 13. Dominio e apertura pubblica
 
-### 10.2 Cutover web
+Solo dopo deploy Production protetto + smoke PASS + autorizzazione al cutover.
 
-1. confermare `NEXT_PUBLIC_SITE_URL=https://immigratiimprenditori.it` nel vero build Production destinato al dominio;
-2. scegliere l'apex `https://immigratiimprenditori.it` come URL canonico;
-3. configurare `www.immigratiimprenditori.it` come alias/redirect verso l'apex, evitando due versioni indicizzabili dello stesso sito;
-4. modificare esclusivamente i record A/AAAA/CNAME web necessari presso Aruba;
-5. verificare che tutti i record email e di verifica non interessati siano rimasti invariati;
-6. attendere la risoluzione DNS e verificare certificato TLS Vercel valido sia su apex sia su `www`;
-7. rimuovere la Deployment Protection destinata al collaudo soltanto quando il dominio risolve sul deployment corretto;
-8. verificare canonical, hreflang, sitemap e robots sul dominio reale;
-9. eseguire live smoke completo;
-10. controllare i log Production immediatamente dopo l'apertura.
+Regole:
 
-### 10.3 Rollback del dominio
+1. non cambiare i nameserver come parte ordinaria del go-live web;
+2. fotografare/esportare la zona DNS prima del cutover;
+3. non modificare MX, SPF, DKIM, DMARC o altri record mail;
+4. verificare i valori DNS richiesti dal dashboard Vercel nel momento del cutover; non usare valori storici non riconfermati;
+5. associare apex e `www` al progetto Production corretto prima di spostare il traffico;
+6. mantenere un solo URL canonico pubblico;
+7. verificare TLS, canonical, hreflang, sitemap e robots sul dominio reale;
+8. eseguire live smoke completo subito dopo il cutover.
 
-Se il cutover DNS espone un deployment errato o instabile:
+### Rollback dominio
 
-- riattivare la protezione del deployment se possibile;
-- ripristinare **solo** i precedenti record web A/AAAA/CNAME annotati nel preflight;
-- non modificare i record di posta durante il rollback;
-- non procedere con ulteriori cambi finché il deployment non è nuovamente verificato.
+Se il cutover espone un deployment errato/instabile:
 
-## 11. Dopo il live smoke
+- riattivare la protezione se disponibile;
+- ripristinare soltanto i precedenti record web A/AAAA/CNAME annotati nel preflight;
+- non modificare i record mail;
+- fermarsi e diagnosticare prima di ulteriori cambi.
 
-Soltanto a questo punto:
-
-- iniziare inviti/outreach;
-- svolgere interviste/testimonianze reali;
-- raccogliere autorizzazioni/consensi necessari;
-- fact-check;
-- review umana;
-- pubblicazione editoriale controllata.
-
-## Rollback
+## 14. Rollback applicativo / database
 
 Se il deployment applicativo fallisce ma il database è sano:
 
-- rollback Vercel al deployment Production precedente, se esistente;
+- rollback Vercel all'ultimo deployment Production noto funzionante, se esistente;
 - mantenere il sito protetto/non pubblico;
 - diagnosticare prima di un nuovo tentativo.
 
-Se il problema è una migration:
+Se il problema è database:
 
 - non improvvisare rollback SQL distruttivi;
 - fermare la release;
-- valutare recovery/forward-fix sulla base del backup verificato e dell'errore concreto.
+- preferire forward-fix revisionata quando lo stato è integro;
+- usare recovery da backup pertinente quando lo stato è corrotto/non deterministico;
+- qualsiasi restore/cutover Production richiede decisione esplicita.
+
+## 15. Stato sintetico
+
+- Production DB migration #1–#25: **PASS**;
+- `candidateDelta`: **0**;
+- Production-source restore: **PASS**;
+- MFA privilegiato Production: **PASS**;
+- governance ibrida DB: **ATTIVA**;
+- Vercel duplicate branch build: **CHIUSO**;
+- Netlify deploy-preview: **CANCELED**;
+- required checks `main`: **ACTIVE**;
+- Production application deploy: **NON ESEGUITO / NON AUTORIZZATO**;
+- QA visivo Preview: **PENDING**;
+- QA umano/device: **PENDING**;
+- legal professionale: **PENDING**;
+- DNS cutover: **NON ESEGUITO**.
+
+`PRODUCTION_READINESS = NOT PASS` finché i gate rimanenti non sono chiusi e il deploy Production non è autorizzato separatamente.
