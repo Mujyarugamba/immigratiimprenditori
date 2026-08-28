@@ -8,6 +8,16 @@ async function tabUntilFocused(page: Page, target: Locator, maxTabs = 30) {
   throw new Error(`Keyboard focus did not reach target within ${maxTabs} Tab presses.`);
 }
 
+async function expectFocusedInViewport(target: Locator) {
+  await expect(target).toBeFocused();
+  const rect = await target.evaluate((element) => {
+    const { top, bottom } = element.getBoundingClientRect();
+    return { top, bottom, innerHeight: window.innerHeight };
+  });
+  expect(rect.bottom).toBeGreaterThan(0);
+  expect(rect.top).toBeLessThan(rect.innerHeight);
+}
+
 async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
   const dimensions = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
@@ -29,7 +39,7 @@ test("core search and authentication controls are keyboard reachable", async ({ 
   for (const control of [search, kind, year, searchSubmit]) {
     await expect(control).toHaveCount(1);
     await tabUntilFocused(page, control);
-    await expect(control).toBeFocused();
+    await expectFocusedInViewport(control);
   }
 
   await page.goto("/accedi", { waitUntil: "domcontentloaded" });
@@ -41,7 +51,7 @@ test("core search and authentication controls are keyboard reachable", async ({ 
   for (const control of [email, password, loginSubmit]) {
     await expect(control).toHaveCount(1);
     await tabUntilFocused(page, control);
-    await expect(control).toBeFocused();
+    await expectFocusedInViewport(control);
   }
 });
 
@@ -62,11 +72,7 @@ test("contribution form remains keyboard reachable through privacy and submit", 
   for (const control of controls) {
     await expect(control).toHaveCount(1);
     await tabUntilFocused(page, control, 35);
-    await expect(control).toBeFocused();
-    const box = await control.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.y + box!.height).toBeGreaterThanOrEqual(0);
-    expect(box!.y).toBeLessThanOrEqual(568);
+    await expectFocusedInViewport(control);
   }
 });
 
