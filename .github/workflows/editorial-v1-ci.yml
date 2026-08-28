@@ -92,6 +92,50 @@ jobs:
 
           echo "SOURCE_HEALTH_LEAST_PRIVILEGE_GUARD = PASS"
 
+      - name: Production promotion workflow guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          workflow=".github/workflows/promote-production.yml"
+          test -f "$workflow" || {
+            echo "Guarded Production promotion workflow is missing" >&2
+            exit 1
+          }
+
+          required=(
+            'workflow_dispatch:'
+            "if: github.ref == 'refs/heads/main'"
+            'contents: write'
+            'DEPLOY_PRODUCTION'
+            "grep -Eq '^[0-9a-f]{40}$'"
+            'git merge-base --is-ancestor'
+            'refs/heads/production'
+            'GITHUB_SHA'
+            'EXPECTED_MAIN_SHA'
+          )
+          for marker in "${required[@]}"; do
+            if ! grep -q --fixed-strings -- "$marker" "$workflow"; then
+              echo "Production promotion safety marker missing: $marker" >&2
+              exit 1
+            fi
+          done
+
+          forbidden_triggers="$(grep -nE '^[[:space:]]+(push|schedule|workflow_call|repository_dispatch|pull_request_target):' "$workflow" || true)"
+          if [[ -n "$forbidden_triggers" ]]; then
+            echo "Production promotion must remain manual-only; forbidden trigger found:" >&2
+            echo "$forbidden_triggers" >&2
+            exit 1
+          fi
+
+          unsafe_push="$(grep -nE -- '--force($|[ =])|--force-with-lease|git push[^#]*[[:space:]]-f([[:space:]]|$)' "$workflow" || true)"
+          if [[ -n "$unsafe_push" ]]; then
+            echo "Production promotion must never force-push:" >&2
+            echo "$unsafe_push" >&2
+            exit 1
+          fi
+
+          echo "PRODUCTION_PROMOTION_WORKFLOW_GUARD = PASS"
+
       - name: Privacy runtime tracker/embed guard
         run: node scripts/ci/privacy-runtime-guard.mjs
 
