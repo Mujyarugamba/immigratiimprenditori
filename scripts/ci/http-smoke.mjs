@@ -171,6 +171,11 @@ async function main() {
     expectHeader(home.response, "permissions-policy", "camera=(), microphone=(), geolocation=()");
     expectHeaderAbsent(home.response, "x-powered-by");
     expectCsp(home.response);
+    if (PREVIEW_READ_ONLY) {
+      expectHeader(home.response, "x-robots-tag", "noindex, nofollow, noarchive");
+    } else {
+      expectHeaderAbsent(home.response, "x-robots-tag");
+    }
 
     if (PREVIEW_READ_ONLY) {
       await expectPreviewMutationBlocked("/contribuisci");
@@ -186,13 +191,21 @@ async function main() {
     await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
     await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
 
-    const robots = await expectText("/robots.txt", [
-      "Sitemap: https://immigratiimprenditori.it/sitemap.xml",
-      "Sitemap: https://immigratiimprenditori.it/sitemap-contributors.xml",
-      "Disallow: /app/",
-    ]);
+    const robots = await expectText(
+      "/robots.txt",
+      PREVIEW_READ_ONLY
+        ? ["Disallow: /"]
+        : [
+            "Sitemap: https://immigratiimprenditori.it/sitemap.xml",
+            "Sitemap: https://immigratiimprenditori.it/sitemap-contributors.xml",
+            "Disallow: /app/",
+          ],
+    );
     if (!robots.response.headers.get("content-type")?.includes("text/plain")) {
       fail("/robots.txt: unexpected Content-Type");
+    }
+    if (PREVIEW_READ_ONLY && robots.body.includes("Sitemap:")) {
+      fail("/robots.txt: read-only preview must not advertise production sitemaps");
     }
 
     const sitemap = await expectText("/sitemap.xml", [
@@ -243,13 +256,15 @@ async function main() {
         PREVIEW_READ_ONLY
           ? "preview mutation firewall for contribution, login and analytics POST"
           : "normal mutation path is not intercepted by preview firewall",
+        PREVIEW_READ_ONLY
+          ? "read-only robots noindex without advertised sitemaps"
+          : "production robots with advertised sitemaps",
         "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
         "support fail-closed state",
-        "robots",
-        "primary sitemap",
-        "contributor sitemap",
+        "primary sitemap route",
+        "contributor sitemap route",
         "legacy route canonical redirect",
         "protected number-zero editorial dashboard",
       ],
