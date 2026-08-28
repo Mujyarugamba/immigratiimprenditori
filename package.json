@@ -11,6 +11,9 @@
     "test": "tsx --test \"src/**/*.test.ts\"",
     "test:smoke": "node scripts/ci/http-smoke.mjs"
   },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
   "dependencies": {
     "@immigrati/product-config": "file:./packages/product-config",
     "@immigrati/ui-foundation": "file:./packages/ui-foundation",
