@@ -2,235 +2,278 @@
 
 Stato: **GATE APERTO — NON PASS**
 
-Data audit: 2026-08-23
-Branch: `feature/research-radar-ai-knowledge-20260822`
+Data audit corrente: 2026-08-28  
+Branch: `work/pre-go-live-integration-20260826`  
+PR corrente: **#13 — DRAFT**
 
-Questo documento registra il **perimetro corrente di rilascio**. Non sostituisce i check GitHub del commit candidato e non trasforma verifiche locali o di preview in autorizzazioni Production.
+Questo documento registra lo stato reale del candidato dopo il rilascio database Production autorizzato del 24 agosto e la successiva integrazione pre-go-live. Non autorizza merge, deploy Production, DNS o ulteriori write Production.
 
 Regola editoriale vincolante:
 
 > **Prima il sito va online e supera il live smoke; solo dopo iniziano inviti, interviste e altri contatti esterni.**
 
-Di conseguenza una storia reale **non è un blocker del primo go-live**. Il cold-start può avere zero storie reali purché `/storie`, workflow, evidence gate e pubblicazione controllata siano tecnicamente pronti.
+Una storia reale non è un blocker del primo go-live. Il cold-start può avere zero storie reali purché `/storie`, workflow, evidence gate e pubblicazione controllata siano tecnicamente pronti.
 
 ---
 
-## 1. Stato sintetico Go-Live A
+## 1. Stato sintetico
 
-Roadmap canonica: `docs/roadmap/ROADMAP-110-PRIORITIES.md`.
+- candidato applicativo / CI: **PASS sul precedente HEAD tecnico verde; CI corrente in riconferma dopo reconciliation docs/release metadata**;
+- Production DB release: **PASS**;
+- migration Production #1–#25: **PASS**;
+- MFA privilegiato Production: **PASS**;
+- Production-source restore drill: **PASS**;
+- governance editoriale ibrida: **ATTIVA IN PRODUCTION DB**;
+- Vercel Preview/Production project alignment: **PASS**;
+- doppio build Vercel branch: **CHIUSO**;
+- required checks `main`: **ACTIVE**;
+- QA umano WCAG/device: **PENDING**;
+- revisione legale professionale: **PENDING**;
+- QA visivo diretto del Preview corrente / mini-trend: **PENDING**;
+- merge/deploy Production: **NON AUTORIZZATI**.
 
-- **READY: 32/33**
-- **DA RIFINIRE: 1/33** — #92 WCAG 2.2 AA human/device QA
-- **blocker di contenuto reale prima del primo go-live: 0**
-
-`PRODUCTION_READINESS = NOT PASS` finché i gate esterni e di rilascio indicati in fondo non sono chiusi.
+`PRODUCTION_READINESS = NOT PASS` finché i gate umani/applicativi rimanenti e le autorizzazioni finali non sono chiusi.
 
 ---
 
 ## 2. Pubblicazione e integrità editoriale
 
 ### EDIT-01 — No auto-publish
-**PASS SUL CANDIDATO**
+**PASS / ATTIVO IN PRODUCTION DB**
 
-Contributi pubblici, Radar e strumenti AI non dispongono di un percorso di auto-pubblicazione. La decisione di pubblicazione resta umana e role-gated.
+Contributi pubblici, Radar, AI e automazioni non dispongono di un percorso di auto-pubblicazione. La decisione di pubblicazione resta umana e role-gated.
 
 ### EDIT-02 — Storie d'impresa
 **FUNZIONE PRE-GO-LIVE READY / CONTENUTO REALE POST-GO-LIVE**
 
-Prima del go-live devono essere pronti:
-
-- `/storie` anche in stato vuoto;
-- tipi editoriali Storie/intervista/testimonianza;
-- Inbox e workflow redazionale;
-- evidence/fact-check gate;
-- pubblicazione umana controllata.
-
-Prima del go-live è vietato:
-
-- inviare inviti o richieste di intervista;
-- contattare imprenditori, partner o ricercatori per popolare Storie;
-- simulare testimonianze;
-- usare placeholder fittizi per rendere verde un gate.
-
-Dopo sito online + live smoke PASS può iniziare l'acquisizione delle prime storie reali.
+`/storie` può andare online anche a zero storie reali. Nessun outreach prima di sito online + live smoke PASS. Placeholder, testimonianze simulate e attribuzioni inventate restano vietati.
 
 ### EDIT-03 — Review governance
-**DECISIONE APPROVATA / IMPLEMENTAZIONE CANDIDATA E VALIDATA NEL LABORATORIO**
+**IBRIDA — ATTIVA IN PRODUCTION DB**
 
-Il 23/08/2026 è stato scelto il modello **ibrido**:
+- same-editor per contenuti ordinari;
+- seconda approvazione distinta per contenuti sensibili/istituzionali;
+- seconda approvazione per indicatori Osservatorio;
+- seconda approvazione per correzioni `substantive`/`retraction`;
+- self-approval negata;
+- approvazioni fingerprint-bound;
+- nessun bypass AI/Radar/service-role.
 
-- contenuti ordinari: same-editor consentito, mantenendo autenticazione, ruolo redazionale, ownership editoriale e audit;
-- contenuti sensibili/istituzionali: seconda approvazione obbligatoria da account redazionale distinto;
-- indicatori Osservatorio: seconda approvazione obbligatoria;
-- correzioni pubbliche `substantive` e `retraction`: seconda approvazione obbligatoria;
-- escalation manuale possibile per contenuti ordinari;
-- nessun bypass per AI, Radar, automazioni o service-role.
-
-L'approvazione è legata al fingerprint dello stato revisionato: una modifica sostanziale rende inutilizzabile una precedente approvazione. Richiedente e approvatore non possono coincidere.
-
-Il test con due redattori effimeri distinti è PASS dopo una forward-fix esplicita della semantica `NULL` del classificatore delle categorie. Sono provati: same-editor ordinario, blocco sensibile senza review, self-approval negata, approvazione del secondo redattore, approvazione stale negata dopo modifica, nuova review valida e cleanup effimero.
-
-Specifica: `docs/editorial/HYBRID-REVIEW-GOVERNANCE.md`.
-Migration candidate:
-- `20260822213000_hybrid_editorial_review_governance.sql`;
-- `20260822213100_fix_hybrid_null_category_classifier.sql`.
-
-Questa decisione **non autorizza** l'apply Production.
+Le migration governance e la forward-fix del classificatore `NULL` sono applicate e coperte dai test locali/CI.
 
 ### EDIT-04 — Versioning / audit
-**IMPLEMENTATO E VALIDATO NEL LABORATORIO / ATTIVAZIONE PRODUCTION PENDING**
+**ATTIVO IN PRODUCTION DB**
 
-Il candidato conserva versioning editoriale, correzioni e audit. L'attivazione live resta parte del set di release autorizzato e non viene anticipata.
+Versioning, correzioni e audit introdotti dal release batch sono applicati. Il comportamento frontend live resta da verificare dopo un futuro deploy Production autorizzato.
 
 ---
 
-## 3. Preview e confine Production
+## 3. Production database e migration ledger
 
-### HOST-01 — Preview read-only
-**PASS SUL CANDIDATO**
+### SEC-MIGRATION-01 — Production release ledger
+**PASS / RICONCILIATO**
 
-Vercel Preview e Netlify Deploy Preview sono trattati come read-only/noindex.
+Il manifest canonico `supabase/CS-PRODUCTION-RELEASE.json` è in schema v2 e registra:
 
-Il proxy blocca le mutazioni in Preview e il client service-role è fail-closed in ambiente Preview anche qualora un secret privilegiato venisse configurato per errore.
+- baseline hosted pre-release: `20260820160000_prepare_events_external_ingestion_rls`;
+- hosted latest post-release: `20260824103000_harden_publication_gate_execute_privileges`;
+- `appliedReleaseDelta`: **25 migration**;
+- `candidateDelta`: **0**;
+- migration rows post-apply: **234**;
+- run apply fase 1: `32699707002`;
+- run apply fase 2: `32706028947`;
+- security patch run: `32707529881`.
+
+`PRODUCTION_MIGRATIONS_1_25 = PASS`
+
+Non esiste oggi un delta migration candidato secondo il manifest. Prima di qualsiasi futura write Production resta obbligatoria una nuova lettura hosted e l'autorizzazione prevista dalla release policy.
+
+### SEC-RLS-01 — RLS e publication gate
+**PASS PRODUCTION POST-APPLY**
+
+La patch `20260824103000_harden_publication_gate_execute_privileges.sql` ha rimosso direct EXECUTE su `public.enforce_content_human_publication_gate()` da `anon`, `authenticated` e `service_role`, mantenendo il trigger di pubblicazione attivo. Il postflight Production e il Security Advisor successivo sono risultati coerenti con il contratto previsto.
+
+---
+
+## 4. Autenticazione e MFA
+
+### SEC-AUTH-01 — Separazione ruoli
+**PASS**
+
+Contributor/editor/admin separation, provisioning e auto-elevazione negata sono coperti dal laboratorio e dalla CI autenticata.
+
+### SEC-AUTH-02 — MFA privilegiati
+**PASS PRODUCTION / FRONTEND REAL-ACCOUNT RECHECK PENDING**
+
+Il rilascio Production ha registrato:
+
+- **2 amministratori applicativi attivi**;
+- **1 fattore TOTP verificato** collegato a un amministratore attivo;
+- enforcement AAL2 applicato.
+
+`PRODUCTION_PRIVILEGED_MFA = PASS`
+
+Resta distinto il controllo applicativo sul vero frontend Vercel con il nuovo account reale prima di rimuovere eventuali credenziali/amministratori di prova conservati come safety fallback.
+
+---
+
+## 5. Backup / recovery
+
+### BACKUP-01 — CI restore drill
+**PASS**
+
+`CI_EPHEMERAL_RESTORE_DRILL = PASS`
+
+### BACKUP-02 — Production-source restore drill
+**PASS**
+
+`PRODUCTION_SOURCE_RESTORE_DRILL = PASS`
+
+Evidenza canonica: `docs/operations/production-source-restore-drill-2026-08-23.md`.
+
+### BACKUP-03 — Backup delle write Production eseguite
+**PASS PER IL RELEASE CHIUSO**
+
+Le fasi Production autorizzate sono state precedute dai backup previsti; la security patch ha evidenza cifrata registrata nel dossier del 24 agosto. La retention degli artifact è finita e non sostituisce un fresh backup prima di future write Production.
+
+---
+
+## 6. Hosting e confine Production
+
+### HOST-01 — Vercel Preview canonico
+**PASS**
+
+Il progetto Preview canonico è `immigratiimprenditori-preview`.
+
+Sul progetto Production `immigratiimprenditori` è configurato un Ignored Build Step che ignora i branch Git diversi da `main`:
+
+```sh
+if [ -n "${VERCEL_GIT_COMMIT_REF:-}" ] && [ "$VERCEL_GIT_COMMIT_REF" != "main" ]; then exit 0; else exit 1; fi
+```
+
+Il comportamento è stato verificato su più commit consecutivi:
+
+- Production project: `Canceled by Ignored Build Step`;
+- Preview project: deployment completato;
+- Netlify deploy-preview: canceled.
+
+`VERCEL_PREVIEW_DUPLICATION = CLOSED`
 
 ### HOST-02 — Vercel Production
 **PENDING RILASCIO AUTORIZZATO**
 
-Vercel è il percorso Production selezionato. Il primo candidato Production deve essere un vero build Production, non la promozione di un artifact Preview.
+Nessun Production deploy applicativo è stato eseguito in questo ciclo. `main` continua a essere il solo branch destinato a costruire sul progetto Production.
 
-### HOST-03 — Deployment Protection
-**DISPONIBILE / ATTIVAZIONE DA VERIFICARE SUL PROGETTO**
+### HOST-03 — Netlify
+**GIT DEPLOY PREVIEW CANCELED / NON TARGET FINALE**
 
-La configurazione effettiva del progetto va verificata prima del rilascio finale.
+Netlify non è target Production e non è required check del percorso finale.
 
 ### HOST-04 — Dominio
-**CUTOVER PREPARATO / DNS NON MODIFICATO**
+**DNS NON MODIFICATO**
 
-Il dominio resta chiuso fino a deploy Production protetto + smoke PASS. Nessun record mail deve essere modificato durante il cutover web.
-
----
-
-## 4. HTTP security e dipendenze
-
-### SEC-HTTP-01 — Header baseline
-**PASS CI SUL CANDIDATO / FINAL LIVE SMOKE PENDING**
-
-HSTS, nosniff, frame denial, referrer policy, permissions policy, CSP e assenza `X-Powered-By` sono verificati dal candidato. Il deployment Production dovrà ripetere lo smoke.
-
-### SEC-DEPS-01 — Dipendenze Production
-**PASS NELLA CI APPLICATIVA**
-
-`npm audit --omit=dev --audit-level=high` resta gate del workflow Editorial.
+Il dominio resta chiuso fino a deploy Production protetto + smoke PASS e successiva autorizzazione/cutover. I record mail non devono essere alterati durante il cutover web.
 
 ---
 
-## 5. Autenticazione, ruoli e database
+## 7. Required checks `main`
 
-### SEC-AUTH-01 — Separazione ruoli
-**PASS LABORATORIO / LIVE RECHECK PENDING**
+**ACTIVE**
 
-Contributor, editor e amministratore sono separati; auto-elevazione negata nel laboratorio.
+Ruleset GitHub: `Protect main`, enforcement `active`, target default branch.
 
-### SEC-AUTH-02 — MFA privilegiati
-**PASS LABORATORIO / PRODUCTION ENROLLMENT PENDING**
+Required status checks con policy strict:
 
-TOTP/AAL2 è validato nel laboratorio. La lettura Production del 23/08/2026 mostra 1 assegnazione attiva `amministratore_applicativo` e 0 fattori in `auth.mfa_factors`: l'enrollment privilegiato reale resta PENDING.
+- `verify`;
+- `validate-local-database`.
 
-### SEC-RLS-01 — RLS e publication gate
-**PASS LABORATORIO SUL CANDIDATO GOVERNANCE**
+Il ruleset blocca anche deletion e non-fast-forward e richiede passaggio tramite pull request. Non risultano bypass actors.
 
-Cold-start, PostgreSQL lint, publication/RLS smoke, governance ibrida con due redattori, rate-limit e go-live DB smoke sono PASS sul candidato che include la forward-fix del classificatore `NULL`. Nessuna nuova applicazione Production è implicata da questo documento.
-
-### SEC-MIGRATION-01 — Apply Production
-**NON AUTORIZZATO**
-
-Prima dell'apply servono ancora:
-
-1. restore drill non-Production **con dump logico proveniente dalla Production reale**;
-2. fresh migration-history read;
-3. controllo assenza drift;
-4. autorizzazione esplicita;
-5. apply ordinato del solo set candidato;
-6. smoke Security/RLS/rate-limit/governance dopo apply.
-
-La lettura hosted più recente conferma ancora cutoff `20260820160000`; il piano candidato contiene **24 migration** e nessuna è stata applicata in Production.
+Il Vercel Preview check resta controllo operativo del candidato, ma non è attualmente incluso tra i required status checks del ruleset.
 
 ---
 
-## 6. Backup / recovery
+## 8. CI, E2E, accessibilità e performance
 
-### BACKUP-01 — Percorso tecnico di restore
-**CI EPHEMERAL RESTORE DRILL = PASS / PRODUCTION-SOURCE DRILL = PENDING**
+Ultimo HEAD tecnico completamente verde prima della reconciliation docs/release metadata: `3c6b464f4666075a872bde6c0a6f07568450a1f7`.
 
-Il 23/08/2026 il laboratorio CI ha completato con PASS un vero ciclo di recovery contro un secondo stack Supabase-managed fresco:
+Su quel candidato:
 
-- dump logico `roles.sql` + `schema.sql` + `data.sql`;
-- normalizzazione chirurgica del solo privilegio platform-managed `log_min_messages`;
-- restore completo su stack fresco senza migration applicative preinstallate;
-- reattach idempotente del solo hook applicativo `on_auth_user_created` su `auth.users` tramite `scripts/ci/post-restore-auth-hooks.sql`;
-- verifica RLS e tabelle critiche;
-- Auth integration smoke con utenti effimeri reali e provisioning `public.profiles`;
-- separazione contributor/redattore e auto-elevazione negata;
-- build applicativa, HTTP/security smoke e browser E2E autenticato sul database ripristinato;
-- cleanup finale.
+- Editorial CI: PASS;
+- Supabase local migration validation: PASS;
+- cold-start/replay, lint DB, RLS/security, governance ibrida, rate limit, audit/analytics, backup/restore, Auth integration: PASS;
+- unit/integration: **120/120 PASS**;
+- browser E2E quality: **9/9 PASS**;
+- authenticated browser E2E: PASS;
+- reflow 320/390/768: PASS;
+- Lighthouse Performance: **98–99**;
+- Accessibility: **100**;
+- Best Practices: **100**;
+- SEO: **100**;
+- LCP < 2,5 s, CLS 0.
 
-Il precedente blocker `log_min_messages` è quindi **CHIUSO** e il mancato ripristino del trigger Auth è anch'esso **CHIUSO**.
+Il 404 favicon è chiuso. Il residuo image-delivery del logo è ~16 KB e non è bloccante.
 
-Resta distinto il gate pre-release **Production-source**: ottenere un dump logico della Production reale da una macchina amministrativa controllata e ripristinarlo su un target non-Production pulito. Le credenziali necessarie non vengono introdotte nel repository e questo passaggio non è ancora stato eseguito.
+### UI-A11Y-01 — Human/device QA
+**PENDING**
 
-### BACKUP-02 — Backup cifrato Production
-**PENDING PRE-RELEASE**
-
-Il workflow di archivio cifrato è preparato ma richiede i secret Production previsti e un'esecuzione reale autorizzata. Il PASS del laboratorio non equivale a un backup Production eseguito.
-
-Procedura canonica: `docs/security/BACKUP-RECOVERY.md`.
+L'automazione non sostituisce il record umano previsto in `docs/operations/go-live-a-closure-kit-2026-08-23.md`: tastiera, screen reader, zoom/reflow, RTL, moduli/Auth e verifica desktop/tablet/mobile.
 
 ---
 
-## 7. Privacy e documenti legali
+## 9. Privacy e documenti legali
 
-### LEGAL-01 — Privacy
-**TECNICAMENTE ALLINEATA / REVISIONE PROFESSIONALE PENDING**
+### LEGAL-01/02/03
+**DOSSIER TECNICO PRONTO / REVISIONE PROFESSIONALE PENDING**
 
-La raccolta proposta distingue il trattamento necessario per ricezione/valutazione dalla possibile autorizzazione alla pubblicazione.
+Handoff: `docs/operations/legal-professional-review-handoff-2026-08-23.md`.
 
-### LEGAL-02 — Cookie
-**RUNTIME COERENTE / REVISIONE PROFESSIONALE PENDING**
+Il gate richiede sign-off di un professionista competente su Privacy, Cookie, Termini, fornitori/trasferimenti, retention, IP/materiali editoriali e altri punti elencati nel dossier.
 
-Il runtime non introduce tracker o embed comportamentali senza revisione deliberata. L'analytics applicativo resta first-party, aggregato e governato da flag espliciti.
-
-### LEGAL-03 — Termini
-**TECNICAMENTE ALLINEATI / REVISIONE PROFESSIONALE PENDING**
-
-La revisione professionale deve ancora validare formulazioni e perimetro giuridico finale.
+`LEGAL_PROFESSIONAL_REVIEW = PENDING`
 
 ---
 
-## 8. Accessibilità e responsive
+## 10. Source-health
 
-### UI-A11Y-01 — Automazione
-**PASS NELLA CI APPLICATIVA / HUMAN-DEVICE QA PENDING**
+**TECHNICAL PASS / DEFAULT-BRANCH RUN POST-MERGE PENDING**
 
-I test coprono reflow 320/390/768, text-spacing WCAG a 320 px, target-size minimo, navigazione tastiera, error association e browser E2E. Lighthouse mobile e Public browser E2E sono PASS nel candidato funzionale. La verifica umana/device resta distinta e PENDING.
+Il checker è read-only, usa publishable key e ha SSRF/redirect/DNS guard PASS. Il workflow settimanale esiste sul branch candidato ma non ancora su `main`.
+
+Il primo vero `workflow_dispatch`/cron sul default branch è quindi un gate **post-merge / pre-go-live**, non un blocker tecnico pre-merge.
 
 ---
 
-## 9. Gate esterni ancora aperti
+## 11. Gate realmente aperti
 
-Restano da chiudere prima del go-live:
+### Prima della decisione finale di merge
 
-1. restore drill con **dump logico Production reale → target non-Production pulito**;
-2. human WCAG 2.2 AA + desktop/tablet/mobile/device QA;
-3. revisione legale professionale finale;
-4. enrollment/verifica MFA reale dell'account privilegiato Production;
-5. fresh migration-history read immediatamente prima di un eventuale apply;
-6. autorizzazione esplicita all'apply delle **24 migration candidate**;
-7. smoke Production post-migration, incluso il gate 4-eyes;
-8. governance required checks di `main`;
-9. autorizzazione esplicita a merge/deploy Production;
-10. protected Production smoke Vercel;
-11. apertura dominio + live smoke finale.
+1. CI verde sul HEAD finale;
+2. QA visivo diretto del Preview corrente / mini-trend con dati reali;
+3. human WCAG 2.2 AA + desktop/tablet/mobile/device QA;
+4. revisione legale professionale finale;
+5. verifica reale login + MFA/AAL2 del nuovo amministratore sul frontend Vercel corretto, se non ancora registrata da evidenza successiva;
+6. autorizzazione esplicita alla decisione di merge.
 
-La decisione sul modello editoriale ibrido e il restore drill CI effimero **non sono più hold point**.
+### Dopo merge / prima del go-live pubblico
+
+1. first source-health run sul default branch;
+2. autorizzazione separata al deploy Production;
+3. protected Production smoke Vercel;
+4. eventuali live recheck DB/security previsti dal runbook;
+5. apertura dominio autorizzata;
+6. live smoke finale.
+
+Dopo il live smoke PASS può iniziare l'outreach editoriale reale.
+
+---
+
+## 12. Safety boundary
+
+- PR #13 resta DRAFT finché i gate pre-merge non sono chiusi;
+- nessun merge automatico;
+- nessuna write Production implicita;
+- nessun deploy Production senza autorizzazione separata;
+- nessun contenuto, autore, attribuzione o evidenza inventati per chiudere un gate.
 
 `PRODUCTION_READINESS = NOT PASS`.
