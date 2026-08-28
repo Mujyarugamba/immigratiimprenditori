@@ -44,7 +44,7 @@ async function get(target, path) {
     redirect: "manual",
     headers: {
       "user-agent": "centro-studi-production-smoke/1.0",
-      accept: "text/html,text/plain,application/xml;q=0.9,*/*;q=0.1",
+      accept: "text/html,text/plain,application/json,application/xml;q=0.9,*/*;q=0.1",
     },
   });
   return { url, response };
@@ -112,6 +112,51 @@ async function run() {
     expectStatus(path, page.response, 200);
     checks.push(`${path} GET 200`);
   }
+
+  const corePublicPaths = [
+    "/osservatorio",
+    "/atlante",
+    "/storie",
+    "/eventi",
+    "/fonti",
+    "/open-data",
+  ];
+  for (const path of corePublicPaths) {
+    const page = await get(target, path);
+    expectStatus(path, page.response, 200);
+    const contentType = page.response.headers.get("content-type") ?? "";
+    if (!contentType.toLowerCase().includes("text/html")) {
+      fail(`${path}: expected text/html response, received ${JSON.stringify(contentType)}`);
+    }
+    checks.push(`${path} public surface GET 200`);
+  }
+
+  const openData = await get(target, "/api/open-data/indicators");
+  expectStatus("/api/open-data/indicators", openData.response, 200);
+  const openDataType = openData.response.headers.get("content-type") ?? "";
+  if (!openDataType.toLowerCase().includes("application/json")) {
+    fail(`/api/open-data/indicators: expected application/json, received ${JSON.stringify(openDataType)}`);
+  }
+  const openDataPayload = await openData.response.json();
+  if (!openDataPayload || typeof openDataPayload !== "object") {
+    fail("/api/open-data/indicators: JSON payload is not an object");
+  }
+  if (typeof openDataPayload.dataset !== "string" || !openDataPayload.dataset.includes("Osservatorio")) {
+    fail("/api/open-data/indicators: dataset marker missing");
+  }
+  if (!Number.isInteger(openDataPayload.record_count) || openDataPayload.record_count < 0) {
+    fail("/api/open-data/indicators: record_count must be a non-negative integer");
+  }
+  if (!openDataPayload.filters || typeof openDataPayload.filters !== "object" || Array.isArray(openDataPayload.filters)) {
+    fail("/api/open-data/indicators: filters object missing");
+  }
+  if (!Array.isArray(openDataPayload.records)) {
+    fail("/api/open-data/indicators: records array missing");
+  }
+  if (openDataPayload.record_count !== openDataPayload.records.length) {
+    fail("/api/open-data/indicators: record_count does not match records length");
+  }
+  checks.push("open-data indicators JSON contract");
 
   const robots = await get(target, "/robots.txt");
   expectStatus("/robots.txt", robots.response, 200);
