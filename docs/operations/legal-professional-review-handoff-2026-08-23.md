@@ -1,10 +1,14 @@
 # Handoff per revisione legale professionale — Centro Studi
 
-Data di riferimento: 2026-08-23  
+Data di riferimento originaria: 2026-08-23  
+Ultima riconciliazione tecnica: 2026-08-29  
 Stato: **DOSSIER TECNICO PRONTO / REVISIONE PROFESSIONALE PENDING**  
-Branch: `feature/research-radar-ai-knowledge-20260822`
+Branch: `work/pre-go-live-integration-20260826`  
+PR: **#13 — DRAFT**
 
-Questo documento non costituisce parere legale e non chiude il gate giuridico. Serve a consegnare al professionista un quadro tecnico-fattuale coerente con l'implementazione corrente, distinguendo ciò che il software fa realmente da ciò che deve essere confermato o corretto sul piano normativo.
+Questo documento non costituisce parere legale e non chiude il gate giuridico. Serve a consegnare al professionista un quadro tecnico-fattuale coerente con l'implementazione candidata, distinguendo ciò che il software fa realmente da ciò che deve essere confermato o corretto sul piano normativo.
+
+La riconciliazione del 29 agosto include il candidato per traduzioni AI automatiche di **soli contenuti editoriali già pubblicati**. La migration relativa non è applicata a Production, il backfill non è stato eseguito e l'attivazione resta soggetta ad autorizzazioni tecniche separate.
 
 ## 1. Identità e natura del progetto implementate
 
@@ -28,9 +32,10 @@ File canonici:
 - `src/app/privacy/page.tsx` — Privacy Policy;
 - `src/app/cookie/page.tsx` — Cookie Policy;
 - `src/app/termini/page.tsx` — Termini di utilizzo;
+- `src/app/politica-editoriale/page.tsx` — Politica editoriale;
 - `src/app/contribuisci/page.tsx` — modulo pubblico di partecipazione e testi di presa d'atto/autorizzazione.
 
-Le tre pagine legali sono marcate come aggiornate al 23 agosto 2026.
+Privacy Policy e Politica editoriale sono state aggiornate tecnicamente il 29 agosto 2026 per includere il candidato di traduzione AI. Il professionista deve verificare la versione effettivamente presente sul commit sottoposto a sign-off, senza fare affidamento sulla data originaria di questo handoff.
 
 ## 3. Dati raccolti dal modulo pubblico
 
@@ -58,9 +63,9 @@ Il modulo dichiara che l'invio è riservato a persone maggiorenni.
 
 La presa d'atto privacy obbligatoria e l'autorizzazione alla possibile pubblicazione sono controlli distinti. La seconda è facoltativa e non determina mai pubblicazione automatica.
 
-## 4. Workflow editoriale e pubblicazione
+## 4. Workflow editoriale, pubblicazione e traduzioni automatiche
 
-Le proposte entrano in una Inbox redazionale privata. Il sistema non dispone di un percorso di auto-pubblicazione per contributi pubblici, Radar, AI o automazioni.
+Le proposte entrano in una Inbox redazionale privata. Il sistema non dispone di un percorso di auto-pubblicazione dell'**originale editoriale** per contributi pubblici, Radar o automazioni.
 
 La governance candidata è ibrida:
 
@@ -73,7 +78,22 @@ La governance candidata è ibrida:
 
 Per materiali personali, interviste, testimonianze, immagini, audio e video la documentazione tecnica prevede che possano essere richieste autorizzazioni ulteriori prima della pubblicazione.
 
-Il professionista deve confermare in particolare il rapporto tra base giuridica del trattamento, consenso/autorizzazione editoriale, diritti di immagine/voce e eventuale conservazione archivistica dopo pubblicazione.
+Il candidato AI introduce una funzione distinta: **traduzione automatica di contenuti editoriali già pubblicati**. Tecnicamente:
+
+- l'originale non viene sovrascritto;
+- le traduzioni sono memorizzate in una cache separata;
+- la versione originale resta accessibile e prevale in caso di dubbio o discrepanza;
+- le traduzioni sono indicate come automatiche e possono essere mostrate senza preventiva revisione umana della singola traduzione;
+- il traffico pubblico è cache-only e non genera chiamate OpenAI;
+- la generazione è riservata a percorsi server-side espliciti e controllati;
+- bozze, proposte non pubblicate e contenuti Inbox non fanno parte della sorgente prevista per la traduzione AI.
+
+Il professionista deve confermare in particolare:
+
+1. il rapporto tra base giuridica del trattamento, consenso/autorizzazione editoriale, diritti di immagine/voce e eventuale conservazione archivistica dopo pubblicazione;
+2. se e come la traduzione automatica di contenuti pubblici che possano contenere dati personali richieda precisazioni ulteriori nell'informativa o nella documentazione interna;
+3. se le avvertenze sulla natura automatica della traduzione e sulla prevalenza dell'originale siano adeguate;
+4. se occorrano regole più restrittive per categorie particolari di contenuti o interessati.
 
 ## 5. Basi giuridiche dichiarate nella Privacy Policy
 
@@ -88,7 +108,9 @@ La policy corrente associa:
 
 La policy distingue espressamente la presa d'atto obbligatoria dell'informativa da un consenso a finalità ulteriori.
 
-Questa tassonomia deve essere validata dal professionista, inclusa l'eventuale necessità di basi più specifiche per casi particolari o categorie di interessati/contenuti.
+La versione candidata descrive inoltre OpenAI come fornitore utilizzato per la traduzione di contenuti editoriali già pubblicati e specifica che tale funzione non viene usata per decisioni automatizzate con effetti giuridici o analogamente significativi sugli interessati.
+
+Questa tassonomia deve essere validata dal professionista, inclusa l'eventuale necessità di una base o motivazione più specifica per la traduzione tramite fornitore esterno e per casi particolari o categorie di interessati/contenuti.
 
 ## 6. Analytics applicativo realmente implementato
 
@@ -124,24 +146,31 @@ La Cookie Policy corrente dichiara:
 
 Il professionista deve verificare la coerenza di questa impostazione con la configurazione realmente attiva al giorno del go-live e con le linee guida applicabili del Garante.
 
-## 8. Fornitori e trasferimenti
+## 8. Fornitori, OpenAI e trasferimenti
 
-La Privacy Policy corrente indica in particolare:
+La Privacy Policy candidata indica in particolare:
 
 - Supabase per database, autenticazione e servizi applicativi, con progetto primario in **eu-west-3 (Parigi)**;
 - Vercel come hosting/deployment Production previsto;
 - Netlify come possibile ambiente tecnico di preview/collaudo non destinato alla pubblicazione;
-- Aruba e servizi Google quando impiegati per dominio/posta/comunicazioni.
+- Aruba e servizi Google quando impiegati per dominio/posta/comunicazioni;
+- **OpenAI** come fornitore per generare traduzioni automatiche di contenuti editoriali già pubblicati.
+
+Per il candidato OpenAI, il contratto tecnico implementato usa `store: false`; la documentazione applicativa specifica espressamente che questa opzione **non viene equiparata a Zero Data Retention**. L'eventuale disponibilità/configurazione di ZDR è un controllo separato a livello account/progetto e non viene presunta dal software.
 
 La policy segnala che fornitori o sub-responsabili possono comportare trattamenti fuori SEE e richiama strumenti come decisioni di adeguatezza o SCC quando applicabili.
 
-Prima del go-live il professionista deve chiedere/confermare almeno:
+Prima del go-live e prima dell'attivazione della funzione AI il professionista deve chiedere/confermare almeno:
 
 - ruolo privacy di ciascun fornitore rilevante;
 - DPA/accordi ex art. 28 ove necessari;
 - elenco e localizzazione dei sub-responsabili materialmente usati;
 - meccanismi di trasferimento internazionale applicabili;
-- coerenza tra disclosure pubblica e configurazione effettiva Production.
+- coerenza tra disclosure pubblica e configurazione effettiva Production;
+- ruolo e condizioni contrattuali applicabili a OpenAI rispetto ai contenuti inviati;
+- retention effettivamente applicabile alle richieste API e distinzione tra `store: false` ed eventuale Zero Data Retention;
+- eventuale necessità di valutazione/documentazione aggiuntiva per contenuti pubblici che includano dati personali o dati di terzi;
+- coerenza tra la configurazione tecnica finale e quanto dichiarato in Privacy Policy al momento dell'attivazione.
 
 ## 9. Conservazione dichiarata
 
@@ -151,9 +180,10 @@ La Privacy Policy corrente prevede, tra l'altro:
 - account: durata del rapporto + periodo successivo necessario a chiusura, sicurezza e tutela diritti;
 - materiali pubblicati/atti editoriali: conservazione nell'archivio finché permane finalità editoriale, storica o documentale, fatti salvi diritti/correzioni/richieste legittime;
 - log tecnici/sicurezza: periodi proporzionati alle finalità e configurazioni dei fornitori;
-- analytics applicativo: conteggi aggregati giornalieri senza archivio di IP, user-agent, cookie ID, account o eventi grezzi.
+- analytics applicativo: conteggi aggregati giornalieri senza archivio di IP, user-agent, cookie ID, account o eventi grezzi;
+- traduzioni AI generate: cache applicativa separata collegata al fingerprint della sorgente pubblica, soggetta a invalidazione/rigenerazione quando cambia la sorgente.
 
-Il professionista deve validare i termini temporali, gli eventuali obblighi di cancellazione/limitazione e il bilanciamento tra diritti degli interessati e finalità archivistico-editoriali.
+Il professionista deve validare i termini temporali, gli eventuali obblighi di cancellazione/limitazione, la durata della cache di traduzione e il bilanciamento tra diritti degli interessati e finalità archivistico-editoriali.
 
 ## 10. Maggiore età
 
@@ -162,7 +192,8 @@ Privacy Policy, Termini e modulo indicano 18 anni come requisito per inviare pro
 Da confermare professionalmente:
 
 - se il requisito di 18 anni sia adeguato e sufficiente per tutte le funzioni previste;
-- se servano meccanismi o formulazioni aggiuntive per gestire segnalazioni/materiali che riguardino minori o dati di minori.
+- se servano meccanismi o formulazioni aggiuntive per gestire segnalazioni/materiali che riguardino minori o dati di minori;
+- se contenuti pubblici riguardanti minori o categorie particolari debbano essere esclusi o gestiti con regole specifiche prima di eventuale traduzione automatica.
 
 ## 11. Termini, contributi e proprietà intellettuale
 
@@ -179,7 +210,7 @@ I Termini correnti stabiliscono tra l'altro che:
 - contenuti e dati pubblicati hanno finalità di studio/documentazione/informazione e non sostituiscono consulenze individuali;
 - legge italiana applicabile; tutela del foro del consumatore per consumatori; Foro di Milano previsto per utenti professionali/istituzionali salvo norme inderogabili.
 
-Il professionista deve convalidare soprattutto clausole IP/licenze, responsabilità, gestione dei materiali di terzi, correzioni/ritiri, foro e distinzione consumatore/professionista.
+Il professionista deve convalidare soprattutto clausole IP/licenze, responsabilità, gestione dei materiali di terzi, correzioni/ritiri, foro e distinzione consumatore/professionista, nonché verificare se la traduzione automatica dei contenuti pubblicati richieda precisazioni contrattuali o autorizzazioni ulteriori rispetto ai diritti sui materiali sorgente.
 
 ## 12. Diritti degli interessati e contatti
 
@@ -192,7 +223,8 @@ Da verificare prima del go-live:
 - chi riceve e gestisce operativamente le richieste;
 - tempi/procedura interna di risposta;
 - eventuale necessità di ulteriori contatti o ruoli (es. DPO, se applicabile);
-- coerenza con eventuali procedure di cancellazione account e retention implementate nel database.
+- coerenza con eventuali procedure di cancellazione account e retention implementate nel database;
+- gestione di richieste di rettifica/cancellazione quando il dato compare anche in una traduzione AI in cache.
 
 ## 13. Punti che devono restare esplicitamente PENDING fino al parere professionale
 
@@ -207,19 +239,28 @@ Il dossier tecnico non autorizza a dichiarare PASS nessuno dei seguenti punti:
 7. limiti di responsabilità e foro;
 8. trattamento di dati/minori;
 9. eventuale necessità di DPIA, registro trattamenti, LIA o altra documentazione interna;
-10. obblighi informativi derivanti dalla forma giuridica e dall'attività effettiva di AIPEL.
+10. obblighi informativi derivanti dalla forma giuridica e dall'attività effettiva di AIPEL;
+11. ruolo/DPA/sub-responsabili e trasferimenti applicabili a OpenAI;
+12. retention delle richieste API e adeguatezza della distinzione tra `store: false` ed eventuale ZDR;
+13. base giuridica e cautele per tradurre tramite provider esterno contenuti pubblici che possano contenere dati personali o dati di terzi;
+14. adeguatezza delle disclosure sulla natura automatica della traduzione e sulla prevalenza dell'originale.
 
 ## 14. Evidenze tecniche da consegnare insieme al dossier
 
 - `src/app/privacy/page.tsx`;
 - `src/app/cookie/page.tsx`;
 - `src/app/termini/page.tsx`;
+- `src/app/politica-editoriale/page.tsx`;
 - `src/app/contribuisci/page.tsx`;
 - `src/app/api/analytics/page-view/route.ts`;
+- `src/lib/i18n/ai-translation/`;
+- `docs/operations/ai-editorial-translation.md`;
 - `docs/editorial/HYBRID-REVIEW-GOVERNANCE.md`;
 - `docs/security/PRODUCTION-READINESS.md`;
-- ultima CI Editorial PASS;
-- ultima Supabase local migration validation PASS;
+- `docs/roadmap/PRE-MERGE-GATE-RECONCILIATION-2026-08-28.md`;
+- `supabase/CS-PRODUCTION-RELEASE.json`;
+- ultima CI Editorial PASS sul commit esaminato;
+- ultima Supabase local migration validation PASS sul commit esaminato;
 - elenco definitivo dei fornitori/servizi effettivamente attivi al go-live.
 
 ## 15. Record di sign-off da compilare
@@ -231,8 +272,12 @@ Il dossier tecnico non autorizza a dichiarare PASS nessuno dei seguenti punti:
 - Privacy Policy: PASS / DA MODIFICARE
 - Cookie Policy: PASS / DA MODIFICARE
 - Termini: PASS / DA MODIFICARE
+- Politica editoriale / disclosure traduzioni AI: PASS / DA MODIFICARE
 - modulo Contribuisci: PASS / DA MODIFICARE
 - fornitori/trasferimenti: PASS / DA MODIFICARE
+- OpenAI — ruolo/DPA/sub-responsabili/trasferimenti: PASS / DA MODIFICARE
+- OpenAI — retention / `store: false` / eventuale ZDR: PASS / DA MODIFICARE
+- traduzione AI di contenuti pubblici e dati di terzi: PASS / DA MODIFICARE
 - retention: PASS / DA MODIFICARE
 - IP/materiali editoriali: PASS / DA MODIFICARE
 - note/correzioni richieste:
