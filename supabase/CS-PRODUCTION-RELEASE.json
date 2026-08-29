@@ -53,7 +53,9 @@
     "20260822213100_fix_hybrid_null_category_classifier.sql",
     "20260824103000_harden_publication_gate_execute_privileges.sql"
   ],
-  "candidateDelta": [],
+  "candidateDelta": [
+    "20260829120000_create_content_ai_translations.sql"
+  ],
   "productionApplyEvidence": {
     "phase1Run": 32699707002,
     "phase2Run": 32706028947,

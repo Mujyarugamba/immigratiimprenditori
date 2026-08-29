@@ -352,6 +352,17 @@ test("Arabic RTL remains usable across core localized pages", async ({ page }) =
   await expect(arabicObservatoryCta).not.toContainText("→");
 });
 
+test("localized editorial surfaces do not claim AI translation without a cache", async ({ page }) => {
+  for (const path of ["/en", "/en/contenuti", "/ar", "/ar/contenuti"]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-ai-translation='true']")).toHaveCount(0);
+    const body = await page.locator("body").innerText();
+    expect(body, `${path} must not describe a reviewed translation`).not.toMatch(
+      /traduzione revisionata|reviewed translation|traduction révisée|traducción revisada|geprüfte Übersetzung/i,
+    );
+  }
+});
+
 test("LTR localized homes keep page direction and forward CTA arrows", async ({ page }) => {
   for (const [locale, path] of [
     ["en", "/en"],

@@ -58,7 +58,7 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "Per docenti, ricercatori, studiosi ed esperti che vogliono proporre analisi, dati, paper, commenti scientifici o interviste.",
     institution: "Segnala ricerca, pubblicazione o evento",
     institutionText: "Per università, enti, associazioni, centri studi e istituzioni che vogliono portare materiale pertinente all'attenzione della redazione.",
-    originalLanguageNotice: "I contenuti editoriali possono essere mostrati nella lingua originale quando una traduzione revisionata non è disponibile.",
+    originalLanguageNotice: "Questo contenuto è attualmente disponibile nella lingua originale.",
   },
   en: {
     homeKicker: "Knowledge. Data. People.",
@@ -87,7 +87,7 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "For lecturers, researchers, scholars and experts proposing analyses, data, papers, scientific commentary or interviews.",
     institution: "Share research, a publication or an event",
     institutionText: "For universities, public bodies, associations, research centres and institutions that want to bring relevant material to the editorial team.",
-    originalLanguageNotice: "Editorial content may be shown in its original language when a reviewed translation is not available.",
+    originalLanguageNotice: "This content is currently available in its original language.",
   },
   fr: {
     homeKicker: "Connaissance. Données. Personnes.",
@@ -116,7 +116,7 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "Pour les enseignants, chercheurs, spécialistes et experts qui proposent analyses, données, articles scientifiques, commentaires ou entretiens.",
     institution: "Signaler une recherche, une publication ou un événement",
     institutionText: "Pour les universités, organismes, associations, centres d'études et institutions souhaitant signaler des ressources pertinentes à la rédaction.",
-    originalLanguageNotice: "Les contenus éditoriaux peuvent être affichés dans leur langue originale lorsqu'une traduction révisée n'est pas disponible.",
+    originalLanguageNotice: "Ce contenu est actuellement disponible dans sa langue originale.",
   },
   es: {
     homeKicker: "Conocimiento. Datos. Personas.",
@@ -145,7 +145,7 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "Para docentes, investigadores, especialistas y expertos que propongan análisis, datos, artículos, comentarios científicos o entrevistas.",
     institution: "Comparte una investigación, publicación o evento",
     institutionText: "Para universidades, entidades, asociaciones, centros de estudios e instituciones que quieran poner material relevante en conocimiento de la redacción.",
-    originalLanguageNotice: "Los contenidos editoriales pueden mostrarse en su idioma original cuando no exista una traducción revisada.",
+    originalLanguageNotice: "Este contenido está actualmente disponible en su idioma original.",
   },
   de: {
     homeKicker: "Wissen. Daten. Menschen.",
@@ -174,7 +174,7 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "Für Lehrende, Forschende, Wissenschaftler und Experten mit Analysen, Daten, Papers, wissenschaftlichen Kommentaren oder Interviews.",
     institution: "Forschung, Publikation oder Veranstaltung melden",
     institutionText: "Für Universitäten, Behörden, Verbände, Forschungszentren und Institutionen, die relevantes Material an die Redaktion weitergeben möchten.",
-    originalLanguageNotice: "Redaktionelle Inhalte können in der Originalsprache angezeigt werden, wenn keine geprüfte Übersetzung vorliegt.",
+    originalLanguageNotice: "Dieser Inhalt ist derzeit in der Originalsprache verfügbar.",
   },
   ar: {
     homeKicker: "معرفة. بيانات. أشخاص.",
@@ -203,7 +203,7 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "للأساتذة والباحثين والخبراء الذين يقترحون تحليلات أو بيانات أو أوراقاً بحثية أو تعليقات علمية أو مقابلات.",
     institution: "أرسل بحثاً أو منشوراً أو فعالية",
     institutionText: "للجامعات والهيئات والجمعيات ومراكز الدراسات والمؤسسات التي ترغب في إحالة مواد ذات صلة إلى هيئة التحرير.",
-    originalLanguageNotice: "قد يظهر المحتوى التحريري بلغته الأصلية عندما لا تتوفر ترجمة مراجعة.",
+    originalLanguageNotice: "هذا المحتوى متاح حالياً بلغته الأصلية.",
   },
   zh: {
     homeKicker: "知识。数据。人物。",
@@ -232,6 +232,6 @@ export const CORE_MESSAGES: Record<PlatformLocale, CorePageMessages> = {
     researcherText: "面向希望提交分析、数据、论文、学术评论或访谈的教师、研究人员、学者和专家。",
     institution: "推荐研究、出版物或活动",
     institutionText: "面向希望向编辑团队推荐相关资料的大学、公共机构、协会、研究中心和其他机构。",
-    originalLanguageNotice: "如暂无经过审校的译文，编辑内容可能以原始语言显示。",
+    originalLanguageNotice: "此内容目前以其原始语言提供。",
   },
 };

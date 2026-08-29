@@ -50,6 +50,7 @@ export type PublicContentAuthor = {
 };
 
 export type PublicContentDetail = PublicContentListItem & {
+  subtitle: string | null;
   body: string;
   body_format: string;
   source_url: string | null;
@@ -103,6 +104,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     id: data.id as string,
     slug: data.slug as string,
     title: data.title as string,
+    subtitle: (data.subtitle as string | null) ?? null,
     abstract: data.abstract as string | null,
     type_code: data.type_code as string,
     primary_category_code: data.primary_category_code as string | null,
@@ -123,7 +125,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
 }
 
 const DETAIL_SELECT = `
-  id, slug, title, abstract, type_code, primary_category_code, language_id,
+  id, slug, title, subtitle, abstract, type_code, primary_category_code, language_id,
   is_featured, published_at, body, body_format, cover_url, source_url,
   publication_status, visibility_status,
   content_subject_links ( id, person_id, business_id, professional_profile_id ),

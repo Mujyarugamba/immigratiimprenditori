@@ -274,4 +274,121 @@ select count(*) as anon_public_corrections from public.content_corrections;
 reset role;
 rollback;
 
+-- AI translation cache: anon may read only when the source content is public;
+-- anon/authenticated must not insert, update or delete.
+do $$
+declare
+  v_private_id uuid;
+  v_language_id bigint;
+  v_type_code text;
+  v_seen integer;
+  v_policy text;
+  v_source_code text;
+  v_target text;
+begin
+  if to_regclass('public.content_ai_translations') is null then
+    raise exception 'SECURITY_SMOKE_CONTENT_AI_TRANSLATIONS_MISSING';
+  end if;
+
+  select qual
+    into v_policy
+  from pg_policies
+  where schemaname = 'public'
+    and tablename = 'content_ai_translations'
+    and policyname = 'content_ai_translations_public_read';
+
+  if v_policy is null
+     or v_policy not ilike '%editorial_status%'
+     or v_policy not ilike '%ready%'
+     or v_policy not ilike '%publication_status%'
+     or v_policy not ilike '%published%'
+     or v_policy not ilike '%visibility_status%'
+     or v_policy not ilike '%public%'
+     or v_policy not ilike '%archived_at%' then
+    raise exception 'SECURITY_SMOKE_AI_TRANSLATION_PUBLIC_POLICY_INCOMPLETE';
+  end if;
+
+  if exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'content_ai_translations'
+      and cmd in ('INSERT', 'UPDATE', 'DELETE')
+  ) then
+    raise exception 'SECURITY_SMOKE_AI_TRANSLATION_WRITE_POLICY_PRESENT';
+  end if;
+
+  select id into v_language_id from public.languages where is_active order by sort_order, id limit 1;
+  select code into v_source_code from public.languages where id = v_language_id;
+  v_target := case when v_source_code = 'en' then 'fr' else 'en' end;
+  select code into v_type_code from public.content_types where is_active order by sort_order, code limit 1;
+
+  insert into public.contents (
+    owned_by_editorial, type_code, language_id, title, slug, body,
+    editorial_status, publication_status, visibility_status, is_featured
+  ) values (
+    true, v_type_code, v_language_id, 'CI private AI translation fixture',
+    'ci-private-ai-translation-fixture-' || replace(gen_random_uuid()::text, '-', ''),
+    'Private fixture body.',
+    'draft', 'unpublished', 'private', false
+  ) returning id into v_private_id;
+
+  insert into public.content_ai_translations (
+    content_id, target_locale, source_language_id, source_fingerprint,
+    translated_title, translated_body, provider, model, prompt_version
+  ) values (
+    v_private_id, v_target, v_language_id, 'ci-private-fingerprint',
+    'Private EN title', 'Private EN body', 'openai', 'gpt-5.6-terra', 'editorial-public-v1'
+  );
+
+  perform set_config('role', 'anon', true);
+  select count(*)::integer into v_seen
+  from public.content_ai_translations
+  where content_id = v_private_id;
+  if v_seen <> 0 then
+    raise exception 'SECURITY_SMOKE_ANON_CAN_READ_PRIVATE_AI_TRANSLATION';
+  end if;
+
+  begin
+    insert into public.content_ai_translations (
+      content_id, target_locale, source_language_id, source_fingerprint,
+      translated_title, translated_body, provider, model, prompt_version
+    ) values (
+      v_private_id, 'zh', v_language_id, 'ci-forbidden-write',
+      'Nope', 'Nope', 'openai', 'gpt-5.6-terra', 'editorial-public-v1'
+    );
+    raise exception 'SECURITY_SMOKE_ANON_INSERTED_AI_TRANSLATION';
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  perform set_config('role', 'authenticated', true);
+  begin
+    update public.content_ai_translations
+    set translated_title = 'hacked'
+    where content_id = v_private_id;
+    if found then
+      raise exception 'SECURITY_SMOKE_AUTHENTICATED_UPDATED_AI_TRANSLATION';
+    end if;
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  begin
+    delete from public.content_ai_translations where content_id = v_private_id;
+    if found then
+      raise exception 'SECURITY_SMOKE_AUTHENTICATED_DELETED_AI_TRANSLATION';
+    end if;
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  perform set_config('role', 'postgres', true);
+  delete from public.contents where id = v_private_id;
+end;
+$$;
+
 select 'SUPABASE_LOCAL_SECURITY_SMOKE_PASS' as result;

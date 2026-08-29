@@ -1,8 +1,12 @@
 import type { ElementType, ReactNode } from "react";
-import { originalContentLanguageAttrs } from "@/lib/i18n/content-direction";
+import {
+  catalogLanguageCodeFromId,
+  writingDirectionForLanguageCode,
+} from "@/lib/i18n/content-direction";
 
 type OriginalLanguageTextProps = {
   languageId?: number | null;
+  languageCode?: string | null;
   as?: "p" | "h1" | "h2" | "h3" | "div" | "span";
   className?: string;
   children: ReactNode;
@@ -10,11 +14,13 @@ type OriginalLanguageTextProps = {
 
 export function OriginalLanguageText({
   languageId,
+  languageCode,
   as: Tag = "p",
   className,
   children,
 }: OriginalLanguageTextProps) {
-  const { dir, lang } = originalContentLanguageAttrs(languageId);
+  const lang = languageCode ?? catalogLanguageCodeFromId(languageId);
+  const dir = writingDirectionForLanguageCode(lang);
   const Component = Tag as ElementType;
 
   return (
@@ -23,6 +29,7 @@ export function OriginalLanguageText({
       dir={dir}
       lang={lang}
       data-original-language={lang ?? "und"}
+      data-content-direction={dir}
       style={{ unicodeBidi: "isolate" }}
     >
       {children}

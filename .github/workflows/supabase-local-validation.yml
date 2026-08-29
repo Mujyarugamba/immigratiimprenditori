@@ -168,6 +168,7 @@ jobs:
           cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
           cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
           cp /tmp/repository-migrations/20260824103000_harden_publication_gate_execute_privileges.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260829120000_create_content_ai_translations.sql supabase/migrations/
 
           echo "Standalone cold-start chain:"
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort
