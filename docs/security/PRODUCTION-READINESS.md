@@ -2,11 +2,11 @@
 
 Stato: **GATE APERTO — NON PASS**
 
-Data audit corrente: 2026-08-28  
+Data audit corrente: 2026-08-29  
 Branch: `work/pre-go-live-integration-20260826`  
 PR corrente: **#13 — DRAFT**
 
-Questo documento registra lo stato reale del candidato dopo il rilascio database Production autorizzato del 24 agosto e la successiva integrazione pre-go-live. Non autorizza merge, avanzamento del branch `production`, deploy Production, DNS o ulteriori write Production.
+Questo documento registra lo stato reale del candidato dopo il rilascio database Production autorizzato del 24 agosto e la successiva integrazione pre-go-live. Non autorizza merge, avanzamento del branch `production`, deploy Production, DNS, backfill AI o ulteriori write Production.
 
 Regola editoriale vincolante:
 
@@ -20,12 +20,14 @@ Il Radar può continuare a inserire candidati review-only nella Inbox redazional
 
 ## 1. Stato sintetico
 
-- candidato applicativo / CI: **PASS**;
-- ultimo candidato tecnico-operativo completamente verificato prima di questa sola riconciliazione documentale: `51f6b8016a791c08d064a29bee1b18ff78824caf`;
-- `Editorial v1 CI` #1059: **SUCCESS**;
-- `Supabase local migration validation` #592: **SUCCESS**;
-- Production DB release: **PASS**;
-- migration Production #1–#25: **PASS**;
+- candidato tecnico-operativo completamente verificato: `5599ddf8160fc22370fa3b784f7f7e5150ea0213`;
+- `Editorial v1 CI` #1078: **SUCCESS**;
+- `Supabase local migration validation` #611: **SUCCESS**;
+- typecheck, suite test/guard, Next build, HTTP smoke, public browser E2E e Lighthouse: **PASS**;
+- migration replay da zero, DB lint, RLS/publication, governance ibrida, rate limit, audit/analytics, backup/restore, Auth integration, build contro Supabase locale, HTTP/security smoke ed E2E autenticato: **PASS**;
+- Production DB release 24 agosto: **PASS / invariato**;
+- migration Production applicate: **25**;
+- migration candidata non applicata: **1** (`20260829120000_create_content_ai_translations.sql`);
 - MFA privilegiato Production DB/Auth: **PASS**;
 - Production-source restore drill: **PASS**;
 - governance editoriale ibrida: **ATTIVA IN PRODUCTION DB**;
@@ -35,9 +37,11 @@ Il Radar può continuare a inserire candidati review-only nella Inbox redazional
 - QA umano WCAG/device: **PENDING**;
 - revisione legale professionale: **PENDING**;
 - autorizzazione al merge: **NON CONCESSA**;
+- migration AI Production: **NON AUTORIZZATA**;
+- backfill AI: **NON AUTORIZZATO**;
 - deploy Production: **NON AUTORIZZATO**.
 
-Questa riconciliazione modifica soltanto documentazione e non cambia runtime, schema, dati, hosting o configurazione Vercel. Il PR HEAD effettivo e la CI più recente vanno sempre letti dalla PR #13.
+La riconciliazione di questo documento è soltanto documentale e non cambia runtime, schema, dati, hosting o configurazione Vercel. Il PR HEAD effettivo e la CI più recente vanno sempre letti dalla PR #13.
 
 `PRODUCTION_READINESS = NOT PASS` finché i gate umani e le autorizzazioni finali non sono chiusi.
 
@@ -48,7 +52,9 @@ Questa riconciliazione modifica soltanto documentazione e non cambia runtime, sc
 ### EDIT-01 — No auto-publish
 **PASS / ATTIVO IN PRODUCTION DB**
 
-Contributi pubblici, Radar, AI e automazioni non dispongono di un percorso di auto-pubblicazione. La decisione di pubblicazione resta umana e role-gated.
+Contributi pubblici, Radar e automazioni editoriali non dispongono di un percorso di auto-pubblicazione dell'originale editoriale. La decisione di pubblicazione del contenuto sorgente resta umana e role-gated.
+
+Le traduzioni AI del candidato sono una trasformazione linguistica di contenuti già pubblicati: non modificano l'originale, sono etichettate come automatiche e la versione originale prevale in caso di dubbio o discrepanza.
 
 I Radar attivi raccolgono soltanto metadati/link da fonti approvate, deduplicano i candidati e inseriscono esclusivamente record `status=new` nella Inbox privata con `auto_publish=false`. Non contengono email, webhook o altri percorsi automatici di contatto esterno.
 
@@ -66,7 +72,7 @@ I Radar attivi raccolgono soltanto metadati/link da fonti approvate, deduplicano
 - seconda approvazione per correzioni `substantive`/`retraction`;
 - self-approval negata;
 - approvazioni fingerprint-bound;
-- nessun bypass AI/Radar/service-role.
+- nessun bypass AI/Radar/service-role sul publication gate dell'originale.
 
 Le migration governance e la forward-fix del classificatore `NULL` sono applicate e coperte dai test locali/CI.
 
@@ -80,31 +86,83 @@ Versioning, correzioni e audit introdotti dal release batch sono applicati. Il c
 ## 3. Production database e migration ledger
 
 ### SEC-MIGRATION-01 — Production release ledger
-**PASS / RICONCILIATO**
+**PASS PER IL RELEASE APPLICATO / 1 DELTA CANDIDATO NON APPLICATO**
 
 Il manifest canonico `supabase/CS-PRODUCTION-RELEASE.json` è in schema v2 e registra:
 
 - baseline hosted pre-release: `20260820160000_prepare_events_external_ingestion_rls`;
-- hosted latest post-release: `20260824103000_harden_publication_gate_execute_privileges`;
+- hosted latest osservata: `20260824103000_harden_publication_gate_execute_privileges`;
 - `appliedReleaseDelta`: **25 migration**;
-- `candidateDelta`: **0**;
-- migration rows post-apply: **234**;
+- `candidateDelta`: **1 migration**;
+- candidato: `20260829120000_create_content_ai_translations.sql`;
+- migration rows post-apply del release chiuso: **234**;
 - run apply fase 1: `32699707002`;
 - run apply fase 2: `32706028947`;
 - security patch run: `32707529881`.
 
 `PRODUCTION_MIGRATIONS_1_25 = PASS`
 
-Non esiste oggi un delta migration candidato secondo il manifest. Prima di qualsiasi futura write Production resta obbligatoria una nuova lettura hosted, fresh backup quando previsto e l'autorizzazione della release policy. È vietato usare l'intera directory storica `supabase/migrations` come bootstrap/apply indiscriminato.
+`AI_TRANSLATION_MIGRATION_PRODUCTION = PENDING / NOT AUTHORIZED`
+
+La migration candidata è stata validata nel replay locale completo e nella CI, ma **non è stata applicata a Production**. Prima di una futura write Production restano obbligatori nuova lettura hosted, fresh backup quando previsto, verifica del delta e autorizzazione esplicita secondo la release policy. È vietato usare l'intera directory storica `supabase/migrations` come bootstrap/apply indiscriminato.
 
 ### SEC-RLS-01 — RLS e publication gate
 **PASS PRODUCTION POST-APPLY**
 
 La patch `20260824103000_harden_publication_gate_execute_privileges.sql` ha rimosso direct EXECUTE su `public.enforce_content_human_publication_gate()` da `anon`, `authenticated` e `service_role`, mantenendo il trigger di pubblicazione attivo. Il postflight Production e il Security Advisor successivo sono risultati coerenti con il contratto previsto.
 
+### SEC-AI-TRANSLATION-01 — Cache traduzioni candidata
+**LOCAL/CI PASS / PRODUCTION PENDING**
+
+Il candidato introduce una cache separata `content_ai_translations` con RLS e vincoli di coerenza, inclusa la corrispondenza tra `source_language_id` e lingua effettiva del record sorgente. La migration è coperta dal replay da zero e dagli smoke di sicurezza locali.
+
 ---
 
-## 4. Autenticazione e MFA
+## 4. Traduzioni AI — boundary e cost control
+
+### AI-01 — Sorgente pubblica canonica
+**PASS**
+
+La traduzione usa una rappresentazione pubblica sanitizzata del contenuto. Le code tecniche di acquisizione `d1d_*` vengono eliminate prima di fingerprint, validazione, fallback e invio al provider AI. Il fingerprint è inoltre difensivamente insensibile alla coda tecnica.
+
+### AI-02 — Runtime pubblico cache-only
+**PASS**
+
+Il frontend pubblico non genera traduzioni AI on-demand. Visitatori, crawler e richieste anonime possono leggere solo traduzioni già presenti in cache; una cache miss restituisce l'originale senza chiamare OpenAI.
+
+La generazione resta consentita soltanto nei percorsi espliciti che impostano `allowGenerate: true`, come il backfill amministrativo. Il backfill resta **OFF / non autorizzato** fino al gate operativo dedicato.
+
+### AI-03 — Chiamata OpenAI hardenizzata
+**PASS TECNICO / ATTIVAZIONE PENDING**
+
+Il candidato usa la Responses API con hardening esplicito:
+
+- `store: false`;
+- reasoning effort `none` per la traduzione;
+- limite esplicito di output;
+- timeout/abort con fallback sicuro all'originale;
+- risposte incomplete/non completate non vengono trattate come traduzioni valide;
+- la chiave API resta server-side.
+
+`store: false` non viene equiparato a Zero Data Retention; eventuali controlli ZDR restano distinti e dipendono dalla configurazione dell'account/progetto OpenAI.
+
+### AI-04 — Activation gate
+**PENDING**
+
+Prima di qualsiasi attivazione reale:
+
+1. migration candidata applicata a Production solo con autorizzazione separata;
+2. nuova CI/postflight sullo SHA autorizzato;
+3. secret OpenAI verificato solo nello scope server-side pertinente;
+4. dry-run backfill esaminato;
+5. strategia di backfill approvata;
+6. backfill eseguito in modo controllato;
+7. cache e costi verificati;
+8. soltanto dopo, eventuale decisione separata sull'abilitazione di ulteriori percorsi di generazione.
+
+---
+
+## 5. Autenticazione e MFA
 
 ### SEC-AUTH-01 — Separazione ruoli
 **PASS**
@@ -122,16 +180,18 @@ Il rilascio Production ha registrato:
 
 `PRODUCTION_PRIVILEGED_MFA = PASS`
 
-La CI locale autenticata verifica inoltre challenge TOTP/AAL2 e superfici redazionali. Il controllo manuale sul vero frontend Vercel Production non è un gate pre-merge, perché la Preview è intenzionalmente read-only e blocca i POST. Va eseguito **post-merge / pre-go-live**, dopo un deploy Production separatamente autorizzato.
+La CI locale autenticata verifica challenge TOTP/AAL2 e superfici redazionali. Il controllo manuale sul vero frontend Vercel Production non è un gate pre-merge, perché la Preview è intenzionalmente read-only e blocca i POST. Va eseguito **post-merge / pre-go-live**, dopo un deploy Production separatamente autorizzato.
 
 ---
 
-## 5. Backup / recovery
+## 6. Backup / recovery
 
 ### BACKUP-01 — CI restore drill
 **PASS**
 
 `CI_EPHEMERAL_RESTORE_DRILL = PASS`
+
+Il run Supabase #611 ha superato anche il backup archive integrity smoke sul candidato corrente.
 
 ### BACKUP-02 — Production-source restore drill
 **PASS**
@@ -149,14 +209,14 @@ Il workflow `production-backup.yml` è read-only rispetto al repository, main-on
 
 ---
 
-## 6. Hosting e separazione merge/deploy
+## 7. Hosting e separazione merge/deploy
 
 ### HOST-01 — Vercel Preview canonico
 **PASS**
 
 Il progetto Preview canonico è `immigratiimprenditori-preview`.
 
-Configurazione verificata via dashboard/Cursor:
+Configurazione verificata:
 
 - Production Branch del progetto Preview: **`main`**;
 - Ignored Build Step del progetto Preview:
@@ -185,16 +245,10 @@ Quindi:
 - branch normali/PR **non** generano Production sul progetto Production;
 - solo l'avanzamento esplicito del branch Git `production` può generare il deploy applicativo Production.
 
-Sul candidato verificato:
-
-- progetto Production: **Canceled by Ignored Build Step**;
-- progetto Preview: **Deployment has completed**;
-- Netlify deploy-preview: **canceled**.
-
 La promozione `main` → `production` è disponibile solo tramite `promote-production.yml`, manuale/fail-closed, e richiede autorizzazione separata al deploy.
 
 ### HOST-03 — Netlify
-**GIT DEPLOY PREVIEW CANCELED / NON TARGET FINALE**
+**NON TARGET FINALE**
 
 Netlify non è target Production e non è required check del percorso finale.
 
@@ -205,7 +259,7 @@ Il dominio resta chiuso fino a deploy Production + smoke PASS e successiva autor
 
 ---
 
-## 7. Required checks `main` e branch release
+## 8. Required checks `main` e branch release
 
 ### `main`
 **ACTIVE**
@@ -223,41 +277,38 @@ Ruleset GitHub `Protect main`, enforcement `active`, target default branch:
 ### `production`
 **HARDENING NON BLOCCANTE**
 
-Il branch esiste e resta allineato al vecchio `main` finché non viene autorizzato un release promotion. Non è ancora protetto da una ruleset dedicata. È raccomandato bloccare deletion e non-fast-forward senza imporre PR/required checks che impedirebbero il fast-forward deliberato del workflow di promozione.
+Il branch resta allineato al vecchio `main` finché non viene autorizzato un release promotion. Non deve essere avanzato implicitamente dal merge della PR.
 
 ---
 
-## 8. CI, E2E, accessibilità e performance
+## 9. CI, E2E, accessibilità e performance
 
-Sul candidato tecnico-operativo `51f6b8016a791c08d064a29bee1b18ff78824caf`:
+Sul candidato tecnico-operativo `5599ddf8160fc22370fa3b784f7f7e5150ea0213`:
 
-- `Editorial v1 CI` #1059: **SUCCESS**;
-- `Supabase local migration validation` #592: **SUCCESS**;
-- unit/integration: **124/124 PASS**;
-- public browser E2E: **12/12 PASS**;
-- authenticated browser E2E: **PASS**;
-- cold-start/replay, lint DB, RLS/security, governance ibrida, rate limit, audit/analytics, backup archive, Auth integration: **PASS**;
-- reflow automatico 320/390/768: **PASS**;
-- tastiera su header/cerca/accedi/contribuisci: **PASS automatico**;
-- RTL arabo strutturale e assenza overflow 320 px: **PASS automatico**;
-- WCAG text-spacing, target size, error association: **PASS automatico**.
-
-Lighthouse #1059, tre run mobile:
-
-- Performance: **99 / 98 / 99**;
-- Accessibility: **100 / 100 / 100**;
-- Best Practices: **100 / 100 / 100**;
-- SEO: **69 / 69 / 69**;
-- LCP: **2.189 / 2.288 / 2.119 s**;
-- TBT: **46.5 / 22.5 / 32 ms**;
-- CLS: **0 / 0 / 0**.
-
-Il punteggio SEO 69 della CI Preview è atteso: l'unico audit SEO fallito è `is-crawlable`, perché la modalità Preview applica intenzionalmente `X-Robots-Tag: noindex, nofollow, noarchive` e `robots.txt` globale bloccante. Questo non è una regressione SEO Production. Il remote Production smoke verifica invece robots crawlable, sitemap canonica e `/app/` disallow.
+- `Editorial v1 CI` #1078: **SUCCESS**;
+- `Supabase local migration validation` #611: **SUCCESS**;
+- TypeScript typecheck: **PASS**;
+- unit/integration e source/security guards: **PASS**;
+- Next build: **PASS**;
+- public HTTP smoke: **PASS**;
+- public browser E2E: **PASS**;
+- Lighthouse mobile performance gate: **PASS**;
+- migration replay/cold-start: **PASS**;
+- PostgreSQL lint: **PASS**;
+- RLS/publication security smoke: **PASS**;
+- hybrid two-editor review smoke: **PASS**;
+- persistent rate-limit smoke: **PASS**;
+- go-live audit/analytics smoke: **PASS**;
+- backup archive integrity smoke: **PASS**;
+- Auth integration con utenti effimeri: **PASS**;
+- build contro Supabase locale: **PASS**;
+- non-preview HTTP/security smoke: **PASS**;
+- authenticated browser E2E + login throttling: **PASS**.
 
 ### UI-VISUAL-01 — QA visivo Preview
-**PASS**
+**PASS SULLE SUPERFICI GIÀ VERIFICATE**
 
-QA già registrato sul runtime applicativo trasferibile, viewport 1440×900, 390×844 e 320×844:
+QA registrato su viewport 1440×900, 390×844 e 320×844:
 
 - mini-trend reale “Imprese straniere registrate”: PASS;
 - `giu 2025` / `dic 2025` / fonte leggibili;
@@ -266,7 +317,7 @@ QA già registrato sul runtime applicativo trasferibile, viewport 1440×900, 390
 - favicon: PASS;
 - console/network: PASS, nessun overlay Next.js o risorsa >=400.
 
-Le modifiche successive sono state boundary deployment, CI/test e documentazione/release metadata, senza modifica del layout della homepage che invalidi questo QA.
+Le modifiche successive non hanno cambiato il layout della homepage che invaliderebbe quel QA.
 
 ### UI-A11Y-01 — Human/device QA
 **PENDING**
@@ -284,22 +335,24 @@ L'automazione non viene equiparata a certificazione WCAG.
 
 ---
 
-## 9. Privacy e documenti legali
+## 10. Privacy e documenti legali
 
 ### LEGAL-01/02/03
-**DOSSIER TECNICO PRONTO / REVISIONE PROFESSIONALE PENDING**
+**TESTI TECNICAMENTE AGGIORNATI / REVISIONE PROFESSIONALE PENDING**
 
 Handoff: `docs/operations/legal-professional-review-handoff-2026-08-23.md`.
 
-Audit tecnico-fattuale sul candidato corrente:
+Sul candidato corrente:
 
-- analytics first-party minimizzato, `path` + `locale`, GPC/DNT e `credentials: "omit"` verificati;
+- analytics first-party minimizzato, `path` + `locale`, GPC/DNT e `credentials: "omit"` restano coperti dai guard;
 - nessun auto-publish dei contributi;
 - presa d'atto privacy obbligatoria distinta dall'autorizzazione facoltativa alla possibile pubblicazione;
-- il Server Action invoca soltanto il percorso di submission editoriale;
-- requisito 18+ dichiarato, senza fingere una verifica tecnica dell'età.
+- requisito 18+ dichiarato, senza fingere una verifica tecnica dell'età;
+- Privacy aggiornata per dichiarare OpenAI come provider per la traduzione di contenuti editoriali già pubblicati, finalità, trasferimenti, cache e assenza di decisioni automatizzate con effetti giuridici o analogamente significativi;
+- la disclosure distingue `store: false` da Zero Data Retention;
+- Politica editoriale aggiornata per chiarire che le traduzioni automatiche possono essere mostrate senza preventiva revisione umana e che l'originale prevale.
 
-Il professionista deve ancora esprimersi su basi giuridiche, cookie/banner, fornitori/trasferimenti, retention, interviste/testimonianze/media/dati di terzi, IP/licenze, responsabilità/foro, minori, DPIA/ROPA/LIA e obblighi informativi applicabili.
+Il professionista deve ancora esprimersi su basi giuridiche, cookie/banner, fornitori/trasferimenti, retention, interviste/testimonianze/media/dati di terzi, IP/licenze, responsabilità/foro, minori, DPIA/ROPA/LIA e obblighi informativi applicabili, inclusa la configurazione definitiva del trattamento con provider AI.
 
 Prima del go-live va inoltre verificato che i recapiti pubblicati siano realmente monitorati: `direzione@pec.aipel.it`, `info@aipel.it`, `cookies@aipel.it`, `termini@aipel.it`, `redazione@immigratiimprenditori.it`.
 
@@ -307,7 +360,7 @@ Prima del go-live va inoltre verificato che i recapiti pubblicati siano realment
 
 ---
 
-## 10. Source-health e workflow operativi
+## 11. Source-health e workflow operativi
 
 ### Source-health
 **TECHNICAL PASS / DEFAULT-BRANCH RUN POST-MERGE PENDING**
@@ -346,41 +399,47 @@ Il primo vero `workflow_dispatch`/cron sul default branch è quindi un gate **po
 
 ---
 
-## 11. Gate realmente aperti
+## 12. Gate realmente aperti
 
 ### Prima della decisione finale di merge
 
-Restano **tre soli gate**:
+Restano **tre gate**:
 
 1. **human WCAG/device QA #92** con record reale;
 2. **revisione legale professionale** e sign-off;
 3. **autorizzazione esplicita separata alla decisione di merge**.
 
-CI finale e QA visivo sono già PASS; il frontend MFA reale non è pre-merge perché la Preview read-only non può validamente eseguire il flusso mutante.
+La migration AI candidata e il relativo backfill sono invece gate di **release/attivazione Production separati**: non sono autorizzati dal semplice stato verde della CI né da un futuro merge della PR.
+
+CI finale e QA visivo automatico sono PASS; il frontend MFA reale non è pre-merge perché la Preview read-only non può validamente eseguire il flusso mutante.
 
 ### Dopo merge / prima del go-live pubblico
 
-1. first source-health run sul default branch;
-2. autorizzazione separata al deploy Production;
-3. promozione manuale `main` → `production` dello SHA approvato;
-4. attesa deployment Vercel Production associato al branch `production`;
-5. remote Production smoke GET-only;
-6. login/challenge TOTP e verifica MFA/AAL2 sul vero frontend Production;
-7. performance/security smoke sul target Production reale;
-8. eventuale cutover DNS soltanto dopo PASS e specifica autorizzazione, senza alterare i record mail;
-9. live smoke sul dominio reale.
+1. primo source-health run sul default branch;
+2. decisione separata sulla migration candidata AI e relativo backup/apply/postflight, se si vuole includerla nel go-live;
+3. eventuale dry-run/backfill AI controllato, se autorizzato;
+4. autorizzazione separata al deploy Production;
+5. promozione manuale `main` → `production` dello SHA approvato;
+6. attesa deployment Vercel Production associato al branch `production`;
+7. remote Production smoke GET-only;
+8. login/challenge TOTP e verifica MFA/AAL2 sul vero frontend Production;
+9. performance/security smoke sul target Production reale;
+10. eventuale cutover DNS soltanto dopo PASS e specifica autorizzazione, senza alterare i record mail;
+11. live smoke sul dominio reale.
 
 Solo dopo sito online + live smoke PASS può iniziare l'outreach editoriale reale.
 
 ---
 
-## 12. Safety boundary
+## 13. Safety boundary
 
 - PR #13 resta DRAFT finché i gate pre-merge non sono chiusi;
 - nessun auto-merge;
 - metodo previsto dopo autorizzazione: **merge commit**, per preservare la storia/evidenze;
 - merge su `main` non deve equivalere a deploy Production;
 - nessun avanzamento di `production` senza autorizzazione separata al deploy;
+- nessuna migration candidata Production senza autorizzazione separata;
+- nessun backfill AI senza autorizzazione separata;
 - nessun force-push;
 - nessuna write Production implicita;
 - Radar review-only nella Inbox privata resta consentito;
