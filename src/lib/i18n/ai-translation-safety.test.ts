@@ -103,7 +103,6 @@ test("AI translation failure falls back to the sanitized public body", async () 
 });
 
 test("OpenAI translation request is non-stored, bounded and non-reasoning", async () => {
-  let capturedInit: RequestInit | null = null;
   const result = await requestEditorialTranslation(
     {
       sourceLanguageCode: "it",
@@ -117,7 +116,16 @@ test("OpenAI translation request is non-stored, bounded and non-reasoning", asyn
     {
       env: { OPENAI_API_KEY: "sk-test" },
       transport: async (_url, init) => {
-        capturedInit = init;
+        const payload = JSON.parse(String(init.body)) as {
+          store?: boolean;
+          reasoning?: { effort?: string };
+          max_output_tokens?: number;
+        };
+        assert.equal(payload.store, false);
+        assert.equal(payload.reasoning?.effort, "none");
+        assert.equal(payload.max_output_tokens, 4096);
+        assert.ok(init.signal instanceof AbortSignal);
+
         return new Response(
           JSON.stringify({
             status: "completed",
@@ -136,14 +144,4 @@ test("OpenAI translation request is non-stored, bounded and non-reasoning", asyn
   );
 
   assert.equal(result.ok, true);
-  assert.ok(capturedInit);
-  const payload = JSON.parse(String(capturedInit.body)) as {
-    store?: boolean;
-    reasoning?: { effort?: string };
-    max_output_tokens?: number;
-  };
-  assert.equal(payload.store, false);
-  assert.equal(payload.reasoning?.effort, "none");
-  assert.equal(payload.max_output_tokens, 4096);
-  assert.ok(capturedInit.signal instanceof AbortSignal);
 });
