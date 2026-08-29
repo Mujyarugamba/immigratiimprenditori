@@ -117,8 +117,15 @@ export default function PoliticaEditorialePage() {
           <h2 className="text-2xl font-semibold text-black">9. Automazione e strumenti di intelligenza artificiale</h2>
           <p className="mt-4">
             Sistemi automatici possono supportare ricerca, monitoraggio, classificazione, trascrizione o attività
-            preparatorie. Non pubblicano autonomamente contenuti. La verifica delle fonti, la decisione editoriale
-            e la responsabilità della pubblicazione restano umane.
+            preparatorie. La verifica delle fonti, la scelta di pubblicare un contenuto editoriale originale e la
+            responsabilità editoriale restano umane.
+          </p>
+          <p className="mt-3">
+            Per rendere più accessibili contenuti editoriali già pubblicati, il sito può mostrare traduzioni
+            automatiche generate mediante intelligenza artificiale. Queste traduzioni sono identificate come tali,
+            possono contenere errori e non implicano necessariamente una revisione umana preventiva. Non modificano
+            né sostituiscono il contenuto originale: in caso di dubbio o divergenza prevale sempre la versione nella
+            lingua originale, che resta accessibile dalla pagina tradotta.
           </p>
         </section>
 
