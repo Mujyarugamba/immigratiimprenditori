@@ -363,6 +363,31 @@ test("localized editorial surfaces do not claim AI translation without a cache",
   }
 });
 
+test("original=1 on a localized content page shows the original and not an AI disclaimer", async ({
+  page,
+}) => {
+  await page.goto("/en/contenuti", { waitUntil: "domcontentloaded" });
+  const firstArticleLink = page.locator("article a[href*='/en/contenuti/']").first();
+  if ((await firstArticleLink.count()) === 0) {
+    test.skip(true, "No public contents available in this environment");
+    return;
+  }
+
+  const href = await firstArticleLink.getAttribute("href");
+  expect(href).toBeTruthy();
+  await page.goto(`${href}?original=1`, { waitUntil: "domcontentloaded" });
+  await expect(page.locator("[data-content-version='original']")).toBeVisible();
+  await expect(page.locator("[data-ai-translation='true']")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  const headingLang = await page.locator("h1").getAttribute("lang");
+  const headingDir = await page.locator("h1").getAttribute("dir");
+  if (headingLang === "ar" || headingLang === "ur" || headingLang === "fa") {
+    expect(headingDir).toBe("rtl");
+  } else {
+    expect(headingDir).toBe("ltr");
+  }
+});
+
 test("LTR localized homes keep page direction and forward CTA arrows", async ({ page }) => {
   for (const [locale, path] of [
     ["en", "/en"],

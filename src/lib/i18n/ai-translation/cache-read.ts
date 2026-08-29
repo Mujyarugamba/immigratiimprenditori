@@ -86,6 +86,34 @@ export async function loadPublicTranslationSource(
   }
 }
 
+export async function loadPublicTranslationSourcesBySlugs(
+  slugs: string[],
+): Promise<Map<string, TranslationSourceContent>> {
+  const result = new Map<string, TranslationSourceContent>();
+  const unique = [...new Set(slugs.filter(Boolean))];
+  if (unique.length === 0) return result;
+  try {
+    const supabase = createPublicReadClient();
+    const { data, error } = await supabase
+      .from("contents")
+      .select(
+        "id, slug, language_id, title, subtitle, abstract, body, body_format, editorial_status, publication_status, visibility_status, archived_at",
+      )
+      .in("slug", unique)
+      .eq("editorial_status", "ready")
+      .eq("publication_status", "published")
+      .eq("visibility_status", "public")
+      .is("archived_at", null);
+    if (error || !data) return result;
+    for (const row of data as TranslationSourceContent[]) {
+      if (row.slug) result.set(row.slug, row);
+    }
+    return result;
+  } catch {
+    return result;
+  }
+}
+
 export async function loadPublicTranslationSources(
   contentIds: string[],
 ): Promise<Map<string, TranslationSourceContent>> {

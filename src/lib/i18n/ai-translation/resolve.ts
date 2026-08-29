@@ -54,6 +54,7 @@ export type TranslationPresentation = {
   isViewingOriginal: boolean;
   openaiCalls: number;
   writes: number;
+  usage: { inputTokens: number | null; outputTokens: number | null };
 };
 
 export type TranslationDeps = {
@@ -91,6 +92,7 @@ function originalPresentation(
     isViewingOriginal: extra.isViewingOriginal ?? false,
     openaiCalls: extra.openaiCalls ?? 0,
     writes: extra.writes ?? 0,
+    usage: extra.usage ?? { inputTokens: null, outputTokens: null },
   };
 }
 
@@ -111,6 +113,7 @@ function translatedPresentation(
     isViewingOriginal: false,
     openaiCalls: extra.openaiCalls ?? 0,
     writes: extra.writes ?? 0,
+    usage: extra.usage ?? { inputTokens: null, outputTokens: null },
   };
 }
 
@@ -235,6 +238,7 @@ async function generateAndCache(
   return translatedPresentation(stillPublic, target, result.translation, {
     openaiCalls: 1,
     writes: 1,
+    usage: result.usage ?? { inputTokens: null, outputTokens: null },
   });
 }
 

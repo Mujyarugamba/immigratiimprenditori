@@ -279,6 +279,7 @@ rollback;
 do $$
 declare
   v_private_id uuid;
+  v_public_id uuid;
   v_language_id bigint;
   v_type_code text;
   v_seen integer;
@@ -388,6 +389,46 @@ begin
 
   perform set_config('role', 'postgres', true);
   delete from public.contents where id = v_private_id;
+
+  -- Positive RLS: anon may SELECT a translation only when the source content
+  -- is already public. Temporarily disable the human publication trigger so
+  -- this local fixture can be inserted without an editorial session.
+  begin
+    alter table public.contents disable trigger contents_human_publication_gate;
+    insert into public.contents (
+      owned_by_editorial, type_code, language_id, title, slug, body,
+      editorial_status, publication_status, visibility_status, is_featured
+    ) values (
+      true, v_type_code, v_language_id, 'CI public AI translation fixture',
+      'ci-public-ai-translation-fixture-' || replace(gen_random_uuid()::text, '-', ''),
+      'Public fixture body.',
+      'ready', 'published', 'public', false
+    ) returning id into v_public_id;
+    alter table public.contents enable trigger contents_human_publication_gate;
+  exception
+    when others then
+      alter table public.contents enable trigger contents_human_publication_gate;
+      raise;
+  end;
+
+  insert into public.content_ai_translations (
+    content_id, target_locale, source_language_id, source_fingerprint,
+    translated_title, translated_body, provider, model, prompt_version
+  ) values (
+    v_public_id, v_target, v_language_id, 'ci-public-fingerprint',
+    'Public EN title', 'Public EN body', 'openai', 'gpt-5.6-terra', 'editorial-public-v1'
+  );
+
+  perform set_config('role', 'anon', true);
+  select count(*)::integer into v_seen
+  from public.content_ai_translations
+  where content_id = v_public_id;
+  if v_seen <> 1 then
+    raise exception 'SECURITY_SMOKE_ANON_CANNOT_READ_PUBLIC_AI_TRANSLATION';
+  end if;
+
+  perform set_config('role', 'postgres', true);
+  delete from public.contents where id = v_public_id;
 end;
 $$;
 

@@ -8,6 +8,8 @@ import {
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { EditorialTranslationNotice } from "@/components/i18n/EditorialTranslationNotice";
+import { presentLocalizedContentByHrefs } from "@/lib/i18n/ai-translation/runtime";
 
 const text = {
   en: {
@@ -125,6 +127,10 @@ export default async function LocalizedSearchPage({
   const query = await searchParams;
   const q = (query.q ?? "").trim();
   const results = q.length >= 2 ? await searchPublicSite(q) : [];
+  const presentedBySlug = await presentLocalizedContentByHrefs(
+    results.filter((result) => result.kind === "content").map((result) => result.href),
+    locale,
+  );
 
   return (
     <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
@@ -163,23 +169,44 @@ export default async function LocalizedSearchPage({
             <span className="text-sm text-neutral-600">{results.length}</span>
           </div>
           <div className="divide-y divide-neutral-300">
-            {results.map((result) => (
+            {results.map((result) => {
+              const slug = result.kind === "content" ? result.href.match(/\/contenuti\/([^/?#]+)/)?.[1] : null;
+              const presented = slug ? presentedBySlug.get(slug) : undefined;
+              const title = presented?.title ?? result.title;
+              const excerpt = presented ? presented.abstract : result.excerpt;
+              const href =
+                presented && slug ? `/${locale}/contenuti/${presented.slug}` : result.href;
+              const languageCode = presented?.displayLanguageCode;
+              return (
               <article key={`${result.kind}-${result.href}`} className="py-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
                   {m.kinds[result.kind]}
                 </p>
                 <h3 className="mt-2 text-xl font-semibold text-black">
-                  <Link href={result.href} className="underline-offset-4 hover:underline">
-                    <OriginalLanguageText as="span">{result.title}</OriginalLanguageText>
+                  <Link href={href} className="underline-offset-4 hover:underline">
+                    <OriginalLanguageText as="span" languageCode={languageCode}>{title}</OriginalLanguageText>
                   </Link>
                 </h3>
-                {result.excerpt ? (
-                  <OriginalLanguageText className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
-                    {result.excerpt}
+                {excerpt ? (
+                  <OriginalLanguageText languageCode={languageCode} className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
+                    {excerpt}
                   </OriginalLanguageText>
                 ) : null}
+                {presented?.isAiTranslation ? (
+                  <EditorialTranslationNotice
+                    locale={locale}
+                    sourceLanguageId={presented.language_id}
+                    displayLanguageCode={presented.displayLanguageCode}
+                    isAiTranslation
+                    isViewingOriginal={false}
+                    originalHref={`/${locale}/contenuti/${presented.slug}?original=1`}
+                    translationHref={`/${locale}/contenuti/${presented.slug}`}
+                    compact
+                  />
+                ) : null}
               </article>
-            ))}
+              );
+            })}
             {results.length === 0 ? (
               <p className="py-8 text-neutral-600">{m.none}</p>
             ) : null}

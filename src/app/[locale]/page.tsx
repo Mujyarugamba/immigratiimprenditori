@@ -58,6 +58,7 @@ export default async function LocalizedHomePage({ params }: Props) {
       isViewingOriginal: false,
       openaiCalls: 0,
       writes: 0,
+      usage: { inputTokens: null, outputTokens: null },
     })),
   );
 

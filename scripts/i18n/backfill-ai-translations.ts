@@ -84,6 +84,9 @@ async function persistAiTranslation(row: CachedAiTranslation): Promise<boolean> 
   if (resolveDeploymentEnvironment(process.env).isReadOnlyPreview) {
     return false;
   }
+  if (!translationGenerationGate(process.env).allowed) {
+    return false;
+  }
   try {
     const { url } = getPublicSupabaseEnv();
     const supabase = createClient(url, getSupabaseServiceRoleKey(), {
@@ -204,7 +207,8 @@ async function main() {
       });
       if (presented.isAiTranslation && presented.writes > 0) {
         report.generated += 1;
-        report.estimated_input_tokens += presented.openaiCalls;
+        report.estimated_input_tokens += presented.usage.inputTokens ?? 0;
+        report.estimated_output_tokens += presented.usage.outputTokens ?? 0;
       } else if (presented.isAiTranslation) {
         report.skipped_fresh += 1;
       } else {

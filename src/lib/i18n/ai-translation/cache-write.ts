@@ -2,10 +2,14 @@ import "server-only";
 
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import { resolveDeploymentEnvironment } from "@/lib/deployment/environment";
+import { translationGenerationGate } from "./config";
 import type { CachedAiTranslation } from "./resolve";
 
 export async function writeAiTranslation(row: CachedAiTranslation): Promise<boolean> {
   if (resolveDeploymentEnvironment(process.env).isReadOnlyPreview) {
+    return false;
+  }
+  if (!translationGenerationGate(process.env).allowed) {
     return false;
   }
   try {

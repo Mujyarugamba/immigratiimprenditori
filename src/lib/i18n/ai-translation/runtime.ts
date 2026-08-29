@@ -3,7 +3,13 @@ import "server-only";
 import type { PlatformLocale } from "@/lib/i18n/config";
 import type { PublicContentDetail, PublicContentListItem } from "@/lib/data/public/contents";
 import { requestEditorialTranslation } from "./openai";
-import { readAiTranslation, readAiTranslations, loadPublicTranslationSource, loadPublicTranslationSources } from "./cache-read";
+import {
+  readAiTranslation,
+  readAiTranslations,
+  loadPublicTranslationSource,
+  loadPublicTranslationSources,
+  loadPublicTranslationSourcesBySlugs,
+} from "./cache-read";
 import { writeAiTranslation } from "./cache-write";
 import {
   presentEditorialContent,
@@ -22,10 +28,10 @@ function detailToSource(content: PublicContentDetail): TranslationSourceContent 
     abstract: content.abstract,
     body: content.body,
     body_format: content.body_format,
-    editorial_status: "ready",
+    editorial_status: content.editorial_status,
     publication_status: content.publication_status,
     visibility_status: content.visibility_status,
-    archived_at: null,
+    archived_at: content.archived_at,
   };
 }
 
@@ -98,4 +104,32 @@ export async function presentLocalizedContentCards(
     type_code: item.type_code,
     language_id: item.language_id,
   }));
+}
+
+function contentSlugFromHref(href: string): string | null {
+  const match = href.match(/\/contenuti\/([^/?#]+)/);
+  return match?.[1] ?? null;
+}
+
+export async function presentLocalizedContentByHrefs(
+  hrefs: string[],
+  locale: PlatformLocale,
+): Promise<Map<string, PresentedPublicContent>> {
+  const slugs = [...new Set(hrefs.map(contentSlugFromHref).filter((slug): slug is string => Boolean(slug)))];
+  if (slugs.length === 0) return new Map();
+  const sources = await loadPublicTranslationSourcesBySlugs(slugs);
+  const items: PublicContentListItem[] = [...sources.values()].map((source) => ({
+    id: source.id,
+    slug: source.slug ?? "",
+    title: source.title,
+    abstract: source.abstract ?? null,
+    type_code: "article",
+    primary_category_code: null,
+    language_id: source.language_id,
+    is_featured: false,
+    published_at: null,
+    cover_url: null,
+  }));
+  const presented = await presentLocalizedContentCards(items, locale);
+  return new Map(presented.filter((item) => item.slug).map((item) => [item.slug, item]));
 }

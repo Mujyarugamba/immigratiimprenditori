@@ -14,6 +14,7 @@ import { isPublicEditorialContent } from "./ai-translation/gates";
 import { requestEditorialTranslation } from "./ai-translation/openai";
 import {
   presentEditorialContent,
+  presentEditorialContentList,
   type CachedAiTranslation,
   type TranslationDeps,
   type TranslationSourceContent,
@@ -333,6 +334,83 @@ test("AI disclaimer strings are used only for actual translations and original=1
   assert.match(aiTranslationMessages("it", "it").aiBody, /dall’originale in italiano/);
   assert.doesNotMatch(aiTranslationMessages("it", "it").aiBody, /revisionat|verificat|ufficiale/i);
   assert.doesNotMatch(aiTranslationMessages("en", "it").aiBody, /reviewed|verified|official/i);
+});
+
+test("Italian interface locale never requests or displays an AI translation", async () => {
+  resetTranslationFlightsForTests();
+  let openaiCalls = 0;
+  const presented = await presentEditorialContent(publicContent, "it", { allowGenerate: true }, deps({
+    env: { AI_TRANSLATION_ENABLED: "true", OPENAI_API_KEY: "sk-test" },
+    readTranslation: async () => cachedRow(),
+    translate: async () => {
+      openaiCalls += 1;
+      return { ok: false };
+    },
+  }));
+  assert.equal(presented.isAiTranslation, false);
+  assert.equal(presented.isViewingOriginal, false);
+  assert.equal(presented.title, publicContent.title);
+  assert.equal(presented.displayLanguageCode, "it");
+  assert.equal(openaiCalls, 0);
+});
+
+test("listing pages never generate translations on cache miss", async () => {
+  resetTranslationFlightsForTests();
+  let openaiCalls = 0;
+  let writes = 0;
+  const presented = await presentEditorialContentList([publicContent], "en", deps({
+    env: { AI_TRANSLATION_ENABLED: "true", OPENAI_API_KEY: "sk-test" },
+    readTranslations: async () => new Map(),
+    translate: async () => {
+      openaiCalls += 1;
+      return { ok: false };
+    },
+    writeTranslation: async () => {
+      writes += 1;
+      return true;
+    },
+  }));
+  assert.equal(presented[0]?.isAiTranslation, false);
+  assert.equal(presented[0]?.title, publicContent.title);
+  assert.equal(openaiCalls, 0);
+  assert.equal(writes, 0);
+});
+
+test("stale cache is not shown as current and can be regenerated", async () => {
+  resetTranslationFlightsForTests();
+  const stale = cachedRow({ source_fingerprint: "deadbeef" });
+  const hidden = await presentEditorialContent(publicContent, "en", { allowGenerate: false }, deps({
+    readTranslation: async () => stale,
+  }));
+  assert.equal(hidden.isAiTranslation, false);
+  assert.equal(hidden.title, publicContent.title);
+
+  let openaiCalls = 0;
+  const regenerated = await presentEditorialContent(publicContent, "en", { allowGenerate: true }, deps({
+    env: { AI_TRANSLATION_ENABLED: "true", OPENAI_API_KEY: "sk-test" },
+    readTranslation: async () => stale,
+    translate: async () => {
+      openaiCalls += 1;
+      return {
+        ok: true,
+        translation: {
+          title: "Businesses and credit in Italy",
+          subtitle: null,
+          abstract: "A note on access to credit. See https://example.org/report and info@immigratiimprenditori.it.",
+          body: "First paragraph.\n\nSecond paragraph with [source](https://example.org/report).",
+        },
+        model: DEFAULT_AI_TRANSLATION_MODEL,
+        provider: "openai",
+        promptVersion: "editorial-public-v1",
+        usage: { inputTokens: 4, outputTokens: 8 },
+      };
+    },
+  }));
+  assert.equal(openaiCalls, 1);
+  assert.equal(regenerated.isAiTranslation, true);
+  assert.equal(regenerated.writes, 1);
+  assert.equal(regenerated.usage.inputTokens, 4);
+  assert.equal(regenerated.usage.outputTokens, 8);
 });
 
 test("content_ai_translations RLS is public-select only and denies anon writes", () => {

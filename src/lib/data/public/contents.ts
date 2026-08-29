@@ -54,8 +54,10 @@ export type PublicContentDetail = PublicContentListItem & {
   body: string;
   body_format: string;
   source_url: string | null;
+  editorial_status: string;
   publication_status: string;
   visibility_status: string;
+  archived_at: string | null;
   subject_links: PublicContentSubjectLink[];
   event_links: PublicContentEventLink[];
   opportunity_links: PublicContentOpportunityLink[];
@@ -115,8 +117,10 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
     body: stripContentsAcquisitionTrailer(data.body as string),
     body_format: data.body_format as string,
     source_url: data.source_url as string | null,
+    editorial_status: data.editorial_status as string,
     publication_status: data.publication_status as string,
     visibility_status: data.visibility_status as string,
+    archived_at: (data.archived_at as string | null) ?? null,
     subject_links,
     event_links,
     opportunity_links,
@@ -127,7 +131,7 @@ function mapContentDetail(data: Record<string, unknown>): PublicContentDetail {
 const DETAIL_SELECT = `
   id, slug, title, subtitle, abstract, type_code, primary_category_code, language_id,
   is_featured, published_at, body, body_format, cover_url, source_url,
-  publication_status, visibility_status,
+  editorial_status, publication_status, visibility_status, archived_at,
   content_subject_links ( id, person_id, business_id, professional_profile_id ),
   content_event_links ( id, event_id ),
   content_opportunity_links ( id, opportunity_id ),
