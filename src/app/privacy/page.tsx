@@ -12,7 +12,7 @@ export default function PrivacyPage() {
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-3xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Documenti legali · aggiornamento 23 agosto 2026
+          Documenti legali · aggiornamento 29 agosto 2026
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
           Privacy Policy
@@ -46,6 +46,7 @@ export default function PrivacyPage() {
             <li>dati di account e autenticazione per redattori, amministratori e contributori abituali;</li>
             <li>nome, email, telefono, organizzazione e informazioni geografiche fornite attraverso i moduli di partecipazione;</li>
             <li>testi, link, materiali e informazioni contenuti nelle proposte editoriali;</li>
+            <li>contenuti editoriali già pubblicati sul sito, inclusi eventuali dati personali che siano già parte legittima del contenuto pubblico, quando vengono elaborati per produrre traduzioni automatiche;</li>
             <li>prese d&apos;atto, consensi e autorizzazioni registrati in relazione alla gestione delle proposte, alla pubblicazione e ai materiali audiovisivi;</li>
             <li>comunicazioni inviate ad AIPEL e dati necessari a gestire richieste, segnalazioni e rapporti istituzionali.</li>
           </ul>
@@ -63,6 +64,7 @@ export default function PrivacyPage() {
             <li><strong className="text-black">gestione degli account:</strong> esecuzione del servizio richiesto e interesse legittimo alla gestione della redazione e dei collaboratori autorizzati;</li>
             <li><strong className="text-black">ricezione, valutazione e approfondimento delle proposte:</strong> trattamento necessario per dare seguito alla richiesta dell&apos;interessato e interesse legittimo editoriale alla verifica dei materiali ricevuti; i recapiti obbligatori possono essere utilizzati per chiarimenti e verifiche strettamente collegati alla proposta;</li>
             <li><strong className="text-black">eventuale pubblicazione di testimonianze e materiali personali:</strong> avviene solo dopo valutazione editoriale e sulla base della base giuridica e delle autorizzazioni appropriate al caso concreto; l&apos;autorizzazione facoltativa presente nel modulo non determina alcuna pubblicazione automatica;</li>
+            <li><strong className="text-black">traduzione automatica di contenuti editoriali già pubblicati:</strong> interesse legittimo editoriale a rendere il patrimonio pubblico del Centro Studi accessibile in più lingue, con minimizzazione dei dati inviati, indicazione visibile della natura automatica della traduzione e prevalenza dell&apos;originale;</li>
             <li><strong className="text-black">misurazione aggregata del funzionamento del sito:</strong> quando la funzione è attivata, interesse legittimo a misurare in forma aggregata l&apos;utilizzo delle pagine per migliorare il servizio, con minimizzazione dei dati e senza profilazione;</li>
             <li><strong className="text-black">adempimenti legali e tutela dei diritti:</strong> obblighi di legge e interesse legittimo alla difesa di AIPEL e degli interessati.</li>
           </ul>
@@ -97,16 +99,23 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li>Supabase, per database, autenticazione e servizi applicativi; il progetto attualmente collegato è configurato nella regione primaria UE <strong className="text-black">eu-west-3 (Parigi)</strong>;</li>
             <li>Vercel, per hosting e deployment dell&apos;applicazione web in produzione; Netlify può essere mantenuto per ambienti tecnici di anteprima e collaudo non destinati alla pubblicazione;</li>
+            <li>OpenAI, quando la funzione viene attivata, per generare traduzioni automatiche di contenuti editoriali già pubblicati. Il sistema invia soltanto i campi editoriali necessari alla traduzione e rimuove preventivamente i metadati tecnici interni di acquisizione;</li>
             <li>fornitori di dominio e posta elettronica utilizzati da AIPEL, inclusi Aruba e i servizi Google quando impiegati per la gestione delle comunicazioni;</li>
             <li>consulenti o soggetti istituzionali quando la comunicazione sia necessaria per obblighi di legge o per la tutela di diritti.</li>
           </ul>
+          <p className="mt-3">
+            Le richieste applicative di traduzione sono configurate con <code>store: false</code>. Questa
+            impostazione non viene descritta da AIPEL come un regime di Zero Data Retention: eventuali
+            trattamenti tecnici e periodi di conservazione del fornitore restano disciplinati dai termini,
+            dalle configurazioni e dagli accordi applicabili al servizio API utilizzato.
+          </p>
           <p className="mt-3">I dati non vengono venduti a terzi.</p>
         </section>
 
         <section className="border-t border-black pt-8">
           <h2 className="text-2xl font-semibold text-black">6. Trasferimenti internazionali</h2>
           <p className="mt-4">
-            La regione primaria del progetto Supabase determina la localizzazione dei dati primari del progetto, ma alcuni fornitori o loro sub-responsabili possono comportare trattamenti fuori dallo Spazio Economico Europeo. In tali casi i trasferimenti vengono gestiti mediante gli strumenti previsti dal GDPR, come decisioni di adeguatezza o clausole contrattuali standard, quando applicabili.
+            La regione primaria del progetto Supabase determina la localizzazione dei dati primari del progetto, ma alcuni fornitori o loro sub-responsabili, incluso il fornitore utilizzato per le traduzioni automatiche quando la funzione è attivata, possono comportare trattamenti fuori dallo Spazio Economico Europeo. In tali casi i trasferimenti vengono gestiti mediante gli strumenti previsti dal GDPR, come decisioni di adeguatezza o clausole contrattuali standard, quando applicabili.
           </p>
         </section>
 
@@ -116,6 +125,7 @@ export default function PrivacyPage() {
             <li>le proposte non pubblicate sono conservate per il tempo necessario alla valutazione e, di regola, non oltre 24 mesi dalla decisione editoriale, salvo esigenze documentali o legali;</li>
             <li>i dati degli account sono conservati per la durata del rapporto e per il periodo successivo necessario a chiusura, sicurezza e tutela dei diritti;</li>
             <li>i materiali pubblicati e i relativi atti editoriali possono essere conservati nell&apos;archivio del Centro Studi finché permane la finalità editoriale, storica o documentale, fatti salvi diritti, correzioni e richieste legittime degli interessati;</li>
+            <li>le traduzioni automatiche validate dal sistema possono essere conservate nella cache editoriale finché il contenuto sorgente resta pubblico e la traduzione corrisponde alla versione corrente dell&apos;originale; una modifica dell&apos;originale rende obsoleta la cache precedente;</li>
             <li>i log tecnici e di sicurezza sono conservati per periodi proporzionati alla prevenzione di abusi e alle configurazioni dei fornitori;</li>
             <li>le misurazioni applicative, quando abilitate, sono registrate direttamente come conteggi giornalieri aggregati per percorso e lingua, senza conservare nell&apos;archivio analytics IP, user-agent, identificatori cookie, account o eventi grezzi.</li>
           </ul>
@@ -151,12 +161,18 @@ export default function PrivacyPage() {
         </section>
 
         <section className="border-t border-black pt-8">
-          <h2 className="text-2xl font-semibold text-black">10. Decisioni automatizzate</h2>
+          <h2 className="text-2xl font-semibold text-black">10. Decisioni automatizzate e traduzioni AI</h2>
           <p className="mt-4">
             ImmigratiImprenditori.it non adotta decisioni che producano effetti giuridici o
             analogamente significativi sull&apos;interessato basate unicamente su trattamenti automatizzati.
             Eventuali sistemi automatici di raccolta o classificazione editoriale supportano la redazione,
             che mantiene la decisione finale.
+          </p>
+          <p className="mt-3">
+            Le traduzioni AI riguardano esclusivamente contenuti editoriali già pubblicati e non determinano
+            decisioni sull&apos;interessato. Sono indicate come traduzioni automatiche, possono contenere errori e
+            non sono necessariamente sottoposte a revisione umana preventiva. La versione nella lingua originale
+            resta accessibile e prevale in caso di dubbio o divergenza.
           </p>
         </section>
 
