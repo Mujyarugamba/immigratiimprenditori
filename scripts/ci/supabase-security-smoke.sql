@@ -397,12 +397,12 @@ begin
     alter table public.contents disable trigger contents_human_publication_gate;
     insert into public.contents (
       owned_by_editorial, type_code, language_id, title, slug, body,
-      editorial_status, publication_status, visibility_status, is_featured
+      editorial_status, publication_status, visibility_status, published_at, is_featured
     ) values (
       true, v_type_code, v_language_id, 'CI public AI translation fixture',
       'ci-public-ai-translation-fixture-' || replace(gen_random_uuid()::text, '-', ''),
       'Public fixture body.',
-      'ready', 'published', 'public', false
+      'ready', 'published', 'public', now(), false
     ) returning id into v_public_id;
     alter table public.contents enable trigger contents_human_publication_gate;
   exception
