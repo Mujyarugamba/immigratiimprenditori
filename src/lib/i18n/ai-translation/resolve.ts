@@ -1,3 +1,4 @@
+import { stripContentsAcquisitionTrailer } from "@/lib/contents/strip-acquisition-trailer";
 import type { PlatformLocale } from "@/lib/i18n/config";
 import { catalogLanguageCodeFromId } from "@/lib/i18n/content-direction";
 import type { DeploymentEnv } from "@/lib/deployment/environment";
@@ -72,6 +73,13 @@ export type TranslationDeps = {
   reloadPublicContent?: (contentId: string) => Promise<TranslationSourceContent | null>;
 };
 
+function normalizeTranslationSourceContent(
+  content: TranslationSourceContent,
+): TranslationSourceContent {
+  const body = stripContentsAcquisitionTrailer(content.body);
+  return body === content.body ? content : { ...content, body };
+}
+
 function sourceLanguageCode(content: TranslationSourceContent): string {
   return catalogLanguageCodeFromId(content.language_id) ?? "und";
 }
@@ -132,36 +140,40 @@ export async function presentEditorialContent(
   options: { preferOriginal?: boolean; allowGenerate?: boolean } = {},
   deps: TranslationDeps,
 ): Promise<TranslationPresentation> {
+  const sourceContent = normalizeTranslationSourceContent(content);
+
   if (options.preferOriginal || locale === "it") {
-    return originalPresentation(content, { isViewingOriginal: Boolean(options.preferOriginal) });
+    return originalPresentation(sourceContent, {
+      isViewingOriginal: Boolean(options.preferOriginal),
+    });
   }
 
-  const sourceCode = sourceLanguageCode(content);
+  const sourceCode = sourceLanguageCode(sourceContent);
   const targetCheck = canUseTargetLocale(locale, sourceCode);
   if (!targetCheck.ok) {
-    return originalPresentation(content);
+    return originalPresentation(sourceContent);
   }
-  if (!isPublicEditorialContent(content)) {
-    return originalPresentation(content);
+  if (!isPublicEditorialContent(sourceContent)) {
+    return originalPresentation(sourceContent);
   }
 
-  const fingerprint = editorialContentFingerprint(content);
-  const cached = await deps.readTranslation(content.id, targetCheck.target);
+  const fingerprint = editorialContentFingerprint(sourceContent);
+  const cached = await deps.readTranslation(sourceContent.id, targetCheck.target);
   if (cached && fingerprintsMatch(cached.source_fingerprint, fingerprint)) {
-    return translatedPresentation(content, targetCheck.target, cacheToStructured(cached));
+    return translatedPresentation(sourceContent, targetCheck.target, cacheToStructured(cached));
   }
 
   if (!options.allowGenerate) {
-    return originalPresentation(content);
+    return originalPresentation(sourceContent);
   }
 
   const gate = translationGenerationGate(deps.env);
   if (!gate.allowed) {
-    return originalPresentation(content);
+    return originalPresentation(sourceContent);
   }
 
-  return singleFlight(translationFlightKey(content.id, targetCheck.target), () =>
-    generateAndCache(content, targetCheck.target, fingerprint, deps),
+  return singleFlight(translationFlightKey(sourceContent.id, targetCheck.target), () =>
+    generateAndCache(sourceContent, targetCheck.target, fingerprint, deps),
   );
 }
 
@@ -171,7 +183,10 @@ async function generateAndCache(
   fingerprint: string,
   deps: TranslationDeps,
 ): Promise<TranslationPresentation> {
-  const latest = deps.reloadPublicContent ? await deps.reloadPublicContent(content.id) : content;
+  const reloaded = deps.reloadPublicContent
+    ? await deps.reloadPublicContent(content.id)
+    : content;
+  const latest = reloaded ? normalizeTranslationSourceContent(reloaded) : null;
   if (!latest || !isPublicEditorialContent(latest)) {
     return originalPresentation(content);
   }
@@ -208,7 +223,12 @@ async function generateAndCache(
     return originalPresentation(latest, { openaiCalls: 1 });
   }
 
-  const stillPublic = deps.reloadPublicContent ? await deps.reloadPublicContent(latest.id) : latest;
+  const persistedSource = deps.reloadPublicContent
+    ? await deps.reloadPublicContent(latest.id)
+    : latest;
+  const stillPublic = persistedSource
+    ? normalizeTranslationSourceContent(persistedSource)
+    : null;
   if (!stillPublic || !isPublicEditorialContent(stillPublic)) {
     return originalPresentation(latest, { openaiCalls: 1 });
   }
