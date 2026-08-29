@@ -61,7 +61,7 @@ export async function presentLocalizedContentDetail(
 ): Promise<PresentedPublicContent> {
   const presented = await presentEditorialContent(detailToSource(content), locale, {
     preferOriginal: options.preferOriginal,
-    allowGenerate: options.allowGenerate ?? !options.preferOriginal,
+    allowGenerate: options.allowGenerate ?? false,
   }, runtimeDeps());
   return {
     ...presented,
