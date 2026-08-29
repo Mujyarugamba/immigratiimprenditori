@@ -5,6 +5,8 @@ import { listPublishedContentsByTypes, RESEARCH_CONTENT_TYPES } from "@/lib/data
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -28,6 +30,7 @@ export default async function LocalizedResearchPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = COLLECTION_MESSAGES[locale];
+  const arrow = localizedCtaArrow(locale);
   const items = await listPublishedContentsByTypes(RESEARCH_CONTENT_TYPES);
 
   return (
@@ -43,11 +46,11 @@ export default async function LocalizedResearchPage({ params }: Props) {
         {items.map((item) => (
           <article key={item.id} className="flex min-h-72 flex-col bg-white p-6">
             <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{item.type_code.replaceAll("_", " ")}</p>
-            <h2 className="mt-2 text-xl font-semibold leading-7 text-black">{item.title}</h2>
-            {item.abstract ? <p className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</p> : <div className="flex-1" />}
+            <OriginalLanguageText as="h2" languageId={item.language_id} className="mt-2 text-xl font-semibold leading-7 text-black">{item.title}</OriginalLanguageText>
+            {item.abstract ? <OriginalLanguageText languageId={item.language_id} className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</OriginalLanguageText> : <div className="flex-1" />}
             <div className="mt-6 flex items-center justify-between gap-4 border-t border-neutral-300 pt-4 text-xs text-neutral-600">
               <span>{formatDate(item.published_at, locale)}</span>
-              <Link href={`/contenuti/${item.slug}`} className="font-semibold text-black">{m.open} →</Link>
+              <Link href={`/contenuti/${item.slug}`} className="font-semibold text-black">{m.open} {arrow}</Link>
             </div>
           </article>
         ))}

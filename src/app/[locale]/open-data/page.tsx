@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 
 const text = {
   en: { kicker: "Observatory · Open data", title: "Open data", intro: "Values already published by the Observatory are also available in structured formats. Definitions, sources and methodological notes remain an integral part of interpretation.", indicators: "Indicators", records: "Records", formats: "Formats", endpoint: "Public endpoint", endpointText: "The endpoint exposes only published indicators and final public values. It does not expose restricted areas, personal data or unpublished editorial material.", open: "Open JSON dataset", csv: "Download CSV", correct: "Correct use", correctText: "A value must not be separated from the indicator definition. Citizenship, place of birth, foreign enterprise and self-employment are not equivalent categories.", method: "Sources & methodology", explorer: "Data Explorer" },
@@ -27,6 +28,7 @@ export default async function LocalizedOpenDataPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = text[locale];
+  const arrow = localizedCtaArrow(locale);
   const snapshot = await getExplorerSnapshot();
 
   return (
@@ -48,7 +50,7 @@ export default async function LocalizedOpenDataPage({ params }: Props) {
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{m.endpointText}</p>
         <code className="mt-5 block overflow-x-auto border border-black bg-neutral-50 p-4 text-sm">/api/open-data/indicators</code>
         <div className="mt-5 flex flex-wrap gap-3">
-          <a href="/api/open-data/indicators" className="border border-black px-5 py-3 text-sm font-semibold">{m.open} →</a>
+          <a href="/api/open-data/indicators" className="border border-black px-5 py-3 text-sm font-semibold">{m.open} {arrow}</a>
           <a href="/api/open-data/indicators.csv" className="border border-black px-5 py-3 text-sm font-semibold">{m.csv} ↓</a>
         </div>
       </section>
@@ -57,8 +59,8 @@ export default async function LocalizedOpenDataPage({ params }: Props) {
         <h2 className="text-2xl font-semibold text-black">{m.correct}</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{m.correctText}</p>
         <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
-          <Link href="/dati-e-fonti" className="underline underline-offset-4">{m.method} →</Link>
-          <Link href={`/${locale}/esplora`} className="underline underline-offset-4">{m.explorer} →</Link>
+          <Link href="/dati-e-fonti" className="underline underline-offset-4">{m.method} {arrow}</Link>
+          <Link href={`/${locale}/esplora`} className="underline underline-offset-4">{m.explorer} {arrow}</Link>
         </div>
       </section>
     </main>

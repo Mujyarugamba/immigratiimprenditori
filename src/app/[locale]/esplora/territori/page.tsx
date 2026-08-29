@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const text = {
   en: { kicker: "Explore · Territories", title: "Territories", intro: "These are the territories actually represented in published Observatory values. The count shows how many published statistical values refer to each territory.", generic: "territory", values: "published values", explore: "Explore data" },
@@ -27,6 +29,7 @@ export default async function LocalizedTerritoriesPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = text[locale];
+  const arrow = localizedCtaArrow(locale);
   const snapshot = await getExplorerSnapshot();
 
   return (
@@ -36,9 +39,9 @@ export default async function LocalizedTerritoriesPage({ params }: Props) {
         {snapshot.territories.map((territory) => (
           <article key={`${territory.level}-${territory.code}-${territory.label}`} className="bg-white p-6">
             <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{territory.level ?? m.generic}</p>
-            <h2 className="mt-2 text-xl font-semibold text-black">{territory.label}</h2>
+            <OriginalLanguageText as="h2" className="mt-2 text-xl font-semibold text-black">{territory.label}</OriginalLanguageText>
             <p className="mt-3 text-sm text-neutral-700">{territory.valueCount} {m.values}</p>
-            {territory.code ? <Link href={`/${locale}/esplora/dati?territorio=${encodeURIComponent(territory.code)}`} className="mt-5 inline-block text-sm font-semibold underline underline-offset-4">{m.explore} →</Link> : null}
+            {territory.code ? <Link href={`/${locale}/esplora/dati?territorio=${encodeURIComponent(territory.code)}`} className="mt-5 inline-block text-sm font-semibold underline underline-offset-4">{m.explore} {arrow}</Link> : null}
           </article>
         ))}
       </div>

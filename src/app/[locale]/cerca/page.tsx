@@ -7,6 +7,7 @@ import {
 } from "@/lib/data/public/search";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const text = {
   en: {
@@ -169,13 +170,13 @@ export default async function LocalizedSearchPage({
                 </p>
                 <h3 className="mt-2 text-xl font-semibold text-black">
                   <Link href={result.href} className="underline-offset-4 hover:underline">
-                    {result.title}
+                    <OriginalLanguageText as="span">{result.title}</OriginalLanguageText>
                   </Link>
                 </h3>
                 {result.excerpt ? (
-                  <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
+                  <OriginalLanguageText className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
                     {result.excerpt}
-                  </p>
+                  </OriginalLanguageText>
                 ) : null}
               </article>
             ))}

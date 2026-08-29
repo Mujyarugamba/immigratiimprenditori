@@ -283,6 +283,16 @@ test("go-live core interface renders across all seven platform languages", async
           `${path} must expose a localized Fonti → Metodologia link`,
         ).toBeTruthy();
       }
+
+      if (locale === "ar" && corePath === "/chi-siamo") {
+        expect(body.includes("استكشف ←"), `${path} Arabic CTA must use an RTL arrow`).toBeTruthy();
+        expect(body.includes("استكشف →"), `${path} Arabic CTA must not keep an LTR arrow`).toBeFalsy();
+      }
+
+      if (locale === "en" && corePath === "/chi-siamo") {
+        expect(body.includes("Explore →"), `${path} English CTA must keep a forward arrow`).toBeTruthy();
+        expect(body.includes("Explore ←"), `${path} English CTA must not mirror the arrow`).toBeFalsy();
+      }
     }
   }
 });
@@ -305,12 +315,26 @@ test("localized homes publish canonical and hreflang metadata", async ({ page })
 test("Arabic RTL remains usable across core localized pages", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
-  for (const path of ["/ar", "/ar/chi-siamo", "/ar/esplora"]) {
+  for (const path of ["/ar", "/ar/chi-siamo", "/ar/esplora", "/ar/contenuti", "/ar/storie"]) {
     const response = await page.goto(path, { waitUntil: "domcontentloaded" });
     expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
     await expect(page.locator('[data-platform-locale="ar"]')).toHaveAttribute("dir", "rtl");
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+
+    const originalNodes = page.locator("[data-original-language]");
+    const originalCount = await originalNodes.count();
+    for (let index = 0; index < originalCount; index += 1) {
+      const node = originalNodes.nth(index);
+      const lang = await node.getAttribute("data-original-language");
+      const dir = await node.getAttribute("dir");
+      if (lang === "ar" || lang === "ur" || lang === "fa") {
+        expect(dir, `${path} original ${lang} must remain RTL`).toBe("rtl");
+      } else {
+        expect(dir, `${path} original ${lang ?? "und"} fallback must isolate as LTR`).toBe("ltr");
+      }
+    }
 
     const dimensions = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -321,6 +345,42 @@ test("Arabic RTL remains usable across core localized pages", async ({ page }) =
       `${path} overflows horizontally in RTL mobile view`,
     ).toBeLessThanOrEqual(dimensions.clientWidth + 1);
   }
+
+  await page.goto("/ar", { waitUntil: "domcontentloaded" });
+  const arabicObservatoryCta = page.getByRole("link", { name: /استكشف المرصد/ });
+  await expect(arabicObservatoryCta).toContainText("←");
+  await expect(arabicObservatoryCta).not.toContainText("→");
+});
+
+test("LTR localized homes keep page direction and forward CTA arrows", async ({ page }) => {
+  for (const [locale, path] of [
+    ["en", "/en"],
+    ["fr", "/fr"],
+    ["zh", "/zh"],
+  ] as const) {
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    expect(response?.ok(), `${path} did not return 2xx`).toBeTruthy();
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await expect(page.locator(`[data-platform-locale="${locale}"]`)).toHaveAttribute("dir", "ltr");
+
+    const originalNodes = page.locator("[data-original-language]");
+    const originalCount = await originalNodes.count();
+    for (let index = 0; index < originalCount; index += 1) {
+      const node = originalNodes.nth(index);
+      const lang = await node.getAttribute("data-original-language");
+      const dir = await node.getAttribute("dir");
+      if (lang === "ar" || lang === "ur" || lang === "fa") {
+        expect(dir, `${path} original ${lang} must isolate as RTL`).toBe("rtl");
+      } else {
+        expect(dir, `${path} original ${lang ?? "und"} must isolate as LTR`).toBe("ltr");
+      }
+    }
+  }
+
+  await page.goto("/en", { waitUntil: "domcontentloaded" });
+  const englishObservatoryCta = page.getByRole("link", { name: /Explore the Observatory/ });
+  await expect(englishObservatoryCta).toContainText("→");
+  await expect(englishObservatoryCta).not.toContainText("←");
 });
 
 test("core public pages reflow without horizontal overflow", async ({ page }) => {

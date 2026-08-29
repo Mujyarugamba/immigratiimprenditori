@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const labels = {
   en: { back: "Back to analysis", text: "Text", source: "Source", cite: "How to cite", open: "Open original source" },
@@ -36,6 +38,7 @@ export default async function LocalizedContentPage({ params }: Props) {
   if (!content) notFound();
   const l = labels[locale];
   const core = CORE_MESSAGES[locale];
+  const arrow = localizedCtaArrow(locale);
   const authors = content.authors.map((a) => a.display_label).filter(Boolean) as string[];
   const year = content.published_at ? new Date(content.published_at).getFullYear() : new Date().getFullYear();
   const citation = `${authors.length ? authors.join(", ") : "Immigrati Imprenditori"} (${year}). ${content.title}. Immigrati Imprenditori — Centro Studi AIPEL.`;
@@ -45,8 +48,8 @@ export default async function LocalizedContentPage({ params }: Props) {
       <Link href={`/${locale}/contenuti`} className="text-sm font-semibold underline underline-offset-4">← {l.back}</Link>
       <header className="mt-6 border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">{content.type_code.replaceAll("_", " ")}</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{content.title}</h1>
-        {content.abstract ? <p className="mt-5 text-lg leading-8 text-neutral-700">{content.abstract}</p> : null}
+        <OriginalLanguageText as="h1" languageId={content.language_id} className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{content.title}</OriginalLanguageText>
+        {content.abstract ? <OriginalLanguageText languageId={content.language_id} className="mt-5 text-lg leading-8 text-neutral-700">{content.abstract}</OriginalLanguageText> : null}
         {authors.length > 0 ? <p className="mt-4 text-sm font-semibold text-black">{authors.join(", ")}</p> : null}
         <p className="mt-3 text-sm leading-6 text-neutral-600">{core.originalLanguageNotice}</p>
       </header>
@@ -54,7 +57,9 @@ export default async function LocalizedContentPage({ params }: Props) {
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-black">{l.text}</h2>
         <div className="mt-4 space-y-4 text-sm leading-7 text-neutral-700">
-          {content.body.split("\n\n").map((paragraph, index) => <p key={index} className="whitespace-pre-wrap">{paragraph}</p>)}
+          {content.body.split("\n\n").map((paragraph, index) => (
+            <OriginalLanguageText key={index} languageId={content.language_id} className="whitespace-pre-wrap">{paragraph}</OriginalLanguageText>
+          ))}
         </div>
       </section>
 
@@ -67,8 +72,8 @@ export default async function LocalizedContentPage({ params }: Props) {
 
       <section className="mt-8 border-t border-black pt-6">
         <h2 className="text-xl font-semibold text-black">{l.cite}</h2>
-        <p className="mt-3 border border-black bg-neutral-50 p-4 text-sm leading-6">{citation}</p>
-        <a href={`/contenuti/${content.slug}/citation.bib`} className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">BibTeX →</a>
+        <OriginalLanguageText languageId={content.language_id} className="mt-3 border border-black bg-neutral-50 p-4 text-sm leading-6">{citation}</OriginalLanguageText>
+        <a href={`/contenuti/${content.slug}/citation.bib`} className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">BibTeX {arrow}</a>
       </section>
     </main>
   );

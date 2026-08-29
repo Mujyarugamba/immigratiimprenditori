@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const text = {
   en: { kicker: "Explore · People", title: "Authors & contributors", intro: "The names shown here come exclusively from content that is already published and publicly visible. The count shows how many published contributions are attributed to each name.", contributions: "contributions", none: "No public bylines are available." },
@@ -31,7 +32,7 @@ export default async function LocalizedAuthorsPage({ params }: Props) {
     <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
       <header className="max-w-4xl border-b border-black pb-8"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">{m.kicker}</p><h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{m.title}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">{m.intro}</p></header>
       <div className="mt-8 divide-y divide-black border-y border-black">
-        {snapshot.authors.map((author) => <article key={author.label} className="flex items-baseline justify-between gap-6 py-5"><h2 className="text-lg font-semibold text-black">{author.label}</h2><span className="text-sm text-neutral-600">{author.contributionCount} {m.contributions}</span></article>)}
+        {snapshot.authors.map((author) => <article key={author.label} className="flex items-baseline justify-between gap-6 py-5"><OriginalLanguageText as="h2" className="text-lg font-semibold text-black">{author.label}</OriginalLanguageText><span className="text-sm text-neutral-600">{author.contributionCount} {m.contributions}</span></article>)}
         {snapshot.authors.length === 0 ? <p className="py-8 text-neutral-600">{m.none}</p> : null}
       </div>
     </main>

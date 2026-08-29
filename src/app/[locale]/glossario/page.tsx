@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { GLOSSARY_MESSAGES } from "@/lib/i18n/glossary";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -22,6 +23,7 @@ export default async function LocalizedGlossaryPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = GLOSSARY_MESSAGES[locale];
+  const arrow = localizedCtaArrow(locale);
 
   return (
     <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
@@ -42,7 +44,7 @@ export default async function LocalizedGlossaryPage({ params }: Props) {
 
       <p className="mt-8 max-w-3xl text-sm leading-6 text-neutral-600">{m.note}</p>
       <Link href="/dati-e-fonti" className="mt-5 inline-block text-sm font-semibold underline underline-offset-4">
-        {m.methodologyLink} →
+        {m.methodologyLink} {arrow}
       </Link>
     </main>
   );

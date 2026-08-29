@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 
 const sectionText = {
   en: {
@@ -70,6 +71,7 @@ export default async function LocalizedAboutPage({ params }: Props) {
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = CORE_MESSAGES[locale];
   const s = sectionText[locale];
+  const arrow = localizedCtaArrow(locale);
 
   return (
     <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
@@ -85,8 +87,8 @@ export default async function LocalizedAboutPage({ params }: Props) {
       <section className="mt-10 border-t border-black pt-8"><h2 className="text-2xl font-semibold text-black">{s.principles}</h2><p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{s.principlesText}</p></section>
 
       <div className="mt-10 flex flex-wrap gap-4 text-sm font-semibold">
-        <Link href={`/${locale}/esplora`} className="underline underline-offset-4">{m.exploreTitle} →</Link>
-        <Link href={`/${locale}/contribuisci`} className="underline underline-offset-4">{m.participateTitle} →</Link>
+        <Link href={`/${locale}/esplora`} className="underline underline-offset-4">{m.exploreTitle} {arrow}</Link>
+        <Link href={`/${locale}/contribuisci`} className="underline underline-offset-4">{m.participateTitle} {arrow}</Link>
       </div>
     </main>
   );

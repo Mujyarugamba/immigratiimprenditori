@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const text = {
   en: { kicker: "Explore · Taxonomy", title: "Economic sectors", intro: "This taxonomy allows indicators, research, stories and events to be connected over time to the same economic fields. A sector appears here because it is active in the Research Centre model; data availability depends on the sources.", sector: "Sector", linked: "Linked Observatory values", notice: "Sector names and descriptions currently follow the canonical taxonomy stored by the Research Centre." },
@@ -38,7 +39,7 @@ export default async function LocalizedSectorsPage({ params }: Props) {
       <header className="max-w-4xl border-b border-black pb-8"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">{m.kicker}</p><h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{m.title}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">{m.intro}</p><p className="mt-3 text-sm leading-6 text-neutral-600">{m.notice}</p></header>
       <div className="mt-8 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-3">
         {snapshot.sectors.map((sector) => (
-          <article key={sector.id} className="bg-white p-6"><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{m.sector}</p><h2 className="mt-2 text-xl font-semibold text-black">{sector.name}</h2>{sector.description ? <p className="mt-3 text-sm leading-6 text-neutral-700">{sector.description}</p> : null}<p className="mt-4 text-xs text-neutral-500">{m.linked}: {counts.get(sector.id) ?? 0}</p></article>
+          <article key={sector.id} className="bg-white p-6"><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{m.sector}</p><OriginalLanguageText as="h2" className="mt-2 text-xl font-semibold text-black">{sector.name}</OriginalLanguageText>{sector.description ? <OriginalLanguageText className="mt-3 text-sm leading-6 text-neutral-700">{sector.description}</OriginalLanguageText> : null}<p className="mt-4 text-xs text-neutral-500">{m.linked}: {counts.get(sector.id) ?? 0}</p></article>
         ))}
       </div>
     </main>

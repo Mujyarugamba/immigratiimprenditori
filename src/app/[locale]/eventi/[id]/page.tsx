@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getPublicEventById } from "@/lib/data/public/events";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const labels = {
   en: { back: "Back to events", description: "Description", organization: "Organization", audience: "Audience", access: "Access", editions: "Editions", calendar: "Calendar" },
@@ -36,23 +38,24 @@ export default async function LocalizedEventPage({ params }: Props) {
   if (!event) notFound();
   const l = labels[locale];
   const core = CORE_MESSAGES[locale];
+  const arrow = localizedCtaArrow(locale);
 
   return (
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <Link href={`/${locale}/eventi`} className="text-sm font-semibold underline underline-offset-4">← {l.back}</Link>
       <header className="mt-6 border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">{event.type_code.replaceAll("_", " ")}</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{event.title}</h1>
-        {event.summary ? <p className="mt-5 text-lg leading-8 text-neutral-700">{event.summary}</p> : null}
+        <OriginalLanguageText as="h1" className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{event.title}</OriginalLanguageText>
+        {event.summary ? <OriginalLanguageText className="mt-5 text-lg leading-8 text-neutral-700">{event.summary}</OriginalLanguageText> : null}
         <p className="mt-3 text-sm leading-6 text-neutral-600">{core.originalLanguageNotice}</p>
       </header>
 
-      <section className="mt-8"><h2 className="text-xl font-semibold text-black">{l.description}</h2><p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-neutral-700">{event.description}</p></section>
-      {event.external_organization_label ? <section className="mt-8 border-t border-black pt-6"><h2 className="text-xl font-semibold text-black">{l.organization}</h2><p className="mt-3 text-sm text-neutral-700">{event.external_organization_label}</p></section> : null}
+      <section className="mt-8"><h2 className="text-xl font-semibold text-black">{l.description}</h2><OriginalLanguageText className="mt-3 whitespace-pre-wrap text-sm leading-7 text-neutral-700">{event.description}</OriginalLanguageText></section>
+      {event.external_organization_label ? <section className="mt-8 border-t border-black pt-6"><h2 className="text-xl font-semibold text-black">{l.organization}</h2><OriginalLanguageText className="mt-3 text-sm text-neutral-700">{event.external_organization_label}</OriginalLanguageText></section> : null}
 
       {event.editions.length > 0 ? (
         <section className="mt-8 border-t border-black pt-6">
-          <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold text-black">{l.editions}</h2><a href={`/eventi/${event.id}/calendar.ics`} className="text-sm font-semibold underline underline-offset-4">{l.calendar} (.ics) →</a></div>
+          <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold text-black">{l.editions}</h2><a href={`/eventi/${event.id}/calendar.ics`} className="text-sm font-semibold underline underline-offset-4">{l.calendar} (.ics) {arrow}</a></div>
           <ul className="mt-4 space-y-4">
             {event.editions.map((edition) => (
               <li key={edition.id} className="border border-black p-4 text-sm leading-6 text-neutral-700">

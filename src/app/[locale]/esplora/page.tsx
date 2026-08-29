@@ -5,6 +5,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 
 const moduleText = {
   en: ["Published Observatory values", "Territories represented in published data", "Economic-sector taxonomy", "Statistical sources used by the Observatory", "Methodological definitions", "Machine-readable public data"],
@@ -40,6 +41,7 @@ export default async function LocalizedExplorePage({ params }: Props) {
   const snapshot = await getExplorerSnapshot();
   const texts = moduleText[locale];
   const metrics = metricText[locale];
+  const arrow = localizedCtaArrow(locale);
   const modules = [
     { title: m.dataExplorer, text: texts[0], href: `/${locale}/esplora/dati` },
     { title: m.territories, text: texts[1], href: `/${locale}/esplora/territori` },
@@ -69,7 +71,7 @@ export default async function LocalizedExplorePage({ params }: Props) {
           <article key={module.href} className="flex min-h-52 flex-col bg-white p-6">
             <h2 className="text-xl font-semibold text-black">{module.title}</h2>
             <p className="mt-3 flex-1 text-sm leading-6 text-neutral-700">{module.text}</p>
-            <Link href={module.href} className="mt-5 text-sm font-semibold underline underline-offset-4">{metrics[4]} →</Link>
+            <Link href={module.href} className="mt-5 text-sm font-semibold underline underline-offset-4">{metrics[4]} {arrow}</Link>
           </article>
         ))}
       </section>

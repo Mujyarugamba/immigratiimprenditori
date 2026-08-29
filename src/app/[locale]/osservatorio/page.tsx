@@ -7,6 +7,8 @@ import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { listPublicIndicators } from "@/lib/data/public/observatory";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const descriptions = {
   en: "Published indicators from the Observatory, with definitions, sources, periods and methodology.",
@@ -35,6 +37,7 @@ export default async function LocalizedObservatoryPage({ params }: Props) {
   const m = NAV_MESSAGES[locale];
   const core = CORE_MESSAGES[locale];
   const open = COLLECTION_MESSAGES[locale].open;
+  const arrow = localizedCtaArrow(locale);
   const result = await listPublicIndicators();
 
   return (
@@ -50,16 +53,16 @@ export default async function LocalizedObservatoryPage({ params }: Props) {
         {result.items.map((indicator) => (
           <article key={indicator.id} className="flex min-h-64 flex-col bg-white p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{indicator.code}</p>
-            <h2 className="mt-2 text-xl font-semibold leading-7 text-black">{indicator.title}</h2>
-            <p className="mt-3 flex-1 text-sm leading-6 text-neutral-700">{indicator.description}</p>
-            <Link href={`/${locale}/osservatorio/${indicator.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} →</Link>
+            <OriginalLanguageText as="h2" className="mt-2 text-xl font-semibold leading-7 text-black">{indicator.title}</OriginalLanguageText>
+            <OriginalLanguageText className="mt-3 flex-1 text-sm leading-6 text-neutral-700">{indicator.description}</OriginalLanguageText>
+            <Link href={`/${locale}/osservatorio/${indicator.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} {arrow}</Link>
           </article>
         ))}
       </div>
 
       <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold">
-        <Link href={`/${locale}/esplora/dati`} className="underline underline-offset-4">{core.dataExplorer} →</Link>
-        <Link href={`/${locale}/open-data`} className="underline underline-offset-4">{core.openData} →</Link>
+        <Link href={`/${locale}/esplora/dati`} className="underline underline-offset-4">{core.dataExplorer} {arrow}</Link>
+        <Link href={`/${locale}/open-data`} className="underline underline-offset-4">{core.openData} {arrow}</Link>
       </div>
     </main>
   );

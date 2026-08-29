@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { listPublicStatisticalSources } from "@/lib/data/public/sources";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const text = {
   en: { kicker: "Observatory · Provenance", title: "Source catalogue", intro: "Statistical sources used by the Observatory are registered separately from the values they support, so producer, publication, edition, licence and methodology can be documented when available.", edition: "Edition", published: "Published", licence: "Licence/use", open: "Open original source", method: "Method & comparability", glossary: "Glossary", notice: "Source metadata and methodological notes may remain in the language in which they were originally documented." },
@@ -27,6 +29,7 @@ export default async function LocalizedSourcesPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = text[locale];
+  const arrow = localizedCtaArrow(locale);
   const sources = await listPublicStatisticalSources();
 
   return (
@@ -41,12 +44,12 @@ export default async function LocalizedSourcesPage({ params }: Props) {
       <div className="mt-8 grid gap-px border border-black bg-black md:grid-cols-2">
         {sources.map((source) => (
           <article key={source.id} className="bg-white p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{source.producer_name}</p>
-            <h2 className="mt-2 text-xl font-semibold text-black">{source.publication_title}</h2>
-            <p className="mt-2 text-sm text-neutral-600">{source.name}</p>
+            <OriginalLanguageText as="p" className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{source.producer_name}</OriginalLanguageText>
+            <OriginalLanguageText as="h2" className="mt-2 text-xl font-semibold text-black">{source.publication_title}</OriginalLanguageText>
+            <OriginalLanguageText className="mt-2 text-sm text-neutral-600">{source.name}</OriginalLanguageText>
             {source.edition_label ? <p className="mt-3 text-sm text-neutral-700">{m.edition}: {source.edition_label}</p> : null}
             {source.source_published_on ? <p className="mt-1 text-sm text-neutral-700">{m.published}: {source.source_published_on}</p> : null}
-            {source.methodology_note ? <p className="mt-4 text-sm leading-6 text-neutral-700">{source.methodology_note}</p> : null}
+            {source.methodology_note ? <OriginalLanguageText className="mt-4 text-sm leading-6 text-neutral-700">{source.methodology_note}</OriginalLanguageText> : null}
             {source.license_note ? <p className="mt-3 text-xs leading-5 text-neutral-500">{m.licence}: {source.license_note}</p> : null}
             {source.url ? <a href={source.url} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-semibold underline underline-offset-4">{m.open} ↗</a> : null}
           </article>
@@ -54,8 +57,8 @@ export default async function LocalizedSourcesPage({ params }: Props) {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-5 text-sm font-semibold">
-        <Link href={`/${locale}/dati-e-fonti`} className="underline underline-offset-4">{m.method} →</Link>
-        <Link href={`/${locale}/glossario`} className="underline underline-offset-4">{m.glossary} →</Link>
+        <Link href={`/${locale}/dati-e-fonti`} className="underline underline-offset-4">{m.method} {arrow}</Link>
+        <Link href={`/${locale}/glossario`} className="underline underline-offset-4">{m.glossary} {arrow}</Link>
       </div>
     </main>
   );

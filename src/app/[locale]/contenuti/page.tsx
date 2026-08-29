@@ -7,6 +7,8 @@ import { NAV_MESSAGES } from "@/lib/i18n/messages";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 
 const descriptions = {
   en: "Published analysis, research, interviews and documented stories from the Research Centre.",
@@ -35,6 +37,7 @@ export default async function LocalizedContentsPage({ params }: Props) {
   const m = NAV_MESSAGES[locale];
   const core = CORE_MESSAGES[locale];
   const open = COLLECTION_MESSAGES[locale].open;
+  const arrow = localizedCtaArrow(locale);
   const result = await listPublicContents();
 
   return (
@@ -50,9 +53,9 @@ export default async function LocalizedContentsPage({ params }: Props) {
         {result.items.map((item) => (
           <article key={item.id} className="flex min-h-72 flex-col bg-white p-6">
             <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{item.type_code.replaceAll("_", " ")}</p>
-            <h2 className="mt-2 text-xl font-semibold leading-7 text-black">{item.title}</h2>
-            {item.abstract ? <p className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</p> : <div className="flex-1" />}
-            <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} →</Link>
+            <OriginalLanguageText as="h2" languageId={item.language_id} className="mt-2 text-xl font-semibold leading-7 text-black">{item.title}</OriginalLanguageText>
+            {item.abstract ? <OriginalLanguageText languageId={item.language_id} className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</OriginalLanguageText> : <div className="flex-1" />}
+            <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} {arrow}</Link>
           </article>
         ))}
       </div>
