@@ -42,6 +42,9 @@ export type OpenAiTransport = (
   init: RequestInit,
 ) => Promise<Response>;
 
+const OPENAI_TRANSLATION_TIMEOUT_MS = 20_000;
+const OPENAI_TRANSLATION_MAX_OUTPUT_TOKENS = 4_096;
+
 const TRANSLATION_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -116,8 +119,12 @@ export async function requestEditorialTranslation(
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
+      signal: AbortSignal.timeout(OPENAI_TRANSLATION_TIMEOUT_MS),
       body: JSON.stringify({
         model,
+        store: false,
+        reasoning: { effort: "none" },
+        max_output_tokens: OPENAI_TRANSLATION_MAX_OUTPUT_TOKENS,
         input: [
           {
             role: "developer",
@@ -159,6 +166,15 @@ export async function requestEditorialTranslation(
     payload = await response.json();
   } catch {
     return { ok: false, reason: "invalid_json" };
+  }
+
+  if (
+    payload &&
+    typeof payload === "object" &&
+    typeof (payload as { status?: unknown }).status === "string" &&
+    (payload as { status: string }).status !== "completed"
+  ) {
+    return { ok: false, reason: "openai_error" };
   }
 
   const outputText = extractOutputText(payload);
