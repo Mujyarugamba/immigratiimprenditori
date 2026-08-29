@@ -68,5 +68,5 @@ test("AI translation legal disclosures remain explicit and conservative", () => 
   assert.match(editorialPolicy, /traduzioni\s+automatiche generate mediante intelligenza artificiale/);
   assert.match(editorialPolicy, /possono contenere errori/);
   assert.match(editorialPolicy, /non implicano necessariamente una revisione umana preventiva/);
-  assert.match(editorialPolicy, /prevale sempre la versione nella lingua originale/);
+  assert.match(editorialPolicy, /prevale sempre la versione nella\s+lingua originale/);
 });
