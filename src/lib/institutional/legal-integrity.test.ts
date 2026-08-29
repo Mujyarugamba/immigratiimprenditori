@@ -13,6 +13,7 @@ const privacy = source("src/app/privacy/page.tsx");
 const cookie = source("src/app/cookie/page.tsx");
 const terms = source("src/app/termini/page.tsx");
 const contribution = source("src/app/contribuisci/page.tsx");
+const editorialPolicy = source("src/app/politica-editoriale/page.tsx");
 
 const legalIdentityMarkers = [
   "Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia (AIPEL)",
@@ -49,9 +50,23 @@ test("age and jurisdiction decisions remain explicit", () => {
   assert.match(terms, /foro del consumatore/);
 });
 
-test("privacy notice keeps current Supabase primary-region disclosure scoped correctly", () => {
+test("privacy notice keeps infrastructure and transfer disclosures scoped correctly", () => {
   assert.match(privacy, /eu-west-3 \(Parigi\)/);
   assert.match(privacy, /regione primaria del progetto Supabase determina la localizzazione dei dati primari/);
-  assert.match(privacy, /sub-responsabili possono comportare trattamenti fuori dallo Spazio/);
+  assert.match(privacy, /sub-responsabili[\s\S]{0,220}possono comportare trattamenti fuori dallo Spazio Economico Europeo/);
   assert.match(privacy, /non costituisce consenso a finalità ulteriori/);
+});
+
+test("AI translation legal disclosures remain explicit and conservative", () => {
+  assert.match(privacy, /OpenAI/);
+  assert.match(privacy, /contenuti editoriali già pubblicati/);
+  assert.match(privacy, /store: false/);
+  assert.match(privacy, /non viene descritta da AIPEL come un regime di Zero Data Retention/);
+  assert.match(privacy, /non sono necessariamente sottoposte a revisione umana preventiva/);
+  assert.match(privacy, /resta accessibile e prevale in caso di dubbio o divergenza/);
+
+  assert.match(editorialPolicy, /traduzioni automatiche generate mediante intelligenza artificiale/);
+  assert.match(editorialPolicy, /possono contenere errori/);
+  assert.match(editorialPolicy, /non implicano necessariamente una revisione umana preventiva/);
+  assert.match(editorialPolicy, /prevale sempre la versione nella lingua originale/);
 });
