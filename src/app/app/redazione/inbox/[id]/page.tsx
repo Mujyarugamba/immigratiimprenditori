@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
+import { assignInboxToMeAction, updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
 import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
 
 export const metadata: Metadata = {
@@ -17,6 +17,49 @@ const STATUS_OPTIONS = [
   ["rejected", "Scartato"],
   ["archived", "Archiviato"],
 ] as const;
+
+const STATUS_LABEL = Object.fromEntries(STATUS_OPTIONS) as Record<string, string>;
+
+function transition(changes: Record<string, unknown>, key: string) {
+  const value = changes[key];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  return {
+    from: typeof record.from === "string" ? record.from : null,
+    to: typeof record.to === "string" ? record.to : null,
+  };
+}
+
+function activityLabel(changes: Record<string, unknown>) {
+  const parts: string[] = [];
+  const status = transition(changes, "status");
+  if (status) {
+    const from = status.from ? STATUS_LABEL[status.from] ?? status.from : "—";
+    const to = status.to ? STATUS_LABEL[status.to] ?? status.to : "—";
+    parts.push(`Stato: ${from} → ${to}`);
+  }
+
+  const priority = transition(changes, "priority");
+  if (priority) {
+    parts.push(`Priorità: ${priority.from ?? "—"} → ${priority.to ?? "—"}`);
+  }
+
+  if (transition(changes, "assigned_account_id")) {
+    parts.push("Assegnazione redazionale aggiornata");
+  }
+
+  if (parts.length > 0) return parts.join(" · ");
+
+  // Compatibility with the short-lived application-side audit shape used by
+  // early branch revisions. Canonical records now come from the DB trigger.
+  if (changes.kind === "status_change") {
+    const from = typeof changes.from === "string" ? STATUS_LABEL[changes.from] ?? changes.from : "—";
+    const to = typeof changes.to === "string" ? STATUS_LABEL[changes.to] ?? changes.to : "—";
+    return `Stato: ${from} → ${to}`;
+  }
+  if (changes.kind === "assignment") return "Assegnazione redazionale aggiornata";
+  return "Attività redazionale";
+}
 
 export default async function InboxDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -87,6 +130,26 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
               </div>
             </section>
           ) : null}
+
+          <section className="border-t border-black pt-6">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-ink text-lg font-semibold">Cronologia redazionale</h2>
+              <span className="text-ink-muted text-xs">{item.activity.length}</span>
+            </div>
+            <div className="mt-3 divide-y divide-neutral-300">
+              {item.activity.map((entry) => (
+                <article key={entry.id} className="py-3">
+                  <p className="text-sm font-medium text-black">{activityLabel(entry.changes)}</p>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    {new Intl.DateTimeFormat("it-IT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(entry.created_at))}
+                  </p>
+                </article>
+              ))}
+              {item.activity.length === 0 ? (
+                <p className="py-4 text-sm text-neutral-500">Nessuna attività registrata per questo arrivo.</p>
+              ) : null}
+            </div>
+          </section>
         </div>
 
         <aside className="border-line border-t pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
@@ -104,10 +167,18 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
             </button>
           </form>
 
+          <form action={assignInboxToMeAction} className="mt-3">
+            <input type="hidden" name="id" value={item.id} />
+            <button type="submit" className="w-full border border-black px-4 py-2 text-sm font-semibold">
+              Assegna a me
+            </button>
+          </form>
+
           <dl className="text-ink-muted mt-6 space-y-3 text-xs">
             <div><dt>Priorità</dt><dd className="text-ink mt-1">{item.priority}</dd></div>
             <div><dt>Fascia geografica</dt><dd className="text-ink mt-1">{item.relevance_band ?? "—"}</dd></div>
             <div><dt>Fonte</dt><dd className="text-ink mt-1">{item.source_label ?? "—"}</dd></div>
+            <div><dt>Assegnazione</dt><dd className="text-ink mt-1">{item.assigned_account_id ? "Assegnato" : "Non assegnato"}</dd></div>
           </dl>
         </aside>
       </div>

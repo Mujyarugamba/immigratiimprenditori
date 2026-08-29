@@ -2,7 +2,14 @@ name: Editorial v1 CI
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - feature/institutional-identity
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -10,7 +17,11 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    env:
+      # Public-shell CI models the Netlify Deploy Preview: production public
+      # data may be rendered server-side, but every mutation path is fail-closed.
+      NEXT_PUBLIC_PREVIEW_READ_ONLY: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,3 +40,193 @@ jobs:
 
       - name: Tests
         run: npm test
+
+      - name: Go-live functional source gates
+        run: node scripts/ci/go-live-functional-gates.mjs
+
+      - name: Radar quality self-tests
+        env:
+          RADAR_SELF_TEST: "1"
+        run: |
+          node scripts/external-data/radar-nightly.mjs
+          node scripts/external-data/radar-emn.mjs
+
+      - name: Source-health safety self-test
+        env:
+          SOURCE_HEALTH_SELF_TEST: "1"
+        run: node scripts/external-data/source-health-check.mjs
+
+      - name: Source-health least-privilege guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          checker="scripts/external-data/source-health-check.mjs"
+          workflow=".github/workflows/source-health-weekly.yml"
+          targets=("$checker" "$workflow")
+
+          privileged="$(grep -n --fixed-strings 'SUPABASE_SERVICE_ROLE_KEY' "${targets[@]}" || true)"
+          if [[ -n "$privileged" ]]; then
+            echo "Source-health must never receive the Supabase service-role credential:"
+            echo "$privileged"
+            exit 1
+          fi
+
+          for target in "${targets[@]}"; do
+            if ! grep -q --fixed-strings 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY' "$target"; then
+              echo "Source-health public publishable-key contract missing from $target"
+              exit 1
+            fi
+          done
+
+          mutations="$(grep -nE '\.(insert|upsert|update|delete|rpc)\(' "$checker" || true)"
+          if [[ -n "$mutations" ]]; then
+            echo "Source-health checker must remain database read-only; mutation/RPC call found:"
+            echo "$mutations"
+            exit 1
+          fi
+
+          if ! grep -q --fixed-strings '.eq("lifecycle_status", "active")' "$checker"; then
+            echo "Source-health checker must explicitly restrict registry reads to active sources"
+            exit 1
+          fi
+
+          echo "SOURCE_HEALTH_LEAST_PRIVILEGE_GUARD = PASS"
+
+      - name: Production promotion workflow guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          workflow=".github/workflows/promote-production.yml"
+          test -f "$workflow" || {
+            echo "Guarded Production promotion workflow is missing" >&2
+            exit 1
+          }
+
+          required=(
+            'workflow_dispatch:'
+            "if: github.ref == 'refs/heads/main'"
+            'contents: write'
+            'DEPLOY_PRODUCTION'
+            "grep -Eq '^[0-9a-f]{40}$'"
+            'git merge-base --is-ancestor'
+            'refs/heads/production'
+            'GITHUB_SHA'
+            'EXPECTED_MAIN_SHA'
+          )
+          for marker in "${required[@]}"; do
+            if ! grep -q --fixed-strings -- "$marker" "$workflow"; then
+              echo "Production promotion safety marker missing: $marker" >&2
+              exit 1
+            fi
+          done
+
+          forbidden_triggers="$(grep -nE '^[[:space:]]+(push|schedule|workflow_call|repository_dispatch|pull_request_target):' "$workflow" || true)"
+          if [[ -n "$forbidden_triggers" ]]; then
+            echo "Production promotion must remain manual-only; forbidden trigger found:" >&2
+            echo "$forbidden_triggers" >&2
+            exit 1
+          fi
+
+          unsafe_push="$(grep -nE -- '--force($|[ =])|--force-with-lease|git push[^#]*[[:space:]]-f([[:space:]]|$)' "$workflow" || true)"
+          if [[ -n "$unsafe_push" ]]; then
+            echo "Production promotion must never force-push:" >&2
+            echo "$unsafe_push" >&2
+            exit 1
+          fi
+
+          echo "PRODUCTION_PROMOTION_WORKFLOW_GUARD = PASS"
+
+      - name: Privacy runtime tracker/embed guard
+        run: node scripts/ci/privacy-runtime-guard.mjs
+
+      - name: Production dependency vulnerability gate
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Supabase Auth deprecation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(grep -R --line-number --include='*.sql' --fixed-strings 'auth.role()' \
+            supabase/baseline supabase/standalone-evolutions supabase/migrations \
+            | grep -vE ':[0-9]+:[[:space:]]*--' || true)"
+          if [[ -n "$matches" ]]; then
+            echo "Deprecated auth.role() usage found in executable Supabase SQL:"
+            echo "$matches"
+            exit 1
+          fi
+          echo "SUPABASE_AUTH_DEPRECATION_GUARD = PASS"
+
+      - name: Supabase unsafe session-user guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(grep -R --line-number --include='*.ts' --include='*.tsx' \
+            --fixed-strings '.auth.getSession(' src || true)"
+          if [[ -n "$matches" ]]; then
+            echo "Direct auth.getSession() usage found in application source."
+            echo "Do not trust cookie-backed session user data for authorization; use getUser()/getClaims() and explicit role checks."
+            echo "$matches"
+            exit 1
+          fi
+          echo "SUPABASE_UNSAFE_SESSION_USER_GUARD = PASS"
+
+      - name: Start deterministic empty Supabase stub
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup node scripts/ci/supabase-unavailable-stub.mjs >/tmp/ci-supabase-stub.log 2>&1 &
+          echo $! >/tmp/ci-supabase-stub.pid
+          for _ in {1..30}; do
+            status="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:54329/__health || true)"
+            if [[ "$status" == "200" ]]; then
+              echo "CI_SUPABASE_STUB = READY"
+              exit 0
+            fi
+            sleep 0.1
+          done
+          cat /tmp/ci-supabase-stub.log || true
+          exit 1
+
+      - name: Next build
+        env:
+          # Public-shell CI has no live database. The local PostgREST stub
+          # returns healthy empty collections immediately, isolating frontend
+          # rendering/performance from external network or backend failure latency.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
+        run: npm run build
+
+      - name: HTTP smoke
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
+        run: npm run test:smoke
+
+      - name: Public browser E2E
+        run: npx playwright test --config=playwright.public.config.ts
+
+      - name: Lighthouse mobile performance gate
+        id: lighthouse
+        continue-on-error: true
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+          NEXT_PUBLIC_SITE_URL: https://preview.example.invalid
+        run: npx --yes @lhci/cli@0.15.1 autorun
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: artifacts/lighthouse
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Enforce Lighthouse result
+        if: steps.lighthouse.outcome == 'failure'
+        run: |
+          echo "Lighthouse assertions failed; reports were preserved as a workflow artifact."
+          exit 1

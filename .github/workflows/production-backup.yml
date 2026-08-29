@@ -1,0 +1,112 @@
+name: Production encrypted backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    # Scheduled workflows only run from the default branch. Keep manual runs on
+    # feature branches inert so development never touches Production.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout metadata
+        uses: actions/checkout@v4
+
+      - name: Setup pinned Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.115.0
+
+      - name: Verify backup secrets
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_DB_URL" || { echo "SUPABASE_DB_URL secret missing" >&2; exit 1; }
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE secret missing" >&2; exit 1; }
+          echo "BACKUP_SECRET_GATE = PASS"
+
+      - name: Create encrypted Supabase logical backup
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+          dir="centro-studi-${stamp}"
+          archive="${dir}.tar.gz"
+          encrypted="${archive}.gpg"
+          mkdir -p "$dir"
+
+          # Use Supabase CLI rather than raw pg_dump. The CLI applies the
+          # platform-specific filters required to avoid managed realtime/vault
+          # objects that are not portable with normal project privileges.
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$dir/roles.sql" --role-only
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$dir/schema.sql"
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$dir/data.sql" --use-copy --data-only \
+            -x "storage.buckets_vectors" \
+            -x "storage.vector_indexes"
+
+          for file in "$dir/roles.sql" "$dir/schema.sql" "$dir/data.sql"; do
+            test -s "$file" || { echo "Backup component empty: $file" >&2; exit 1; }
+          done
+          grep -Eq 'CREATE TABLE .*contents' "$dir/schema.sql" || {
+            echo "Backup preflight: public.contents DDL missing" >&2
+            exit 1
+          }
+          grep -Eq 'CREATE TABLE .*observatory_indicators' "$dir/schema.sql" || {
+            echo "Backup preflight: public.observatory_indicators DDL missing" >&2
+            exit 1
+          }
+          grep -Eq 'COPY .*languages' "$dir/data.sql" || {
+            echo "Backup preflight: public.languages data missing" >&2
+            exit 1
+          }
+
+          tar -czf "$archive" "$dir"
+          test -s "$archive"
+          tar -tzf "$archive" | grep -q '/roles.sql$'
+          tar -tzf "$archive" | grep -q '/schema.sql$'
+          tar -tzf "$archive" | grep -q '/data.sql$'
+
+          printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" \
+            | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --symmetric --cipher-algo AES256 --output "$encrypted" "$archive"
+
+          rm -rf "$dir" "$archive"
+          test -s "$encrypted"
+          sha256sum "$encrypted" > "${encrypted}.sha256"
+          printf '%s\n' "$encrypted" > backup-filename.txt
+          echo "BACKUP_SUPABASE_LOGICAL_EXPORT = PASS"
+          echo "BACKUP_ENCRYPTION = PASS"
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: centro-studi-encrypted-backup-${{ github.run_id }}
+          path: |
+            *.tar.gz.gpg
+            *.tar.gz.gpg.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Confirm plaintext removal
+        shell: bash
+        run: |
+          set -euo pipefail
+          if compgen -G '*.sql' >/dev/null || compgen -G '*.tar.gz' >/dev/null || compgen -G 'centro-studi-*' >/dev/null; then
+            echo "Plaintext backup material still present" >&2
+            ls -la
+            exit 1
+          fi
+          echo "BACKUP_PLAINTEXT_REMOVAL = PASS"

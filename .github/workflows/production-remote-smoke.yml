@@ -1,0 +1,95 @@
+name: Production Remote Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Exact HTTPS Production deployment URL to test"
+        required: true
+        type: string
+      approved_sha:
+        description: "Full 40-character Git SHA approved on main"
+        required: true
+        type: string
+      confirmation:
+        description: "Type SMOKE_PRODUCTION"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-remote-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preflight authorization and promoted ref
+        env:
+          APPROVED_SHA: ${{ inputs.approved_sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          if [[ "$CONFIRMATION" != "SMOKE_PRODUCTION" ]]; then
+            echo "Confirmation must be exactly SMOKE_PRODUCTION" >&2
+            exit 1
+          fi
+          if ! grep -Eq '^[0-9a-f]{40}$' <<<"$APPROVED_SHA"; then
+            echo "approved_sha must be a full lowercase 40-character Git SHA" >&2
+            exit 1
+          fi
+          if [[ "$APPROVED_SHA" != "$GITHUB_SHA" ]]; then
+            echo "approved_sha does not match the current main SHA ($GITHUB_SHA)" >&2
+            exit 1
+          fi
+
+          production_sha="$(git ls-remote --heads origin refs/heads/production | awk '{print $1}')"
+          if [[ -z "$production_sha" ]]; then
+            echo "production branch does not exist" >&2
+            exit 1
+          fi
+          if [[ "$production_sha" != "$APPROVED_SHA" ]]; then
+            echo "production has not been promoted to the approved main SHA" >&2
+            echo "production=$production_sha approved=$APPROVED_SHA" >&2
+            exit 1
+          fi
+          echo "PRODUCTION_SMOKE_PREFLIGHT = PASS"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Enforce GET-only smoke source
+        run: |
+          set -euo pipefail
+          checker="scripts/ci/remote-production-smoke.mjs"
+          test -f "$checker"
+          if grep -nEi 'method[[:space:]]*:[[:space:]]*["'"''](POST|PUT|PATCH|DELETE)["'"'']|\b(curl|wget)\b.*(-X|--request)[[:space:]]*(POST|PUT|PATCH|DELETE)|SUPABASE_SERVICE_ROLE_KEY' "$checker"; then
+            echo "Remote Production smoke must remain GET-only and service-role-free" >&2
+            exit 1
+          fi
+          echo "REMOTE_PRODUCTION_SMOKE_SAFETY = PASS"
+
+      - name: Run remote Production smoke
+        env:
+          PRODUCTION_SMOKE_TARGET: ${{ inputs.target_url }}
+          PRODUCTION_SMOKE_APPROVED_SHA: ${{ inputs.approved_sha }}
+        run: node scripts/ci/remote-production-smoke.mjs
+
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-remote-smoke-${{ inputs.approved_sha }}
+          path: artifacts/production-remote-smoke.json
+          if-no-files-found: warn
+          retention-days: 30

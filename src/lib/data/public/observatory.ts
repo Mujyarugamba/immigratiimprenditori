@@ -5,6 +5,14 @@ import {
   param,
   type PaginatedResult,
 } from "@/lib/data/public/paging";
+import { createPublicReadClient } from "@/lib/supabase/public-read";
+import {
+  fetchJoinedPublicIndicatorValues,
+  type PublicValueFilters,
+  type PublicValuePage,
+  type PublicValuePageInput,
+  type PublicValueStatus,
+} from "@/lib/data/public/public-values";
 
 const LIST_SELECT =
   "id, code, slug, title, description, value_nature, unit_code, periodicity";
@@ -164,4 +172,61 @@ export async function listHomeIndicators(limit = 3) {
     .limit(limit);
   if (error) throw new Error(error.message);
   return (data ?? []) as PublicIndicatorListItem[];
+}
+
+export type PublicIndicatorValueRecord = {
+  id: string;
+  indicator_id: string;
+  numeric_value: number;
+  methodology_note: string | null;
+  period_start: string;
+  period_end: string;
+  status: PublicValueStatus;
+  quality_code: string;
+  territory_level: string | null;
+  territory_code: string | null;
+  territory_label: string | null;
+  country_code: string | null;
+  country_label: string | null;
+  business_sector_id: number | null;
+};
+
+export type PublicIndicatorValuesResult = {
+  items: PublicIndicatorValueRecord[];
+} & PublicValuePage;
+
+export async function queryPublicIndicatorValues(
+  filters: PublicValueFilters = {},
+  page: PublicValuePageInput = {},
+): Promise<PublicIndicatorValuesResult> {
+  const { rows, page: resolved } = await fetchJoinedPublicIndicatorValues({
+    client: createPublicReadClient(),
+    filters,
+    page,
+    order: [
+      { column: "period_start", ascending: false },
+      { column: "territory_code", ascending: true },
+      { column: "id", ascending: true },
+    ],
+  });
+
+  return {
+    items: rows.map((row) => ({
+      id: row.id,
+      indicator_id: row.indicator_id,
+      numeric_value: Number(row.numeric_value),
+      methodology_note: row.methodology_note,
+      period_start: row.period_start,
+      period_end: row.period_end,
+      status: row.status,
+      quality_code: row.quality_code,
+      territory_level: row.territory_level,
+      territory_code: row.territory_code,
+      territory_label: row.territory_label,
+      country_code: row.country_code,
+      country_label: row.country_label,
+      business_sector_id: row.business_sector_id,
+    })),
+    ...resolved,
+  };
 }

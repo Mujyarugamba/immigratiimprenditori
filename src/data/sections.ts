@@ -5,21 +5,21 @@ export const sections: Record<string, SectionContent> = {
   eventi: {
     slug: "eventi",
     title: "Eventi",
-    description: "Scopri incontri, workshop e appuntamenti.",
-    emptyTitle: "Nessun evento in programma.",
+    description: "Incontri, convegni e appuntamenti pertinenti all’imprenditoria migrante.",
+    emptyTitle: "Nessun evento disponibile.",
   },
   "notizie-e-guide": {
     slug: "notizie-e-guide",
-    title: "Notizie e guide",
+    title: "Analisi e ricerche",
     description:
-      "Aggiornamenti, approfondimenti e materiali utili per orientarsi nel percorso imprenditoriale.",
-    emptyTitle: "Nessuna notizia o guida disponibile.",
+      "Rapporti, ricerche, approfondimenti e contenuti documentati sull’imprenditoria migrante.",
+    emptyTitle: "Nessuna analisi o ricerca disponibile.",
   },
   osservatorio: {
     slug: "osservatorio",
-    title: "Osservatorio",
+    title: "Ricerche e dati",
     description:
-      "Indicatori e dati per leggere l’imprenditoria di origine immigrata.",
+      "Indicatori, dati e serie storiche per leggere l’imprenditoria migrante con fonti e metodologia esplicite.",
     emptyTitle: "Nessun indicatore disponibile.",
   },
 };

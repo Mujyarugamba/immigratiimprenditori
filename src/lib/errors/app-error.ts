@@ -44,7 +44,48 @@ export function mapPostgresError(error: unknown): AppError {
 
   const msg = `${err?.message ?? ""} ${err?.details ?? ""}`.toLowerCase();
   const sqlstate = err?.code;
+
   // Prefer semantic message matches over generic SQLSTATE labels.
+  if (msg.includes("editorial_review_self_approval_forbidden")) {
+    return appError(
+      "forbidden",
+      "La seconda approvazione deve essere registrata da un altro redattore.",
+      { cause: err },
+    );
+  }
+  if (msg.includes("editorial_review_stale")) {
+    return appError(
+      "conflict",
+      "Il contenuto è cambiato dopo la richiesta di revisione. Richiedi una nuova seconda revisione.",
+      { cause: err },
+    );
+  }
+  if (
+    msg.includes("content_publication_requires_secondary_review") ||
+    msg.includes("observatory_publication_requires_secondary_review") ||
+    msg.includes("substantive_correction_requires_secondary_review")
+  ) {
+    return appError(
+      "forbidden",
+      "Serve una seconda approvazione valida prima della pubblicazione.",
+      { cause: err },
+    );
+  }
+  if (msg.includes("editorial_review_entity_not_found")) {
+    return appError("not_found", "Elemento da revisionare non trovato.", {
+      cause: err,
+    });
+  }
+  if (
+    msg.includes("editorial_review_transition_not_allowed") ||
+    msg.includes("editorial_review_request_is_immutable")
+  ) {
+    return appError(
+      "conflict",
+      "Lo stato della review non consente questa operazione.",
+      { cause: err },
+    );
+  }
   if (msg.includes("self-grant")) {
     return appError("forbidden", "Non puoi assegnarti la gestione.", {
       cause: err,

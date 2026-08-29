@@ -23,6 +23,14 @@ export function getPublicSupabaseEnv() {
   };
 }
 
+/** Server-only privileged key. Never expose through a NEXT_PUBLIC_ variable. */
+export function getSupabaseServiceRoleKey(): string {
+  return required(
+    "SUPABASE_SERVICE_ROLE_KEY",
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
+}
+
 /** Public site origin for redirects/metadata. Optional; defaults to localhost in dev. */
 export function getSiteUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();

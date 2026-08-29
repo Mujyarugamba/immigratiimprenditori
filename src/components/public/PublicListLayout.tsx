@@ -41,50 +41,52 @@ export function PublicListLayout<T>({
   banner,
 }: PublicListLayoutProps<T>) {
   return (
-    <Section>
-      <Container>
-        <PublicPageHeader title={title} description={description} />
-        {banner}
-        {filters.length > 0 ? (
-          <PublicFilters
-            action={basePath}
-            fields={filters}
-            values={filterValues}
-          />
-        ) : null}
-
-        {result.total === 0 ? (
-          <PublicEmpty title={emptyTitle} description={emptyDescription} />
-        ) : (
-          <>
-            <p className="text-ink-muted mt-6 text-sm">
-              {result.total} risultat{result.total === 1 ? "o" : "i"}
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {result.items.map((item, index) => {
-                const card = mapItem(item);
-                return (
-                  <PublicResultCard
-                    key={`${card.href}-${index}`}
-                    href={card.href}
-                    title={card.title}
-                    description={card.description}
-                    meta={card.meta}
-                    badges={card.badges}
-                  />
-                );
-              })}
-            </div>
-            <PublicPagination
-              basePath={basePath}
-              page={result.page}
-              pageCount={result.pageCount}
-              total={result.total}
-              filters={filterValues}
+    <main>
+      <Section>
+        <Container>
+          <PublicPageHeader title={title} description={description} />
+          {banner}
+          {filters.length > 0 ? (
+            <PublicFilters
+              action={basePath}
+              fields={filters}
+              values={filterValues}
             />
-          </>
-        )}
-      </Container>
-    </Section>
+          ) : null}
+
+          {result.total === 0 ? (
+            <PublicEmpty title={emptyTitle} description={emptyDescription} />
+          ) : (
+            <>
+              <p className="text-ink-muted mt-6 text-sm">
+                {result.total} risultat{result.total === 1 ? "o" : "i"}
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {result.items.map((item, index) => {
+                  const card = mapItem(item);
+                  return (
+                    <PublicResultCard
+                      key={`${card.href}-${index}`}
+                      href={card.href}
+                      title={card.title}
+                      description={card.description}
+                      meta={card.meta}
+                      badges={card.badges}
+                    />
+                  );
+                })}
+              </div>
+              <PublicPagination
+                basePath={basePath}
+                page={result.page}
+                pageCount={result.pageCount}
+                total={result.total}
+                filters={filterValues}
+              />
+            </>
+          )}
+        </Container>
+      </Section>
+    </main>
   );
 }

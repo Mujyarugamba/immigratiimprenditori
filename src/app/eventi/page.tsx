@@ -18,6 +18,7 @@ const section = sections.eventi;
 export const metadata: Metadata = {
   title: section.title,
   description: section.description,
+  alternates: { canonical: "/eventi" },
 };
 
 type PageProps = {
