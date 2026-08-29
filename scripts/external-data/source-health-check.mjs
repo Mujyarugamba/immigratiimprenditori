@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const MAX_REDIRECTS = 5;
 const REQUEST_TIMEOUT_MS = 15000;
+const BOT_RESTRICTED_HOSTS = new Set(["www.oecd.org"]);
 
 function required(name) {
   const value = process.env[name]?.trim();
@@ -77,6 +78,20 @@ function parsePublicHttpUrl(raw) {
   } catch {
     return null;
   }
+}
+
+function classifyHttpResponse(rawUrl, status) {
+  if (status >= 200 && status < 400) return "ok";
+  try {
+    const host = normalizedHostname(new URL(rawUrl));
+    // OECD currently returns 403 to GitHub-hosted automated probes while the
+    // public article remains browser-accessible. Keep that visible as a warning
+    // instead of misclassifying the source as broken. Other 403s still fail.
+    if (status === 403 && BOT_RESTRICTED_HOSTS.has(host)) return "access_restricted";
+  } catch {
+    // Invalid URLs are handled before network requests; fall through safely.
+  }
+  return "http_error";
 }
 
 async function resolvePublicDestination(url) {
@@ -188,10 +203,9 @@ async function checkSource(source) {
     if ([403, 405, 406].includes(response.status)) {
       response = await requestWithSafeRedirects(url, "GET");
     }
-    const ok = response.status >= 200 && response.status < 400;
     return {
       ...source,
-      status: ok ? "ok" : "http_error",
+      status: classifyHttpResponse(response.url, response.status),
       http_status: response.status,
       final_url: response.url,
       checked_at: new Date().toISOString(),
@@ -243,14 +257,24 @@ async function main() {
     checked_at: new Date().toISOString(),
     total: results.length,
     ok: results.filter((item) => item.status === "ok").length,
-    issues: results.filter((item) => item.status !== "ok").length,
+    warnings: results.filter((item) => item.status === "access_restricted").length,
+    issues: results.filter(
+      (item) => item.status !== "ok" && item.status !== "access_restricted",
+    ).length,
     results,
   };
 
   await mkdir("artifacts", { recursive: true });
   await writeFile("artifacts/source-health.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
 
-  console.log(JSON.stringify({ total: summary.total, ok: summary.ok, issues: summary.issues }));
+  console.log(
+    JSON.stringify({
+      total: summary.total,
+      ok: summary.ok,
+      warnings: summary.warnings,
+      issues: summary.issues,
+    }),
+  );
   for (const item of results.filter((row) => row.status !== "ok")) {
     console.warn(`[source-health] ${item.status} ${item.http_status ?? "-"} ${item.name} ${item.url}`);
   }
@@ -259,7 +283,7 @@ async function main() {
     const lines = [
       "## Observatory source health",
       "",
-      `Checked: **${summary.total}** · OK: **${summary.ok}** · Issues: **${summary.issues}**`,
+      `Checked: **${summary.total}** · OK: **${summary.ok}** · Warnings: **${summary.warnings}** · Issues: **${summary.issues}**`,
       "",
     ];
     for (const item of results.filter((row) => row.status !== "ok")) {
@@ -285,6 +309,10 @@ function selfTest() {
   assert.equal(isPrivateAddress("fc00::1"), true);
   assert.equal(isPrivateAddress("2001:db8::1"), true);
   assert.equal(isPrivateAddress("2001:4860:4860::8888"), false);
+  assert.equal(classifyHttpResponse("https://example.com/report", 200), "ok");
+  assert.equal(classifyHttpResponse("https://www.oecd.org/report", 403), "access_restricted");
+  assert.equal(classifyHttpResponse("https://example.com/report", 403), "http_error");
+  assert.equal(classifyHttpResponse("https://example.com/report", 404), "http_error");
 
   const pinned = pinnedLookup({ address: "8.8.8.8", family: 4 });
   pinned("example.com", {}, (error, address, family) => {
