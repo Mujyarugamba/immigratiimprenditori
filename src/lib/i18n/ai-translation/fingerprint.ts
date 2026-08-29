@@ -1,3 +1,4 @@
+import { stripContentsAcquisitionTrailer } from "@/lib/contents/strip-acquisition-trailer";
 import { checksumSha256 } from "@/lib/external-data/checksum";
 
 export type EditorialFingerprintSource = {
@@ -17,7 +18,7 @@ export function editorialContentFingerprint(source: EditorialFingerprintSource):
     title: source.title,
     subtitle: source.subtitle ?? null,
     abstract: source.abstract ?? null,
-    body: source.body,
+    body: stripContentsAcquisitionTrailer(source.body),
     body_format: source.body_format,
   });
 }
