@@ -2,6 +2,12 @@ name: Observatory Source Health
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/source-health-weekly.yml"
+      - "scripts/external-data/source-health-check.mjs"
   schedule:
     - cron: "15 5 * * 1"
 
@@ -9,13 +15,18 @@ permissions:
   contents: read
 
 concurrency:
-  group: observatory-source-health
+  group: observatory-source-health-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
   source-health:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # Both values are public client configuration by design. The checker is
+      # strictly read-only and uses only the Supabase publishable key + RLS.
+      NEXT_PUBLIC_SUPABASE_URL: https://hvfvfatlaspcpszgizhg.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_vYjxOWDvWC3UpipM_Qsm4g_2bpM_bER
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,9 +43,6 @@ jobs:
       - name: Check Observatory source URLs
         id: source_health
         continue-on-error: true
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
         run: node scripts/external-data/source-health-check.mjs
 
       - name: Upload health report
