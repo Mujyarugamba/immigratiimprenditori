@@ -249,7 +249,10 @@ test("all seven platform languages expose the correct document direction", async
   );
 });
 
-test("go-live core interface renders across all seven platform languages", async ({ request }) => {
+test("go-live core interface renders across all seven platform languages", async ({
+  request,
+  page,
+}) => {
   for (const [locale, , direction] of localizedHomes) {
     for (const corePath of goLiveLocalizedCorePaths) {
       const path = locale === "it" ? corePath : `/${locale}${corePath}`;
@@ -283,18 +286,30 @@ test("go-live core interface renders across all seven platform languages", async
           `${path} must expose a localized Fonti → Metodologia link`,
         ).toBeTruthy();
       }
-
-      if (locale === "ar" && corePath === "/chi-siamo") {
-        expect(body.includes("استكشف ←"), `${path} Arabic CTA must use an RTL arrow`).toBeTruthy();
-        expect(body.includes("استكشف →"), `${path} Arabic CTA must not keep an LTR arrow`).toBeFalsy();
-      }
-
-      if (locale === "en" && corePath === "/chi-siamo") {
-        expect(body.includes("Explore →"), `${path} English CTA must keep a forward arrow`).toBeTruthy();
-        expect(body.includes("Explore ←"), `${path} English CTA must not mirror the arrow`).toBeFalsy();
-      }
     }
   }
+
+  // React SSR may insert comments between `{label} {arrow}`; assert the
+  // accessible name of the in-page CTA, not a contiguous raw-HTML substring.
+  await page.goto("/en/chi-siamo", { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("link", { name: "Explore →", exact: true }),
+    "/en/chi-siamo English CTA must keep a forward arrow",
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Explore ←", exact: true }),
+    "/en/chi-siamo English CTA must not mirror the arrow",
+  ).toHaveCount(0);
+
+  await page.goto("/ar/chi-siamo", { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("link", { name: "استكشف ←", exact: true }),
+    "/ar/chi-siamo Arabic CTA must use an RTL arrow",
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "استكشف →", exact: true }),
+    "/ar/chi-siamo Arabic CTA must not keep an LTR arrow",
+  ).toHaveCount(0);
 });
 
 test("localized homes publish canonical and hreflang metadata", async ({ page }) => {
