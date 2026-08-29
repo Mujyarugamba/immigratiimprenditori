@@ -44,8 +44,24 @@ language plpgsql
 set search_path = public
 as $$
 declare
+  v_content_language_id bigint;
   v_source_code text;
 begin
+  select language_id
+    into v_content_language_id
+  from public.contents
+  where id = new.content_id;
+
+  if v_content_language_id is null then
+    raise exception 'CONTENT_AI_TRANSLATION_UNKNOWN_CONTENT'
+      using errcode = '23514';
+  end if;
+
+  if new.source_language_id <> v_content_language_id then
+    raise exception 'CONTENT_AI_TRANSLATION_SOURCE_LANGUAGE_MISMATCH'
+      using errcode = '23514';
+  end if;
+
   select code
     into v_source_code
   from public.languages
@@ -73,7 +89,7 @@ comment on table public.content_ai_translations is
   'Cached OpenAI translations of already-public editorial contents. Original contents rows are never overwritten. Anon/authenticated may SELECT only when the source content is public; writes are service-role only.';
 
 comment on function public.enforce_content_ai_translation_locale() is
-  'Rejects AI translation rows whose target_locale matches the catalog language of the original content.';
+  'Rejects AI translation rows whose source_language_id differs from the source content language or whose target_locale matches that source language.';
 
 alter table public.content_ai_translations enable row level security;
 
