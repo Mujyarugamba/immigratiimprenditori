@@ -1,22 +1,23 @@
-import { describe, expect, it } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import {
   canCreateContentDraftFromInbox,
   suggestedContentTypeForInboxKind,
-} from "@/lib/editorial/inbox-draft";
+} from "./inbox-draft";
 
 describe("inbox draft routing", () => {
   it("maps editorial source kinds to valid content types", () => {
-    expect(suggestedContentTypeForInboxKind("report")).toBe("research_report");
-    expect(suggestedContentTypeForInboxKind("academic_paper")).toBe("research_report");
-    expect(suggestedContentTypeForInboxKind("policy")).toBe("policy_brief");
-    expect(suggestedContentTypeForInboxKind("story_tip")).toBe("business_story");
-    expect(suggestedContentTypeForInboxKind("interview_proposal")).toBe("interview");
+    assert.equal(suggestedContentTypeForInboxKind("report"), "research_report");
+    assert.equal(suggestedContentTypeForInboxKind("academic_paper"), "research_report");
+    assert.equal(suggestedContentTypeForInboxKind("policy"), "policy_brief");
+    assert.equal(suggestedContentTypeForInboxKind("story_tip"), "business_story");
+    assert.equal(suggestedContentTypeForInboxKind("interview_proposal"), "interview");
   });
 
   it("keeps Observatory and event arrivals out of the content-draft shortcut", () => {
-    expect(canCreateContentDraftFromInbox("dataset")).toBe(false);
-    expect(canCreateContentDraftFromInbox("statistical_release")).toBe(false);
-    expect(canCreateContentDraftFromInbox("event")).toBe(false);
-    expect(suggestedContentTypeForInboxKind("event")).toBeNull();
+    assert.equal(canCreateContentDraftFromInbox("dataset"), false);
+    assert.equal(canCreateContentDraftFromInbox("statistical_release"), false);
+    assert.equal(canCreateContentDraftFromInbox("event"), false);
+    assert.equal(suggestedContentTypeForInboxKind("event"), null);
   });
 });
