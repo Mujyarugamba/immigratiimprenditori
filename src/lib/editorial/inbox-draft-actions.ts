@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getDefaultLanguageId } from "@/lib/data/editorial/catalogs";
 import { createEditorialContent } from "@/lib/data/editorial/contents";
 import type { FormActionState } from "@/lib/editorial/actions";
+import { canCreateContentDraftFromInbox } from "@/lib/editorial/inbox-draft";
 import { slugify } from "@/lib/editorial/slug";
 import { toUserMessage } from "@/lib/errors/app-error";
 import { getApplicationSession } from "@/lib/session/get-application-session";
@@ -40,7 +41,7 @@ export async function createEditorialContentFromInboxAction(
   const supabase = await createClient();
   const { data: inbox, error: inboxError } = await supabase
     .from("editorial_inbox_items")
-    .select("id, linked_content_id, original_url, source_label")
+    .select("id, item_kind, status, linked_content_id, linked_event_id, original_url, source_label")
     .eq("id", inboxId)
     .maybeSingle();
 
@@ -49,6 +50,12 @@ export async function createEditorialContentFromInboxAction(
   }
   if (inbox.linked_content_id) {
     redirect(`/app/redazione/contenuti/${inbox.linked_content_id}`);
+  }
+  if (inbox.linked_event_id || !canCreateContentDraftFromInbox(inbox.item_kind)) {
+    return { ok: false, message: "Questo arrivo segue un workflow diverso dai contenuti editoriali." };
+  }
+  if (inbox.status === "rejected" || inbox.status === "archived") {
+    return { ok: false, message: "Un arrivo scartato o archiviato non può generare una bozza." };
   }
 
   const title = str(formData, "title");
@@ -101,7 +108,7 @@ export async function createEditorialContentFromInboxAction(
     };
   }
 
-  const { error: linkError } = await supabase
+  const { data: linked, error: linkError } = await supabase
     .from("editorial_inbox_items")
     .update({
       linked_content_id: result.id,
@@ -109,9 +116,11 @@ export async function createEditorialContentFromInboxAction(
       reviewed_at: new Date().toISOString(),
     })
     .eq("id", inboxId)
-    .is("linked_content_id", null);
+    .is("linked_content_id", null)
+    .select("id")
+    .maybeSingle();
 
-  if (linkError) {
+  if (linkError || !linked) {
     return {
       ok: false,
       message: `Bozza ${result.id} creata, ma il collegamento con l'Inbox non è riuscito.`,
