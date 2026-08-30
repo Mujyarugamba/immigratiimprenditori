@@ -10,6 +10,7 @@ import { contentQualifiesForCultureHub } from "@/lib/data/public/culture";
 import { relatedForContent } from "@/lib/data/public/related";
 import { absoluteUrl } from "@/lib/i18n/seo";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -101,11 +102,17 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
     },
     isAccessibleForFree: true,
   };
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Analisi e ricerche", path: "/contenuti" },
+    { name: content.title, path: `/contenuti/${content.slug}` },
+  ]);
 
   return (
     <Section>
       <Container className="max-w-3xl space-y-8">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/contenuti" className="text-brand hover:text-brand-dark text-sm font-medium">

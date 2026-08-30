@@ -12,6 +12,7 @@ import {
   label,
 } from "@/lib/public/labels";
 import { observatoryDatasetStructuredData } from "@/lib/seo/observatory-dataset";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -72,6 +73,11 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
     ),
   ];
   const datasetSchema = observatoryDatasetStructuredData(indicator);
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Osservatorio", path: "/osservatorio" },
+    { name: indicator.title, path: `/osservatorio/${indicator.slug}` },
+  ]);
 
   return (
     <Section>
@@ -79,6 +85,10 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
         />
 
         <Link

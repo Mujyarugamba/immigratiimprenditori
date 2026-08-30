@@ -17,6 +17,7 @@ import {
   formatItalianDateTime,
   label,
 } from "@/lib/public/labels";
+import { breadcrumbStructuredData, schemaEventStatus } from "@/lib/seo/structured-data";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -128,7 +129,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
         description: event.summary ?? event.description,
         startDate: calendarEdition.starts_at,
         endDate: calendarEdition.ends_at ?? undefined,
-        eventStatus: "https://schema.org/EventScheduled",
+        eventStatus: schemaEventStatus(calendarEdition.occurrence_status),
         eventAttendanceMode:
           calendarEdition.delivery_mode === "online"
             ? "https://schema.org/OnlineEventAttendanceMode"
@@ -152,6 +153,11 @@ export default async function EventoDetailPage({ params }: PageProps) {
         url: absoluteUrl(`/eventi/${event.id}`),
       }
     : null;
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Eventi", path: "/eventi" },
+    { name: event.title, path: `/eventi/${event.id}` },
+  ]);
 
   return (
     <Section>
@@ -159,6 +165,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
         {structuredData ? (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
         ) : null}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/eventi" className="text-brand hover:text-brand-dark text-sm font-medium">
