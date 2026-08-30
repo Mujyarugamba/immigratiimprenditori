@@ -1,0 +1,49 @@
+name: Live post-live probe
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/ci/live-post-live-probe.mjs"
+      - ".github/workflows/live-post-live-probe.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Enforce live probe scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe="scripts/ci/live-post-live-probe.mjs"
+          test -f "$probe"
+          if grep -n --fixed-strings 'SUPABASE_SERVICE_ROLE_KEY' "$probe"; then
+            echo "Live post-live probe must not receive privileged database credentials" >&2
+            exit 1
+          fi
+          if grep -nE '\b(DELETE|PUT|PATCH)\b|method[[:space:]]*:[[:space:]]*["'"''](DELETE|PUT|PATCH)["'"'']' "$probe"; then
+            echo "Live post-live probe contains a forbidden mutation method" >&2
+            exit 1
+          fi
+
+      - name: Run live post-live probe
+        env:
+          POST_LIVE_TARGET: https://www.immigratiimprenditori.it
+        run: node scripts/ci/live-post-live-probe.mjs
