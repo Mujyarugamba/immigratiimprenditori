@@ -5,6 +5,7 @@ const baseURL = "http://127.0.0.1:3000";
 export default defineConfig({
   testDir: "e2e",
   testMatch: [
+    "contribution-form.spec.ts",
     "editorial.spec.ts",
     "go-live-local.spec.ts",
     "internal-links.spec.ts",
