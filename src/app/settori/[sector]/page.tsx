@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getSectorDetail } from "@/lib/data/public/sectors";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 type PageProps = {
   params: Promise<{ sector: string }>;
