@@ -20,6 +20,7 @@ type InitialValues = {
   title: string;
   abstract: string | null;
   typeCode: string | null;
+  categoryCode: string | null;
   sourceLabel: string | null;
   sourceUrl: string | null;
 };
@@ -48,6 +49,10 @@ export function EditorialContentCreateForm({
     initialValues?.typeCode && contentTypes.some((item) => item.code === initialValues.typeCode)
       ? initialValues.typeCode
       : "";
+  const suggestedCategory =
+    initialValues?.categoryCode && categories.some((item) => item.code === initialValues.categoryCode)
+      ? initialValues.categoryCode
+      : "";
 
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
@@ -59,7 +64,7 @@ export function EditorialContentCreateForm({
         <div className="border-line bg-surface-elevated border p-4 text-sm">
           <p className="text-ink font-semibold">Bozza da Inbox redazionale</p>
           <p className="text-ink-muted mt-1">
-            Titolo, abstract e fonte sono precompilati dall’arrivo. Il corpo resta da redigere prima della creazione della bozza.
+            Titolo, abstract e fonte sono precompilati dall’arrivo. Tipo e categoria sono soltanto suggerimenti modificabili. Il corpo resta da redigere prima della creazione della bozza.
           </p>
           {initialValues.sourceLabel ? (
             <p className="text-ink-muted mt-2">Fonte: {initialValues.sourceLabel}</p>
@@ -142,7 +147,7 @@ export function EditorialContentCreateForm({
           name="primary_category_code"
           disabled={pending}
           className={selectClass}
-          defaultValue=""
+          defaultValue={suggestedCategory}
         >
           <option value="">— Nessuna —</option>
           {categories.map((c) => (
