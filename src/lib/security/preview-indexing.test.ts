@@ -66,7 +66,7 @@ test("explicit read-only flag keeps a Vercel production-like Preview project noi
   assert.equal(result.host, undefined);
 });
 
-test("Netlify production keeps public crawl rules and sitemaps", () => {
+test("Netlify production keeps public crawl rules and active sitemap", () => {
   process.env.NETLIFY = "true";
   process.env.CONTEXT = "production";
   delete process.env.VERCEL;
@@ -83,7 +83,6 @@ test("Netlify production keeps public crawl rules and sitemaps", () => {
   ]);
   assert.deepEqual(result.sitemap, [
     "https://www.immigratiimprenditori.it/sitemap.xml",
-    "https://www.immigratiimprenditori.it/sitemap-contributors.xml",
   ]);
   assert.equal(result.host, "https://www.immigratiimprenditori.it");
 });
