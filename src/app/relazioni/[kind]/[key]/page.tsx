@@ -7,6 +7,8 @@ import {
   type KnowledgeConnection,
   type KnowledgePredicate,
 } from "@/lib/data/public/knowledge";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 type Props = {
   params: Promise<{ kind: string; key: string }>;
@@ -46,10 +48,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kind, key } = await params;
   const neighborhood = await getPublicKnowledgeNeighborhood(kind, key);
   if (!neighborhood) return { title: "Relazione non trovata | Centro Studi" };
+  const title = `${neighborhood.node.label} — Relazioni | Centro Studi`;
+  const description = `Relazioni pubbliche e verificabili collegate a ${neighborhood.node.label} nel Knowledge Graph di Immigrati Imprenditori.`;
+  const canonical = `/relazioni/${kind}/${encodeURIComponent(key)}`;
   return {
-    title: `${neighborhood.node.label} — Relazioni | Centro Studi`,
-    description: `Relazioni pubbliche e verificabili collegate a ${neighborhood.node.label} nel Knowledge Graph di Immigrati Imprenditori.`,
-    alternates: { canonical: `/relazioni/${kind}/${encodeURIComponent(key)}` },
+    title,
+    description,
+    alternates: { canonical },
+    ...pageSocialMetadata({ title, description, pathname: canonical }),
   };
 }
 
@@ -62,9 +68,21 @@ export default async function RelationalEntityPage({ params }: Props) {
   for (const connection of neighborhood.connections) {
     counts.set(connection.node.kind, (counts.get(connection.node.kind) ?? 0) + 1);
   }
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Relazioni", path: "/relazioni" },
+    {
+      name: neighborhood.node.label,
+      path: `/relazioni/${kind}/${encodeURIComponent(key)}`,
+    },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <nav className="text-sm text-neutral-600" aria-label="Percorso">
         <Link href="/relazioni" className="underline underline-offset-4">Relazioni</Link>
         <span aria-hidden="true"> / </span>
@@ -93,7 +111,7 @@ export default async function RelationalEntityPage({ params }: Props) {
         </div>
         {Array.from(counts.entries()).slice(0, 3).map(([relatedKind, count]) => (
           <div key={relatedKind} className="bg-white p-5">
-            <p className="text-xs uppercase tracking-[0.12em] text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
               {KIND_LABELS[relatedKind] ?? relatedKind}
             </p>
             <strong className="mt-2 block text-3xl text-black">{count}</strong>

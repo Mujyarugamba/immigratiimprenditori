@@ -1,24 +1,42 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const routes = await listPublishedRouteSummaries().catch(() => []);
   const hasRoutes = routes.length > 0;
+  const title = "Rotte imprenditoriali | Atlante";
+  const description =
+    "Rotte origine-destinazione documentate con dati, analisi, storie o eventi verificati dal Centro Studi Immigrati Imprenditori.";
   return {
-    title: "Rotte imprenditoriali | Atlante",
-    description:
-      "Rotte origine-destinazione documentate con dati, analisi, storie o eventi verificati dal Centro Studi Immigrati Imprenditori.",
+    title,
+    description,
     alternates: { canonical: "/atlante/rotte" },
     robots: hasRoutes ? { index: true, follow: true } : { index: false, follow: true },
+    ...pageSocialMetadata({
+      title,
+      description,
+      pathname: "/atlante/rotte",
+    }),
   };
 }
 
 export default async function AtlasRoutesPage() {
   const routes = await listPublishedRouteSummaries();
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Atlante", path: "/atlante" },
+    { name: "Rotte imprenditoriali", path: "/atlante/rotte" },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="mb-6">
         <Link href="/atlante" className="text-sm font-semibold underline underline-offset-4">
           ← Torna all&apos;Atlante
