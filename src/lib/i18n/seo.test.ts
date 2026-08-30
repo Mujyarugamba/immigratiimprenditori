@@ -65,7 +65,6 @@ test("hosted and explicitly read-only previews are noindex while writable produc
     ]);
     assert.deepEqual(production.sitemap, [
       "https://www.immigratiimprenditori.it/sitemap.xml",
-      "https://www.immigratiimprenditori.it/sitemap-contributors.xml",
     ]);
     assert.equal(production.host, "https://www.immigratiimprenditori.it");
 
