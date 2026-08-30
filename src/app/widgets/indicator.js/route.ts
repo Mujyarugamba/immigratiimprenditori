@@ -1,6 +1,8 @@
+import { SITE_URL } from "@/lib/i18n/seo";
+
 const SCRIPT = String.raw`(() => {
-  const API_BASE = "https://immigratiimprenditori.it/api/v1/indicators";
-  const SITE_BASE = "https://immigratiimprenditori.it";
+  const API_BASE = "${SITE_URL}/api/v1/indicators";
+  const SITE_BASE = "${SITE_URL}";
 
   const formatValue = (value, unit) => {
     const number = new Intl.NumberFormat(document.documentElement.lang || "it-IT", {
