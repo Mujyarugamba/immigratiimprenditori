@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { listAtlasCountrySummaries } from "@/lib/data/public/atlas";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export async function GET() {
           content_count: item.contentCount,
           event_count: item.eventCount,
         },
-        url: `https://immigratiimprenditori.it/atlante/${item.country.slug}`,
+        url: absoluteUrl(`/atlante/${item.country.slug}`),
       }));
 
     return NextResponse.json(
