@@ -1,4 +1,5 @@
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 function risLine(tag: string, value: string | null | undefined) {
   if (!value) return "";
@@ -18,7 +19,7 @@ export async function GET(
     .filter((value): value is string => Boolean(value));
   const published = content.published_at ? new Date(content.published_at) : null;
   const year = published ? String(published.getFullYear()) : "2026";
-  const url = `https://immigratiimprenditori.it/contenuti/${content.slug}`;
+  const url = absoluteUrl(`/contenuti/${content.slug}`);
   const reportLike = ["report", "research_report", "policy_brief", "working_paper", "dossier"].includes(
     content.type_code,
   );
