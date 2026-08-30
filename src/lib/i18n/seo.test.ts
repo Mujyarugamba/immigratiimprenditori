@@ -2,7 +2,18 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import robots from "../../app/robots";
 import { localizedHref } from "./navigation";
-import { absoluteLocalizedUrl, languageAlternates } from "./seo";
+import { absoluteLocalizedUrl, absoluteUrl, languageAlternates } from "./seo";
+
+test("canonical absolute URLs always use the final www origin", () => {
+  assert.equal(
+    absoluteUrl("/contenuti/example"),
+    "https://www.immigratiimprenditori.it/contenuti/example",
+  );
+  assert.equal(
+    absoluteUrl("eventi/example"),
+    "https://www.immigratiimprenditori.it/eventi/example",
+  );
+});
 
 test("localized SEO URLs keep Italian unprefixed and expose seven-language alternates", () => {
   assert.equal(
