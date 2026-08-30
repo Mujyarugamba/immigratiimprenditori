@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import robots from "../../app/robots";
+import { localizedHref } from "./navigation";
 import { absoluteLocalizedUrl, languageAlternates } from "./seo";
 
 test("localized SEO URLs keep Italian unprefixed and expose seven-language alternates", () => {
@@ -28,6 +29,18 @@ test("localized SEO URLs keep Italian unprefixed and expose seven-language alter
   assert.equal(alternates.en, "https://www.immigratiimprenditori.it/en/fonti");
   assert.equal(alternates.ar, "https://www.immigratiimprenditori.it/ar/fonti");
   assert.equal(alternates["x-default"], "https://www.immigratiimprenditori.it/fonti");
+});
+
+test("culture is a first-class localized route with hreflang alternates", () => {
+  assert.equal(localizedHref("it", "/cultura"), "/cultura");
+  assert.equal(localizedHref("en", "/cultura"), "/en/cultura");
+  assert.equal(localizedHref("fr", "/cultura"), "/fr/cultura");
+
+  const alternates = languageAlternates("/cultura");
+  assert.equal(alternates.it, "https://www.immigratiimprenditori.it/cultura");
+  assert.equal(alternates.en, "https://www.immigratiimprenditori.it/en/cultura");
+  assert.equal(alternates.zh, "https://www.immigratiimprenditori.it/zh/cultura");
+  assert.equal(alternates["x-default"], "https://www.immigratiimprenditori.it/cultura");
 });
 
 test("hosted and explicitly read-only previews are noindex while writable production is crawlable", () => {
