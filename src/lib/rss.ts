@@ -1,4 +1,4 @@
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 export type RssItem = {
   title: string;
