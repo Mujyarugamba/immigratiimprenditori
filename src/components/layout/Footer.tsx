@@ -47,6 +47,7 @@ export function Footer() {
         <div>
           <h2>{m.footerCenter}</h2>
           <Link href={localizedHref(locale, "/contenuti")}>{m.analysis}</Link>
+          <Link href={localizedHref(locale, "/cultura")}>{m.culture}</Link>
           <Link href={localizedHref(locale, "/ricerca")}>{collections.researchTitle}</Link>
           {locale === "it" ? <Link href="/pubblicazioni">Pubblicazioni</Link> : null}
           {locale === "it" ? <Link href="/bibliografia">Bibliografia</Link> : null}
