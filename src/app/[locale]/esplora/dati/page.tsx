@@ -5,6 +5,7 @@ import { formatExplorerValue, getExplorerSnapshot } from "@/lib/data/public/expl
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const text = {
   en: { kicker: "Observatory · Explore", title: "Data Explorer", intro: "Filter values already published by the Research Centre. Definitions and comparability depend on each indicator page; values from different indicators must not be added automatically.", indicator: "Indicator", territory: "Territory", year: "Year", all: "All", filter: "Filter", reset: "Reset", values: "Values", results: "results", category: "Group / category", period: "Period", value: "Value", quality: "Quality", none: "No values match the selected filters.", note: "The Data Explorer does not replace the methodological record. Citizenship, place of birth, foreign enterprise and self-employment describe different statistical populations." },
@@ -21,7 +22,16 @@ export async function generateMetadata({ params }: Pick<Props, "params">): Promi
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = text[locale];
-  return { title: m.title, description: m.intro, alternates: { canonical: `/${locale}/esplora/dati`, languages: languageAlternates("/esplora/dati") } };
+  return {
+    title: m.title,
+    description: m.intro,
+    alternates: { canonical: `/${locale}/esplora/dati`, languages: languageAlternates("/esplora/dati") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/esplora/dati`,
+    }),
+  };
 }
 
 export default async function LocalizedDataExplorerPage({ params, searchParams }: Props) {
