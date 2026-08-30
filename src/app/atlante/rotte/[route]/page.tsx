@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getRouteDetail } from "@/lib/data/public/routes";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonical = `/atlante/rotte/${detail.route.slug}`;
   const title = `${detail.route.origin.name} → ${detail.route.destination.name} | Atlante`;
   const description = `Dati e contenuti verificati sulla rotta imprenditoriale ${detail.route.origin.name} → ${detail.route.destination.name}.`;
+  const social = pageSocialMetadata({ title, description, pathname: canonical });
 
   return {
     title,
@@ -32,6 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
     },
+    twitter: social.twitter,
   };
 }
 

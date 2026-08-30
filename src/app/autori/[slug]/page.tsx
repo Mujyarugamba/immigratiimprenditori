@@ -5,6 +5,7 @@ import {
   getPublicAuthorProfile,
   listPublicAuthorContents,
 } from "@/lib/data/public/authors";
+import { profileSocialMetadata } from "@/lib/seo/social-metadata";
 import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
@@ -28,11 +29,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const canonical = `/autori/${profile.slug}`;
+  const description =
+    profile.bio ??
+    `Profilo autore di ${profile.display_name} nel Centro Studi Immigrati Imprenditori.`;
+  const social = profileSocialMetadata({
+    title: profile.display_name,
+    description,
+    pathname: canonical,
+  });
   return {
     title: `${profile.display_name} | Autori`,
-    description:
-      profile.bio ??
-      `Profilo autore di ${profile.display_name} nel Centro Studi Immigrati Imprenditori.`,
+    description,
     alternates: { canonical },
     openGraph: {
       type: "profile",
@@ -40,6 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: profile.display_name,
       description: profile.bio ?? undefined,
     },
+    twitter: social.twitter,
   };
 }
 

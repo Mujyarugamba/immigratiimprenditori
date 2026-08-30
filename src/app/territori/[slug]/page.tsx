@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTerritoryDetail } from "@/lib/data/public/territories";
 import { formatExplorerValue } from "@/lib/data/public/explore";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -24,10 +25,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const canonical = `/territori/${detail.territory.slug}`;
+  const title = `${detail.territory.name} | Territori`;
+  const description = `Dati, analisi, storie ed eventi disponibili per ${detail.territory.name} nel Centro Studi Immigrati Imprenditori.`;
   return {
-    title: `${detail.territory.name} | Territori`,
-    description: `Dati, analisi, storie ed eventi disponibili per ${detail.territory.name} nel Centro Studi Immigrati Imprenditori.`,
+    title,
+    description,
     alternates: { canonical },
+    ...pageSocialMetadata({ title, description, pathname: canonical }),
   };
 }
 

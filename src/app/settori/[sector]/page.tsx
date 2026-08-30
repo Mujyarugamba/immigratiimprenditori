@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getSectorDetail } from "@/lib/data/public/sectors";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
@@ -19,6 +20,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   const canonical = `/settori/${detail.sector.slug}`;
   const description = `Indicatori e dati verificati disponibili per il settore ${detail.sector.name} nel Centro Studi Immigrati Imprenditori.`;
+  const social = pageSocialMetadata({
+    title: `${detail.sector.name} | Immigrati Imprenditori`,
+    description,
+    pathname: canonical,
+  });
   return {
     title: `${detail.sector.name} | Settori`,
     description,
@@ -29,6 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${detail.sector.name} | Immigrati Imprenditori`,
       description,
     },
+    twitter: social.twitter,
   };
 }
 
