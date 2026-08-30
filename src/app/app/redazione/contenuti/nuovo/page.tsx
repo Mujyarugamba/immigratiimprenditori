@@ -11,6 +11,7 @@ import {
 import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
 import {
   canCreateContentDraftFromInbox,
+  suggestedCategoryForInboxMetadata,
   suggestedContentTypeForInboxKind,
 } from "@/lib/editorial/inbox-draft";
 
@@ -38,9 +39,16 @@ export default async function NuovoContenutoPage({ searchParams }: Props) {
   }
 
   const canCreateFromInbox =
-    inboxItem && canCreateContentDraftFromInbox(inboxItem.item_kind);
+    inboxItem &&
+    !inboxItem.linked_event_id &&
+    inboxItem.status !== "rejected" &&
+    inboxItem.status !== "archived" &&
+    canCreateContentDraftFromInbox(inboxItem.item_kind);
   const suggestedType = canCreateFromInbox
     ? suggestedContentTypeForInboxKind(inboxItem.item_kind)
+    : null;
+  const suggestedCategory = canCreateFromInbox
+    ? suggestedCategoryForInboxMetadata(inboxItem.raw_metadata)
     : null;
 
   const initialValues = canCreateFromInbox
@@ -49,6 +57,7 @@ export default async function NuovoContenutoPage({ searchParams }: Props) {
         title: inboxItem.title,
         abstract: inboxItem.summary,
         typeCode: suggestedType,
+        categoryCode: suggestedCategory,
         sourceLabel: inboxItem.source_label,
         sourceUrl: inboxItem.original_url,
       }
@@ -67,7 +76,7 @@ export default async function NuovoContenutoPage({ searchParams }: Props) {
       </h1>
       {inboxItem && !canCreateFromInbox ? (
         <p className="mt-4 border border-black p-4 text-sm text-neutral-700">
-          Questo tipo di arrivo segue un workflow dedicato e non può essere convertito automaticamente in contenuto editoriale.
+          Questo arrivo non può essere convertito in contenuto: può appartenere a un workflow dedicato oppure essere già scartato o archiviato.
         </p>
       ) : null}
       <EditorialContentCreateForm
