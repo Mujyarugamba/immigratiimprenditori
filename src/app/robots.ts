@@ -25,10 +25,9 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/app/", "/accedi"],
       },
     ],
-    sitemap: [
-      `${SITE_URL}/sitemap.xml`,
-      `${SITE_URL}/sitemap-contributors.xml`,
-    ],
+    // The contributor sitemap route stays available, but it is intentionally
+    // not advertised until at least one public contributor profile exists.
+    sitemap: [`${SITE_URL}/sitemap.xml`],
     host: SITE_URL,
   };
 }
