@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { assignInboxToMeAction, updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
 import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
+import { canCreateContentDraftFromInbox } from "@/lib/editorial/inbox-draft";
 
 export const metadata: Metadata = {
   title: "Arrivo — Inbox Redazione",
@@ -50,8 +51,6 @@ function activityLabel(changes: Record<string, unknown>) {
 
   if (parts.length > 0) return parts.join(" · ");
 
-  // Compatibility with the short-lived application-side audit shape used by
-  // early branch revisions. Canonical records now come from the DB trigger.
   if (changes.kind === "status_change") {
     const from = typeof changes.from === "string" ? STATUS_LABEL[changes.from] ?? changes.from : "—";
     const to = typeof changes.to === "string" ? STATUS_LABEL[changes.to] ?? changes.to : "—";
@@ -68,6 +67,12 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
 
   const origin = item.origin_country_label ?? item.origin_country_code ?? "—";
   const destination = item.destination_country_label ?? item.destination_country_code ?? "—";
+  const canCreateDraft =
+    !item.linked_content_id &&
+    !item.linked_event_id &&
+    item.status !== "rejected" &&
+    item.status !== "archived" &&
+    canCreateContentDraftFromInbox(item.item_kind);
 
   return (
     <div>
@@ -154,6 +159,34 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
 
         <aside className="border-line border-t pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
           <h2 className="text-ink text-sm font-semibold uppercase tracking-wide">Valutazione</h2>
+
+          {item.linked_content_id ? (
+            <Link
+              href={`/app/redazione/contenuti/${item.linked_content_id}`}
+              className="mt-3 block w-full border border-black bg-black px-4 py-2 text-center text-sm font-semibold text-white"
+            >
+              Apri bozza collegata
+            </Link>
+          ) : null}
+
+          {item.linked_event_id ? (
+            <Link
+              href={`/app/redazione/eventi/${item.linked_event_id}`}
+              className="mt-3 block w-full border border-black bg-black px-4 py-2 text-center text-sm font-semibold text-white"
+            >
+              Apri evento collegato
+            </Link>
+          ) : null}
+
+          {canCreateDraft ? (
+            <Link
+              href={`/app/redazione/contenuti/nuovo?inbox=${item.id}`}
+              className="mt-3 block w-full border border-black bg-black px-4 py-2 text-center text-sm font-semibold text-white"
+            >
+              Crea bozza da questo arrivo
+            </Link>
+          ) : null}
+
           <form action={updateInboxStatusAction} className="mt-3 space-y-3">
             <input type="hidden" name="id" value={item.id} />
             <label className="block text-sm">
