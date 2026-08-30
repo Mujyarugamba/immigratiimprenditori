@@ -11,6 +11,7 @@ import {
   formatItalianDate,
   label,
 } from "@/lib/public/labels";
+import { observatoryDatasetStructuredData } from "@/lib/seo/observatory-dataset";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -70,10 +71,16 @@ export default async function IndicatoreDetailPage({ params }: PageProps) {
         .filter((name): name is string => Boolean(name)),
     ),
   ];
+  const datasetSchema = observatoryDatasetStructuredData(indicator);
 
   return (
     <Section>
       <Container className="max-w-4xl space-y-8">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetSchema) }}
+        />
+
         <Link
           href="/osservatorio"
           className="text-brand hover:text-brand-dark text-sm font-medium"
