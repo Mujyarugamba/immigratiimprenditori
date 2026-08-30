@@ -23,3 +23,20 @@ export function canCreateContentDraftFromInbox(itemKind: string): boolean {
 export function suggestedContentTypeForInboxKind(itemKind: string): string | null {
   return CONTENT_DRAFT_TYPE_BY_INBOX_KIND[itemKind] ?? null;
 }
+
+/**
+ * Radar metadata can provide a non-binding category suggestion. The editor can
+ * always change it before creating the draft. Public-submission metadata is
+ * treated only as a hint and never as an authorization signal.
+ */
+export function suggestedCategoryForInboxMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!metadata) return null;
+  const topic = metadata.topic;
+  if (Array.isArray(topic) && topic.some((value) => value === "culture")) {
+    return "culture";
+  }
+  if (metadata.cultural_scope === "creative_industries") return "culture";
+  return null;
+}
