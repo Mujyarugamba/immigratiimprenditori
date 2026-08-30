@@ -5,6 +5,7 @@ import { getAtlasCountryBySlug } from "@/lib/atlas/scope";
 import { getAtlasCountryDetail } from "@/lib/data/public/atlas";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 
@@ -54,9 +55,18 @@ export default async function AtlasCountryPage({ params }: PageProps) {
   const relatedRoutes = routeSummaries.filter(
     (item) => item.route.origin.code === country.code || item.route.destination.code === country.code,
   );
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Atlante", path: "/atlante" },
+    { name: country.name, path: `/atlante/${country.slug}` },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="mb-6">
         <Link href="/atlante" className="text-sm font-semibold underline underline-offset-4">
           ← Torna all&apos;Atlante

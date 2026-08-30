@@ -75,7 +75,22 @@ test.describe("Go-live local surfaces", () => {
       await expect(page.getByText("CI Research Institute", { exact: true })).toBeVisible();
       await expect(page.getByText("0000-0002-1825-0097", { exact: false })).toBeVisible();
       await expect(page.getByRole("heading", { level: 2, name: "Pubblicazioni e contributi" })).toBeVisible();
-      await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(2);
+
+      const structuredDataTypes = await page.locator('script[type="application/ld+json"]').evaluateAll(
+        (scripts) => scripts.flatMap((script) => {
+          try {
+            const parsed = JSON.parse(script.textContent ?? "{}");
+            if (Array.isArray(parsed?.["@graph"])) {
+              return parsed["@graph"].map((item: { "@type"?: string }) => item?.["@type"]).filter(Boolean);
+            }
+            return parsed?.["@type"] ? [parsed["@type"]] : [];
+          } catch {
+            return [];
+          }
+        }),
+      );
+      expect(structuredDataTypes).toContain("Person");
+      expect(structuredDataTypes).toContain("BreadcrumbList");
 
       await page.goto("/esplora/autori");
       await expect(page.getByRole("link", { name: "CI Research Author" })).toHaveAttribute(

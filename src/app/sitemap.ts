@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { ATLAS_COUNTRIES } from "@/lib/atlas/scope";
 import { getPublicSupabaseEnv } from "@/lib/env";
 import { PLATFORM_LOCALES } from "@/lib/i18n/config";
+import { authorsWithPublishedContent } from "@/lib/seo/sitemap-authors";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 
@@ -150,10 +151,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       eventRoutesResult,
       territoriesResult,
       sectorsResult,
+      authorProfilesResult,
+      contentAuthorsResult,
     ] = await Promise.all([
       supabase
         .from("contents")
-        .select("slug, updated_at, published_at")
+        .select("id, slug, updated_at, published_at")
         .eq("editorial_status", "ready")
         .eq("publication_status", "published")
         .eq("visibility_status", "public")
@@ -192,13 +195,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .from("business_sectors")
         .select("id, slug, updated_at")
         .eq("is_active", true),
+      supabase
+        .from("author_profiles")
+        .select("id, slug")
+        .eq("is_public", true),
+      supabase
+        .from("content_authors")
+        .select("author_profile_id, content_id"),
     ]);
 
-    const contents: MetadataRoute.Sitemap = (contentsResult.data ?? []).map((item) => ({
+    const contentRows = contentsResult.data ?? [];
+    const contents: MetadataRoute.Sitemap = contentRows.map((item) => ({
       url: `${SITE_URL}/contenuti/${item.slug}`,
       lastModified: item.updated_at ?? item.published_at ?? undefined,
       changeFrequency: "monthly",
       priority: 0.8,
+    }));
+    const publishedContentIds = new Set(contentRows.map((item) => item.id));
+    const authorEntries: MetadataRoute.Sitemap = authorsWithPublishedContent(
+      authorProfilesResult.data ?? [],
+      contentAuthorsResult.data ?? [],
+      publishedContentIds,
+    ).map((profile) => ({
+      url: `${SITE_URL}/autori/${profile.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.72,
     }));
 
     const indicatorRows = indicatorsResult.data ?? [];
@@ -319,6 +340,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       ...base,
       ...contents,
+      ...authorEntries,
       ...indicators,
       ...events,
       ...atlasCountries,
