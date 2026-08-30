@@ -4,6 +4,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const text = {
   en: { kicker: "Explore · Taxonomy", title: "Economic sectors", intro: "This taxonomy allows indicators, research, stories and events to be connected over time to the same economic fields. A sector appears here because it is active in the Research Centre model; data availability depends on the sources.", sector: "Sector", linked: "Linked Observatory values", notice: "Sector names and descriptions currently follow the canonical taxonomy stored by the Research Centre." },
@@ -20,7 +21,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = text[locale];
-  return { title: m.title, description: m.intro, alternates: { canonical: `/${locale}/esplora/settori`, languages: languageAlternates("/esplora/settori") } };
+  return {
+    title: m.title,
+    description: m.intro,
+    alternates: { canonical: `/${locale}/esplora/settori`, languages: languageAlternates("/esplora/settori") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/esplora/settori`,
+    }),
+  };
 }
 
 export default async function LocalizedSectorsPage({ params }: Props) {

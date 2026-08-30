@@ -4,6 +4,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const text = {
   en: { kicker: "Explore · People", title: "Authors & contributors", intro: "The names shown here come exclusively from content that is already published and publicly visible. The count shows how many published contributions are attributed to each name.", contributions: "contributions", none: "No public bylines are available." },
@@ -20,7 +21,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = text[locale];
-  return { title: m.title, description: m.intro, alternates: { canonical: `/${locale}/esplora/autori`, languages: languageAlternates("/esplora/autori") } };
+  return {
+    title: m.title,
+    description: m.intro,
+    alternates: { canonical: `/${locale}/esplora/autori`, languages: languageAlternates("/esplora/autori") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/esplora/autori`,
+    }),
+  };
 }
 
 export default async function LocalizedAuthorsPage({ params }: Props) {

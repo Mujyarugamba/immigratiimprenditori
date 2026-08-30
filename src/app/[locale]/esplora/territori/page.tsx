@@ -6,6 +6,7 @@ import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const text = {
   en: { kicker: "Explore · Territories", title: "Territories", intro: "These are the territories actually represented in published Observatory values. The count shows how many published statistical values refer to each territory.", generic: "territory", values: "published values", explore: "Explore data" },
@@ -22,7 +23,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = text[locale];
-  return { title: m.title, description: m.intro, alternates: { canonical: `/${locale}/esplora/territori`, languages: languageAlternates("/esplora/territori") } };
+  return {
+    title: m.title,
+    description: m.intro,
+    alternates: { canonical: `/${locale}/esplora/territori`, languages: languageAlternates("/esplora/territori") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/esplora/territori`,
+    }),
+  };
 }
 
 export default async function LocalizedTerritoriesPage({ params }: Props) {

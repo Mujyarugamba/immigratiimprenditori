@@ -16,10 +16,16 @@ const staticSeoPages = [
   "/cultura",
   "/eventi",
   "/esplora",
+  "/esplora/dati",
+  "/esplora/mappa",
+  "/esplora/territori",
+  "/esplora/settori",
+  "/esplora/autori",
   "/atlante",
   "/relazioni",
   "/timeline",
   "/open-data",
+  "/open-data/api",
   "/fonti",
   "/chi-siamo",
   "/dati-e-fonti",
@@ -39,6 +45,11 @@ const socialSeoPages = [
   "/cultura",
   "/eventi",
   "/esplora",
+  "/esplora/dati",
+  "/esplora/mappa",
+  "/esplora/territori",
+  "/esplora/settori",
+  "/esplora/autori",
   "/ricerca",
   "/pubblicazioni",
   "/bibliografia",
@@ -46,9 +57,17 @@ const socialSeoPages = [
   "/relazioni",
   "/timeline",
   "/open-data",
+  "/open-data/api",
   "/fonti",
   "/dati-e-fonti",
   "/glossario",
+  "/chi-siamo",
+  "/contribuisci",
+  "/sostieni",
+  "/privacy",
+  "/cookie",
+  "/termini",
+  "/politica-editoriale",
   "/en/osservatorio",
   "/fr/contenuti",
   "/es/storie",
@@ -60,6 +79,12 @@ const socialSeoPages = [
   "/es/fonti",
   "/de/dati-e-fonti",
   "/ar/glossario",
+  "/en/esplora/dati",
+  "/fr/esplora/territori",
+  "/es/esplora/settori",
+  "/de/esplora/autori",
+  "/en/chi-siamo",
+  "/fr/contribuisci",
 ] as const;
 
 function tags(html: string, tagName: string) {
@@ -101,8 +126,11 @@ function assertSingleMetaContent(
 }
 
 function assertPageSocialMetadata(html: string, path: string) {
+  const pageDescription = assertSingleMetaContent(html, path, "name", "description");
   assertSingleMetaContent(html, path, "property", "og:title");
-  assertSingleMetaContent(html, path, "property", "og:description");
+  expect(assertSingleMetaContent(html, path, "property", "og:description")).toBe(
+    pageDescription,
+  );
   const openGraphUrl = assertSingleMetaContent(html, path, "property", "og:url");
   assertCanonical(openGraphUrl, path);
 
@@ -119,7 +147,9 @@ function assertPageSocialMetadata(html: string, path: string) {
     "summary_large_image",
   );
   assertSingleMetaContent(html, path, "name", "twitter:title");
-  assertSingleMetaContent(html, path, "name", "twitter:description");
+  expect(assertSingleMetaContent(html, path, "name", "twitter:description")).toBe(
+    pageDescription,
+  );
   const twitterImage = new URL(
     assertSingleMetaContent(html, path, "name", "twitter:image"),
     `${PRODUCTION_ORIGIN}/`,
