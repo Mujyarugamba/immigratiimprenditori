@@ -105,7 +105,14 @@ jobs:
           required=(
             'workflow_dispatch:'
             "if: github.ref == 'refs/heads/main'"
-            'contents: write'
+            'contents: read'
+            'actions/create-github-app-token@v3'
+            'app-id: ${{ vars.PRODUCTION_RELEASE_APP_ID }}'
+            'private-key: ${{ secrets.PRODUCTION_RELEASE_APP_PRIVATE_KEY }}'
+            'permission-contents: write'
+            'persist-credentials: false'
+            'RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}'
+            'git_with_app push origin'
             'Verify production branch protection'
             'rules/branches/production'
             'const required = ["update", "deletion", "non_fast_forward"];'
@@ -128,6 +135,20 @@ jobs:
           if [[ -n "$forbidden_triggers" ]]; then
             echo "Production promotion must remain manual-only; forbidden trigger found:" >&2
             echo "$forbidden_triggers" >&2
+            exit 1
+          fi
+
+          writable_github_token="$(grep -nE '^[[:space:]]+contents:[[:space:]]+write[[:space:]]*$' "$workflow" || true)"
+          if [[ -n "$writable_github_token" ]]; then
+            echo "Production promotion GITHUB_TOKEN must remain read-only; write permission found:" >&2
+            echo "$writable_github_token" >&2
+            exit 1
+          fi
+
+          bare_push="$(grep -nE '^[[:space:]]*git[[:space:]]+push([[:space:]]|$)' "$workflow" || true)"
+          if [[ -n "$bare_push" ]]; then
+            echo "Production push must use the canonical GitHub App helper, not a bare git push:" >&2
+            echo "$bare_push" >&2
             exit 1
           fi
 
