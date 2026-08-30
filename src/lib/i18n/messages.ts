@@ -8,6 +8,7 @@ export type NavigationMessages = {
   login: string;
   observatory: string;
   analysis: string;
+  culture: string;
   events: string;
   explore: string;
   participate: string;
@@ -36,6 +37,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "Accedi",
     observatory: "Ricerche e dati",
     analysis: "Analisi",
+    culture: "Cultura",
     events: "Eventi",
     explore: "Esplora",
     participate: "Partecipa",
@@ -62,6 +64,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "Sign in",
     observatory: "Research & data",
     analysis: "Analysis",
+    culture: "Culture",
     events: "Events",
     explore: "Explore",
     participate: "Contribute",
@@ -88,6 +91,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "Connexion",
     observatory: "Recherche et données",
     analysis: "Analyses",
+    culture: "Culture",
     events: "Événements",
     explore: "Explorer",
     participate: "Participer",
@@ -114,6 +118,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "Acceder",
     observatory: "Investigación y datos",
     analysis: "Análisis",
+    culture: "Cultura",
     events: "Eventos",
     explore: "Explorar",
     participate: "Participa",
@@ -140,6 +145,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "Anmelden",
     observatory: "Forschung & Daten",
     analysis: "Analysen",
+    culture: "Kultur",
     events: "Veranstaltungen",
     explore: "Entdecken",
     participate: "Mitwirken",
@@ -166,6 +172,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "تسجيل الدخول",
     observatory: "البحوث والبيانات",
     analysis: "التحليلات",
+    culture: "الثقافة",
     events: "الفعاليات",
     explore: "استكشف",
     participate: "شارك",
@@ -192,6 +199,7 @@ export const NAV_MESSAGES: Record<PlatformLocale, NavigationMessages> = {
     login: "登录",
     observatory: "研究与数据",
     analysis: "分析",
+    culture: "文化",
     events: "活动",
     explore: "探索",
     participate: "参与",
