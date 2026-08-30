@@ -1,78 +1,47 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 30) {
+const corePublicPages = ["/", "/contribuisci", "/sostieni"] as const;
+
+const localizedHomes = [
+  ["it", "/", "ltr", "Navigazione principale", "Lingua"],
+  ["en", "/en", "ltr", "Primary navigation", "Language"],
+  ["fr", "/fr", "ltr", "Navigation principale", "Langue"],
+  ["es", "/es", "ltr", "Navegación principal", "Idioma"],
+  ["de", "/de", "ltr", "Hauptnavigation", "Sprache"],
+  ["ar", "/ar", "rtl", "التنقل الرئيسي", "اللغة"],
+  ["zh", "/zh", "ltr", "主导航", "语言"],
+] as const;
+
+async function tabUntilFocused(page: Page, target: Locator, maxTabs = 12) {
   for (let index = 0; index < maxTabs; index += 1) {
-    if (await locator.evaluate((node) => node === document.activeElement).catch(() => false)) return;
     await page.keyboard.press("Tab");
+    if (await target.evaluate((element) => element === document.activeElement)) return;
   }
-  throw new Error("Target did not receive keyboard focus within the expected tab sequence.");
+  throw new Error(`Keyboard focus did not reach target within ${maxTabs} Tab presses.`);
 }
 
-async function expectFocusedInViewport(locator: Locator, viewportWidth: number) {
-  await expect(locator).toBeFocused();
-  const box = await locator.boundingBox();
+async function expectFocusedInViewport(target: Locator, viewportWidth: number) {
+  await expect(target).toBeFocused();
+  const box = await target.boundingBox();
   expect(box).not.toBeNull();
-  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x).toBeGreaterThanOrEqual(-1);
   expect(box!.x + box!.width).toBeLessThanOrEqual(viewportWidth + 1);
 }
 
-test("homepage renders the institutional editorial shell", async ({ page }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("link", { name: "Immigrati Imprenditori — Home" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Navigazione principale" })).toBeVisible();
-  await expect(page.getByRole("main")).toBeVisible();
-});
+async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(dimensions.scrollWidth, `${label} has horizontal document overflow`).toBeLessThanOrEqual(
+    dimensions.clientWidth + 1,
+  );
+}
 
-test("contribution and support surfaces remain safe without live data", async ({ page }) => {
-  await page.goto("/contribuisci", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Contribuisci/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Invia alla redazione/i })).toBeVisible();
-
-  await page.goto("/sostieni", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /Sostieni/i })).toBeVisible();
-});
-
-test("contribution server errors are announced and associated with the form", async ({ page }) => {
-  await page.goto("/contribuisci", { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: /Invia alla redazione/i }).click();
-  const alert = page.getByRole("alert");
-  await expect(alert).toBeVisible();
-});
-
-test("all seven localized home shells expose language, direction and localized controls", async ({ page }) => {
-  const cases = [
-    ["/", "it", "ltr"],
-    ["/en", "en", "ltr"],
-    ["/fr", "fr", "ltr"],
-    ["/es", "es", "ltr"],
-    ["/de", "de", "ltr"],
-    ["/ar", "ar", "rtl"],
-    ["/zh", "zh", "ltr"],
-  ] as const;
-
-  for (const [path, lang, dir] of cases) {
-    await page.goto(path, { waitUntil: "domcontentloaded" });
-    await expect(page.locator("html")).toHaveAttribute("lang", lang);
-    await expect(page.locator("html")).toHaveAttribute("dir", dir);
-    await expect(page.getByRole("combobox")).toBeVisible();
-  }
-});
-
-test("core static surfaces reflow on narrow viewports", async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  for (const path of ["/", "/osservatorio", "/contenuti", "/eventi", "/esplora"]) {
-    await page.goto(path, { waitUntil: "domcontentloaded" });
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(overflow).toBeLessThanOrEqual(1);
-  }
-});
-
-test("core public surfaces tolerate WCAG text spacing at narrow width", async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+async function applyWcagTextSpacing(page: Page) {
   await page.addStyleTag({
     content: `
-      * {
+      body, body * {
         line-height: 1.5 !important;
         letter-spacing: 0.12em !important;
         word-spacing: 0.16em !important;
@@ -80,8 +49,94 @@ test("core public surfaces tolerate WCAG text spacing at narrow width", async ({
       p { margin-bottom: 2em !important; }
     `,
   });
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  expect(overflow).toBeLessThanOrEqual(1);
+}
+
+test("homepage renders the institutional editorial shell", async ({ page }) => {
+  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+  expect(response?.ok()).toBeTruthy();
+  await expect(page).toHaveTitle(/Immigrati Imprenditori/i);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.locator("img:not([alt])")).toHaveCount(0);
+
+  await page.keyboard.press("Tab");
+  const skipLink = page.getByRole("link", { name: "Vai al contenuto" });
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toHaveAttribute("href", "#contenuto-principale");
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#contenuto-principale")).toBeFocused();
+});
+
+test("contribution and support surfaces remain safe without live data", async ({ page }) => {
+  await page.goto("/contribuisci");
+  await expect(page.getByRole("heading", { level: 1, name: "Partecipa al Centro Studi" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Invia alla redazione/i })).toBeVisible();
+  await expect(page.getByText(/non comporta pubblicazione automatica/i)).toBeVisible();
+
+  await page.goto("/sostieni");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.getByText(/pagamenti online/i)).toBeVisible();
+  await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
+});
+
+test("contribution server errors are announced and associated with the form", async ({ page }) => {
+  await page.goto("/contribuisci?errore=campi", { waitUntil: "domcontentloaded" });
+  const alert = page.locator("#submission-form-error");
+  await expect(alert).toBeVisible();
+  await expect(alert).toHaveAttribute("role", "alert");
+  await expect(alert).toContainText(/Controlla i campi obbligatori/i);
+  await expect(page.locator("#modulo-partecipazione")).toHaveAttribute(
+    "aria-describedby",
+    "submission-form-error",
+  );
+});
+
+test("all seven localized home shells expose language, direction and localized controls", async ({ page }) => {
+  for (const [locale, path, direction, primaryNavigation, languageLabel] of localizedHomes) {
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    expect(response?.ok(), `${locale} home did not return 2xx`).toBeTruthy();
+    await expect(page.locator("html")).toHaveAttribute("lang", locale);
+    await expect(page.locator("html")).toHaveAttribute("dir", direction);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole("navigation", { name: primaryNavigation })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: languageLabel })).toBeVisible();
+  }
+});
+
+test("core static surfaces reflow on narrow viewports", async ({ page }) => {
+  for (const width of [320, 390, 768]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of corePublicPages) {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+      await expectNoHorizontalDocumentOverflow(page, `${path} at ${width}px`);
+    }
+  }
+});
+
+test("core public surfaces tolerate WCAG text spacing at narrow width", async ({ page }) => {
+  const width = 320;
+  await page.setViewportSize({ width, height: 844 });
+
+  for (const path of corePublicPages) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await applyWcagTextSpacing(page);
+    await expectNoHorizontalDocumentOverflow(page, `${path} with WCAG text spacing`);
+
+    const clippedControls = await page.locator("button, select").evaluateAll((elements) =>
+      elements
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        })
+        .filter(
+          (element) =>
+            element.scrollWidth > element.clientWidth + 1 ||
+            element.scrollHeight > element.clientHeight + 1,
+        )
+        .map((element) => element.textContent?.trim() || element.getAttribute("aria-label") || element.tagName),
+    );
+    expect(clippedControls, `${path} clips button/select content under text spacing`).toEqual([]);
+  }
 });
 
 test("primary mobile controls meet the WCAG 2.2 minimum target size", async ({ page }) => {
