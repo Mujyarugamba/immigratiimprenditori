@@ -18,8 +18,10 @@ test("page social metadata uses the canonical www URL and preserves the shared s
       alt: "Immigrati Imprenditori",
     },
   ]);
-  assert.equal(metadata.twitter?.card, "summary_large_image");
-  assert.equal(metadata.twitter?.title, "Cultura");
-  assert.equal(metadata.twitter?.description, "Descrizione Cultura");
-  assert.deepEqual(metadata.twitter?.images, ["/logo-immigrati-imprenditori.png"]);
+  assert.deepEqual(metadata.twitter, {
+    card: "summary_large_image",
+    title: "Cultura",
+    description: "Descrizione Cultura",
+    images: ["/logo-immigrati-imprenditori.png"],
+  });
 });
