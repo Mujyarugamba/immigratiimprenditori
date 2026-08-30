@@ -35,15 +35,19 @@ test("profile social metadata uses canonical www URL and an avatar when availabl
     imageAlt: "Ada Rossi",
   });
 
-  assert.equal(metadata.openGraph?.url, "https://www.immigratiimprenditori.it/contributori/ada-rossi");
-  assert.equal(metadata.openGraph?.type, "profile");
-  assert.equal(metadata.openGraph?.description, "Profilo pubblico di Ada Rossi.");
-  assert.deepEqual(metadata.openGraph?.images, [
-    {
-      url: "https://images.example.org/ada.jpg",
-      alt: "Ada Rossi",
-    },
-  ]);
+  assert.deepEqual(metadata.openGraph, {
+    type: "profile",
+    url: "https://www.immigratiimprenditori.it/contributori/ada-rossi",
+    siteName: "Immigrati Imprenditori",
+    title: "Ada Rossi",
+    description: "Profilo pubblico di Ada Rossi.",
+    images: [
+      {
+        url: "https://images.example.org/ada.jpg",
+        alt: "Ada Rossi",
+      },
+    ],
+  });
   assert.deepEqual(metadata.twitter, {
     card: "summary",
     title: "Ada Rossi",
@@ -59,12 +63,19 @@ test("profile social metadata falls back to the shared social image", () => {
     pathname: "/autori/ada-rossi",
   });
 
-  assert.deepEqual(metadata.openGraph?.images, [
-    {
-      url: "/logo-immigrati-imprenditori.png",
-      alt: "Ada Rossi",
-    },
-  ]);
+  assert.deepEqual(metadata.openGraph, {
+    type: "profile",
+    url: "https://www.immigratiimprenditori.it/autori/ada-rossi",
+    siteName: "Immigrati Imprenditori",
+    title: "Ada Rossi",
+    description: "Profilo pubblico di Ada Rossi.",
+    images: [
+      {
+        url: "/logo-immigrati-imprenditori.png",
+        alt: "Ada Rossi",
+      },
+    ],
+  });
   assert.deepEqual(metadata.twitter, {
     card: "summary",
     title: "Ada Rossi",
