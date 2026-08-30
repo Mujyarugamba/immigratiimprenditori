@@ -46,6 +46,7 @@ const fullyLocalizedCoreRoutes = [
   "/contenuti",
   "/ricerca",
   "/storie",
+  "/cultura",
   "/eventi",
   "/esplora",
   "/esplora/dati",
@@ -84,7 +85,7 @@ function staticEntries(): MetadataRoute.Sitemap {
     priority:
       path === ""
         ? 1
-        : path === "/osservatorio" || path === "/contenuti" || path === "/esplora" || path === "/atlante"
+        : path === "/osservatorio" || path === "/contenuti" || path === "/cultura" || path === "/esplora" || path === "/atlante"
           ? 0.9
           : path === "/esplora/dati" || path === "/open-data" || path === "/ricerca" || path === "/pubblicazioni" || path === "/storie" || path === "/relazioni" || path === "/timeline"
             ? 0.85
@@ -104,7 +105,7 @@ function staticEntries(): MetadataRoute.Sitemap {
       priority:
         path === ""
           ? 0.95
-          : path === "/osservatorio" || path === "/contenuti" || path === "/esplora"
+          : path === "/osservatorio" || path === "/contenuti" || path === "/cultura" || path === "/esplora"
             ? 0.85
             : 0.8,
       alternates: { languages: languageAlternates(path) },

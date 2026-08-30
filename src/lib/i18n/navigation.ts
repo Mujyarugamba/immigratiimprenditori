@@ -6,6 +6,7 @@ const LOCALIZED_EXACT_PATHS = new Set([
   "/contenuti",
   "/ricerca",
   "/storie",
+  "/cultura",
   "/eventi",
   "/esplora",
   "/esplora/dati",
