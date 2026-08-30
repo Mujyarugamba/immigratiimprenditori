@@ -54,6 +54,7 @@ export function Header() {
   const mainNav = [
     { label: m.observatory, href: localizedHref(locale, "/osservatorio") },
     { label: m.analysis, href: localizedHref(locale, "/contenuti") },
+    { label: m.culture, href: localizedHref(locale, "/cultura") },
     { label: m.events, href: localizedHref(locale, "/eventi") },
     { label: m.explore, href: localizedHref(locale, "/esplora") },
     { label: m.participate, href: localizedHref(locale, "/contribuisci") },
