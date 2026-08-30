@@ -8,6 +8,7 @@ import { Section } from "@/components/ui/Section";
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
 import { contentQualifiesForCultureHub } from "@/lib/data/public/culture";
 import { relatedForContent } from "@/lib/data/public/related";
+import { absoluteUrl } from "@/lib/i18n/seo";
 import { CONTENT_TYPES, formatItalianDate, label } from "@/lib/public/labels";
 
 type PageProps = {
@@ -56,7 +57,7 @@ function citationText(content: {
   const year = content.published_at ? new Date(content.published_at).getFullYear() : new Date().getFullYear();
   const authors = content.authors.map((author) => author.display_label).filter(Boolean) as string[];
   const byline = authors.length > 0 ? authors.join(", ") : "Immigrati Imprenditori";
-  return `${byline} (${year}). ${content.title}. Immigrati Imprenditori — Centro Studi AIPEL. https://immigratiimprenditori.it/contenuti/${content.slug}`;
+  return `${byline} (${year}). ${content.title}. Immigrati Imprenditori — Centro Studi AIPEL. ${absoluteUrl(`/contenuti/${content.slug}`)}`;
 }
 
 export default async function ContenutoDetailPage({ params }: PageProps) {
@@ -88,7 +89,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
     description: content.abstract ?? undefined,
     datePublished: content.published_at ?? undefined,
     image: content.cover_url ?? undefined,
-    url: `https://immigratiimprenditori.it/contenuti/${content.slug}`,
+    url: absoluteUrl(`/contenuti/${content.slug}`),
     author:
       authorNames.length > 0
         ? authorNames.map((name) => ({ "@type": "Person", name }))
@@ -96,7 +97,7 @@ export default async function ContenutoDetailPage({ params }: PageProps) {
     publisher: {
       "@type": "Organization",
       name: "Immigrati Imprenditori — Centro Studi AIPEL",
-      url: "https://immigratiimprenditori.it",
+      url: absoluteUrl("/"),
     },
     isAccessibleForFree: true,
   };
