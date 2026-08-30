@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export async function GET() {
         content_count: item.contentCount,
         event_count: item.eventCount,
       },
-      url: `https://immigratiimprenditori.it/atlante/rotte/${item.route.slug}`,
+      url: absoluteUrl(`/atlante/rotte/${item.route.slug}`),
     }));
 
     return NextResponse.json(
