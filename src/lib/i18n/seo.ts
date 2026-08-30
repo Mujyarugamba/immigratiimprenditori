@@ -1,7 +1,7 @@
 import { DEFAULT_LOCALE, PLATFORM_LOCALES, type PlatformLocale } from "@/lib/i18n/config";
 import { localizePath } from "@/lib/i18n/navigation";
 
-export const SITE_URL = "https://immigratiimprenditori.it";
+export const SITE_URL = "https://www.immigratiimprenditori.it";
 
 export function absoluteLocalizedUrl(locale: PlatformLocale, pathname: string) {
   return `${SITE_URL}${localizePath(locale, pathname)}`;
