@@ -50,7 +50,9 @@ try {
   const home = await page.goto(target.toString(), { waitUntil: "domcontentloaded", timeout: 45_000 });
   if (!home?.ok()) fail(`homepage did not return 2xx (${home?.status()})`);
   const homeCanonical = await page.locator('link[rel="canonical"]').getAttribute("href");
-  if (homeCanonical !== `${canonicalOrigin}/`) fail(`unexpected homepage canonical: ${homeCanonical}`);
+  if (![canonicalOrigin, `${canonicalOrigin}/`].includes(homeCanonical ?? "")) {
+    fail(`unexpected homepage canonical: ${homeCanonical}`);
+  }
 
   const contribution = await page.goto(new URL("/contribuisci", target).toString(), {
     waitUntil: "domcontentloaded",
