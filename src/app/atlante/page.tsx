@@ -3,12 +3,21 @@ import Link from "next/link";
 import { AtlasRouteMap } from "@/components/atlas/AtlasRouteMap";
 import { listAtlasCountrySummaries } from "@/lib/data/public/atlas";
 import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Atlante dell'imprenditoria migrante";
+const DESCRIPTION =
+  "Paesi e territori letti attraverso dati, ricerche, storie, rotte ed eventi verificati dal Centro Studi Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Atlante dell'imprenditoria migrante",
-  description:
-    "Paesi e territori letti attraverso dati, ricerche, storie, rotte ed eventi verificati dal Centro Studi Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/atlante" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/atlante",
+  }),
 };
 
 export default async function AtlantePage() {

@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublicStatisticalSources } from "@/lib/data/public/sources";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Registro fonti e metodologia | Immigrati Imprenditori";
+const DESCRIPTION =
+  "Registro delle fonti statistiche effettivamente utilizzate dai dati pubblicati dell'Osservatorio, con copertura, periodicità, periodo osservato, metodo e limiti.";
 
 export const metadata: Metadata = {
-  title: "Registro fonti e metodologia | Immigrati Imprenditori",
-  description:
-    "Registro delle fonti statistiche effettivamente utilizzate dai dati pubblicati dell'Osservatorio, con copertura, periodicità, periodo osservato, metodo e limiti.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/fonti" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/fonti",
+  }),
 };
 
 const PERIODICITY_LABELS: Record<string, string> = {

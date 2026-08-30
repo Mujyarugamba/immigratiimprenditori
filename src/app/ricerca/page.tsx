@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublishedContentsByTypes, RESEARCH_CONTENT_TYPES } from "@/lib/data/public/collections";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Ricerca | Immigrati Imprenditori";
+const DESCRIPTION = "Rapporti, ricerche, analisi, note dati e policy brief pubblicati dal Centro Studi.";
 
 export const metadata: Metadata = {
-  title: "Ricerca | Immigrati Imprenditori",
-  description: "Rapporti, ricerche, analisi, note dati e policy brief pubblicati dal Centro Studi.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/ricerca" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/ricerca",
+  }),
 };
 
 function formatDate(value: string | null) {

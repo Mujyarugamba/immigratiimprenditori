@@ -4,12 +4,21 @@ import {
   getPublicKnowledgeSnapshot,
   knowledgeNodeRelationalHref,
 } from "@/lib/data/public/knowledge";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Relazioni tra dati e conoscenza | Centro Studi";
+const DESCRIPTION =
+  "Naviga le relazioni verificabili tra Paesi, indicatori, settori e rotte nell'ecosistema dati di Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Relazioni tra dati e conoscenza | Centro Studi",
-  description:
-    "Naviga le relazioni verificabili tra Paesi, indicatori, settori e rotte nell'ecosistema dati di Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/relazioni" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/relazioni",
+  }),
 };
 
 const PREDICATE_LABEL = {

@@ -1,27 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublications, publicationKindLabel } from "@/lib/data/public/publications";
+import {
+  bibliographyCitation,
+  bibliographyStructuredData,
+} from "@/lib/seo/bibliography-structured-data";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Bibliografia scientifica";
+const DESCRIPTION =
+  "Riferimenti bibliografici delle pubblicazioni utilizzate o pubblicate dal Centro Studi Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Bibliografia scientifica",
-  description:
-    "Riferimenti bibliografici delle pubblicazioni utilizzate o pubblicate dal Centro Studi Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/bibliografia" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/bibliografia",
+  }),
 };
-
-function citation(item: Awaited<ReturnType<typeof listPublications>>[number]) {
-  const authors = item.authors.length > 0 ? item.authors.join(", ") : item.publisher_name ?? "Immigrati Imprenditori";
-  const year = item.source_publication_year ?? (item.published_at ? new Date(item.published_at).getFullYear() : null);
-  const publisher = item.publisher_name ? ` ${item.publisher_name}.` : "";
-  const identifier = item.external_identifier ? ` ${item.external_identifier}.` : "";
-  return `${authors}${year ? ` (${year}).` : "."} ${item.title}.${publisher}${identifier}`.replace(/\s+/g, " ").trim();
-}
 
 export default async function BibliografiaPage() {
   const publications = await listPublications();
+  const structuredData = bibliographyStructuredData(publications);
 
   return (
     <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <header className="max-w-4xl border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
           Centro Studi · Biblioteca
@@ -42,7 +53,9 @@ export default async function BibliografiaPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
                 {publicationKindLabel(item.report_kind, item.type_code)}
               </p>
-              <p className="mt-2 text-base leading-7 text-neutral-800">{citation(item)}</p>
+              <p className="mt-2 text-base leading-7 text-neutral-800">
+                {bibliographyCitation(item)}
+              </p>
               <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold">
                 <Link href={`/contenuti/${item.slug}`} className="underline underline-offset-4">
                   Scheda →

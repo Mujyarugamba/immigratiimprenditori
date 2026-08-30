@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import { LegalDocumentPage } from "@/components/legal/LegalDocumentPage";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Fonti e metodologia";
+const DESCRIPTION =
+  "Fonti, metodologia, limiti e criteri di utilizzo dei dati pubblicati da Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Fonti e metodologia",
-  description:
-    "Fonti, metodologia, limiti e criteri di utilizzo dei dati pubblicati da Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/dati-e-fonti",
+  }),
 };
 
 export default function DatiEFontiPage() {

@@ -5,6 +5,7 @@ import { getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const text = {
   en: { kicker: "Observatory · Open data", title: "Open data", intro: "Values already published by the Observatory are also available in structured formats. Definitions, sources and methodological notes remain an integral part of interpretation.", indicators: "Indicators", records: "Records", formats: "Formats", endpoint: "Public endpoint", endpointText: "The endpoint exposes only published indicators and final public values. It does not expose restricted areas, personal data or unpublished editorial material.", open: "Open JSON dataset", csv: "Download CSV", correct: "Correct use", correctText: "A value must not be separated from the indicator definition. Citizenship, place of birth, foreign enterprise and self-employment are not equivalent categories.", method: "Sources & methodology", explorer: "Data Explorer" },
@@ -21,7 +22,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = text[locale];
-  return { title: m.title, description: m.intro, alternates: { canonical: `/${locale}/open-data`, languages: languageAlternates("/open-data") } };
+  return {
+    title: m.title,
+    description: m.intro,
+    alternates: { canonical: `/${locale}/open-data`, languages: languageAlternates("/open-data") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/open-data`,
+    }),
+  };
 }
 
 export default async function LocalizedOpenDataPage({ params }: Props) {

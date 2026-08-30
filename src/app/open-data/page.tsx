@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Open data | Immigrati Imprenditori";
+const DESCRIPTION = "Accesso ai dati pubblicati dall'Osservatorio di Immigrati Imprenditori in formato consultabile, JSON, CSV e XLSX.";
 
 export const metadata: Metadata = {
-  title: "Open data | Immigrati Imprenditori",
-  description: "Accesso ai dati pubblicati dall'Osservatorio di Immigrati Imprenditori in formato consultabile, JSON, CSV e XLSX.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/open-data" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/open-data",
+  }),
 };
 
 const FILTERS = [

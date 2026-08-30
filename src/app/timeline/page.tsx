@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublicTimelineEntries, type TimelineEntry } from "@/lib/data/public/timeline";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Timeline";
+const DESCRIPTION =
+  "Cronologia integrata di dati, ricerche, storie ed eventi pubblici del Centro Studi Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Timeline",
-  description:
-    "Cronologia integrata di dati, ricerche, storie ed eventi pubblici del Centro Studi Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/timeline" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/timeline",
+  }),
 };
 
 const KIND_LABELS: Record<TimelineEntry["kind"], string> = {

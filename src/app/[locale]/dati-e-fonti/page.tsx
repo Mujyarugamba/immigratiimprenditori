@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { METHODOLOGY_MESSAGES } from "@/lib/i18n/methodology";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -14,6 +15,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: m.title,
     description: m.intro,
     alternates: { canonical: `/${locale}/dati-e-fonti`, languages: languageAlternates("/dati-e-fonti") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/dati-e-fonti`,
+    }),
   };
 }
 

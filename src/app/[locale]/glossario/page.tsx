@@ -5,6 +5,7 @@ import { isPlatformLocale } from "@/lib/i18n/config";
 import { GLOSSARY_MESSAGES } from "@/lib/i18n/glossary";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -16,6 +17,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: m.title,
     description: m.intro,
     alternates: { canonical: `/${locale}/glossario`, languages: languageAlternates("/glossario") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/glossario`,
+    }),
   };
 }
 
