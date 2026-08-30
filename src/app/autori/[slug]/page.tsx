@@ -6,7 +6,7 @@ import {
   listPublicAuthorContents,
 } from "@/lib/data/public/authors";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 type Props = { params: Promise<{ slug: string }> };
 

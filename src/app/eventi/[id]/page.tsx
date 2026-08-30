@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getPublicEventById } from "@/lib/data/public/events";
 import { relatedForEvent } from "@/lib/data/public/related";
+import { absoluteUrl } from "@/lib/i18n/seo";
 import {
   EDITION_STATUSES,
   EVENT_AUDIENCE,
@@ -87,7 +88,7 @@ function googleCalendarUrl(event: {
     action: "TEMPLATE",
     text: event.title,
     dates: `${compact(edition.starts_at)}/${compact(edition.ends_at ?? edition.starts_at)}`,
-    details: event.summary ?? `https://immigratiimprenditori.it/eventi/${event.id}`,
+    details: event.summary ?? absoluteUrl(`/eventi/${event.id}`),
     location: [edition.venue_label, edition.city_text, edition.country_ref].filter(Boolean).join(", "),
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -148,7 +149,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
         organizer: event.external_organization_label
           ? { "@type": "Organization", name: event.external_organization_label }
           : undefined,
-        url: `https://immigratiimprenditori.it/eventi/${event.id}`,
+        url: absoluteUrl(`/eventi/${event.id}`),
       }
     : null;
 

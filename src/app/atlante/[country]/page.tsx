@@ -6,7 +6,7 @@ import { getAtlasCountryDetail } from "@/lib/data/public/atlas";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 type PageProps = {
   params: Promise<{ country: string }>;

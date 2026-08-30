@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublications, publicationKindLabel } from "@/lib/data/public/publications";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const metadata: Metadata = {
   title: "Pubblicazioni",
@@ -16,16 +17,16 @@ export default async function PubblicazioniPage() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Pubblicazioni — Immigrati Imprenditori",
-    url: "https://immigratiimprenditori.it/pubblicazioni",
+    url: absoluteUrl("/pubblicazioni"),
     isPartOf: {
       "@type": "WebSite",
       name: "Immigrati Imprenditori",
-      url: "https://immigratiimprenditori.it",
+      url: absoluteUrl("/"),
     },
     hasPart: publications.map((item) => ({
       "@type": "Report",
       name: item.title,
-      url: `https://immigratiimprenditori.it/contenuti/${item.slug}`,
+      url: absoluteUrl(`/contenuti/${item.slug}`),
       datePublished: item.source_publication_date ?? item.published_at ?? undefined,
       author: item.authors.map((name) => ({ "@type": "Person", name })),
       publisher: item.publisher_name

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
           settore: sectorId,
           categoria: categoryCode,
         },
-        methodology_url: "https://immigratiimprenditori.it/dati-e-fonti",
+        methodology_url: absoluteUrl("/dati-e-fonti"),
         records,
       },
       {

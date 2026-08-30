@@ -1,4 +1,5 @@
 import { getPublicContentBySlug } from "@/lib/data/public/contents";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 function bibEscape(value: string) {
   return value.replaceAll("{", "\\{").replaceAll("}", "\\}");
@@ -24,7 +25,7 @@ export async function GET(
   const year = content.published_at ? String(new Date(content.published_at).getFullYear()) : "2026";
   const authors = content.authors.map((author) => author.display_label).filter(Boolean) as string[];
   const author = authors.length > 0 ? authors.join(" and ") : "Immigrati Imprenditori";
-  const url = `https://immigratiimprenditori.it/contenuti/${content.slug}`;
+  const url = absoluteUrl(`/contenuti/${content.slug}`);
   const entryType = ["report", "research_report", "policy_brief"].includes(content.type_code) ? "techreport" : "online";
 
   const bib = `@${entryType}{${bibKey(content.title, year)},\n  author = {${bibEscape(author)}},\n  title = {${bibEscape(content.title)}},\n  year = {${year}},\n  institution = {Immigrati Imprenditori — Centro Studi AIPEL},\n  url = {${url}}\n}\n`;

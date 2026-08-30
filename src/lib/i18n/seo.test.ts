@@ -1,8 +1,38 @@
 import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, relative } from "node:path";
 import test from "node:test";
 import robots from "../../app/robots";
 import { localizedHref } from "./navigation";
-import { absoluteLocalizedUrl, languageAlternates } from "./seo";
+import { absoluteLocalizedUrl, absoluteUrl, languageAlternates } from "./seo";
+
+function sourceFiles(root: string): string[] {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.(?:ts|tsx)$/.test(entry.name) ? [path] : [];
+  });
+}
+
+test("canonical absolute URLs always use the final www origin", () => {
+  assert.equal(
+    absoluteUrl("/contenuti/example"),
+    "https://www.immigratiimprenditori.it/contenuti/example",
+  );
+  assert.equal(
+    absoluteUrl("eventi/example"),
+    "https://www.immigratiimprenditori.it/eventi/example",
+  );
+});
+
+test("application source never hardcodes the legacy apex origin", () => {
+  const legacyOrigin = ["https://", "immigratiimprenditori.it"].join("");
+  const root = join(process.cwd(), "src");
+  const offenders = sourceFiles(root)
+    .filter((path) => readFileSync(path, "utf8").includes(legacyOrigin))
+    .map((path) => relative(process.cwd(), path));
+  assert.deepEqual(offenders, []);
+});
 
 test("localized SEO URLs keep Italian unprefixed and expose seven-language alternates", () => {
   assert.equal(

@@ -1,4 +1,5 @@
 import { getPublicEventById } from "@/lib/data/public/events";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 function icsEscape(value: string) {
   return value
@@ -25,7 +26,7 @@ export async function GET(
 
   const edition = event.editions.find((item) => item.occurrence_status === "scheduled" || item.occurrence_status === "ongoing") ?? event.editions[0];
   const location = [edition.venue_label, edition.city_text, edition.country_ref].filter(Boolean).join(", ");
-  const url = event.source_url ?? edition.online_reference ?? `https://immigratiimprenditori.it/eventi/${event.id}`;
+  const url = event.source_url ?? edition.online_reference ?? absoluteUrl(`/eventi/${event.id}`);
 
   const lines = [
     "BEGIN:VCALENDAR",

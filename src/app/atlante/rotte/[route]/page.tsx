@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getRouteDetail } from "@/lib/data/public/routes";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 type PageProps = {
   params: Promise<{ route: string }>;
