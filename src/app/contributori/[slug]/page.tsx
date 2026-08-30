@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { profileSocialMetadata } from "@/lib/seo/social-metadata";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 import { createClient } from "@/lib/supabase/server";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
@@ -25,17 +27,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = await getProfile(slug);
   if (!profile) return { title: "Non trovato", robots: { index: false, follow: false } };
   const canonical = `/contributori/${profile.slug}`;
+  const description =
+    profile.bio ?? `Profilo di ${profile.display_name} nel Centro Studi Immigrati Imprenditori.`;
   return {
     title: `${profile.display_name} | Contributori`,
-    description: profile.bio ?? `Profilo di ${profile.display_name} nel Centro Studi Immigrati Imprenditori.`,
+    description,
     alternates: { canonical },
-    openGraph: {
-      type: "profile",
-      url: `${SITE_URL}${canonical}`,
+    ...profileSocialMetadata({
       title: profile.display_name,
-      description: profile.bio ?? undefined,
-      images: profile.avatar_url ? [{ url: profile.avatar_url, alt: profile.display_name }] : undefined,
-    },
+      description,
+      pathname: canonical,
+      image: profile.avatar_url,
+      imageAlt: profile.display_name,
+    }),
   };
 }
 
@@ -59,10 +63,19 @@ export default async function PublicContributorProfilePage({ params }: Props) {
     homeLocation: place ? { "@type": "Place", name: place } : undefined,
     sameAs: profile.website ? [profile.website] : undefined,
   };
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Esplora", path: "/esplora" },
+    { name: profile.display_name, path: `/contributori/${profile.slug}` },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <header className="border-b border-black pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Centro Studi · Contributore</p>
         <div className="mt-4 flex items-start gap-6">
