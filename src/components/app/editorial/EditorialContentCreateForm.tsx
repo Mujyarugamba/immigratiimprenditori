@@ -7,18 +7,29 @@ import {
   createEditorialContentAction,
   type FormActionState,
 } from "@/lib/editorial/actions";
+import { createEditorialContentFromInboxAction } from "@/lib/editorial/inbox-draft-actions";
 import type { CatalogOption } from "@/lib/data/editorial/catalogs";
 
-const initial: FormActionState = { ok: false };
+const initialState: FormActionState = { ok: false };
 
 const selectClass =
   "border-line bg-surface-elevated text-ink focus:border-brand focus:ring-brand/30 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2";
+
+type InitialValues = {
+  inboxId: string;
+  title: string;
+  abstract: string | null;
+  typeCode: string | null;
+  sourceLabel: string | null;
+  sourceUrl: string | null;
+};
 
 type Props = {
   contentTypes: CatalogOption[];
   categories: CatalogOption[];
   languages: { id: number; code: string; label: string }[];
   defaultLanguageId: number | null;
+  initialValues?: InitialValues | null;
 };
 
 export function EditorialContentCreateForm({
@@ -26,14 +37,46 @@ export function EditorialContentCreateForm({
   categories,
   languages,
   defaultLanguageId,
+  initialValues = null,
 }: Props) {
-  const [state, action, pending] = useActionState(
-    createEditorialContentAction,
-    initial,
-  );
+  const submitAction = initialValues?.inboxId
+    ? createEditorialContentFromInboxAction
+    : createEditorialContentAction;
+  const [state, action, pending] = useActionState(submitAction, initialState);
+
+  const suggestedType =
+    initialValues?.typeCode && contentTypes.some((item) => item.code === initialValues.typeCode)
+      ? initialValues.typeCode
+      : "";
 
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
+      {initialValues?.inboxId ? (
+        <input type="hidden" name="inbox_id" value={initialValues.inboxId} />
+      ) : null}
+
+      {initialValues ? (
+        <div className="border-line bg-surface-elevated border p-4 text-sm">
+          <p className="text-ink font-semibold">Bozza da Inbox redazionale</p>
+          <p className="text-ink-muted mt-1">
+            Titolo, abstract e fonte sono precompilati dall’arrivo. Il corpo resta da redigere prima della creazione della bozza.
+          </p>
+          {initialValues.sourceLabel ? (
+            <p className="text-ink-muted mt-2">Fonte: {initialValues.sourceLabel}</p>
+          ) : null}
+          {initialValues.sourceUrl ? (
+            <a
+              href={initialValues.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-ink mt-1 block break-all underline underline-offset-2"
+            >
+              {initialValues.sourceUrl}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+
       <label className="text-ink flex flex-col gap-1.5 text-sm">
         <span className="font-medium">Tipo</span>
         <select
@@ -41,7 +84,7 @@ export function EditorialContentCreateForm({
           required
           disabled={pending}
           className={selectClass}
-          defaultValue=""
+          defaultValue={suggestedType}
         >
           <option value="" disabled>
             Seleziona…
@@ -75,6 +118,7 @@ export function EditorialContentCreateForm({
         name="title"
         required
         disabled={pending}
+        defaultValue={initialValues?.title ?? ""}
         error={state.fieldErrors?.title}
       />
       <FormField
@@ -85,7 +129,12 @@ export function EditorialContentCreateForm({
         error={state.fieldErrors?.slug}
       />
       <FormField label="Sottotitolo" name="subtitle" disabled={pending} />
-      <FormField label="Abstract" name="abstract" disabled={pending} />
+      <FormField
+        label="Abstract"
+        name="abstract"
+        disabled={pending}
+        defaultValue={initialValues?.abstract ?? ""}
+      />
 
       <label className="text-ink flex flex-col gap-1.5 text-sm">
         <span className="font-medium">Categoria primaria</span>
@@ -117,9 +166,7 @@ export function EditorialContentCreateForm({
           disabled={pending}
           className={selectClass}
           aria-invalid={Boolean(state.fieldErrors?.body)}
-          aria-describedby={
-            state.fieldErrors?.body ? "body-error" : undefined
-          }
+          aria-describedby={state.fieldErrors?.body ? "body-error" : undefined}
         />
         {state.fieldErrors?.body ? (
           <p id="body-error" className="text-accent-dark text-xs">
@@ -135,7 +182,11 @@ export function EditorialContentCreateForm({
       ) : null}
 
       <Button type="submit" disabled={pending}>
-        {pending ? "Creazione…" : "Crea contenuto"}
+        {pending
+          ? "Creazione…"
+          : initialValues
+            ? "Crea bozza da Inbox"
+            : "Crea contenuto"}
       </Button>
     </form>
   );
