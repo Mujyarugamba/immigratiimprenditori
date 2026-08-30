@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { assignInboxToMeAction, updateInboxStatusAction } from "@/lib/editorial/inbox-actions";
 import { getEditorialInboxItemById } from "@/lib/data/editorial/inbox";
+import { buildInboxEditorialBrief } from "@/lib/editorial/inbox-brief";
 import { canCreateContentDraftFromInbox } from "@/lib/editorial/inbox-draft";
 
 export const metadata: Metadata = {
@@ -60,6 +61,12 @@ function activityLabel(changes: Record<string, unknown>) {
   return "Attività redazionale";
 }
 
+function migrationRelevanceLabel(value: string) {
+  if (value === "direct") return "Diretta";
+  if (value === "contextual_not_direct") return "Contestuale, non diretta";
+  return value;
+}
+
 export default async function InboxDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const item = await getEditorialInboxItemById(id);
@@ -67,6 +74,7 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
 
   const origin = item.origin_country_label ?? item.origin_country_code ?? "—";
   const destination = item.destination_country_label ?? item.destination_country_code ?? "—";
+  const editorialBrief = buildInboxEditorialBrief(item.raw_metadata);
   const canCreateDraft =
     !item.linked_content_id &&
     !item.linked_event_id &&
@@ -115,6 +123,87 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
               <div><dt className="text-ink-muted">Paese di attività / destinazione</dt><dd className="text-ink font-medium">{destination}</dd></div>
             </dl>
           </section>
+
+          {editorialBrief ? (
+            <section className="border-t border-black pt-6">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Solo redazione</p>
+                  <h2 className="mt-1 text-xl font-semibold text-black">Istruttoria editoriale</h2>
+                </div>
+                {editorialBrief.sourceCheckedOn ? (
+                  <span className="text-xs text-neutral-500">Fonte verificata: {editorialBrief.sourceCheckedOn}</span>
+                ) : null}
+              </div>
+              <p className="mt-2 text-sm leading-6 text-neutral-600">
+                Appunti interni di preparazione. Non sono testo approvato e non vengono pubblicati automaticamente.
+              </p>
+
+              {editorialBrief.migrationRelevance ? (
+                <p className="mt-4 text-sm">
+                  <span className="font-semibold">Rilevanza migrazione/diaspora:</span>{" "}
+                  {migrationRelevanceLabel(editorialBrief.migrationRelevance)}
+                </p>
+              ) : null}
+
+              {editorialBrief.verifiedClaims.length > 0 ? (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold text-black">Punti verificati alla fonte</h3>
+                  <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-neutral-700">
+                    {editorialBrief.verifiedClaims.map((claim) => <li key={claim}>{claim}</li>)}
+                  </ul>
+                </div>
+              ) : null}
+
+              {editorialBrief.draftRecommendation ? (
+                <div className="mt-6 border border-black p-5">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-neutral-600">
+                    {editorialBrief.draftRecommendation.editorialPriority ? (
+                      <span>Priorità editoriale: {editorialBrief.draftRecommendation.editorialPriority}</span>
+                    ) : null}
+                    {editorialBrief.draftRecommendation.recommendedType ? (
+                      <span>Tipo suggerito: {editorialBrief.draftRecommendation.recommendedType}</span>
+                    ) : null}
+                    {editorialBrief.draftRecommendation.recommendedCategory ? (
+                      <span>Categoria suggerita: {editorialBrief.draftRecommendation.recommendedCategory}</span>
+                    ) : null}
+                  </div>
+
+                  {editorialBrief.draftRecommendation.workingTitle ? (
+                    <div className="mt-4">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Titolo di lavoro</h3>
+                      <p className="mt-1 text-lg font-semibold text-black">{editorialBrief.draftRecommendation.workingTitle}</p>
+                    </div>
+                  ) : null}
+
+                  {editorialBrief.draftRecommendation.angle ? (
+                    <div className="mt-4">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Taglio proposto</h3>
+                      <p className="mt-1 text-sm leading-6 text-neutral-700">{editorialBrief.draftRecommendation.angle}</p>
+                    </div>
+                  ) : null}
+
+                  {editorialBrief.draftRecommendation.outline.length > 0 ? (
+                    <div className="mt-4">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Scaletta</h3>
+                      <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm leading-6 text-neutral-700">
+                        {editorialBrief.draftRecommendation.outline.map((entry) => <li key={entry}>{entry}</li>)}
+                      </ol>
+                    </div>
+                  ) : null}
+
+                  {editorialBrief.draftRecommendation.cautions.length > 0 ? (
+                    <div className="mt-5 border-t border-neutral-300 pt-4">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Cautele</h3>
+                      <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-neutral-700">
+                        {editorialBrief.draftRecommendation.cautions.map((entry) => <li key={entry}>{entry}</li>)}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
 
           {item.submission ? (
             <section className="border-t border-black pt-6">
