@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTerritoryDetail } from "@/lib/data/public/territories";
 import { formatExplorerValue } from "@/lib/data/public/explore";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const LEVEL_LABELS: Record<string, string> = {
   region: "Regione",
@@ -37,9 +38,19 @@ export default async function TerritoryPage({ params }: PageProps) {
 
   const { territory } = detail;
   const levelLabel = LEVEL_LABELS[territory.level_kind] ?? "Territorio";
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Esplora", path: "/esplora" },
+    { name: "Territori", path: "/esplora/territori" },
+    { name: territory.name, path: `/territori/${territory.slug}` },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="mb-6">
         <Link href="/esplora/territori" className="text-sm font-semibold underline underline-offset-4">
           ← Torna ai territori

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getRouteDetail } from "@/lib/data/public/routes";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 
@@ -38,9 +39,20 @@ export default async function AtlasRouteDetailPage({ params }: PageProps) {
   const { route: slug } = await params;
   const detail = await getRouteDetail(slug);
   if (!detail?.hasEvidence) notFound();
+  const routeName = `${detail.route.origin.name} → ${detail.route.destination.name}`;
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Atlante", path: "/atlante" },
+    { name: "Rotte", path: "/atlante/rotte" },
+    { name: routeName, path: `/atlante/rotte/${detail.route.slug}` },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="mb-6 flex flex-wrap gap-4 text-sm font-semibold">
         <Link href="/atlante/rotte" className="underline underline-offset-4">
           ← Tutte le rotte
@@ -55,7 +67,7 @@ export default async function AtlasRouteDetailPage({ params }: PageProps) {
           Rotta · {detail.route.origin.code} → {detail.route.destination.code}
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
-          {detail.route.origin.name} → {detail.route.destination.name}
+          {routeName}
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
           Questa pagina riunisce soltanto evidenze attribuibili alla relazione tra Paese di origine e Paese di destinazione.

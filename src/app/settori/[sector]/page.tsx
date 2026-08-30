@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getSectorDetail } from "@/lib/data/public/sectors";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 
@@ -35,9 +36,19 @@ export default async function SectorDetailPage({ params }: PageProps) {
   const { sector: slug } = await params;
   const detail = await getSectorDetail(slug);
   if (!detail?.hasEvidence) notFound();
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Esplora", path: "/esplora" },
+    { name: "Settori", path: "/esplora/settori" },
+    { name: detail.sector.name, path: `/settori/${detail.sector.slug}` },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="mb-6">
         <Link href="/esplora/settori" className="text-sm font-semibold underline underline-offset-4">
           ← Tutti i settori

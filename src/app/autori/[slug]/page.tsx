@@ -5,6 +5,7 @@ import {
   getPublicAuthorProfile,
   listPublicAuthorContents,
 } from "@/lib/data/public/authors";
+import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 
@@ -63,12 +64,22 @@ export default async function PublicAuthorPage({ params }: Props) {
       profile.orcid ? `https://orcid.org/${profile.orcid}` : null,
     ].filter(Boolean),
   };
+  const breadcrumbSchema = breadcrumbStructuredData([
+    { name: "Home", path: "/" },
+    { name: "Esplora", path: "/esplora" },
+    { name: "Autori e contributori", path: "/esplora/autori" },
+    { name: profile.display_name, path: `/autori/${profile.slug}` },
+  ]);
 
   return (
     <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <div className="mb-6">
         <Link href="/esplora/autori" className="text-sm font-semibold underline underline-offset-4">
