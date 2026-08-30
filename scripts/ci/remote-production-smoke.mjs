@@ -4,6 +4,7 @@ import process from "node:process";
 const rawTarget = process.env.PRODUCTION_SMOKE_TARGET ?? "";
 const approvedSha = process.env.PRODUCTION_SMOKE_APPROVED_SHA ?? "";
 const artifactPath = "artifacts/production-remote-smoke.json";
+const canonicalOrigin = "https://immigratiimprenditori.it";
 
 const allowedExactHosts = new Set([
   "immigratiimprenditori.it",
@@ -83,6 +84,41 @@ function expectProductionCsp(response) {
   if (csp.includes("'unsafe-eval'")) fail("content-security-policy: unsafe-eval must not be enabled");
 }
 
+function expectHtml(path, response) {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().includes("text/html")) {
+    fail(`${path}: expected text/html response, received ${JSON.stringify(contentType)}`);
+  }
+}
+
+function expectXml(path, response) {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().includes("xml")) {
+    fail(`${path}: expected XML response, received ${JSON.stringify(contentType)}`);
+  }
+}
+
+function expectCanonical(path, body, expectedPath) {
+  const canonicalTag = body.match(/<link\b[^>]*\brel=["']canonical["'][^>]*>/i)?.[0];
+  if (!canonicalTag) fail(`${path}: canonical link not found`);
+  const href = canonicalTag.match(/\bhref=["']([^"']+)["']/i)?.[1];
+  if (!href) fail(`${path}: canonical link has no href`);
+
+  let actual;
+  try {
+    actual = new URL(href, canonicalOrigin);
+  } catch {
+    fail(`${path}: canonical href is not a valid URL: ${JSON.stringify(href)}`);
+  }
+  const expected = new URL(expectedPath, `${canonicalOrigin}/`);
+  if (actual.origin !== expected.origin || actual.pathname !== expected.pathname) {
+    fail(`${path}: expected canonical ${expected.href}, received ${actual.href}`);
+  }
+  if (actual.search || actual.hash) {
+    fail(`${path}: canonical must not contain query or fragment components`);
+  }
+}
+
 async function run() {
   if (!/^[0-9a-f]{40}$/.test(approvedSha)) {
     fail("PRODUCTION_SMOKE_APPROVED_SHA must be a full lowercase 40-character Git SHA");
@@ -93,11 +129,13 @@ async function run() {
 
   const home = await get(target, "/");
   expectStatus("/", home.response, 200);
+  expectHtml("/", home.response);
   const homeBody = await home.response.text();
   if (!homeBody.includes("<h1")) fail("/: primary h1 not found");
   if (!homeBody.includes("Studiare l&#x27;imprenditoria migrante") && !homeBody.includes("Studiare l’imprenditoria migrante")) {
     fail("/: expected institutional homepage heading not found");
   }
+  expectCanonical("/", homeBody, "/");
   expectHeader(home.response, "x-content-type-options", "nosniff");
   expectHeader(home.response, "x-frame-options", "DENY");
   expectHeader(home.response, "strict-transport-security", /max-age=63072000/i);
@@ -105,13 +143,22 @@ async function run() {
   expectHeader(home.response, "permissions-policy", "camera=(), microphone=(), geolocation=()");
   expectHeaderAbsent(home.response, "x-powered-by");
   expectProductionCsp(home.response);
-  checks.push("homepage + security headers");
+  checks.push("homepage + canonical + security headers");
 
   for (const path of ["/chi-siamo", "/privacy", "/cookie", "/termini", "/accedi"]) {
     const page = await get(target, path);
     expectStatus(path, page.response, 200);
+    expectHtml(path, page.response);
     checks.push(`${path} GET 200`);
   }
+
+  const contribute = await get(target, "/contribuisci");
+  expectStatus("/contribuisci", contribute.response, 200);
+  expectHtml("/contribuisci", contribute.response);
+  const contributeBody = await contribute.response.text();
+  expectCanonical("/contribuisci", contributeBody, "/contribuisci");
+  if (!contributeBody.includes("<form")) fail("/contribuisci: contribution form not found");
+  checks.push("/contribuisci form + canonical");
 
   const corePublicPaths = [
     "/osservatorio",
@@ -124,10 +171,7 @@ async function run() {
   for (const path of corePublicPaths) {
     const page = await get(target, path);
     expectStatus(path, page.response, 200);
-    const contentType = page.response.headers.get("content-type") ?? "";
-    if (!contentType.toLowerCase().includes("text/html")) {
-      fail(`${path}: expected text/html response, received ${JSON.stringify(contentType)}`);
-    }
+    expectHtml(path, page.response);
     checks.push(`${path} public surface GET 200`);
   }
 
@@ -164,13 +208,28 @@ async function run() {
   if (/^Disallow:\s*\/\s*$/im.test(robotsBody)) {
     fail("/robots.txt: Production target is still globally disallowed for crawlers");
   }
-  if (!robotsBody.includes("Sitemap: https://immigratiimprenditori.it/sitemap.xml")) {
+  if (!robotsBody.includes(`Sitemap: ${canonicalOrigin}/sitemap.xml`)) {
     fail("/robots.txt: canonical sitemap is not advertised");
+  }
+  if (!robotsBody.includes(`Sitemap: ${canonicalOrigin}/sitemap-contributors.xml`)) {
+    fail("/robots.txt: contributor sitemap is not advertised");
   }
   if (!robotsBody.includes("Disallow: /app/")) {
     fail("/robots.txt: private /app/ area is not disallowed");
   }
-  checks.push("robots crawlable + /app private");
+  checks.push("robots crawlable + both sitemaps advertised + /app private");
+
+  for (const path of ["/sitemap.xml", "/sitemap-contributors.xml"]) {
+    const sitemap = await get(target, path);
+    expectStatus(path, sitemap.response, 200);
+    expectXml(path, sitemap.response);
+    const sitemapBody = await sitemap.response.text();
+    if (!/<urlset\b/i.test(sitemapBody)) fail(`${path}: sitemap urlset not found`);
+    if (path === "/sitemap.xml" && !sitemapBody.includes(canonicalOrigin)) {
+      fail(`${path}: canonical origin not found in sitemap`);
+    }
+    checks.push(`${path} valid XML sitemap`);
+  }
 
   const protectedRoute = await get(target, "/app/redazione");
   if (![307, 308].includes(protectedRoute.response.status)) {
