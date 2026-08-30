@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublishedContentsByTypes, VOICE_CONTENT_TYPES } from "@/lib/data/public/collections";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Storie e voci | Immigrati Imprenditori";
+const DESCRIPTION = "Storie d'impresa, interviste, testimonianze e contenuti audiovisivi pubblicati dal Centro Studi.";
 
 export const metadata: Metadata = {
-  title: "Storie e voci | Immigrati Imprenditori",
-  description: "Storie d'impresa, interviste, testimonianze e contenuti audiovisivi pubblicati dal Centro Studi.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/storie" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/storie",
+  }),
 };
 
 function formatDate(value: string | null) {

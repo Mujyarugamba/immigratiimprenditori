@@ -11,6 +11,7 @@ import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 import { EditorialTranslationNotice } from "@/components/i18n/EditorialTranslationNotice";
 import { presentLocalizedContentCards } from "@/lib/i18n/ai-translation/runtime";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const descriptions = {
   en: "Published analysis, research, interviews and documented stories from the Research Centre.",
@@ -30,6 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: NAV_MESSAGES[locale].analysis,
     description: descriptions[locale],
     alternates: { canonical: `/${locale}/contenuti`, languages: languageAlternates("/contenuti") },
+    ...pageSocialMetadata({
+      title: NAV_MESSAGES[locale].analysis,
+      description: descriptions[locale],
+      pathname: `/${locale}/contenuti`,
+    }),
   };
 }
 

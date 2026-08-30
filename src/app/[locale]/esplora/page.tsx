@@ -6,6 +6,7 @@ import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const moduleText = {
   en: ["Published Observatory values", "Territories represented in published data", "Economic-sector taxonomy", "Statistical sources used by the Observatory", "Methodological definitions", "Machine-readable public data"],
@@ -31,7 +32,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = CORE_MESSAGES[locale];
-  return { title: m.exploreTitle, description: m.exploreIntro, alternates: { canonical: `/${locale}/esplora`, languages: languageAlternates("/esplora") } };
+  return {
+    title: m.exploreTitle,
+    description: m.exploreIntro,
+    alternates: { canonical: `/${locale}/esplora`, languages: languageAlternates("/esplora") },
+    ...pageSocialMetadata({
+      title: m.exploreTitle,
+      description: m.exploreIntro,
+      pathname: `/${locale}/esplora`,
+    }),
+  };
 }
 
 export default async function LocalizedExplorePage({ params }: Props) {

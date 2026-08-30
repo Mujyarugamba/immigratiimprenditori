@@ -11,13 +11,20 @@ import {
   selectFilter,
   textFilter,
 } from "@/lib/public/labels";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const section = sections["notizie-e-guide"];
+const TITLE = "Analisi e ricerche";
 
 export const metadata: Metadata = {
-  title: "Analisi e ricerche",
+  title: TITLE,
   description: section.description,
   alternates: { canonical: "/contenuti" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: section.description,
+    pathname: "/contenuti",
+  }),
 };
 
 type PageProps = {
@@ -48,7 +55,7 @@ export default async function ContenutiPage({ searchParams }: PageProps) {
 
   return (
     <PublicListLayout
-      title="Analisi e ricerche"
+      title={TITLE}
       description={section.description}
       basePath="/contenuti"
       filters={[

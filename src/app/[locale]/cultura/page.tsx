@@ -11,6 +11,7 @@ import { presentLocalizedContentCards } from "@/lib/i18n/ai-translation/runtime"
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const messages = {
   en: {
@@ -171,6 +172,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `/${locale}/cultura`,
       languages: languageAlternates("/cultura"),
     },
+    ...pageSocialMetadata({
+      title: NAV_MESSAGES[locale].culture,
+      description: m.description,
+      pathname: `/${locale}/cultura`,
+    }),
   };
 }
 
