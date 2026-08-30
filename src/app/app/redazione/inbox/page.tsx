@@ -39,12 +39,17 @@ const KIND_LABELS: Record<string, string> = {
   other: "Altro",
 };
 
+const TOPIC_LABELS: Record<string, string> = {
+  culture: "Cultura",
+};
+
 type Props = {
   searchParams: Promise<{
     q?: string;
     stato?: string;
     origine?: string;
     tipo?: string;
+    tema?: string;
     page?: string;
   }>;
 };
@@ -69,6 +74,7 @@ export default async function InboxPage({ searchParams }: Props) {
   if (params.stato) qs.set("stato", params.stato);
   if (params.origine) qs.set("origine", params.origine);
   if (params.tipo) qs.set("tipo", params.tipo);
+  if (params.tema === "culture") qs.set("tema", params.tema);
   const baseQs = qs.toString();
 
   return (
@@ -87,7 +93,7 @@ export default async function InboxPage({ searchParams }: Props) {
         </p>
       </div>
 
-      <form method="get" className="border-line mt-6 grid gap-3 border-y py-4 md:grid-cols-4">
+      <form method="get" className="border-line mt-6 grid gap-3 border-y py-4 md:grid-cols-5">
         <label className="text-ink flex flex-col gap-1 text-sm">
           <span className="font-medium">Cerca</span>
           <input name="q" defaultValue={params.q ?? ""} className="border-line border px-3 py-2" placeholder="Titolo" />
@@ -113,7 +119,14 @@ export default async function InboxPage({ searchParams }: Props) {
             {Object.entries(KIND_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </label>
-        <div className="md:col-span-4">
+        <label className="text-ink flex flex-col gap-1 text-sm">
+          <span className="font-medium">Tema</span>
+          <select name="tema" defaultValue={params.tema === "culture" ? params.tema : ""} className="border-line border px-3 py-2">
+            <option value="">Tutti</option>
+            {Object.entries(TOPIC_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <div className="md:col-span-5">
           <button type="submit" className="border-ink bg-ink text-surface border px-4 py-2 text-sm font-medium">
             Filtra
           </button>
