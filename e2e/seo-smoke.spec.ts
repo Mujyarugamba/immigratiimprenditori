@@ -24,6 +24,21 @@ const staticSeoPages = [
   "/politica-editoriale",
 ] as const;
 
+const socialSeoPages = [
+  "/osservatorio",
+  "/contenuti",
+  "/storie",
+  "/cultura",
+  "/eventi",
+  "/esplora",
+  "/en/osservatorio",
+  "/fr/contenuti",
+  "/es/storie",
+  "/de/eventi",
+  "/ar/esplora",
+  "/zh/cultura",
+] as const;
+
 function tags(html: string, tagName: string) {
   return html.match(new RegExp(`<${tagName}\\b[^>]*>`, "gi")) ?? [];
 }
@@ -41,6 +56,55 @@ function assertCanonical(href: string | null, path: string) {
   expect(actual.pathname, `${path} canonical pathname`).toBe(expected.pathname);
   expect(actual.search, `${path} canonical must not contain query parameters`).toBe("");
   expect(actual.hash, `${path} canonical must not contain a fragment`).toBe("");
+}
+
+function matchingMeta(html: string, attributeName: "name" | "property", value: string) {
+  return tags(html, "meta").filter(
+    (tag) => attribute(tag, attributeName)?.toLowerCase() === value.toLowerCase(),
+  );
+}
+
+function assertSingleMetaContent(
+  html: string,
+  path: string,
+  attributeName: "name" | "property",
+  value: string,
+) {
+  const matches = matchingMeta(html, attributeName, value);
+  expect(matches, `${path} must expose exactly one ${value} meta tag`).toHaveLength(1);
+  const content = attribute(matches[0], "content")?.trim();
+  expect(content, `${path} ${value} content must not be empty`).toBeTruthy();
+  return content!;
+}
+
+function assertPageSocialMetadata(html: string, path: string) {
+  assertSingleMetaContent(html, path, "property", "og:title");
+  assertSingleMetaContent(html, path, "property", "og:description");
+  const openGraphUrl = assertSingleMetaContent(html, path, "property", "og:url");
+  assertCanonical(openGraphUrl, path);
+
+  const openGraphImage = new URL(
+    assertSingleMetaContent(html, path, "property", "og:image"),
+    `${PRODUCTION_ORIGIN}/`,
+  );
+  expect(openGraphImage.origin, `${path} og:image origin`).toBe(PRODUCTION_ORIGIN);
+  expect(openGraphImage.pathname, `${path} og:image pathname`).toBe(
+    "/logo-immigrati-imprenditori.png",
+  );
+
+  expect(assertSingleMetaContent(html, path, "name", "twitter:card")).toBe(
+    "summary_large_image",
+  );
+  assertSingleMetaContent(html, path, "name", "twitter:title");
+  assertSingleMetaContent(html, path, "name", "twitter:description");
+  const twitterImage = new URL(
+    assertSingleMetaContent(html, path, "name", "twitter:image"),
+    `${PRODUCTION_ORIGIN}/`,
+  );
+  expect(twitterImage.origin, `${path} twitter:image origin`).toBe(PRODUCTION_ORIGIN);
+  expect(twitterImage.pathname, `${path} twitter:image pathname`).toBe(
+    "/logo-immigrati-imprenditori.png",
+  );
 }
 
 function assertGlobalStructuredData(html: string, path: string) {
@@ -106,5 +170,15 @@ test("all public core pages publish complete canonical SEO metadata", async ({ r
     const response = await request.get(path, { timeout: 30_000 });
     expect(response.ok(), `${path} did not return 2xx`).toBeTruthy();
     assertSeoDocument(await response.text(), path);
+  }
+});
+
+test("core Italian and localized sections publish page-specific social metadata", async ({ request }) => {
+  for (const path of socialSeoPages) {
+    const response = await request.get(path, { timeout: 30_000 });
+    expect(response.ok(), `${path} did not return 2xx`).toBeTruthy();
+    const html = await response.text();
+    assertSeoDocument(html, path);
+    assertPageSocialMetadata(html, path);
   }
 });

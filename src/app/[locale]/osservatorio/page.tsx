@@ -9,6 +9,7 @@ import { languageAlternates } from "@/lib/i18n/seo";
 import { listPublicIndicators } from "@/lib/data/public/observatory";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const descriptions = {
   en: "Published indicators from the Observatory, with definitions, sources, periods and methodology.",
@@ -28,6 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: NAV_MESSAGES[locale].observatory,
     description: descriptions[locale],
     alternates: { canonical: `/${locale}/osservatorio`, languages: languageAlternates("/osservatorio") },
+    ...pageSocialMetadata({
+      title: NAV_MESSAGES[locale].observatory,
+      description: descriptions[locale],
+      pathname: `/${locale}/osservatorio`,
+    }),
   };
 }
 

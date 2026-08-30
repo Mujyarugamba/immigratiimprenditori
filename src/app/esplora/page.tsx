@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Esplora il Centro Studi";
+const DESCRIPTION =
+  "Esplora dati, mappe, territori, settori, autori, analisi, cultura, pubblicazioni, storie, eventi e fonti di Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Esplora il Centro Studi",
-  description:
-    "Esplora dati, mappe, territori, settori, autori, analisi, cultura, pubblicazioni, storie, eventi e fonti di Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/esplora" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/esplora",
+  }),
 };
 
 const modules = [

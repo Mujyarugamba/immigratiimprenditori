@@ -15,12 +15,21 @@ import {
   formatItalianDateTime,
   label,
 } from "@/lib/public/labels";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Cultura e industrie creative | Immigrati Imprenditori";
+const DESCRIPTION =
+  "Storie, eventi, analisi e industrie culturali e creative osservate dal Centro Studi attraverso migrazioni, diaspora, impresa e territori.";
 
 export const metadata: Metadata = {
-  title: "Cultura e industrie creative | Immigrati Imprenditori",
-  description:
-    "Storie, eventi, analisi e industrie culturali e creative osservate dal Centro Studi attraverso migrazioni, diaspora, impresa e territori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/cultura" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/cultura",
+  }),
 };
 
 const CREATIVE_FIELDS = [

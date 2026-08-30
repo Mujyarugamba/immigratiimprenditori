@@ -10,6 +10,7 @@ import {
   label,
   textFilter,
 } from "@/lib/public/labels";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const section = sections.osservatorio;
 
@@ -17,6 +18,11 @@ export const metadata: Metadata = {
   title: section.title,
   description: section.description,
   alternates: { canonical: "/osservatorio" },
+  ...pageSocialMetadata({
+    title: section.title,
+    description: section.description,
+    pathname: "/osservatorio",
+  }),
 };
 
 type PageProps = {

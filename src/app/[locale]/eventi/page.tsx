@@ -9,6 +9,7 @@ import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const descriptions = {
   en: "Events, conferences and initiatives relevant to migrant entrepreneurship, research and economic integration.",
@@ -28,6 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: NAV_MESSAGES[locale].events,
     description: descriptions[locale],
     alternates: { canonical: `/${locale}/eventi`, languages: languageAlternates("/eventi") },
+    ...pageSocialMetadata({
+      title: NAV_MESSAGES[locale].events,
+      description: descriptions[locale],
+      pathname: `/${locale}/eventi`,
+    }),
   };
 }
 
