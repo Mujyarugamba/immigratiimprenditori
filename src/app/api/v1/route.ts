@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -8,8 +9,8 @@ export async function GET() {
       name: "Immigrati Imprenditori — Public API",
       version: "v1",
       status: "stable-foundation",
-      documentation: "https://immigratiimprenditori.it/open-data/api",
-      methodology: "https://immigratiimprenditori.it/dati-e-fonti",
+      documentation: absoluteUrl("/open-data/api"),
+      methodology: absoluteUrl("/dati-e-fonti"),
       endpoints: {
         indicators: "/api/v1/indicators",
         atlas_countries: "/api/v1/atlas/countries",
