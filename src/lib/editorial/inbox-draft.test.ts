@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   canCreateContentDraftFromInbox,
+  suggestedCategoryForInboxMetadata,
   suggestedContentTypeForInboxKind,
 } from "./inbox-draft";
 
@@ -19,5 +20,20 @@ describe("inbox draft routing", () => {
     assert.equal(canCreateContentDraftFromInbox("statistical_release"), false);
     assert.equal(canCreateContentDraftFromInbox("event"), false);
     assert.equal(suggestedContentTypeForInboxKind("event"), null);
+  });
+
+  it("suggests the culture category only from explicit culture metadata", () => {
+    assert.equal(
+      suggestedCategoryForInboxMetadata({ topic: ["culture", "migration"] }),
+      "culture",
+    );
+    assert.equal(
+      suggestedCategoryForInboxMetadata({ cultural_scope: "creative_industries" }),
+      "culture",
+    );
+    assert.equal(
+      suggestedCategoryForInboxMetadata({ topic: ["entrepreneurship"] }),
+      null,
+    );
   });
 });
