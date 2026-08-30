@@ -13,7 +13,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: production-promotion
@@ -27,11 +27,21 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Create canonical production release token
+        id: release-app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.PRODUCTION_RELEASE_APP_ID }}
+          private-key: ${{ secrets.PRODUCTION_RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Checkout main with full history
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ steps.release-app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Verify production branch protection
         env:
@@ -73,9 +83,16 @@ jobs:
         env:
           EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
           CONFIRMATION: ${{ inputs.confirmation }}
+          RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}
         shell: bash
         run: |
           set -euo pipefail
+
+          git_with_app() {
+            local auth
+            auth="$(printf 'x-access-token:%s' "$RELEASE_APP_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" "$@"
+          }
 
           if [ "$CONFIRMATION" != "DEPLOY_PRODUCTION" ]; then
             echo "Refusing promotion: confirmation must be DEPLOY_PRODUCTION." >&2
@@ -87,7 +104,7 @@ jobs:
             exit 1
           fi
 
-          git fetch --no-tags origin main production
+          git_with_app fetch --no-tags origin main production
           main_sha="$(git rev-parse origin/main)"
           production_sha="$(git rev-parse origin/production)"
 
@@ -125,21 +142,37 @@ jobs:
         if: steps.guard.outputs.already_current == 'false'
         env:
           APPROVED_SHA: ${{ steps.guard.outputs.main_sha }}
+          RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}
         shell: bash
         run: |
           set -euo pipefail
+
+          git_with_app() {
+            local auth
+            auth="$(printf 'x-access-token:%s' "$RELEASE_APP_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" "$@"
+          }
+
           # No force push. Git rejects the update if production changed after preflight.
-          git push origin "$APPROVED_SHA:refs/heads/production"
+          git_with_app push origin "$APPROVED_SHA:refs/heads/production"
           echo "PRODUCTION_FAST_FORWARD = PASS"
 
       - name: Verify promoted ref
         if: steps.guard.outputs.already_current == 'false'
         env:
           APPROVED_SHA: ${{ steps.guard.outputs.main_sha }}
+          RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin production
+
+          git_with_app() {
+            local auth
+            auth="$(printf 'x-access-token:%s' "$RELEASE_APP_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" "$@"
+          }
+
+          git_with_app fetch --no-tags origin production
           actual="$(git rev-parse origin/production)"
           test "$actual" = "$APPROVED_SHA" || {
             echo "Production ref does not match the approved SHA after push." >&2
