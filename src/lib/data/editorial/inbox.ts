@@ -66,6 +66,7 @@ export type EditorialInboxSearchParams = {
   stato?: string;
   origine?: string;
   tipo?: string;
+  tema?: string;
   page?: string;
 };
 
@@ -92,6 +93,13 @@ export async function listEditorialInbox(
   if (origine) query = query.eq("source_kind", origine);
   const tipo = searchParams.tipo?.trim();
   if (tipo) query = query.eq("item_kind", tipo);
+
+  // Topic filters are deliberately whitelisted. raw_metadata is editorial
+  // enrichment, not an arbitrary user-queryable JSON surface.
+  const tema = searchParams.tema?.trim();
+  if (tema === "culture") {
+    query = query.contains("raw_metadata", { topic: ["culture"] });
+  }
 
   const { data, error, count } = await query.range(from, to);
   if (error) return paginated([], 0, page, LIST_PAGE_SIZE);
