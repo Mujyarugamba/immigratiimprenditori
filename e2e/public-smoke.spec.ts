@@ -168,9 +168,9 @@ test("narrow header navigation remains keyboard reachable and scrolls focus into
 
   const primaryNavigation = page.getByRole("navigation", { name: "Navigazione principale" });
   const primaryLinks = primaryNavigation.getByRole("link");
-  await expect(primaryLinks).toHaveCount(5);
+  await expect(primaryLinks).toHaveCount(6);
 
-  for (let index = 0; index < 5; index += 1) {
+  for (let index = 0; index < 6; index += 1) {
     const link = primaryLinks.nth(index);
     await tabUntilFocused(page, link);
     await expectFocusedInViewport(link, width);
