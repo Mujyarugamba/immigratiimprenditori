@@ -1,14 +1,14 @@
 {
   "schemaVersion": 2,
   "hostedProjectRef": "hvfvfatlaspcpszgizhg",
-  "verifiedReadOnlyAt": "2026-08-24",
+  "verifiedReadOnlyAt": "2026-08-30",
   "releaseBaselineHostedLatestMigration": {
     "version": "20260820160000",
     "name": "prepare_events_external_ingestion_rls"
   },
   "observedHostedLatestMigration": {
-    "version": "20260824103000",
-    "name": "harden_publication_gate_execute_privileges"
+    "version": "20260824104000",
+    "name": "fix_public_profile_column_grants"
   },
   "canonicalColdStartBaseline": [
     "00000000000000_baseline_immigratiimprenditori.sql",
@@ -51,18 +51,18 @@
     "20260822212000_backfill_futurae_route_evidence.sql",
     "20260822213000_hybrid_editorial_review_governance.sql",
     "20260822213100_fix_hybrid_null_category_classifier.sql",
-    "20260824103000_harden_publication_gate_execute_privileges.sql"
+    "20260824103000_harden_publication_gate_execute_privileges.sql",
+    "20260824104000_fix_public_profile_column_grants.sql"
   ],
   "candidateDelta": [
-    "20260824104000_fix_public_profile_column_grants.sql",
     "20260829120000_create_content_ai_translations.sql"
   ],
   "productionApplyEvidence": {
     "phase1Run": 32699707002,
     "phase2Run": 32706028947,
     "securityPatchRun": 32707529881,
-    "migrationRowsAfterApply": 234,
-    "maxVersionAfterApply": "20260824103000"
+    "migrationRowsAfterApply": 235,
+    "maxVersionAfterApply": "20260824104000"
   },
   "releasePolicy": {
     "historicalMigrationsDirectoryIsNotBootstrap": true,
