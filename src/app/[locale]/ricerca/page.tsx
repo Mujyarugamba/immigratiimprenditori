@@ -9,6 +9,7 @@ import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 import { EditorialTranslationNotice } from "@/components/i18n/EditorialTranslationNotice";
 import { presentLocalizedContentCards } from "@/lib/i18n/ai-translation/runtime";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -20,6 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: m.researchTitle,
     description: m.researchIntro,
     alternates: { canonical: `/${locale}/ricerca`, languages: languageAlternates("/ricerca") },
+    ...pageSocialMetadata({
+      title: m.researchTitle,
+      description: m.researchIntro,
+      pathname: `/${locale}/ricerca`,
+    }),
   };
 }
 

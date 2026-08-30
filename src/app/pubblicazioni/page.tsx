@@ -2,12 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listPublications, publicationKindLabel } from "@/lib/data/public/publications";
 import { absoluteUrl } from "@/lib/i18n/seo";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Pubblicazioni";
+const DESCRIPTION =
+  "Rapporti, studi e pubblicazioni verificati e pubblicati dal Centro Studi Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
-  title: "Pubblicazioni",
-  description:
-    "Rapporti, studi e pubblicazioni verificati e pubblicati dal Centro Studi Immigrati Imprenditori.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/pubblicazioni" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/pubblicazioni",
+  }),
 };
 
 export default async function PubblicazioniPage() {

@@ -6,6 +6,7 @@ import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const text = {
   en: { kicker: "Observatory · Provenance", title: "Source catalogue", intro: "Statistical sources used by the Observatory are registered separately from the values they support, so producer, publication, edition, licence and methodology can be documented when available.", edition: "Edition", published: "Published", licence: "Licence/use", open: "Open original source", method: "Method & comparability", glossary: "Glossary", notice: "Source metadata and methodological notes may remain in the language in which they were originally documented." },
@@ -22,7 +23,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") return { robots: { index: false, follow: false } };
   const m = text[locale];
-  return { title: m.title, description: m.intro, alternates: { canonical: `/${locale}/fonti`, languages: languageAlternates("/fonti") } };
+  return {
+    title: m.title,
+    description: m.intro,
+    alternates: { canonical: `/${locale}/fonti`, languages: languageAlternates("/fonti") },
+    ...pageSocialMetadata({
+      title: m.title,
+      description: m.intro,
+      pathname: `/${locale}/fonti`,
+    }),
+  };
 }
 
 export default async function LocalizedSourcesPage({ params }: Props) {

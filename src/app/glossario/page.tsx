@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+
+const TITLE = "Glossario | Immigrati Imprenditori";
+const DESCRIPTION =
+  "Glossario metodologico dei principali termini utilizzati dal Centro Studi sull'imprenditoria migrante.";
 
 export const metadata: Metadata = {
-  title: "Glossario | Immigrati Imprenditori",
-  description:
-    "Glossario metodologico dei principali termini utilizzati dal Centro Studi sull'imprenditoria migrante.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/glossario" },
+  ...pageSocialMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    pathname: "/glossario",
+  }),
 };
 
 const entries = [
