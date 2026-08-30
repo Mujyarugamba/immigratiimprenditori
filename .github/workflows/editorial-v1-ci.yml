@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      # Public-shell CI models the Netlify Deploy Preview: production public
+      # Public-shell CI models the read-only preview boundary: production public
       # data may be rendered server-side, but every mutation path is fail-closed.
       NEXT_PUBLIC_PREVIEW_READ_ONLY: "true"
     steps:
@@ -106,6 +106,10 @@ jobs:
             'workflow_dispatch:'
             "if: github.ref == 'refs/heads/main'"
             'contents: write'
+            'Verify production branch protection'
+            'rules/branches/production'
+            'const required = ["update", "deletion", "non_fast_forward"];'
+            'PRODUCTION_BRANCH_PROTECTION = PASS'
             'DEPLOY_PRODUCTION'
             "grep -Eq '^[0-9a-f]{40}$'"
             'git merge-base --is-ancestor'

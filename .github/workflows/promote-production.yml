@@ -33,6 +33,41 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Verify production branch protection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rules_api="https://api.github.com/repos/${GITHUB_REPOSITORY}/rules/branches/production?per_page=100"
+          rules_payload="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$rules_api")"
+
+          missing="$(printf '%s' "$rules_payload" | node -e '
+            let input = "";
+            process.stdin.setEncoding("utf8");
+            process.stdin.on("data", (chunk) => { input += chunk; });
+            process.stdin.on("end", () => {
+              const rules = JSON.parse(input);
+              if (!Array.isArray(rules)) throw new Error("GitHub branch-rules response is not an array");
+              const required = ["update", "deletion", "non_fast_forward"];
+              const active = new Set(rules.map((rule) => rule?.type).filter(Boolean));
+              process.stdout.write(required.filter((type) => !active.has(type)).join(","));
+            });
+          ')"
+
+          if [ -n "$missing" ]; then
+            echo "Refusing promotion: production is missing active GitHub branch rule(s): $missing" >&2
+            echo "Create an active Production ruleset with restrict-updates, deletion protection and non-fast-forward protection, plus an explicit bypass path for the canonical promotion actor." >&2
+            exit 1
+          fi
+
+          echo "PRODUCTION_BRANCH_PROTECTION = PASS"
+
       - name: Verify explicit release authorization
         id: guard
         env:
