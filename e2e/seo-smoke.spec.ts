@@ -1,11 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 const PRODUCTION_ORIGIN = "https://www.immigratiimprenditori.it";
+const LEGACY_APEX_ORIGIN = "https://immigratiimprenditori.it";
 
 // Source-gate vocabulary retained for the invariant contract:
 // canonical must target production; global structured data must remain present and valid.
 const staticSeoPages = [
   "/",
+  "/osservatorio",
+  "/contenuti",
+  "/storie",
+  "/cultura",
+  "/eventi",
+  "/esplora",
   "/chi-siamo",
   "/dati-e-fonti",
   "/glossario",
@@ -63,6 +70,8 @@ function assertGlobalStructuredData(html: string, path: string) {
 }
 
 function assertSeoDocument(html: string, path: string) {
+  expect(html, `${path} must not expose the legacy apex origin`).not.toContain(LEGACY_APEX_ORIGIN);
+
   const titles = html.match(/<title>[\s\S]*?<\/title>/gi) ?? [];
   expect(titles, `${path} must expose exactly one title`).toHaveLength(1);
   expect(titles[0].replace(/<\/?title>/gi, "").trim(), `${path} title must not be empty`).not.toBe("");
@@ -92,7 +101,7 @@ function assertSeoDocument(html: string, path: string) {
   }
 }
 
-test("static public core pages publish complete canonical SEO metadata", async ({ request }) => {
+test("all public core pages publish complete canonical SEO metadata", async ({ request }) => {
   for (const path of staticSeoPages) {
     const response = await request.get(path, { timeout: 30_000 });
     expect(response.ok(), `${path} did not return 2xx`).toBeTruthy();
