@@ -53,6 +53,7 @@ export type EditorialInboxItem = EditorialInboxListItem & {
   assigned_account_id: string | null;
   linked_content_id: string | null;
   linked_event_id: string | null;
+  raw_metadata: Record<string, unknown>;
   reviewed_at: string | null;
   created_at: string;
   updated_at: string;
@@ -71,7 +72,7 @@ export type EditorialInboxSearchParams = {
 const LIST_SELECT =
   "id, source_kind, item_kind, title, source_label, original_url, origin_country_code, destination_country_code, origin_country_label, destination_country_label, relevance_band, priority, status, received_at";
 
-const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_id, duplicate_of_id, assigned_account_id, linked_content_id, linked_event_id, reviewed_at, created_at, updated_at`;
+const DETAIL_SELECT = `${LIST_SELECT}, source_published_at, summary, territory_id, duplicate_of_id, assigned_account_id, linked_content_id, linked_event_id, raw_metadata, reviewed_at, created_at, updated_at`;
 
 export async function listEditorialInbox(
   searchParams: EditorialInboxSearchParams = {},
@@ -135,6 +136,10 @@ export async function getEditorialInboxItemById(
   if (itemError || !item) return null;
   return {
     ...(item as Omit<EditorialInboxItem, "submission" | "activity">),
+    raw_metadata:
+      item.raw_metadata && typeof item.raw_metadata === "object" && !Array.isArray(item.raw_metadata)
+        ? (item.raw_metadata as Record<string, unknown>)
+        : {},
     submission: (submission as EditorialSubmission | null) ?? null,
     activity: activityError ? [] : ((activity ?? []) as EditorialInboxActivity[]),
   };
