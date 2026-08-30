@@ -54,6 +54,7 @@
     "20260824103000_harden_publication_gate_execute_privileges.sql"
   ],
   "candidateDelta": [
+    "20260824104000_fix_public_profile_column_grants.sql",
     "20260829120000_create_content_ai_translations.sql"
   ],
   "productionApplyEvidence": {
