@@ -4,7 +4,7 @@ import process from "node:process";
 const rawTarget = process.env.PRODUCTION_SMOKE_TARGET ?? "";
 const approvedSha = process.env.PRODUCTION_SMOKE_APPROVED_SHA ?? "";
 const artifactPath = "artifacts/production-remote-smoke.json";
-const canonicalOrigin = "https://immigratiimprenditori.it";
+const canonicalOrigin = "https://www.immigratiimprenditori.it";
 
 const allowedExactHosts = new Set([
   "immigratiimprenditori.it",
