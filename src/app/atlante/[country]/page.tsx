@@ -5,6 +5,7 @@ import { getAtlasCountryBySlug } from "@/lib/atlas/scope";
 import { getAtlasCountryDetail } from "@/lib/data/public/atlas";
 import { formatExplorerValue } from "@/lib/data/public/explore";
 import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
+import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 import { breadcrumbStructuredData } from "@/lib/seo/structured-data";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
@@ -27,6 +28,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const canonical = `/atlante/${country.slug}`;
   const description = `Dati, indicatori, rotte, analisi, storie ed eventi disponibili per ${country.name} nell'Atlante dell'imprenditoria migrante.`;
+  const social = pageSocialMetadata({
+    title: `${country.name} | Atlante dell'imprenditoria migrante`,
+    description,
+    pathname: canonical,
+  });
 
   return {
     title: `${country.name} | Atlante`,
@@ -38,6 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${country.name} | Atlante dell'imprenditoria migrante`,
       description,
     },
+    twitter: social.twitter,
   };
 }
 

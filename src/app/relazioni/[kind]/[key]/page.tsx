@@ -111,7 +111,7 @@ export default async function RelationalEntityPage({ params }: Props) {
         </div>
         {Array.from(counts.entries()).slice(0, 3).map(([relatedKind, count]) => (
           <div key={relatedKind} className="bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+            <p className="text-xs uppercase tracking-[0.12em] text-neutral-500">
               {KIND_LABELS[relatedKind] ?? relatedKind}
             </p>
             <strong className="mt-2 block text-3xl text-black">{count}</strong>
