@@ -4,7 +4,7 @@ import { ATLAS_COUNTRIES } from "@/lib/atlas/scope";
 import { getPublicSupabaseEnv } from "@/lib/env";
 import { PLATFORM_LOCALES } from "@/lib/i18n/config";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 const publicRoutes = [
   "",
@@ -257,7 +257,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const row of eventRoutesResult.data ?? []) {
       eventRouteEvidence.set(row.route_id, newest(eventRouteEvidence.get(row.route_id), row.updated_at));
     }
-
     const routesWithEvidence = (routesResult.data ?? []).filter((route) => {
       if (contentRouteEvidence.has(route.id) || eventRouteEvidence.has(route.id)) return true;
       return publicValues.some((value) => {

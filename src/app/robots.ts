@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { resolveDeploymentEnvironment } from "@/lib/deployment/environment";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 
 export default function robots(): MetadataRoute.Robots {
   const deployment = resolveDeploymentEnvironment(process.env);

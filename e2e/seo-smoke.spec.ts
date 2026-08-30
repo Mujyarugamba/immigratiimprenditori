@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const PRODUCTION_ORIGIN = "https://immigratiimprenditori.it";
+const PRODUCTION_ORIGIN = "https://www.immigratiimprenditori.it";
 
 // Source-gate vocabulary retained for the invariant contract:
 // canonical must target production; global structured data must remain present and valid.

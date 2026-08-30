@@ -12,7 +12,7 @@ import "./responsive-overrides.css";
 import "./editorial-identity.css";
 import "./accessibility.css";
 
-const SITE_URL = "https://immigratiimprenditori.it";
+const SITE_URL = "https://www.immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
 
 export const metadata: Metadata = {

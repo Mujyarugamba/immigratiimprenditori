@@ -82,8 +82,8 @@ test("Netlify production keeps public crawl rules and sitemaps", () => {
     },
   ]);
   assert.deepEqual(result.sitemap, [
-    "https://immigratiimprenditori.it/sitemap.xml",
-    "https://immigratiimprenditori.it/sitemap-contributors.xml",
+    "https://www.immigratiimprenditori.it/sitemap.xml",
+    "https://www.immigratiimprenditori.it/sitemap-contributors.xml",
   ]);
-  assert.equal(result.host, "https://immigratiimprenditori.it");
+  assert.equal(result.host, "https://www.immigratiimprenditori.it");
 });

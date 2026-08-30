@@ -6,11 +6,11 @@ import { absoluteLocalizedUrl, languageAlternates } from "./seo";
 test("localized SEO URLs keep Italian unprefixed and expose seven-language alternates", () => {
   assert.equal(
     absoluteLocalizedUrl("it", "/osservatorio"),
-    "https://immigratiimprenditori.it/osservatorio",
+    "https://www.immigratiimprenditori.it/osservatorio",
   );
   assert.equal(
     absoluteLocalizedUrl("en", "/osservatorio"),
-    "https://immigratiimprenditori.it/en/osservatorio",
+    "https://www.immigratiimprenditori.it/en/osservatorio",
   );
 
   const alternates = languageAlternates("/fonti");
@@ -24,10 +24,10 @@ test("localized SEO URLs keep Italian unprefixed and expose seven-language alter
     "x-default",
     "zh",
   ]);
-  assert.equal(alternates.it, "https://immigratiimprenditori.it/fonti");
-  assert.equal(alternates.en, "https://immigratiimprenditori.it/en/fonti");
-  assert.equal(alternates.ar, "https://immigratiimprenditori.it/ar/fonti");
-  assert.equal(alternates["x-default"], "https://immigratiimprenditori.it/fonti");
+  assert.equal(alternates.it, "https://www.immigratiimprenditori.it/fonti");
+  assert.equal(alternates.en, "https://www.immigratiimprenditori.it/en/fonti");
+  assert.equal(alternates.ar, "https://www.immigratiimprenditori.it/ar/fonti");
+  assert.equal(alternates["x-default"], "https://www.immigratiimprenditori.it/fonti");
 });
 
 test("hosted and explicitly read-only previews are noindex while writable production is crawlable", () => {
@@ -64,10 +64,10 @@ test("hosted and explicitly read-only previews are noindex while writable produc
       { userAgent: "*", allow: "/", disallow: ["/app/", "/accedi"] },
     ]);
     assert.deepEqual(production.sitemap, [
-      "https://immigratiimprenditori.it/sitemap.xml",
-      "https://immigratiimprenditori.it/sitemap-contributors.xml",
+      "https://www.immigratiimprenditori.it/sitemap.xml",
+      "https://www.immigratiimprenditori.it/sitemap-contributors.xml",
     ]);
-    assert.equal(production.host, "https://immigratiimprenditori.it");
+    assert.equal(production.host, "https://www.immigratiimprenditori.it");
 
     process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY = "true";
     assert.deepEqual(robots(), {

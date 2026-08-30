@@ -196,8 +196,8 @@ async function main() {
       PREVIEW_READ_ONLY
         ? ["Disallow: /"]
         : [
-            "Sitemap: https://immigratiimprenditori.it/sitemap.xml",
-            "Sitemap: https://immigratiimprenditori.it/sitemap-contributors.xml",
+            "Sitemap: https://www.immigratiimprenditori.it/sitemap.xml",
+            "Sitemap: https://www.immigratiimprenditori.it/sitemap-contributors.xml",
             "Disallow: /app/",
           ],
     );
@@ -209,8 +209,8 @@ async function main() {
     }
 
     const sitemap = await expectText("/sitemap.xml", [
-      "https://immigratiimprenditori.it/osservatorio",
-      "https://immigratiimprenditori.it/atlante",
+      "https://www.immigratiimprenditori.it/osservatorio",
+      "https://www.immigratiimprenditori.it/atlante",
     ]);
     if (!sitemap.response.headers.get("content-type")?.includes("xml")) {
       fail("/sitemap.xml: expected XML Content-Type");
