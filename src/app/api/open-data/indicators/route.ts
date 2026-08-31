@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import {
-  collectPublicExportRows,
+  collectCanonicalPublicExportRecords,
   publicExportFilters,
-} from "@/lib/data/public/export-values";
+} from "@/lib/data/public/exports";
 import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const dynamic = "force-dynamic";
@@ -11,27 +11,7 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const filters = publicExportFilters(url.searchParams);
-    const rows = await collectPublicExportRows(filters);
-    const records = rows.map((value) => {
-      const indicator = value.observatory_indicators;
-      return {
-        indicator_code: indicator.code,
-        indicator_slug: indicator.slug,
-        indicator_title: indicator.title,
-        unit_code: indicator.unit_code,
-        numeric_value: Number(value.numeric_value),
-        period_start: value.period_start,
-        period_end: value.period_end,
-        status: value.status,
-        territory_level: value.territory_level,
-        territory_code: value.territory_code,
-        territory_label: value.territory_label,
-        category_code: value.country_code,
-        category_label: value.country_label,
-        business_sector_id: value.business_sector_id,
-        quality_code: value.quality_code,
-      };
-    });
+    const records = await collectCanonicalPublicExportRecords(filters);
 
     return NextResponse.json(
       {
