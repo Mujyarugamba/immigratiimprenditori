@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getExplorerSnapshot } from "@/lib/data/public/explore";
+import { fetchJoinedPublicIndicatorValues } from "@/lib/data/public/public-values";
+import { createPublicReadClient } from "@/lib/supabase/public-read";
 import { absoluteUrl } from "@/lib/i18n/seo";
 
 export const dynamic = "force-dynamic";
@@ -16,60 +17,58 @@ function boundedInteger(raw: string | null, fallback: number, minimum: number, m
 
 export async function GET(request: Request) {
   try {
-    const snapshot = await getExplorerSnapshot();
-    const indicatorMap = new Map(snapshot.indicators.map((indicator) => [indicator.id, indicator]));
     const url = new URL(request.url);
-    const indicatorSlug = url.searchParams.get("indicator")?.trim() || null;
-    const territoryCode = url.searchParams.get("territory")?.trim() || null;
-    const year = url.searchParams.get("year")?.trim() || null;
-    const sectorId = url.searchParams.get("sector")?.trim() || null;
-    const categoryCode = url.searchParams.get("category")?.trim() || null;
+    const indicatorSlug = url.searchParams.get("indicator")?.trim() || undefined;
+    const territoryCode = url.searchParams.get("territory")?.trim() || undefined;
+    const year = url.searchParams.get("year")?.trim() || undefined;
+    const sectorId = url.searchParams.get("sector")?.trim() || undefined;
+    const categoryCode = url.searchParams.get("category")?.trim() || undefined;
     const limit = boundedInteger(url.searchParams.get("limit"), DEFAULT_LIMIT, 1, MAX_LIMIT);
     const offset = boundedInteger(url.searchParams.get("offset"), 0, 0, MAX_OFFSET);
 
-    const matchingValues = snapshot.values.filter((value) => {
-      const indicator = indicatorMap.get(value.indicator_id);
-      if (!indicator) return false;
-      if (indicatorSlug && indicator.slug !== indicatorSlug) return false;
-      if (territoryCode && value.territory_code !== territoryCode) return false;
-      if (year && String(new Date(value.period_start).getFullYear()) !== year) return false;
-      if (sectorId && String(value.business_sector_id ?? "") !== sectorId) return false;
-      if (categoryCode && value.country_code !== categoryCode) return false;
-      return true;
+    const result = await fetchJoinedPublicIndicatorValues({
+      client: createPublicReadClient(),
+      filters: {
+        indicatorSlug,
+        territoryCode,
+        year,
+        sectorId,
+        categoryCode,
+      },
+      page: { limit, offset },
+      bounds: { defaultLimit: DEFAULT_LIMIT, maxLimit: MAX_LIMIT },
     });
 
-    const totalCount = matchingValues.length;
-    const records = matchingValues
-      .slice(offset, offset + limit)
-      .map((value) => {
-        const indicator = indicatorMap.get(value.indicator_id)!;
-        return {
-          indicator: {
-            code: indicator.code,
-            slug: indicator.slug,
-            title: indicator.title,
-            description: indicator.description,
-            unit_code: indicator.unit_code,
-          },
-          value: Number(value.numeric_value),
-          period: {
-            start: value.period_start,
-            end: value.period_end,
-          },
-          territory: value.territory_label
-            ? {
-                level: value.territory_level,
-                code: value.territory_code,
-                label: value.territory_label,
-              }
-            : null,
-          category: value.country_label
-            ? { code: value.country_code, label: value.country_label }
-            : null,
-          business_sector_id: value.business_sector_id,
-          quality_code: value.quality_code,
-        };
-      });
+    const records = result.rows.map((value) => {
+      const indicator = value.observatory_indicators;
+      return {
+        indicator: {
+          code: indicator.code,
+          slug: indicator.slug,
+          title: indicator.title,
+          description: indicator.description,
+          unit_code: indicator.unit_code,
+        },
+        value: Number(value.numeric_value),
+        period: {
+          start: value.period_start,
+          end: value.period_end,
+        },
+        status: value.status,
+        territory: value.territory_label
+          ? {
+              level: value.territory_level,
+              code: value.territory_code,
+              label: value.territory_label,
+            }
+          : null,
+        category: value.country_label
+          ? { code: value.country_code, label: value.country_label }
+          : null,
+        business_sector_id: value.business_sector_id,
+        quality_code: value.quality_code,
+      };
+    });
 
     return NextResponse.json(
       {
@@ -77,18 +76,18 @@ export async function GET(request: Request) {
         dataset: "observatory_indicators",
         generated_at: new Date().toISOString(),
         record_count: records.length,
-        total_count: totalCount,
+        total_count: result.page.total,
         pagination: {
-          limit,
-          offset,
-          has_more: offset + records.length < totalCount,
+          limit: result.page.limit,
+          offset: result.page.offset,
+          has_more: result.page.hasMore,
         },
         filters: {
-          indicator: indicatorSlug,
-          territory: territoryCode,
-          year,
-          sector: sectorId,
-          category: categoryCode,
+          indicator: indicatorSlug ?? null,
+          territory: territoryCode ?? null,
+          year: year ?? null,
+          sector: sectorId ?? null,
+          category: categoryCode ?? null,
         },
         methodology_url: absoluteUrl("/dati-e-fonti"),
         records,
