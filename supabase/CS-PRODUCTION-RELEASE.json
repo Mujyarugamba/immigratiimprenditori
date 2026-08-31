@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "hostedProjectRef": "hvfvfatlaspcpszgizhg",
-  "verifiedReadOnlyAt": "2026-08-30",
+  "verifiedReadOnlyAt": "2026-08-31",
   "releaseBaselineHostedLatestMigration": {
     "version": "20260820160000",
     "name": "prepare_events_external_ingestion_rls"
