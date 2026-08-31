@@ -51,6 +51,24 @@ export type ExplorerSnapshot = {
   authors: ExplorerAuthor[];
 };
 
+export const EXPLORER_VALUE_PAGE_SIZE = 1000;
+
+export async function collectExplorerPages<T>(
+  fetchPage: (from: number, to: number) => Promise<T[]>,
+  pageSize = EXPLORER_VALUE_PAGE_SIZE,
+): Promise<T[]> {
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 1000) {
+    throw new Error("Explorer page size must be an integer between 1 and 1000");
+  }
+
+  const rows: T[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const page = await fetchPage(from, from + pageSize - 1);
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+  }
+}
+
 function keyForTerritory(value: Pick<ExplorerValue, "territory_level" | "territory_code" | "territory_label">) {
   return [value.territory_level ?? "", value.territory_code ?? "", value.territory_label ?? ""].join("|");
 }
@@ -58,21 +76,29 @@ function keyForTerritory(value: Pick<ExplorerValue, "territory_level" | "territo
 export async function getExplorerSnapshot(): Promise<ExplorerSnapshot> {
   const supabase = await createClient();
 
-  const [indicatorResult, valueResult, sectorResult, authorResult] = await Promise.all([
-    supabase
-      .from("observatory_indicators")
-      .select("id, code, slug, title, description, unit_code")
-      .eq("publication_status", "published")
-      .in("operational_status", ["active", "deprecated"])
-      .order("title"),
-    supabase
+  const valuesPromise = collectExplorerPages<ExplorerValue>(async (from, to) => {
+    const result = await supabase
       .from("observatory_indicator_values")
       .select(
         "id, indicator_id, numeric_value, period_start, period_end, territory_level, territory_code, territory_label, business_sector_id, country_code, country_label, quality_code",
       )
       .eq("status", "final")
       .order("period_start", { ascending: false })
-      .limit(2000),
+      .order("id", { ascending: true })
+      .range(from, to);
+
+    if (result.error) throw new Error(result.error.message);
+    return (result.data ?? []) as ExplorerValue[];
+  });
+
+  const [indicatorResult, values, sectorResult, authorResult] = await Promise.all([
+    supabase
+      .from("observatory_indicators")
+      .select("id, code, slug, title, description, unit_code")
+      .eq("publication_status", "published")
+      .in("operational_status", ["active", "deprecated"])
+      .order("title"),
+    valuesPromise,
     supabase
       .from("business_sectors")
       .select("id, slug, name, description")
@@ -88,19 +114,16 @@ export async function getExplorerSnapshot(): Promise<ExplorerSnapshot> {
   ]);
 
   if (indicatorResult.error) throw new Error(indicatorResult.error.message);
-  if (valueResult.error) throw new Error(valueResult.error.message);
   if (sectorResult.error) throw new Error(sectorResult.error.message);
   if (authorResult.error) throw new Error(authorResult.error.message);
 
   const indicators = (indicatorResult.data ?? []) as ExplorerIndicator[];
   const indicatorIds = new Set(indicators.map((indicator) => indicator.id));
-  const values = ((valueResult.data ?? []) as ExplorerValue[]).filter((value) =>
-    indicatorIds.has(value.indicator_id),
-  );
+  const publicValues = values.filter((value) => indicatorIds.has(value.indicator_id));
   const sectors = (sectorResult.data ?? []) as ExplorerSector[];
 
   const territoryCounts = new Map<string, ExplorerTerritory>();
-  for (const value of values) {
+  for (const value of publicValues) {
     if (!value.territory_label) continue;
     const key = keyForTerritory(value);
     const current = territoryCounts.get(key);
@@ -129,7 +152,7 @@ export async function getExplorerSnapshot(): Promise<ExplorerSnapshot> {
 
   return {
     indicators,
-    values,
+    values: publicValues,
     sectors,
     territories: Array.from(territoryCounts.values()).sort((a, b) =>
       a.label.localeCompare(b.label, "it"),
