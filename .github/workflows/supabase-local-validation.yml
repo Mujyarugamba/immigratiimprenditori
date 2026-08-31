@@ -22,6 +22,7 @@ on:
       - "scripts/ci/hybrid-review-smoke.mjs"
       - "scripts/ci/rate-limit-smoke.sql"
       - "scripts/ci/go-live-db-smoke.sql"
+      - "scripts/ci/interview-workflow-audit-smoke.sql"
       - "scripts/ci/backup-archive-smoke.sh"
       - "scripts/ci/post-restore-auth-hooks.sql"
       - "scripts/ci/auth-integration-smoke.mjs"
@@ -160,6 +161,8 @@ jobs:
             supabase/migrations/20260819141022_editorial_inbox_activity.sql
           cp supabase/standalone-evolutions/20260819141338_editorial_contributor_hardening.sql \
             supabase/migrations/20260819141338_editorial_contributor_hardening.sql
+          cp supabase/standalone-evolutions/20260819170614_content_interview_workflow.sql \
+            supabase/migrations/20260819170614_content_interview_workflow.sql
           cp /tmp/repository-migrations/20260820173000_harden_editorial_public_submission.sql \
             supabase/migrations/20260820173000_harden_editorial_public_submission.sql
 
@@ -169,6 +172,7 @@ jobs:
           cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
           cp /tmp/repository-migrations/20260824103000_harden_publication_gate_execute_privileges.sql supabase/migrations/
           cp /tmp/repository-migrations/20260829120000_create_content_ai_translations.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260831103000_audit_interview_workflow_activity.sql supabase/migrations/
 
           echo "Standalone cold-start chain:"
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort
@@ -206,6 +210,14 @@ jobs:
           psql "postgresql://postgres@127.0.0.1:54322/postgres" \
             -v ON_ERROR_STOP=1 \
             -f scripts/ci/go-live-db-smoke.sql
+
+      - name: Interview workflow audit smoke
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/ci/interview-workflow-audit-smoke.sql
 
       - name: Backup archive integrity smoke
         env:

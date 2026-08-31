@@ -1,7 +1,7 @@
 # Centro Studi — runbook migration production e rollback
 
-Stato: **PRODUCTION SCHEMA ALLINEATO AL CUTOFF 20260824103000 / NESSUN DELTA CANDIDATO APERTO**  
-Data verifica read-only: **24 agosto 2026**
+Stato: **PRODUCTION SCHEMA ALLINEATO AL CUTOFF 20260824104000 / 2 MIGRATION CANDIDATE NON APPLICATE**  
+Data verifica read-only: **31 agosto 2026**
 
 Questo documento disciplina esclusivamente il rilascio del database Centro Studi sul progetto Supabase hosted `hvfvfatlaspcpszgizhg`. Non autorizza alcuna migration o deploy.
 
@@ -19,17 +19,22 @@ Questo documento disciplina esclusivamente il rilascio del database Centro Studi
 
 ## 2. Stato hosted osservato
 
-La lettura delle migration hosted del 24/08/2026 mostra come ultima migration:
+La lettura read-only delle migration hosted del 31/08/2026 mostra come ultima migration:
 
-`20260824103000_harden_publication_gate_execute_privileges`
+`20260824104000_fix_public_profile_column_grants`
 
-Il progetto hosted risulta a **234 migration**. Il cutoff Production corrente è `20260824103000`. Le 25 migration repository che in precedenza costituivano il `candidateDelta` (da `20260820173000_harden_editorial_public_submission.sql` fino a `20260824103000_harden_publication_gate_execute_privileges.sql`) sono già applicate e **non** sono più candidate.
+Il progetto hosted risulta a **235 migration**. Il cutoff Production osservato è `20260824104000`. Le migration classificate in `appliedReleaseDelta` fino a questo cutoff risultano già applicate e **non** sono candidate.
 
-`candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` è quindi `[]`. Uno stato vuoto è valido: non autorizza scritture e non richiede applicazione.
+`candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` contiene attualmente, in ordine:
+
+1. `20260829120000_create_content_ai_translations.sql`;
+2. `20260831103000_audit_interview_workflow_activity.sql`.
+
+Entrambe sono **candidate repository non applicate**: la loro presenza nel piano impedisce drift, ma non autorizza alcuna scrittura Production.
 
 Gli alias storici repository/hosted restano dichiarati in `alreadyAppliedRepositoryAliases` e **non** vanno mescolati con eventuali migration future.
 
-Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano. Qualunque file con timestamp `<= 20260824103000` proposto come candidato deve essere rifiutato.
+Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano. Qualunque file con timestamp `<= 20260824104000` proposto come nuovo candidato deve essere rifiutato, salvo alias storico già classificato.
 
 ## 3. Precondizioni obbligatorie
 
@@ -54,16 +59,16 @@ Usare esclusivamente l'array ordinato `candidateDelta` in `CS-PRODUCTION-RELEASE
 
 Il gate `scripts/ci/production-migration-plan-smoke.mjs` verifica che:
 
-- `candidateDelta: []` sia uno stato valido;
+- `candidateDelta: []` sia comunque uno stato valido quando non esistono evoluzioni future;
 - tutti i file dichiarati come alias o candidati esistano;
 - l'ordine dei candidati, se presenti, sia cronologico e senza duplicati;
 - nessun candidato abbia timestamp `<=` al cutoff Production corrente;
 - gli alias storici restino separati dall'elenco delle migration future;
 - ogni file repository successivo al cutoff hosted, esclusi gli alias storici, sia classificato come candidato;
-- i gate security/governance critici restino presenti nel repository anche quando il delta corrente è zero, inclusa `20260824103000_harden_publication_gate_execute_privileges.sql`, la governance ibrida 4-eyes e la relativa forward-fix del classificatore `NULL`;
+- i gate security/governance critici restino presenti nel repository, inclusa `20260824103000_harden_publication_gate_execute_privileges.sql`, la governance ibrida 4-eyes e la relativa forward-fix del classificatore `NULL`;
 - nessun candidato contenga `DROP TABLE`, `DROP SCHEMA`, `TRUNCATE` o `DROP COLUMN` non consentiti dal gate.
 
-Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente. Con delta vuoto non applicare nulla.
+Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente. La classificazione del file non equivale mai ad autorizzazione di applicazione.
 
 ## 5. Esecuzione production — solo dopo autorizzazione
 
@@ -91,6 +96,7 @@ Controllare almeno:
 - contenuti ordinari senza categoria (`primary_category_code = NULL`) non devono essere classificati sensibili per il solo `NULL`;
 - indicatori Osservatorio bloccati senza seconda approvazione;
 - correzioni `substantive`/`retraction` pubbliche bloccate senza seconda approvazione;
+- se è inclusa la migration interviste: transizioni invalide negate, DELETE diretto `authenticated` negato, timestamp consensi normalizzati, audit append-only presente e `internal_notes` assenti dal payload audit;
 - lettura di Osservatorio, Atlante, rotte, contenuti, autori e open data;
 - nessuna FK/oggetto PonteImprese reintrodotto;
 - conteggi e visibilità dei contenuti coerenti con lo stato editoriale reale;
@@ -108,7 +114,7 @@ Controllare almeno:
 
 ### B. Migration applicata ma difetto semantico correggibile
 
-Preferire una **forward-fix migration** esplicita. Il candidato corrente applica esattamente questo principio con `20260822213100_fix_hybrid_null_category_classifier.sql`, introdotta dopo che il test due-redattori ha rilevato la semantica SQL `NULL` del classificatore. Non inventare automaticamente una down-migration se non è stata progettata e provata.
+Preferire una **forward-fix migration** esplicita. La precedente `20260822213100_fix_hybrid_null_category_classifier.sql` è un esempio storico di questo principio: fu introdotta dopo che il test due-redattori rilevò la semantica SQL `NULL` del classificatore. Non inventare automaticamente una down-migration se non è stata progettata e provata.
 
 ### C. Corruzione/perdita dati o incompatibilità non recuperabile con forward-fix sicura
 
@@ -134,6 +140,6 @@ Registrare per il rilascio:
 - esito smoke DB/security/app;
 - esito governance ibrida 4-eyes, inclusa la regressione `NULL`;
 - eventuali forward-fix;
-- autorizzazione esplicita a merge/deploy production.
+- autorizzazione esplicita a deploy/migration production.
 
 Finché queste evidenze non esistono, lo stato resta **PRODUCTION ACTIVATION PENDING**.
