@@ -1,5 +1,6 @@
 import { createPublicReadClient } from "@/lib/supabase/public-read";
 import {
+  PUBLIC_VALUE_MAX_LIMIT,
   fetchJoinedPublicIndicatorValues,
   type PublicValueFilters,
   type PublicValuePage,
@@ -32,6 +33,16 @@ export type CanonicalPublicExportRecord = {
 export type CanonicalPublicExportPage = {
   records: CanonicalPublicExportRecord[];
 } & PublicValuePage;
+
+export function publicExportFilters(searchParams: URLSearchParams): PublicValueFilters {
+  return {
+    indicatorSlug: searchParams.get("indicatore")?.trim() || undefined,
+    territoryCode: searchParams.get("territorio")?.trim() || undefined,
+    year: searchParams.get("anno")?.trim() || undefined,
+    sectorId: searchParams.get("settore")?.trim() || undefined,
+    categoryCode: searchParams.get("categoria")?.trim() || undefined,
+  };
+}
 
 export async function queryCanonicalPublicExportPage(
   filters: PublicValueFilters = {},
@@ -75,4 +86,19 @@ export async function queryCanonicalPublicExportPage(
     }),
     ...resolved,
   };
+}
+
+/** Explicit full-export path: paginate until exact total is exhausted. */
+export async function collectCanonicalPublicExportRecords(
+  filters: PublicValueFilters = {},
+): Promise<CanonicalPublicExportRecord[]> {
+  const records: CanonicalPublicExportRecord[] = [];
+  for (let offset = 0; ; offset += PUBLIC_VALUE_MAX_LIMIT) {
+    const page = await queryCanonicalPublicExportPage(filters, {
+      limit: PUBLIC_VALUE_MAX_LIMIT,
+      offset,
+    });
+    records.push(...page.records);
+    if (!page.hasMore) return records;
+  }
 }
