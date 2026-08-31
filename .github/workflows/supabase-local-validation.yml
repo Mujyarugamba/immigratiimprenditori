@@ -171,6 +171,7 @@ jobs:
           cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
           cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
           cp /tmp/repository-migrations/20260824103000_harden_publication_gate_execute_privileges.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260824104000_fix_public_profile_column_grants.sql supabase/migrations/
           cp /tmp/repository-migrations/20260829120000_create_content_ai_translations.sql supabase/migrations/
           cp /tmp/repository-migrations/20260831103000_audit_interview_workflow_activity.sql supabase/migrations/
 
@@ -252,7 +253,7 @@ jobs:
           printf 'PRIVACY_ANALYTICS_WRITE_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
           NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLIC_KEY" \
-          SUPABASE_SERVICE_ROLE_KEY="$SERVICE_KEY" \
+          SUPABASE_SERVICE_ROLE_KEY_KEY="$SERVICE_KEY" \
           NEXT_PUBLIC_SITE_URL="http://127.0.0.1:3000" \
           NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED="true" \
           PRIVACY_ANALYTICS_WRITE_ENABLED="true" \
