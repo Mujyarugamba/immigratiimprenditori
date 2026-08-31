@@ -273,15 +273,72 @@ export async function updateEditorialContent(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const targetTypeCode =
+    typeof allowed.type_code === "string" ? allowed.type_code : null;
+  let previousTypeCode: string | null = null;
+
+  if (targetTypeCode === "interview") {
+    const { data: current, error: currentError } = await supabase
+      .from("contents")
+      .select("type_code")
+      .eq("id", id)
+      .eq("owned_by_editorial", true)
+      .maybeSingle();
+
+    if (currentError) {
+      return { ok: false, error: mapPostgresError(currentError) };
+    }
+    if (!current) {
+      return {
+        ok: false,
+        error: { code: "conflict", message: "Contenuto non trovato." },
+      };
+    }
+    previousTypeCode = current.type_code as string;
+  }
+
+  const { data: updated, error } = await supabase
     .from("contents")
     .update(allowed)
     .eq("id", id)
-    .eq("owned_by_editorial", true);
+    .eq("owned_by_editorial", true)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return { ok: false, error: mapPostgresError(error) };
   }
+  if (!updated) {
+    return {
+      ok: false,
+      error: { code: "conflict", message: "Contenuto non trovato." },
+    };
+  }
+
+  if (targetTypeCode === "interview") {
+    const workflow = await ensureEditorialInterviewWorkflow(id);
+    if (!workflow.ok) {
+      if (previousTypeCode && previousTypeCode !== "interview") {
+        const { error: rollbackError } = await supabase
+          .from("contents")
+          .update({ type_code: previousTypeCode })
+          .eq("id", id)
+          .eq("owned_by_editorial", true);
+
+        if (rollbackError) {
+          return {
+            ok: false,
+            error: {
+              code: "conflict",
+              message: `${workflow.error.message} Il contenuto ${id} è stato convertito in intervista ma il workflow non è stato inizializzato e il ripristino del tipo precedente non è riuscito.`,
+            },
+          };
+        }
+      }
+      return { ok: false, error: workflow.error };
+    }
+  }
+
   return { ok: true };
 }
 
