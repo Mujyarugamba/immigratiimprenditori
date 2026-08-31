@@ -137,37 +137,89 @@ grep -Eq 'COPY .*languages' "$DATA_FILE" || {
 }
 echo "PRODUCTION_BACKUP_LOGICAL_PREFLIGHT = PASS"
 
-# A fresh Supabase-managed target owns platform logging configuration. Remove
-# only the known log_min_messages forms that normal project privileges cannot
-# replay. Fail closed if any other log_min_messages statement survives.
-python3 - "$ROLES_FILE" <<'PY'
+# A fresh Supabase-managed target owns its platform roles and platform object
+# ownership. Normalize only incompatibilities that Supabase documents for
+# logical restores, while leaving project-specific/custom roles untouched.
+python3 - "$ROLES_FILE" "$SCHEMA_FILE" <<'PY'
 from pathlib import Path
 import re
 import sys
 
-path = Path(sys.argv[1])
-text = path.read_text(encoding="utf-8")
-parts = re.split(r"(?<=;)", text)
-kept = []
+roles_path = Path(sys.argv[1])
+schema_path = Path(sys.argv[2])
 
-alter_role = re.compile(r"(?is)^\s*ALTER\s+ROLE\b.*\blog_min_messages\b")
-grant_parameter = re.compile(
+
+def split_statements(text: str) -> list[str]:
+    return re.split(r"(?<=;)", text)
+
+
+roles_text = roles_path.read_text(encoding="utf-8")
+roles_kept = []
+
+log_alter = re.compile(r"(?is)^\s*ALTER\s+ROLE\b.*\blog_min_messages\b")
+log_grant = re.compile(
     r'(?is)^\s*GRANT\s+SET\s+ON\s+PARAMETER\s+"?log_min_messages"?\s+TO\b'
 )
+supabase_admin_alter = re.compile(
+    r'(?is)^\s*ALTER\s+(?:ROLE|USER)\s+"?supabase_admin"?\b'
+)
+cli_login_grant = re.compile(
+    r'(?is)^\s*GRANT\s+"?postgres"?\s+TO\s+"?cli_login_postgres"?\b'
+)
 
-for part in parts:
+for part in split_statements(roles_text):
     statement = part.strip()
-    if statement and (alter_role.match(statement) or grant_parameter.match(statement)):
+    if statement and (
+        log_alter.match(statement)
+        or log_grant.match(statement)
+        or supabase_admin_alter.match(statement)
+        or cli_login_grant.match(statement)
+    ):
         continue
-    kept.append(part)
+    roles_kept.append(part)
 
-filtered = "".join(kept)
-if re.search(r"(?i)\blog_min_messages\b", filtered):
+roles_filtered = "".join(roles_kept)
+if re.search(r"(?i)\blog_min_messages\b", roles_filtered):
     raise SystemExit(
         "Restore drill: unrecognized log_min_messages statement survived normalization"
     )
-path.write_text(filtered, encoding="utf-8")
+if re.search(
+    r'(?is)\bALTER\s+(?:ROLE|USER)\s+"?supabase_admin"?\b', roles_filtered
+):
+    raise SystemExit(
+        "Restore drill: supabase_admin role mutation survived normalization"
+    )
+if re.search(
+    r'(?is)\bGRANT\s+"?postgres"?\s+TO\s+"?cli_login_postgres"?\b',
+    roles_filtered,
+):
+    raise SystemExit(
+        "Restore drill: cli_login_postgres platform grant survived normalization"
+    )
+roles_path.write_text(roles_filtered, encoding="utf-8")
+
+schema_text = schema_path.read_text(encoding="utf-8")
+schema_kept = []
+supabase_admin_owner = re.compile(
+    r'(?is)^\s*ALTER\b.*\bOWNER\s+TO\s+"?supabase_admin"?\s*;?\s*$'
+)
+for part in split_statements(schema_text):
+    statement = part.strip()
+    if statement and supabase_admin_owner.match(statement):
+        continue
+    schema_kept.append(part)
+
+schema_filtered = "".join(schema_kept)
+if re.search(
+    r'(?is)\bALTER\b.*\bOWNER\s+TO\s+"?supabase_admin"?\b', schema_filtered
+):
+    raise SystemExit(
+        "Restore drill: supabase_admin object ownership mutation survived normalization"
+    )
+schema_path.write_text(schema_filtered, encoding="utf-8")
 PY
+
+echo "PRODUCTION_BACKUP_MANAGED_ROLE_NORMALIZATION = PASS"
 
 if [[ -d supabase/migrations ]]; then
   MIGRATIONS_STASH="$(mktemp -d /tmp/centro-studi-production-migrations-XXXXXX)"
