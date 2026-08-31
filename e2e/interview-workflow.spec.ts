@@ -170,14 +170,29 @@ test.describe("Interview workflow authenticated E2E", () => {
     const contentId = match![1];
     contents.push(contentId);
 
-    // Direct editorial creation must initialize the interview workflow itself.
-    // No fixture SQL or reload is allowed here: the first returned detail page
-    // must already represent the persisted candidate/editorial workflow.
     await expect
       .poll(() => workflowSeed(contentId), { timeout: 30_000 })
       .toBe("candidate|editorial");
     await expect(page.getByRole("heading", { name: "Workflow e consensi" })).toBeVisible();
     await expect(workflowStatusBadge(page)).toHaveText("Candidato");
+
+    const lockedType = page.locator('select[name="type_code"]');
+    await expect(lockedType).toBeDisabled();
+    await expect(
+      page.getByText(
+        "Il tipo Intervista resta bloccato per preservare workflow, consensi e audit già associati.",
+      ),
+    ).toBeVisible();
+
+    // The disabled select is paired with a hidden type_code so ordinary edits
+    // remain possible without detaching the workflow.
+    await page.getByLabel("Sottotitolo").fill("Modifica consentita con tipo Intervista bloccato");
+    await page.getByRole("button", { name: "Salva modifiche" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Contenuto aggiornato." }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(lockedType).toBeDisabled();
+    expect(workflowSeed(contentId)).toBe("candidate|editorial");
 
     await page.getByRole("button", { name: "Registra contatto effettuato" }).click();
     await expect(
@@ -281,5 +296,6 @@ test.describe("Interview workflow authenticated E2E", () => {
       timeout: 30_000,
     });
     await expect(workflowStatusBadge(page)).toHaveText("Candidato");
+    await expect(page.locator('select[name="type_code"]')).toBeDisabled();
   });
 });
