@@ -1,0 +1,170 @@
+name: DB-first production compatibility smoke
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/db-first-production-compat.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  production-app-against-future-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PRODUCTION_SHA: d588f88ad6f827fdd062ca7f7d38e4a1ee7a2ac0
+    steps:
+      - name: Checkout current release candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate production migration release plan
+        run: node scripts/ci/production-migration-plan-smoke.mjs
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Initialize ephemeral local config
+        run: supabase init
+
+      - name: Assemble hosted cutoff plus candidate migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mv supabase/migrations /tmp/repository-migrations
+          mkdir -p supabase/migrations
+
+          cp supabase/baseline/00000000000000_baseline_immigratiimprenditori.sql supabase/migrations/
+          cp supabase/baseline/00000000000001_runtime_link_compatibility.sql supabase/migrations/
+          cp supabase/baseline/00000000000002_seed_immigrati_public_data.sql supabase/migrations/
+          cp supabase/baseline/00000000000003_auth_identity_gate.sql supabase/migrations/
+
+          cp /tmp/repository-migrations/20260819100000_grant_observatory_ingestion_writer.sql \
+            supabase/migrations/20260819100000_grant_observatory_ingestion_writer.sql
+          cp /tmp/repository-migrations/20260820170000_editorial_foundation_v1.sql \
+            supabase/migrations/20260819102530_editorial_foundation_v1.sql
+          cp /tmp/repository-migrations/20260820171000_editorial_submission_country_labels.sql \
+            supabase/migrations/20260819103031_editorial_submission_country_labels.sql
+          cp supabase/standalone-evolutions/20260819141022_editorial_inbox_activity.sql \
+            supabase/migrations/20260819141022_editorial_inbox_activity.sql
+          cp supabase/standalone-evolutions/20260819141338_editorial_contributor_hardening.sql \
+            supabase/migrations/20260819141338_editorial_contributor_hardening.sql
+          cp supabase/standalone-evolutions/20260819170614_content_interview_workflow.sql \
+            supabase/migrations/20260819170614_content_interview_workflow.sql
+          cp /tmp/repository-migrations/20260820173000_harden_editorial_public_submission.sql \
+            supabase/migrations/20260820173000_harden_editorial_public_submission.sql
+
+          cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260824103000_harden_publication_gate_execute_privileges.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260824104000_fix_public_profile_column_grants.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260829120000_create_content_ai_translations.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260831103000_audit_interview_workflow_activity.sql supabase/migrations/
+
+          printf 'Compatibility migration chain:\n'
+          find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort
+
+      - name: Start future local database
+        run: supabase start
+
+      - name: Prove both candidate migrations are active locally
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -euo pipefail
+          psql "postgresql://postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 <<'SQL'
+          do $$
+          declare
+            v_count integer;
+          begin
+            select count(*)::integer into v_count
+            from supabase_migrations.schema_migrations
+            where version in ('20260829120000', '20260831103000');
+            if v_count <> 2 then
+              raise exception 'DB_FIRST_COMPAT_CANDIDATE_MIGRATIONS_MISSING_%', v_count;
+            end if;
+            if to_regclass('public.content_ai_translations') is null then
+              raise exception 'DB_FIRST_COMPAT_AI_TRANSLATION_TABLE_MISSING';
+            end if;
+            if to_regclass('public.content_interview_workflow') is null then
+              raise exception 'DB_FIRST_COMPAT_INTERVIEW_WORKFLOW_TABLE_MISSING';
+            end if;
+          end;
+          $$;
+          select 'DB_FIRST_COMPAT_FUTURE_DB_READY' as result;
+          SQL
+
+      - name: Mount exact current Production application
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "${PRODUCTION_SHA}^{commit}"
+          git worktree add --detach /tmp/production-app "$PRODUCTION_SHA"
+          test "$(git -C /tmp/production-app rev-parse HEAD)" = "$PRODUCTION_SHA"
+
+      - name: Install Production application dependencies
+        working-directory: /tmp/production-app
+        run: npm ci
+
+      - name: Build Production application against future local database
+        shell: bash
+        working-directory: /tmp/production-app
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          eval "$(supabase status -o env)"
+          PUBLIC_KEY="${PUBLISHABLE_KEY:-${ANON_KEY:-}}"
+          SERVICE_KEY="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
+          test -n "${API_URL:-}"
+          test -n "$PUBLIC_KEY"
+          test -n "$SERVICE_KEY"
+          case "$API_URL" in
+            http://127.0.0.1:*|http://localhost:*) ;;
+            *) echo "Refusing non-local Supabase API_URL: $API_URL" >&2; exit 1 ;;
+          esac
+          cd /tmp/production-app
+          NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLIC_KEY" \
+          SUPABASE_SERVICE_ROLE_KEY="$SERVICE_KEY" \
+          NEXT_PUBLIC_SITE_URL="https://www.immigratiimprenditori.it" \
+          NEXT_PUBLIC_PREVIEW_READ_ONLY="false" \
+          NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED="true" \
+          PRIVACY_ANALYTICS_WRITE_ENABLED="true" \
+          AI_TRANSLATION_ENABLED="false" \
+          npm run build
+
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLIC_KEY" >> "$GITHUB_ENV"
+          printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_KEY" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SITE_URL=%s\n' 'https://www.immigratiimprenditori.it' >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_PREVIEW_READ_ONLY=%s\n' 'false' >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          printf 'PRIVACY_ANALYTICS_WRITE_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          printf 'AI_TRANSLATION_ENABLED=%s\n' 'false' >> "$GITHUB_ENV"
+
+      - name: Runtime HTTP smoke with Production application and future DB
+        working-directory: /tmp/production-app
+        run: npm run test:smoke
+
+      - name: Report compatibility result
+        run: |
+          echo "PRODUCTION_APP_SHA=$PRODUCTION_SHA"
+          echo "FUTURE_DB_CANDIDATES=20260829120000,20260831103000"
+          echo "DB_FIRST_PRODUCTION_COMPAT=PASS"
+
+      - name: Stop ephemeral local stack
+        if: always()
+        run: supabase stop --no-backup || true
