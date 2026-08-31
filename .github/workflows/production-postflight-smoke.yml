@@ -1,0 +1,26 @@
+name: Production Osservatorio final smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live Osservatorio title and H1
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://www.immigratiimprenditori.it/osservatorio"
+          body="$(mktemp)"
+          code="$(curl --fail-with-body --silent --show-error --location --connect-timeout 15 --max-time 45 --output "$body" --write-out '%{http_code}' "$url")"
+          test "$code" = "200"
+          grep -Fq '<h1' "$body"
+          grep -Fq 'Osservatorio' "$body"
+          grep -Fq '<title>Osservatorio sull’imprenditoria migrante | Centro Studi</title>' "$body" || grep -Fq '<title>Osservatorio sull&#x2019;imprenditoria migrante | Centro Studi</title>' "$body" || grep -Fq '<title>Osservatorio sull&apos;imprenditoria migrante | Centro Studi</title>' "$body"
+          grep -Fq 'Ricerche, dati, indicatori e serie storiche' "$body"
+          echo "PASS /osservatorio HTTP 200 + H1 + SEO title + description"
