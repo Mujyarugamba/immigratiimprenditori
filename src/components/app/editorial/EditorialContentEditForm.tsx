@@ -38,6 +38,9 @@ export function EditorialContentEditForm({
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
       <input type="hidden" name="id" value={content.id} />
+      {interviewTypeLocked ? (
+        <input type="hidden" name="type_code" value={content.type_code} />
+      ) : null}
 
       <label className="text-ink flex flex-col gap-1.5 text-sm">
         <span className="font-medium">Tipo</span>
