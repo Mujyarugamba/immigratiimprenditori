@@ -1,0 +1,64 @@
+name: Production accessibility and devices smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright Chromium
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+      - name: Production semantic, keyboard and reflow checks
+        shell: bash
+        run: |
+          cat > /tmp/qa.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const base='https://www.immigratiimprenditori.it';
+          const paths=['/','/esplora','/cultura','/ricerca','/osservatorio','/storie','/contribuisci','/accedi'];
+          const widths=[320,390,768,1440];
+          const browser=await chromium.launch({headless:true});
+          const failures=[];
+          for (const width of widths) {
+            const page=await browser.newPage({viewport:{width,height:900}});
+            for (const path of paths) {
+              const response=await page.goto(base+path,{waitUntil:'networkidle',timeout:45000});
+              if (!response || response.status()>=400) failures.push(`${width} ${path}: HTTP ${response?.status()}`);
+              const data=await page.evaluate(() => {
+                const imgs=[...document.images].filter(i=>!i.hasAttribute('alt')).length;
+                const fields=[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(el=>{
+                  const id=el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+                  return !id && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby');
+                }).length;
+                return {h1:document.querySelectorAll('h1').length,main:document.querySelectorAll('main').length,imgs,fields,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+2};
+              });
+              if (data.h1!==1) failures.push(`${width} ${path}: h1=${data.h1}`);
+              if (data.main<1) failures.push(`${width} ${path}: no main landmark`);
+              if (data.imgs) failures.push(`${width} ${path}: ${data.imgs} images without alt`);
+              if (data.fields) failures.push(`${width} ${path}: ${data.fields} form controls without accessible label`);
+              if (data.overflow) failures.push(`${width} ${path}: horizontal overflow`);
+            }
+            await page.goto(base+'/',{waitUntil:'networkidle',timeout:45000});
+            await page.keyboard.press('Tab');
+            const focus=await page.evaluate(()=>{const e=document.activeElement; if(!e||e===document.body) return null; const s=getComputedStyle(e); return {tag:e.tagName,outline:s.outlineStyle,boxShadow:s.boxShadow};});
+            if (!focus || (focus.outline==='none' && (focus.boxShadow==='none'||focus.boxShadow===''))) failures.push(`${width} /: first keyboard focus not visibly styled`);
+            await page.close();
+          }
+          await browser.close();
+          if (failures.length) { console.error(failures.join('\n')); process.exit(1); }
+          console.log('PASS semantic + labels + keyboard focus + reflow on 8 pages x 4 viewports');
+          EOF
+          npx --yes -p playwright@1.55.0 node /tmp/qa.mjs
+      - name: Lighthouse Production accessibility Home
+        shell: bash
+        run: |
+          npx --yes lighthouse@12.8.2 https://www.immigratiimprenditori.it/ --only-categories=accessibility --chrome-flags='--headless --no-sandbox' --output=json --output-path=/tmp/lh.json --quiet
+          node -e "const r=require('/tmp/lh.json'); const s=Math.round(r.categories.accessibility.score*100); console.log('Lighthouse accessibility:',s); if(s<95) process.exit(1)"
