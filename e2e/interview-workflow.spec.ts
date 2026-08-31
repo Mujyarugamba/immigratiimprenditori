@@ -99,6 +99,12 @@ async function browserFutureLocalDateTime(page: Page, hoursAhead: number) {
   }, hoursAhead);
 }
 
+function workflowSeed(contentId: string) {
+  return psql(
+    `COPY (SELECT workflow_status || '|' || source_origin FROM public.content_interview_workflow WHERE content_id = '${contentId}') TO STDOUT;`,
+  ).trim();
+}
+
 function scheduledEpochSeconds(contentId: string) {
   const out = psql(
     `COPY (SELECT floor(extract(epoch from scheduled_for))::bigint FROM public.content_interview_workflow WHERE content_id = '${contentId}') TO STDOUT;`,
@@ -164,14 +170,12 @@ test.describe("Interview workflow authenticated E2E", () => {
     const contentId = match![1];
     contents.push(contentId);
 
-    // Generic content creation intentionally does not imply an external contact.
-    // Initialize only the local workflow fixture, then exercise every subsequent
-    // state mutation through the real browser/server-action path.
-    psql(
-      `INSERT INTO public.content_interview_workflow (content_id) VALUES ('${contentId}');`,
-    );
-    await page.reload();
-
+    // Direct editorial creation must initialize the interview workflow itself.
+    // No fixture SQL or reload is allowed here: the first returned detail page
+    // must already represent the persisted candidate/editorial workflow.
+    await expect
+      .poll(() => workflowSeed(contentId), { timeout: 30_000 })
+      .toBe("candidate|editorial");
     await expect(page.getByRole("heading", { name: "Workflow e consensi" })).toBeVisible();
     await expect(workflowStatusBadge(page)).toHaveText("Candidato");
 
