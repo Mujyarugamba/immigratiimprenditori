@@ -13,13 +13,14 @@ import {
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const section = sections.osservatorio;
+const seoTitle = "Osservatorio sull’imprenditoria migrante";
 
 export const metadata: Metadata = {
-  title: section.title,
+  title: seoTitle,
   description: section.description,
   alternates: { canonical: "/osservatorio" },
   ...pageSocialMetadata({
-    title: section.title,
+    title: seoTitle,
     description: section.description,
     pathname: "/osservatorio",
   }),
