@@ -15,6 +15,14 @@ La baseline autonoma del Centro Studi è in `supabase/baseline/`:
 
 Questa baseline è stata validata con cold start, RLS pubblico e Auth identity/rollback prima del cutover Production.
 
+Dopo la baseline, il cold-start standalone ricostruisce anche evoluzioni canoniche già presenti nella migration history hosted e conservate in `supabase/standalone-evolutions/`. Questi file servono esclusivamente a riprodurre localmente lo schema reale già applicato; **non** fanno parte del `candidateDelta` Production e non devono essere riapplicati al progetto hosted:
+
+- `20260819141022_editorial_inbox_activity.sql` — migration hosted canonica post-cutover;
+- `20260819141338_editorial_contributor_hardening.sql` — consolidamento delle evoluzioni hosted `20260819141338`–`20260819143251`;
+- `20260819170614_content_interview_workflow.sql` — ricostruzione della migration hosted `20260819170614_content_interview_workflow`, necessaria perché le evoluzioni successive della pipeline interviste possano essere replayate da database vuoto.
+
+La workflow CI `.github/workflows/supabase-local-validation.yml` copia queste evoluzioni sotto i rispettivi timestamp hosted prima di applicare le migration repository post-cutoff.
+
 ## Hosted Production — cutover SPLIT-3
 
 Il 19/08/2026 il progetto Supabase storico `hvfvfatlaspcpszgizhg` è stato convertito in-place al perimetro standalone Centro Studi mediante le migration gestite:
@@ -62,7 +70,7 @@ La classificazione in `candidateDelta` serve a impedire drift e applicazioni acc
 
 I file SQL pre-SPLIT-3 presenti in `supabase/migrations/` sono **storico di ownership** proveniente dal precedente monolite. Non sono una catena di bootstrap standalone e non devono essere concatenati o riapplicati al database Centro Studi.
 
-Per un cold start usare esclusivamente `supabase/baseline/00..03`. Per evoluzioni successive usare solo migration nuove e revisionate sul perimetro standalone; non reintrodurre oggetti o FK PonteImprese.
+Per un cold start usare la baseline `supabase/baseline/00..03`, le evoluzioni hosted ricostruite esplicitamente in `supabase/standalone-evolutions/` e soltanto le migration successive dichiarate dalla workflow di validazione. Non reintrodurre oggetti o FK PonteImprese.
 
 **Non usare `supabase db push` sull'intera directory `supabase/migrations/` per il rilascio production.** La history repository e quella hosted contengono alias temporali intenzionali e storico pre-SPLIT-3.
 
