@@ -277,7 +277,7 @@ export async function updateEditorialContent(
     typeof allowed.type_code === "string" ? allowed.type_code : null;
   let previousTypeCode: string | null = null;
 
-  if (targetTypeCode === "interview") {
+  if (targetTypeCode !== null) {
     const { data: current, error: currentError } = await supabase
       .from("contents")
       .select("type_code")
@@ -294,7 +294,18 @@ export async function updateEditorialContent(
         error: { code: "conflict", message: "Contenuto non trovato." },
       };
     }
+
     previousTypeCode = current.type_code as string;
+    if (previousTypeCode === "interview" && targetTypeCode !== "interview") {
+      return {
+        ok: false,
+        error: {
+          code: "conflict",
+          message:
+            "Il tipo Intervista non può essere modificato dopo l’inizializzazione del workflow.",
+        },
+      };
+    }
   }
 
   const { data: updated, error } = await supabase
