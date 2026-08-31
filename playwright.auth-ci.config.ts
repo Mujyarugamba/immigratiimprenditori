@@ -7,6 +7,7 @@ export default defineConfig({
   testMatch: [
     "contribution-form.spec.ts",
     "editorial.spec.ts",
+    "interview-workflow.spec.ts",
     "go-live-local.spec.ts",
     "internal-links.spec.ts",
     "public-readonly.spec.ts",
