@@ -7,6 +7,9 @@ on:
         description: GitHub Actions run ID of Production encrypted backup
         required: true
         type: string
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -15,10 +18,14 @@ permissions:
 jobs:
   restore-drill:
     # The drill consumes a Production artifact but restores only to the runner's
-    # isolated local Supabase stack. Feature-branch manual runs stay inert.
-    if: github.ref == 'refs/heads/main'
+    # isolated local Supabase stack. Manual feature-branch runs stay inert.
+    # The push path is a one-shot retry gate: only a merge commit containing
+    # [restore-drill-auto] may run it, using the exact previously verified backup.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[restore-drill-auto]')))
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      BACKUP_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.backup_run_id || '33406592097' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +43,6 @@ jobs:
 
       - name: Verify restore drill inputs and secret
         env:
-          BACKUP_RUN_ID: ${{ inputs.backup_run_id }}
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
         shell: bash
         run: |
@@ -48,11 +54,16 @@ jobs:
       - name: Download exact Production backup artifact
         uses: actions/download-artifact@v4
         with:
-          name: centro-studi-encrypted-backup-${{ inputs.backup_run_id }}
+          name: centro-studi-encrypted-backup-${{ env.BACKUP_RUN_ID }}
           path: restore-input
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          run-id: ${{ inputs.backup_run_id }}
+          run-id: ${{ env.BACKUP_RUN_ID }}
+
+      - name: Normalize managed Storage metadata for isolated target
+        env:
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: bash scripts/ci/normalize-production-backup-storage.sh restore-input
 
       - name: Restore Production artifact to isolated local Supabase
         env:
