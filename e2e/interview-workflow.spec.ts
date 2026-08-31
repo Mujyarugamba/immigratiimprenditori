@@ -187,9 +187,6 @@ test.describe("Interview workflow authenticated E2E", () => {
     ).toBeVisible({ timeout: 30_000 });
     await expect(workflowStatusBadge(page)).toHaveText("Contattato");
 
-    // Exercise the browser-local datetime conversion all the way to the persisted
-    // timestamptz. The expected epoch is computed inside the same browser timezone
-    // that produces the hidden UTC ISO value submitted by the real form.
     const firstSchedule = await browserFutureLocalDateTime(page, 2);
     await page.getByLabel("Data e ora concordate").fill(firstSchedule.local);
     await page.getByRole("button", { name: "Registra programmazione" }).click();
@@ -238,12 +235,8 @@ test.describe("Interview workflow authenticated E2E", () => {
     ).toBeVisible({ timeout: 30_000 });
     await expect(workflowStatusBadge(page)).toHaveText("Approvato");
 
-    // Approval of the interview workflow must never publish the content itself.
     await expect(page.getByText("unpublished · private", { exact: true })).toBeVisible();
 
-    // Converting an existing non-interview content through the real edit form must
-    // establish the same workflow invariant. Reuse the authenticated session so
-    // this coverage adds no second MFA enrollment.
     await page.goto("/app/redazione/contenuti/nuovo");
     await expect(page.getByRole("heading", { name: "Nuovo contenuto editoriale" })).toBeVisible({
       timeout: 30_000,
@@ -276,7 +269,7 @@ test.describe("Interview workflow authenticated E2E", () => {
     expect(workflowSeed(convertedId)).toBe("");
     await expect(page.getByRole("heading", { name: "Workflow e consensi" })).toHaveCount(0);
 
-    await page.getByLabel("Tipo").selectOption("interview");
+    await page.locator('select[name="type_code"]').selectOption("interview");
     await page.getByRole("button", { name: "Salva modifiche" }).click();
     await expect(
       page.getByRole("status").filter({ hasText: "Contenuto aggiornato." }),
