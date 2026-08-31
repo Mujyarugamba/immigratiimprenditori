@@ -111,7 +111,10 @@ test -s "$normalized_encrypted"
 
 rm -f "$encrypted" "$checksum"
 cp "$normalized_encrypted" "$encrypted"
-sha256sum "$encrypted" > "$checksum"
+(
+  cd "$INPUT_DIR"
+  sha256sum "$(basename "$encrypted")" > "$(basename "$checksum")"
+)
 
 echo "PRODUCTION_BACKUP_MANAGED_STORAGE_COPY_BLOCKS_REMOVED = $removed_blocks"
 echo "PRODUCTION_BACKUP_MANAGED_STORAGE_DATA_NORMALIZATION = PASS"
