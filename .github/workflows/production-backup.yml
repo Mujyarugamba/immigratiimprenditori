@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: production-encrypted-backup
+  cancel-in-progress: false
+
 jobs:
   backup:
     # Scheduled workflows only run from the default branch. Keep manual runs on
@@ -17,10 +21,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout metadata
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup pinned Supabase CLI
-        uses: supabase/setup-cli@v3
+        uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
         with:
           version: 2.115.0
 
@@ -92,14 +96,14 @@ jobs:
           echo "BACKUP_ENCRYPTION = PASS"
 
       - name: Upload encrypted backup
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: centro-studi-encrypted-backup-${{ github.run_id }}
           path: |
             *.tar.gz.gpg
             *.tar.gz.gpg.sha256
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
 
       - name: Confirm plaintext removal
         shell: bash
