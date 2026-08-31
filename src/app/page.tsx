@@ -22,11 +22,12 @@ export default function HomeMotionPreviewPage() {
     <>
       <link rel="stylesheet" href="/home-light-v1.css" />
       <link rel="stylesheet" href="/home-motion-v3.css" />
+      <link rel="stylesheet" href="/home-motion-v4.css" />
 
-      <section className="preview-hero-v3" aria-labelledby="preview-hero-title">
-        <div className="preview-hero-media" aria-hidden="true">
+      <section className="preview-hero-v4" aria-labelledby="preview-hero-title">
+        <div className="preview-v4-media" aria-hidden="true">
           <video
-            className="preview-hero-video"
+            className="preview-v4-video"
             autoPlay
             muted
             loop
@@ -40,47 +41,35 @@ export default function HomeMotionPreviewPage() {
               type="video/mp4"
             />
           </video>
-          <div className="preview-media-labels">
-            <span>Persone</span>
-            <span>Imprese</span>
-            <span>Territori</span>
-          </div>
+        </div>
+        <div className="preview-v4-veil" aria-hidden="true" />
+
+        <div className="preview-v4-meta" aria-hidden="true">
+          <span>Osservatorio · Centro Studi</span>
+          <span>Dati · Ricerca · Storie · Territori</span>
         </div>
 
-        <div className="preview-coral-square" aria-hidden="true" />
-
-        <div className="site-container preview-hero-layout">
-          <div className="preview-hero-copy">
-            <p className="preview-kicker">Osservatorio • Centro Studi</p>
-            <h1 id="preview-hero-title">
-              L&apos;impresa
-              <em>si muove.</em>
-              Noi la studiamo.
-            </h1>
-            <p>
-              Dati verificati, ricerca e testimonianze per capire come persone e
-              imprese attraversano Paesi, territori e settori economici.
-            </p>
-            <div className="preview-hero-actions">
-              <Link href="/osservatorio" className="preview-primary">
-                Esplora i dati →
-              </Link>
-              <Link href="/contenuti" className="preview-secondary">
-                Analisi e ricerche
-              </Link>
-            </div>
-          </div>
-
-          <aside className="preview-hero-card">
-            <span>IN EVIDENZA</span>
-            <strong>Dati + persone.</strong>
-            <p>
-              Numeri leggibili, fonti verificabili e le voci di chi costruisce
-              impresa attraverso confini, settori e territori.
-            </p>
-            <Link href="/storie">Esplora le storie →</Link>
-          </aside>
+        <div className="preview-v4-payoff">
+          <h1 id="preview-hero-title">
+            <span className="preview-v4-line preview-v4-line-a">E dal cammino</span>
+            <span className="preview-v4-line preview-v4-line-b">
+              nasce <em>l&apos;impresa.</em>
+            </span>
+          </h1>
         </div>
+
+        <div className="site-container preview-v4-bottom">
+          <p>
+            Studiamo l&apos;imprenditoria migrante attraverso dati verificati,
+            ricerca, territori e testimonianze.
+          </p>
+          <nav className="preview-v4-actions" aria-label="Esplora il Centro Studi">
+            <Link href="/osservatorio">Esplora l&apos;Osservatorio →</Link>
+            <Link href="/contenuti">Analisi e ricerche →</Link>
+          </nav>
+        </div>
+
+        <span className="preview-v4-scroll" aria-hidden="true">Scorri ↓</span>
       </section>
 
       <div className="preview-motion-rail" aria-label="Temi dell'Osservatorio">
