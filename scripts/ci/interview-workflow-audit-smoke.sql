@@ -98,7 +98,8 @@ begin
   end if;
 
   update public.content_interview_workflow
-  set publication_consent_status = 'granted'
+  set publication_consent_status = 'granted',
+      publication_consent_at = now()
   where content_id = v_content_id;
 
   if not exists (
@@ -108,8 +109,10 @@ begin
       and action = 'updated'
       and changes ->> 'scope' = 'interview_workflow'
       and changes -> 'fields' ? 'publication_consent_status'
+      and changes -> 'fields' ? 'publication_consent_at'
       and changes #>> '{before_interview,publication_consent_status}' = 'pending'
       and changes #>> '{after_interview,publication_consent_status}' = 'granted'
+      and changes #>> '{after_interview,publication_consent_at}' is not null
   ) then
     raise exception 'INTERVIEW_AUDIT_CONSENT_CHANGE_MISSING';
   end if;
