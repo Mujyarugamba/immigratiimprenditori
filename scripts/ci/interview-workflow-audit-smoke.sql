@@ -4,9 +4,12 @@
 do $$
 declare
   v_content_id uuid;
+  v_other_content_id uuid;
   v_language_id bigint;
-  v_type_code text;
+  v_interview_type text := 'interview';
+  v_other_type text;
   v_slug text := 'ci-interview-audit-' || replace(gen_random_uuid()::text, '-', '');
+  v_other_slug text := 'ci-non-interview-' || replace(gen_random_uuid()::text, '-', '');
   v_count bigint;
   v_secret_note text := 'CI_PRIVATE_INTERVIEW_NOTE_MUST_NOT_BE_AUDITED';
 begin
@@ -16,13 +19,19 @@ begin
   order by sort_order, id
   limit 1;
 
-  select code into v_type_code
+  select code into v_other_type
   from public.content_types
   where is_active
+    and code <> v_interview_type
   order by sort_order, code
   limit 1;
 
-  if v_language_id is null or v_type_code is null then
+  if v_language_id is null
+     or v_other_type is null
+     or not exists (
+       select 1 from public.content_types
+       where code = v_interview_type and is_active
+     ) then
     raise exception 'INTERVIEW_AUDIT_SMOKE_MISSING_CATALOG';
   end if;
 
@@ -30,6 +39,7 @@ begin
     raise exception 'INTERVIEW_WORKFLOW_AUTHENTICATED_DELETE_STILL_GRANTED';
   end if;
 
+  -- A workflow row may never be attached to a non-interview content.
   insert into public.contents (
     owned_by_editorial,
     owner_person_id,
@@ -47,7 +57,46 @@ begin
     true,
     null,
     null,
-    v_type_code,
+    v_other_type,
+    v_language_id,
+    'CI non-interview fixture',
+    v_other_slug,
+    'Temporary local-only non-interview fixture.',
+    'draft',
+    'unpublished',
+    'private',
+    false
+  ) returning id into v_other_content_id;
+
+  begin
+    insert into public.content_interview_workflow (content_id)
+    values (v_other_content_id);
+    raise exception 'INTERVIEW_WORKFLOW_NON_INTERVIEW_CONTENT_ACCEPTED';
+  exception
+    when check_violation then null;
+  end;
+
+  delete from public.contents where id = v_other_content_id;
+
+  -- Creating an editorial interview must seed candidate/editorial automatically.
+  insert into public.contents (
+    owned_by_editorial,
+    owner_person_id,
+    owner_business_id,
+    type_code,
+    language_id,
+    title,
+    slug,
+    body,
+    editorial_status,
+    publication_status,
+    visibility_status,
+    is_featured
+  ) values (
+    true,
+    null,
+    null,
+    v_interview_type,
     v_language_id,
     'CI interview audit fixture',
     v_slug,
@@ -58,8 +107,15 @@ begin
     false
   ) returning id into v_content_id;
 
-  insert into public.content_interview_workflow (content_id)
-  values (v_content_id);
+  if not exists (
+    select 1
+    from public.content_interview_workflow
+    where content_id = v_content_id
+      and workflow_status = 'candidate'
+      and source_origin = 'editorial'
+  ) then
+    raise exception 'INTERVIEW_WORKFLOW_AUTO_SEED_MISSING';
+  end if;
 
   select count(*) into v_count
   from public.editorial_content_activity
@@ -81,6 +137,16 @@ begin
   ) then
     raise exception 'INTERVIEW_AUDIT_CREATE_PAYLOAD_INVALID';
   end if;
+
+  -- Once a workflow exists, the content may not silently stop being an interview.
+  begin
+    update public.contents
+    set type_code = v_other_type
+    where id = v_content_id;
+    raise exception 'INTERVIEW_CONTENT_TYPE_DETACH_ACCEPTED';
+  exception
+    when check_violation then null;
+  end;
 
   begin
     update public.content_interview_workflow
