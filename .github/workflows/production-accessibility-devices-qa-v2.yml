@@ -1,0 +1,32 @@
+name: Production accessibility and devices QA v2
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Install axe runtime without changing lockfile
+        run: npm install --no-save --package-lock=false axe-core@4.10.3
+
+      - name: Run Production accessibility and device QA
+        run: node scripts/ci/production-a11y-devices-temp.mjs
