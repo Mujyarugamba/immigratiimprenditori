@@ -34,13 +34,13 @@ Stato verificato dopo il cutover:
 - 1 `auth.users` / 1 profilo / 1 account
 - 1 ruolo attivo `amministratore_applicativo`
 
-## Hosted Production — verifica read-only 24/08/2026
+## Hosted Production — verifica read-only 31/08/2026
 
 La migration history del progetto hosted è stata riletta senza scritture. L'ultima migration osservata è:
 
-`20260824103000_harden_publication_gate_execute_privileges`
+`20260824104000_fix_public_profile_column_grants`
 
-Il cutoff Production corrente è `20260824103000` (234 migration hosted). Qualunque file repository con timestamp `<=` a questo cutoff **non** è un candidato di rilascio.
+Il cutoff Production osservato è `20260824104000` (235 migration hosted). Qualunque file repository con timestamp `<=` a questo cutoff **non** è un candidato di rilascio, salvo alias storici già classificati.
 
 Due file repository restano alias storici di migration **già applicate** con versioni hosted precedenti. Restano in `alreadyAppliedRepositoryAliases` e non appartengono al delta futuro:
 
@@ -49,9 +49,14 @@ Due file repository restano alias storici di migration **già applicate** con ve
 
 Non devono essere riapplicati.
 
-Le 25 migration che in precedenza formavano il delta (da `20260820173000_harden_editorial_public_submission.sql` fino a `20260824103000_harden_publication_gate_execute_privileges.sql`) risultano già applicate in Production. `candidateDelta` in `supabase/CS-PRODUCTION-RELEASE.json` è quindi `[]`. Uno stato vuoto è valido e non autorizza nuove scritture.
+Le migration classificate in `appliedReleaseDelta`, da `20260820173000_harden_editorial_public_submission.sql` fino a `20260824104000_fix_public_profile_column_grants.sql`, risultano già applicate in Production.
 
-La migration history hosted deve essere riletta immediatamente prima di qualsiasi rilascio: il file JSON è un'evidenza dello stato osservato, non un'autorizzazione permanente alla scrittura.
+Il delta candidato repository, **non applicato e non autorizzato alla scrittura Production**, è invece:
+
+- `20260829120000_create_content_ai_translations.sql`;
+- `20260831103000_audit_interview_workflow_activity.sql`.
+
+La classificazione in `candidateDelta` serve a impedire drift e applicazioni accidentali: non equivale ad approvazione del rilascio. La migration history hosted deve essere riletta immediatamente prima di qualsiasi rilascio; il file JSON è un'evidenza dello stato osservato, non un'autorizzazione permanente alla scrittura.
 
 ## `supabase/migrations/`
 
