@@ -23,6 +23,8 @@ jobs:
           npm install --no-package-lock --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
       - name: Production semantic, keyboard and reflow checks
+        id: browserqa
+        continue-on-error: true
         shell: bash
         run: |
           cat > /tmp/production-qa/qa.mjs <<'EOF'
@@ -40,8 +42,8 @@ jobs:
               const data=await page.evaluate(() => {
                 const imgs=[...document.images].filter(i=>!i.hasAttribute('alt')).length;
                 const fields=[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(el=>{
-                  const id=el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
-                  return !id && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby');
+                  const nativeLabels=typeof el.labels!=='undefined' && el.labels && el.labels.length>0;
+                  return !nativeLabels && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby');
                 }).length;
                 return {h1:document.querySelectorAll('h1').length,main:document.querySelectorAll('main').length,imgs,fields,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+2};
               });
@@ -64,7 +66,16 @@ jobs:
           cd /tmp/production-qa
           node qa.mjs
       - name: Lighthouse Production accessibility Home
+        id: lighthouse
+        continue-on-error: true
         shell: bash
         run: |
           npx --yes lighthouse@12.8.2 https://www.immigratiimprenditori.it/ --only-categories=accessibility --chrome-flags='--headless --no-sandbox' --output=json --output-path=/tmp/lh.json --quiet
           node -e "const r=require('/tmp/lh.json'); const s=Math.round(r.categories.accessibility.score*100); console.log('Lighthouse accessibility:',s); if(s<95) process.exit(1)"
+      - name: Enforce Production QA
+        if: always()
+        shell: bash
+        run: |
+          echo "browser=${{ steps.browserqa.outcome }} lighthouse=${{ steps.lighthouse.outcome }}"
+          test "${{ steps.browserqa.outcome }}" = success
+          test "${{ steps.lighthouse.outcome }}" = success
