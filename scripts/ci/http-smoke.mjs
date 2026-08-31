@@ -160,8 +160,8 @@ async function main() {
     const home = await expectText("/", [
       '<html lang="it"',
       'id="contenuto"',
-      "Studiare l&#x27;imprenditoria migrante",
-      "Contribuisci al Centro Studi",
+      "Idee, dati e opportunità",
+      "Sostieni il Centro Studi",
     ]);
     if (!home.body.includes("<h1")) fail("/: missing primary h1");
     expectHeader(home.response, "x-content-type-options", "nosniff");
