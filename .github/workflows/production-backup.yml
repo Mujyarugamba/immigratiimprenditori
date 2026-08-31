@@ -75,9 +75,10 @@ jobs:
 
           tar -czf "$archive" "$dir"
           test -s "$archive"
-          tar -tzf "$archive" | grep -q '/roles.sql$'
-          tar -tzf "$archive" | grep -q '/schema.sql$'
-          tar -tzf "$archive" | grep -q '/data.sql$'
+          archive_members="$(tar -tzf "$archive")"
+          grep -q '/roles.sql$' <<<"$archive_members"
+          grep -q '/schema.sql$' <<<"$archive_members"
+          grep -q '/data.sql$' <<<"$archive_members"
 
           printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" \
             | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
