@@ -188,38 +188,42 @@ export function InterviewWorkflowControls({
             Seleziona soltanto uno stato effettivamente documentato. “Concesso” registra anche la data e ora corrente.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {CONSENTS.map((consent) => (
-              <WorkflowForm
-                key={consent.kind}
-                contentId={workflow.content_id}
-                operation="update_consent"
-                action={action}
-              >
-                <div className="border-line border p-3">
-                  <input type="hidden" name="consent_kind" value={consent.kind} />
-                  <label className="text-ink flex flex-col gap-1.5 text-sm">
-                    <span className="font-medium">{consent.label}</span>
-                    <select
-                      name="consent_status"
-                      defaultValue={workflow[consent.field]}
-                      disabled={pending}
-                      className={selectClass}
-                    >
-                      {CONSENT_OPTIONS.filter(
-                        (option) => consent.allowNotRequired || option.value !== "not_required",
-                      ).map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <Button type="submit" size="sm" variant="secondary" disabled={pending} className="mt-2">
-                    Salva
-                  </Button>
-                </div>
-              </WorkflowForm>
-            ))}
+            {CONSENTS.map((consent) => {
+              const persistedStatus = workflow[consent.field];
+              return (
+                <WorkflowForm
+                  key={consent.kind}
+                  contentId={workflow.content_id}
+                  operation="update_consent"
+                  action={action}
+                >
+                  <div className="border-line border p-3">
+                    <input type="hidden" name="consent_kind" value={consent.kind} />
+                    <label className="text-ink flex flex-col gap-1.5 text-sm">
+                      <span className="font-medium">{consent.label}</span>
+                      <select
+                        key={`${consent.kind}:${persistedStatus}`}
+                        name="consent_status"
+                        defaultValue={persistedStatus}
+                        disabled={pending}
+                        className={selectClass}
+                      >
+                        {CONSENT_OPTIONS.filter(
+                          (option) => consent.allowNotRequired || option.value !== "not_required",
+                        ).map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <Button type="submit" size="sm" variant="secondary" disabled={pending} className="mt-2">
+                      Salva
+                    </Button>
+                  </div>
+                </WorkflowForm>
+              );
+            })}
           </div>
         </div>
       ) : null}
