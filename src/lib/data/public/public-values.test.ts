@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   PUBLIC_VALUE_MAX_LIMIT,
+  hasNarrowingPublicValueFilter,
   publicValueYearRange,
   resolveExplicitPage,
   resolvePublicValueStatuses,
@@ -51,4 +52,14 @@ test("page metadata exposes remaining rows instead of truncating them", () => {
     hasMore: true,
   });
   assert.equal(toPublicValuePage(200, 200, 500, 0).hasMore, false);
+});
+
+test("full materialization guard requires a real narrowing dimension", () => {
+  assert.equal(hasNarrowingPublicValueFilter({}), false);
+  assert.equal(hasNarrowingPublicValueFilter({ status: "final" }), false);
+  assert.equal(hasNarrowingPublicValueFilter({ territoryCodes: [] }), false);
+  assert.equal(hasNarrowingPublicValueFilter({ indicatorSlug: "imprese-straniere" }), true);
+  assert.equal(hasNarrowingPublicValueFilter({ territoryCodes: ["IT", "ITA"] }), true);
+  assert.equal(hasNarrowingPublicValueFilter({ sectorId: 12 }), true);
+  assert.equal(hasNarrowingPublicValueFilter({ year: 2025 }), true);
 });

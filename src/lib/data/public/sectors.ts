@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import {
-  getExplorerSnapshot,
+  getScopedExplorerEvidence,
   type ExplorerIndicator,
   type ExplorerValue,
 } from "@/lib/data/public/explore";
@@ -43,29 +43,24 @@ function indicatorEvidence(
 
 export async function getSectorDetail(slug: string): Promise<SectorDetail | null> {
   const supabase = await createClient();
-  const [sectorResult, snapshot] = await Promise.all([
-    supabase
-      .from("business_sectors")
-      .select("id, slug, name, description")
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .maybeSingle(),
-    getExplorerSnapshot(),
-  ]);
+  const sectorResult = await supabase
+    .from("business_sectors")
+    .select("id, slug, name, description")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .maybeSingle();
 
   if (sectorResult.error) throw new Error(sectorResult.error.message);
   if (!sectorResult.data) return null;
 
   const sector = sectorResult.data as PublicSector;
-  const values = snapshot.values.filter(
-    (value) => value.business_sector_id === sector.id,
-  );
-  const indicators = indicatorEvidence(snapshot.indicators, values);
+  const evidence = await getScopedExplorerEvidence({ sectorId: sector.id });
+  const indicators = indicatorEvidence(evidence.indicators, evidence.values);
   return {
     sector,
-    dataValueCount: values.length,
+    dataValueCount: evidence.values.length,
     indicatorCount: indicators.length,
     indicators,
-    hasEvidence: values.length > 0,
+    hasEvidence: evidence.values.length > 0,
   };
 }
