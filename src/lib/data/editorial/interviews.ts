@@ -18,23 +18,8 @@ export type EditorialInterviewWorkflow = {
   updated_at: string;
 };
 
-const SELECT = [
-  "content_id",
-  "workflow_status",
-  "source_origin",
-  "contacted_at",
-  "scheduled_for",
-  "interviewed_at",
-  "publication_consent_status",
-  "publication_consent_at",
-  "quote_approval_status",
-  "quote_approval_at",
-  "image_consent_status",
-  "image_consent_at",
-  "video_consent_status",
-  "video_consent_at",
-  "updated_at",
-].join(", ");
+const SELECT =
+  "content_id, workflow_status, source_origin, contacted_at, scheduled_for, interviewed_at, publication_consent_status, publication_consent_at, quote_approval_status, quote_approval_at, image_consent_status, image_consent_at, video_consent_status, video_consent_at, updated_at" as const;
 
 export async function getEditorialInterviewWorkflow(
   contentId: string,
