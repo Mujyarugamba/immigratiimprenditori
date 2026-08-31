@@ -7,8 +7,8 @@
     "name": "prepare_events_external_ingestion_rls"
   },
   "observedHostedLatestMigration": {
-    "version": "20260824104000",
-    "name": "fix_public_profile_column_grants"
+    "version": "20260831174953",
+    "name": "audit_interview_workflow_activity"
   },
   "canonicalColdStartBaseline": [
     "00000000000000_baseline_immigratiimprenditori.sql",
@@ -24,6 +24,16 @@
     "20260820171000_editorial_submission_country_labels.sql": {
       "hostedVersion": "20260819103031",
       "hostedName": "editorial_submission_country_labels"
+    }
+  },
+  "appliedHostedMappings": {
+    "20260829120000_create_content_ai_translations.sql": {
+      "hostedVersion": "20260831174853",
+      "hostedName": "create_content_ai_translations"
+    },
+    "20260831103000_audit_interview_workflow_activity.sql": {
+      "hostedVersion": "20260831174953",
+      "hostedName": "audit_interview_workflow_activity"
     }
   },
   "appliedReleaseDelta": [
@@ -52,18 +62,23 @@
     "20260822213000_hybrid_editorial_review_governance.sql",
     "20260822213100_fix_hybrid_null_category_classifier.sql",
     "20260824103000_harden_publication_gate_execute_privileges.sql",
-    "20260824104000_fix_public_profile_column_grants.sql"
-  ],
-  "candidateDelta": [
+    "20260824104000_fix_public_profile_column_grants.sql",
     "20260829120000_create_content_ai_translations.sql",
     "20260831103000_audit_interview_workflow_activity.sql"
   ],
+  "candidateDelta": [],
   "productionApplyEvidence": {
     "phase1Run": 32699707002,
     "phase2Run": 32706028947,
     "securityPatchRun": 32707529881,
-    "migrationRowsAfterApply": 235,
-    "maxVersionAfterApply": "20260824104000"
+    "migrationRowsAfterApply": 237,
+    "maxVersionAfterApply": "20260831174953",
+    "preReleaseBackupRun": 33406592097,
+    "preReleaseBackupArtifactId": 9769054787,
+    "preReleaseBackupTimestamp": "20260831T174600Z",
+    "preReleaseEncryptedSha256": "3c8353a8891dcb86d6deded137dd584f66f89fbd301ccd48befae5f12a97d1c7",
+    "applicationReleaseSha": "2dfc5e9f25e69edecd6bbe31c3ffe314a433aa52",
+    "applicationReleaseWorkflowRun": 33422006767
   },
   "releasePolicy": {
     "historicalMigrationsDirectoryIsNotBootstrap": true,
