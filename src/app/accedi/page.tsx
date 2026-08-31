@@ -103,7 +103,7 @@ export default async function AccediPage({ searchParams }: PageProps) {
           </div>
           <button
             type="submit"
-            className="bg-brand text-brand-fg w-full rounded-md px-4 py-2 text-sm font-medium hover:opacity-95"
+            className="bg-brand w-full rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-95"
           >
             Accedi
           </button>
