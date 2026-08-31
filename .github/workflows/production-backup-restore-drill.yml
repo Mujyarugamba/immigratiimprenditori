@@ -1,0 +1,107 @@
+name: Production backup isolated restore drill
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_run_id:
+        description: GitHub Actions run ID of Production encrypted backup
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  restore-drill:
+    # The drill consumes a Production artifact but restores only to the runner's
+    # isolated local Supabase stack. Feature-branch manual runs stay inert.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup pinned Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.115.0
+
+      - name: Verify restore drill inputs and secret
+        env:
+          BACKUP_RUN_ID: ${{ inputs.backup_run_id }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$BACKUP_RUN_ID" =~ ^[0-9]+$ ]] || { echo "backup_run_id must be numeric" >&2; exit 1; }
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE secret missing" >&2; exit 1; }
+          echo "PRODUCTION_RESTORE_DRILL_INPUT_GATE = PASS"
+
+      - name: Download exact Production backup artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: centro-studi-encrypted-backup-${{ inputs.backup_run_id }}
+          path: restore-input
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.backup_run_id }}
+
+      - name: Restore Production artifact to isolated local Supabase
+        env:
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: bash scripts/ci/production-backup-restore-drill.sh restore-input
+
+      - name: Auth integration smoke on restored database
+        run: node scripts/ci/auth-integration-smoke.mjs
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Build application against restored local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          PUBLIC_KEY="${PUBLISHABLE_KEY:-${ANON_KEY:-}}"
+          SERVICE_KEY="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
+          test -n "${API_URL:-}"
+          test -n "$PUBLIC_KEY"
+          test -n "$SERVICE_KEY"
+          case "$API_URL" in
+            http://127.0.0.1:*|http://localhost:*) ;;
+            *) echo "Refusing non-local Supabase API_URL: $API_URL" >&2; exit 1 ;;
+          esac
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLIC_KEY" >> "$GITHUB_ENV"
+          printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_KEY" >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_SITE_URL=%s\n' 'http://127.0.0.1:3000' >> "$GITHUB_ENV"
+          printf 'NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          printf 'PRIVACY_ANALYTICS_WRITE_ENABLED=%s\n' 'true' >> "$GITHUB_ENV"
+          NEXT_PUBLIC_SUPABASE_URL="$API_URL" \
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLIC_KEY" \
+          SUPABASE_SERVICE_ROLE_KEY="$SERVICE_KEY" \
+          NEXT_PUBLIC_SITE_URL="http://127.0.0.1:3000" \
+          NEXT_PUBLIC_PRIVACY_ANALYTICS_ENABLED="true" \
+          PRIVACY_ANALYTICS_WRITE_ENABLED="true" \
+          npm run build
+
+      - name: HTTP and security smoke on restored database
+        run: npm run test:smoke
+
+      - name: Authenticated browser E2E on restored database
+        run: npx playwright test --config=playwright.auth-ci.config.ts
+
+      - name: Cleanup isolated restore drill
+        if: always()
+        shell: bash
+        run: |
+          rm -rf restore-input
+          supabase stop --no-backup || true
