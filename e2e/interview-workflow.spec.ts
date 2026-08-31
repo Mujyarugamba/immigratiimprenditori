@@ -157,10 +157,10 @@ test.describe("Interview workflow authenticated E2E", () => {
     await expect(page.getByText("Contattato", { exact: true })).toBeVisible();
 
     await saveConsent(page, "Pubblicazione");
-    await expect(page.getByText("Concesso", { exact: true }).first()).toBeVisible();
+    await expect(page.getByLabel("Pubblicazione")).toHaveValue("granted");
 
     await saveConsent(page, "Citazioni");
-    await expect(page.getByText("Concesso", { exact: true })).toHaveCount(2);
+    await expect(page.getByLabel("Citazioni")).toHaveValue("granted");
 
     await page.getByRole("button", { name: "Registra intervista svolta" }).click();
     await expect(
