@@ -26,17 +26,20 @@ begin
       'contacted_at',
       'scheduled_for',
       'interviewed_at',
-      'fact_check_completed_at',
       'publication_consent_status',
+      'publication_consent_at',
       'quote_approval_status',
+      'quote_approval_at',
       'image_consent_status',
-      'video_consent_status'
+      'image_consent_at',
+      'video_consent_status',
+      'video_consent_at'
     ]) as k
     where (v_old -> k) is distinct from (v_new -> k);
 
-    -- updated_at, internal_notes, metadata and source bookkeeping are deliberately
-    -- outside this audit payload. In particular, internal notes must never be
-    -- copied into editorial_content_activity.
+    -- updated_at, internal_notes and source bookkeeping are deliberately outside
+    -- this audit payload. In particular, internal notes must never be copied into
+    -- editorial_content_activity.
     if jsonb_array_length(v_fields) = 0 then
       return new;
     end if;
@@ -74,11 +77,14 @@ begin
           'contacted_at', old.contacted_at,
           'scheduled_for', old.scheduled_for,
           'interviewed_at', old.interviewed_at,
-          'fact_check_completed_at', old.fact_check_completed_at,
           'publication_consent_status', old.publication_consent_status,
+          'publication_consent_at', old.publication_consent_at,
           'quote_approval_status', old.quote_approval_status,
+          'quote_approval_at', old.quote_approval_at,
           'image_consent_status', old.image_consent_status,
-          'video_consent_status', old.video_consent_status
+          'image_consent_at', old.image_consent_at,
+          'video_consent_status', old.video_consent_status,
+          'video_consent_at', old.video_consent_at
         ))
       end,
       'after_interview', jsonb_strip_nulls(jsonb_build_object(
@@ -86,11 +92,14 @@ begin
         'contacted_at', new.contacted_at,
         'scheduled_for', new.scheduled_for,
         'interviewed_at', new.interviewed_at,
-        'fact_check_completed_at', new.fact_check_completed_at,
         'publication_consent_status', new.publication_consent_status,
+        'publication_consent_at', new.publication_consent_at,
         'quote_approval_status', new.quote_approval_status,
+        'quote_approval_at', new.quote_approval_at,
         'image_consent_status', new.image_consent_status,
-        'video_consent_status', new.video_consent_status
+        'image_consent_at', new.image_consent_at,
+        'video_consent_status', new.video_consent_status,
+        'video_consent_at', new.video_consent_at
       ))
     )
   );
@@ -106,4 +115,4 @@ after insert or update on public.content_interview_workflow
 for each row execute function public.log_interview_workflow_activity();
 
 comment on function public.log_interview_workflow_activity() is
-  'Atomically records interview workflow state/date/consent changes in editorial_content_activity without copying internal notes or metadata.';
+  'Atomically records interview workflow state/date/consent changes in editorial_content_activity without copying internal notes.';
