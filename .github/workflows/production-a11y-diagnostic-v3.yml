@@ -1,0 +1,28 @@
+name: Production accessibility focused diagnostic v3
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install project dependencies
+        run: npm ci
+      - name: Install axe runtime without changing lockfile
+        run: npm install --no-save --package-lock=false axe-core@4.10.3
+      - name: Diagnose Production login contrast and keyboard scroll
+        run: node scripts/ci/production-a11y-diagnostic-temp.mjs
