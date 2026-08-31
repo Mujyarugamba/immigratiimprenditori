@@ -41,6 +41,46 @@ jobs:
         with:
           version: 2.115.0
 
+      - name: Initialize isolated config with TOTP MFA
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase init
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("supabase/config.toml")
+          text = path.read_text(encoding="utf-8")
+          section = re.compile(r"(?ms)^(\[auth\.mfa\.totp\]\n)(.*?)(?=^\[|\Z)")
+          match = section.search(text)
+          if not match:
+              raise SystemExit("Generated Supabase config is missing [auth.mfa.totp]")
+
+          block = match.group(2)
+          for key in ("enroll_enabled", "verify_enabled"):
+              block, count = re.subn(
+                  rf"(?m)^{key}\s*=\s*(?:true|false)\s*$",
+                  f"{key} = true",
+                  block,
+              )
+              if count != 1:
+                  raise SystemExit(f"Expected exactly one {key} flag in [auth.mfa.totp], found {count}")
+
+          text = text[: match.start(2)] + block + text[match.end(2) :]
+          path.write_text(text, encoding="utf-8")
+
+          verified = section.search(text)
+          if not verified:
+              raise SystemExit("Unable to re-read [auth.mfa.totp] after update")
+          verified_block = verified.group(2)
+          for expected in ("enroll_enabled = true", "verify_enabled = true"):
+              if expected not in verified_block:
+                  raise SystemExit(f"TOTP MFA config verification failed: {expected}")
+
+          print("RESTORE_DRILL_LOCAL_TOTP_MFA_CONFIG = PASS")
+          PY
+
       - name: Verify restore drill inputs and secret
         env:
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
