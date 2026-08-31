@@ -57,58 +57,60 @@ export default async function AccediPage({ searchParams }: PageProps) {
     : "Area riservata ai redattori autorizzati del Centro Studi.";
 
   return (
-    <Container className="py-12 sm:py-16">
-      <div className="border-line bg-surface-elevated mx-auto max-w-md rounded-md border p-6 shadow-soft sm:p-8">
-        <h1 className="text-ink text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-ink-muted mt-2 text-sm">{description}</p>
+    <main>
+      <Container className="py-12 sm:py-16">
+        <div className="border-line bg-surface-elevated mx-auto max-w-md rounded-md border p-6 shadow-soft sm:p-8">
+          <h1 className="text-ink text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="text-ink-muted mt-2 text-sm">{description}</p>
 
-        {errorMessage ? (
-          <p id="login-form-error" className="mt-4 rounded-md border px-3 py-2 text-sm" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+          {errorMessage ? (
+            <p id="login-form-error" className="mt-4 rounded-md border px-3 py-2 text-sm" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
 
-        <form
-          id="login-form"
-          action={signInEditorialAction}
-          aria-describedby={errorMessage ? "login-form-error" : undefined}
-          className="mt-6 space-y-4"
-        >
-          <input type="hidden" name="next" value={next} />
-          <div>
-            <label htmlFor="email" className="text-ink block text-sm font-medium">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="border-line bg-surface mt-1 w-full rounded-md border px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="text-ink block text-sm font-medium">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="border-line bg-surface mt-1 w-full rounded-md border px-3 py-2 text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-brand w-full rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-95"
+          <form
+            id="login-form"
+            action={signInEditorialAction}
+            aria-describedby={errorMessage ? "login-form-error" : undefined}
+            className="mt-6 space-y-4"
           >
-            Accedi
-          </button>
-        </form>
-      </div>
-    </Container>
+            <input type="hidden" name="next" value={next} />
+            <div>
+              <label htmlFor="email" className="text-ink block text-sm font-medium">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="border-line bg-surface mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="text-ink block text-sm font-medium">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="border-line bg-surface mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-brand w-full rounded-md px-4 py-2 text-sm font-medium text-white hover:opacity-95"
+            >
+              Accedi
+            </button>
+          </form>
+        </div>
+      </Container>
+    </main>
   );
 }
