@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ExplorerBarChart } from "@/components/data/ExplorerBarChart";
-import { formatExplorerValue, getExplorerSnapshot } from "@/lib/data/public/explore";
+import { formatExplorerValue, getExplorerIndex } from "@/lib/data/public/explore";
+import { queryPublicIndicatorValues } from "@/lib/data/public/observatory";
 
 export const metadata: Metadata = {
   title: "Data Explorer | Osservatorio",
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/esplora/dati" },
 };
 
+const PAGE_SIZE = 100;
+
 type Props = {
   searchParams: Promise<{
     indicatore?: string;
@@ -17,44 +20,49 @@ type Props = {
     anno?: string;
     settore?: string;
     categoria?: string;
+    pagina?: string;
   }>;
 };
 
+function clean(value?: string) {
+  return value?.trim() || undefined;
+}
+
 export default async function DataExplorerPage({ searchParams }: Props) {
   const params = await searchParams;
-  const snapshot = await getExplorerSnapshot();
-  const indicatorMap = new Map(snapshot.indicators.map((item) => [item.id, item]));
-  const sectorMap = new Map(snapshot.sectors.map((item) => [item.id, item]));
+  const requestedPage = Math.max(1, Number.parseInt(params.pagina ?? "1", 10) || 1);
+  const filters = {
+    indicatorSlug: clean(params.indicatore),
+    territoryCode: clean(params.territorio),
+    year: clean(params.anno),
+    sectorId: clean(params.settore),
+    categoryCode: clean(params.categoria),
+  };
 
-  const years = Array.from(
-    new Set(snapshot.values.map((value) => new Date(value.period_start).getFullYear())),
-  ).sort((a, b) => b - a);
-
-  const categories = Array.from(
-    new Map(
-      snapshot.values
-        .filter((value) => value.country_code && value.country_label)
-        .map((value) => [value.country_code as string, value.country_label as string]),
-    ).entries(),
-  ).sort((a, b) => a[1].localeCompare(b[1], "it"));
-
-  const filtered = snapshot.values.filter((value) => {
-    const indicator = indicatorMap.get(value.indicator_id);
-    if (!indicator) return false;
-    if (params.indicatore && indicator.slug !== params.indicatore) return false;
-    if (params.territorio && value.territory_code !== params.territorio) return false;
-    if (params.anno && String(new Date(value.period_start).getFullYear()) !== params.anno) return false;
-    if (params.settore && String(value.business_sector_id ?? "") !== params.settore) return false;
-    if (params.categoria && value.country_code !== params.categoria) return false;
-    return true;
-  });
+  const [index, result] = await Promise.all([
+    getExplorerIndex(),
+    queryPublicIndicatorValues(filters, {
+      limit: PAGE_SIZE,
+      offset: (requestedPage - 1) * PAGE_SIZE,
+    }),
+  ]);
+  const indicatorMap = new Map(index.indicators.map((item) => [item.id, item]));
+  const sectorMap = new Map(index.sectors.map((item) => [item.id, item]));
+  const filtered = result.items.filter((value) => indicatorMap.has(value.indicator_id));
+  const pageCount = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
 
   const exportParams = new URLSearchParams();
   for (const key of ["indicatore", "territorio", "anno", "settore", "categoria"] as const) {
-    const value = params[key]?.trim();
+    const value = clean(params[key]);
     if (value) exportParams.set(key, value);
   }
   const csvHref = `/api/open-data/indicators.csv${exportParams.size ? `?${exportParams.toString()}` : ""}`;
+
+  const pageHref = (page: number) => {
+    const qs = new URLSearchParams(exportParams);
+    if (page > 1) qs.set("pagina", String(page));
+    return `/esplora/dati${qs.size ? `?${qs.toString()}` : ""}`;
+  };
 
   const visibleIndicatorIds = Array.from(new Set(filtered.map((value) => value.indicator_id)));
   const chartIndicator = visibleIndicatorIds.length === 1 ? indicatorMap.get(visibleIndicatorIds[0]) : undefined;
@@ -95,7 +103,7 @@ export default async function DataExplorerPage({ searchParams }: Props) {
           Indicatore
           <select name="indicatore" defaultValue={params.indicatore ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal">
             <option value="">Tutti</option>
-            {snapshot.indicators.map((indicator) => (
+            {index.indicators.map((indicator) => (
               <option key={indicator.id} value={indicator.slug}>{indicator.title}</option>
             ))}
           </select>
@@ -104,7 +112,7 @@ export default async function DataExplorerPage({ searchParams }: Props) {
           Territorio
           <select name="territorio" defaultValue={params.territorio ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal">
             <option value="">Tutti</option>
-            {snapshot.territories.filter((territory) => territory.code).map((territory) => (
+            {index.territories.filter((territory) => territory.code).map((territory) => (
               <option key={`${territory.level}-${territory.code}-${territory.label}`} value={territory.code ?? ""}>{territory.label}</option>
             ))}
           </select>
@@ -113,14 +121,14 @@ export default async function DataExplorerPage({ searchParams }: Props) {
           Anno
           <select name="anno" defaultValue={params.anno ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal">
             <option value="">Tutti</option>
-            {years.map((year) => <option key={year} value={year}>{year}</option>)}
+            {index.years.map((year) => <option key={year} value={year}>{year}</option>)}
           </select>
         </label>
         <label className="flex flex-col gap-2 text-sm font-semibold text-black">
           Settore
           <select name="settore" defaultValue={params.settore ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal">
             <option value="">Tutti</option>
-            {snapshot.sectors.map((sector) => (
+            {index.sectors.map((sector) => (
               <option key={sector.id} value={String(sector.id)}>{sector.name}</option>
             ))}
           </select>
@@ -129,7 +137,7 @@ export default async function DataExplorerPage({ searchParams }: Props) {
           Gruppo / categoria
           <select name="categoria" defaultValue={params.categoria ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal">
             <option value="">Tutti</option>
-            {categories.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+            {index.categories.map((category) => <option key={category.code} value={category.code}>{category.label}</option>)}
           </select>
         </label>
         <div className="flex items-end gap-3">
@@ -141,7 +149,9 @@ export default async function DataExplorerPage({ searchParams }: Props) {
       <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4 border-b border-black pb-3">
         <div>
           <h2 className="text-2xl font-semibold text-black">Valori</h2>
-          <span className="text-sm text-neutral-600">{filtered.length} risultati</span>
+          <span className="text-sm text-neutral-600">
+            {result.total} risultati · pagina {Math.min(requestedPage, pageCount)} di {pageCount}
+          </span>
         </div>
         <a href={csvHref} className="border border-black px-4 py-2 text-sm font-semibold">
           Scarica CSV filtrato
@@ -151,11 +161,11 @@ export default async function DataExplorerPage({ searchParams }: Props) {
       {chartIndicator && chartRows.length > 0 ? (
         <section className="mt-6" aria-labelledby="explorer-chart-heading">
           <h2 id="explorer-chart-heading" className="sr-only">Grafico dei risultati</h2>
-          <ExplorerBarChart title={chartIndicator.title} rows={chartRows} />
+          <ExplorerBarChart title={`${chartIndicator.title} · pagina corrente`} rows={chartRows} />
         </section>
       ) : filtered.length > 0 ? (
         <p className="mt-5 max-w-4xl text-sm leading-6 text-neutral-600">
-          Seleziona un singolo indicatore per ottenere anche la visualizzazione grafica senza mescolare unità o definizioni diverse.
+          Seleziona un singolo indicatore per ottenere anche la visualizzazione grafica della pagina corrente senza mescolare unità o definizioni diverse.
         </p>
       ) : null}
 
@@ -169,6 +179,7 @@ export default async function DataExplorerPage({ searchParams }: Props) {
               <th className="border-b border-black px-4 py-3">Settore</th>
               <th className="border-b border-black px-4 py-3">Periodo</th>
               <th className="border-b border-black px-4 py-3 text-right">Valore</th>
+              <th className="border-b border-black px-4 py-3">Stato</th>
               <th className="border-b border-black px-4 py-3">Qualità</th>
             </tr>
           </thead>
@@ -192,16 +203,28 @@ export default async function DataExplorerPage({ searchParams }: Props) {
                   <td className="px-4 py-3 text-right align-top font-semibold">
                     {formatExplorerValue(Number(value.numeric_value), indicator.unit_code)}
                   </td>
+                  <td className="px-4 py-3 align-top">{value.status}</td>
                   <td className="px-4 py-3 align-top">{value.quality_code}</td>
                 </tr>
               );
             })}
             {filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-neutral-600">Nessun valore corrisponde ai filtri selezionati.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-neutral-600">Nessun valore corrisponde ai filtri selezionati.</td></tr>
             ) : null}
           </tbody>
         </table>
       </div>
+
+      {pageCount > 1 ? (
+        <nav className="mt-6 flex flex-wrap items-center justify-between gap-4" aria-label="Paginazione valori">
+          {requestedPage > 1 ? (
+            <Link href={pageHref(requestedPage - 1)} className="border border-black px-4 py-2 text-sm font-semibold">← Pagina precedente</Link>
+          ) : <span />}
+          {requestedPage < pageCount ? (
+            <Link href={pageHref(requestedPage + 1)} className="border border-black px-4 py-2 text-sm font-semibold">Pagina successiva →</Link>
+          ) : null}
+        </nav>
+      ) : null}
 
       <p className="mt-5 max-w-4xl text-sm leading-6 text-neutral-600">
         Il Data Explorer non sostituisce la lettura della scheda metodologica. Le categorie come cittadinanza,
