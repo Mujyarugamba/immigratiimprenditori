@@ -101,16 +101,30 @@ includes("scripts/ci/go-live-db-smoke.sql", [
 ]);
 
 includes(".github/workflows/production-backup.yml", [
-  "supabase/setup-cli@v3",
+  "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+  "supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520",
+  "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
   "version: 2.115.0",
   "supabase db dump",
   "roles.sql",
   "schema.sql",
   "data.sql",
   "gpg",
-  "retention-days: 14",
+  "retention-days: 30",
+  "group: production-encrypted-backup",
+  "cancel-in-progress: false",
   "SUPABASE_DB_URL",
   "BACKUP_ENCRYPTION_PASSPHRASE",
+]);
+
+includes(".github/workflows/production-backup-restore-drill.yml", [
+  "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+  "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+  "supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520",
+  "actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+  "group: production-backup-restore-drill",
+  "cancel-in-progress: false",
+  "github.event_name == 'workflow_dispatch'",
 ]);
 
 file("docs/security/BACKUP-RECOVERY.md");
