@@ -13,6 +13,8 @@ export type PublicValueFilters = {
   indicatorSlug?: string;
   indicatorCode?: string;
   territoryCode?: string;
+  territoryCodes?: readonly string[];
+  territoryLabel?: string;
   year?: number | string;
   status?: PublicValueStatus | readonly PublicValueStatus[];
   sectorId?: number | string;
@@ -204,6 +206,16 @@ export async function fetchJoinedPublicIndicatorValues(options: {
   if (filters.territoryCode?.trim()) {
     query = query.eq("territory_code", filters.territoryCode.trim());
   }
+  if (filters.territoryCodes != null) {
+    const codes = [...new Set(filters.territoryCodes.map((value) => value.trim()).filter(Boolean))];
+    if (codes.length === 0) {
+      throw new Error("Public value territoryCodes filter must not be empty.");
+    }
+    query = query.in("territory_code", codes);
+  }
+  if (filters.territoryLabel?.trim()) {
+    query = query.eq("territory_label", filters.territoryLabel.trim());
+  }
   if (filters.categoryCode?.trim()) {
     query = query.eq("country_code", filters.categoryCode.trim());
   }
@@ -245,6 +257,50 @@ export async function fetchJoinedPublicIndicatorValues(options: {
   });
   const total = count ?? 0;
   return { rows, page: toPublicValuePage(rows.length, total, limit, offset) };
+}
+
+export function hasNarrowingPublicValueFilter(filters: PublicValueFilters): boolean {
+  return Boolean(
+    filters.indicatorId?.trim() ||
+      filters.indicatorSlug?.trim() ||
+      filters.indicatorCode?.trim() ||
+      filters.territoryCode?.trim() ||
+      filters.territoryLabel?.trim() ||
+      filters.territoryCodes?.some((value) => value.trim()) ||
+      (filters.year != null && String(filters.year).trim()) ||
+      (filters.sectorId != null && String(filters.sectorId).trim()) ||
+      filters.categoryCode?.trim(),
+  );
+}
+
+/**
+ * Exhaust a deliberately scoped public query without silently truncating it.
+ * A status-only query is intentionally rejected: callers needing a global
+ * index must use a compact dimension loader rather than materializing every
+ * full numeric record in memory.
+ */
+export async function fetchAllScopedPublicIndicatorValues(options: {
+  client: SupabaseClient;
+  filters: PublicValueFilters;
+}): Promise<JoinedPublicValueRow[]> {
+  if (!hasNarrowingPublicValueFilter(options.filters)) {
+    throw new Error("Refusing unscoped full public Observatory value materialization.");
+  }
+
+  const rows: JoinedPublicValueRow[] = [];
+  for (let offset = 0; ; offset += PUBLIC_VALUE_MAX_LIMIT) {
+    const result = await fetchJoinedPublicIndicatorValues({
+      client: options.client,
+      filters: options.filters,
+      page: { limit: PUBLIC_VALUE_MAX_LIMIT, offset },
+      bounds: {
+        defaultLimit: PUBLIC_VALUE_MAX_LIMIT,
+        maxLimit: PUBLIC_VALUE_MAX_LIMIT,
+      },
+    });
+    rows.push(...result.rows);
+    if (!result.page.hasMore) return rows;
+  }
 }
 
 export function publishedIndicatorOf(
