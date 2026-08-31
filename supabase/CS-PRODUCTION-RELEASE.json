@@ -56,7 +56,8 @@
   ],
   "candidateDelta": [
     "20260829120000_create_content_ai_translations.sql",
-    "20260831103000_audit_interview_workflow_activity.sql"
+    "20260831103000_audit_interview_workflow_activity.sql",
+    "20260831120000_enforce_interview_content_type_consistency.sql"
   ],
   "productionApplyEvidence": {
     "phase1Run": 32699707002,
