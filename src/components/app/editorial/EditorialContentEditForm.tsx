@@ -33,6 +33,7 @@ export function EditorialContentEditForm({
     updateEditorialContentAction,
     initial,
   );
+  const interviewTypeLocked = content.type_code === "interview";
 
   return (
     <form action={action} className="mt-6 flex flex-col gap-4">
@@ -43,7 +44,7 @@ export function EditorialContentEditForm({
         <select
           name="type_code"
           required
-          disabled={pending}
+          disabled={pending || interviewTypeLocked}
           className={selectClass}
           defaultValue={content.type_code}
         >
@@ -53,6 +54,11 @@ export function EditorialContentEditForm({
             </option>
           ))}
         </select>
+        {interviewTypeLocked ? (
+          <span className="text-ink-muted text-xs">
+            Il tipo Intervista resta bloccato per preservare workflow, consensi e audit già associati.
+          </span>
+        ) : null}
       </label>
 
       <label className="text-ink flex flex-col gap-1.5 text-sm">
