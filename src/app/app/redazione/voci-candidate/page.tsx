@@ -56,9 +56,9 @@ export default async function CandidateVoicesPage() {
 
       <section className="border border-black p-5" role="status">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Stato operativo</p>
-        <h2 className="mt-2 text-xl font-semibold text-black">Nessun contatto inviato</h2>
+        <h2 className="mt-2 text-xl font-semibold text-black">Primo ciclo post-go-live</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
-          La decisione su chi invitare verrà presa prima del lancio. Fino ad allora questa è soltanto una lista di lavoro interna.
+          Il sito è online e lo smoke live è chiuso. La short list serve ora a scegliere le prime interviste originali. Preparare una bozza non equivale a contattare il candidato: lo stato cambia solo quando la redazione avvia davvero il contatto.
         </p>
       </section>
 
@@ -112,6 +112,12 @@ export default async function CandidateVoicesPage() {
                     <p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Decisione</p>
                     <p className="mt-1 font-semibold text-black">Non contattato</p>
                   </div>
+                  <Link
+                    href={`/app/redazione/contenuti/nuovo?inbox=${candidate.id}`}
+                    className="block font-semibold underline underline-offset-4"
+                  >
+                    Prepara intervista →
+                  </Link>
                   <Link href={`/app/redazione/inbox/${candidate.id}`} className="block font-semibold underline underline-offset-4">
                     Apri dossier Inbox →
                   </Link>
@@ -134,6 +140,7 @@ export default async function CandidateVoicesPage() {
         <h2 className="text-xl font-semibold text-black">Quando decideremo di invitare qualcuno</h2>
         <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm leading-6 text-neutral-700">
           <li>scelta umana del candidato dalla short list;</li>
+          <li>preparazione della bozza intervista e della scaletta;</li>
           <li>scelta del formato, con preferenza possibile per il video autonomo;</li>
           <li>invio delle domande e delle istruzioni tecniche;</li>
           <li>ricezione del materiale e fact-check;</li>
