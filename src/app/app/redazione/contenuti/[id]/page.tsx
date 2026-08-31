@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditorialContentEditForm } from "@/components/app/editorial/EditorialContentEditForm";
 import { EditorialLifecycleButtons } from "@/components/app/editorial/EditorialLifecycleButtons";
+import { InterviewWorkflowControls } from "@/components/app/editorial/InterviewWorkflowControls";
 import { SecondaryReviewPanel } from "@/components/app/editorial/SecondaryReviewPanel";
 import {
   listActiveContentCategories,
@@ -222,8 +223,10 @@ export default async function ContenutoRedazionePage({ params }: Props) {
 
               <p className="text-ink-muted mt-4 text-xs">
                 Ultimo aggiornamento: {formatDate(interviewWorkflow.updated_at)}.
-                Questa sezione è informativa: non modifica lo stato del workflow.
+                Gli avanzamenti qui sotto registrano soltanto decisioni o attività redazionali già avvenute.
               </p>
+
+              <InterviewWorkflowControls workflow={interviewWorkflow} />
             </>
           )}
         </section>
