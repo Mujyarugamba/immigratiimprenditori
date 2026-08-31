@@ -4,7 +4,9 @@ import {
 } from "@/lib/atlas/scope";
 import { createClient } from "@/lib/supabase/server";
 import {
-  getExplorerSnapshot,
+  getExplorerDimensionValues,
+  getScopedExplorerEvidence,
+  type ExplorerDimensionValue,
   type ExplorerIndicator,
   type ExplorerValue,
 } from "@/lib/data/public/explore";
@@ -38,12 +40,17 @@ export type RouteDetail = RouteSummary & {
   events: AtlasEventItem[];
 };
 
-function destinationMatches(value: ExplorerValue, destination: AtlasCountry) {
+type RouteEvidenceValue = Pick<
+  ExplorerDimensionValue,
+  "indicator_id" | "country_code" | "territory_code"
+>;
+
+function destinationMatches(value: RouteEvidenceValue, destination: AtlasCountry) {
   const code = value.territory_code?.toUpperCase();
   return code === destination.code || code === destination.iso3;
 }
 
-function routeValues(values: ExplorerValue[], route: PublicMigrationRoute) {
+function routeValues<T extends RouteEvidenceValue>(values: T[], route: PublicMigrationRoute): T[] {
   return values.filter(
     (value) =>
       value.country_code?.toUpperCase() === route.origin.code &&
@@ -137,13 +144,13 @@ async function publicLinkedItems(routeId: string) {
 
 export async function listPublishedRouteSummaries(): Promise<RouteSummary[]> {
   const supabase = await createClient();
-  const [routeResult, snapshot] = await Promise.all([
+  const [routeResult, dimensions] = await Promise.all([
     supabase
       .from("migration_routes")
       .select("id, origin_country_code, destination_country_code, slug")
       .eq("is_active", true)
       .order("slug"),
-    getExplorerSnapshot(),
+    getExplorerDimensionValues(),
   ]);
 
   if (routeResult.error) throw new Error(routeResult.error.message);
@@ -154,7 +161,7 @@ export async function listPublishedRouteSummaries(): Promise<RouteSummary[]> {
 
   const summaries = await Promise.all(
     routes.map(async (route) => {
-      const values = routeValues(snapshot.values, route);
+      const values = routeValues(dimensions, route);
       const links = await publicLinkedItems(route.id);
       const dataValueCount = values.length;
       const indicatorCount = new Set(values.map((value) => value.indicator_id)).size;
@@ -189,12 +196,15 @@ export async function getRouteDetail(slug: string): Promise<RouteDetail | null> 
   const route = hydrateRoute(routeRow);
   if (!route) return null;
 
-  const [snapshot, links] = await Promise.all([
-    getExplorerSnapshot(),
+  const [evidence, links] = await Promise.all([
+    getScopedExplorerEvidence({
+      categoryCode: route.origin.code,
+      territoryCodes: [route.destination.code, route.destination.iso3],
+    }),
     publicLinkedItems(route.id),
   ]);
-  const values = routeValues(snapshot.values, route);
-  const indicators = mapIndicatorEvidence(snapshot.indicators, values);
+  const values = routeValues(evidence.values, route);
+  const indicators = mapIndicatorEvidence(evidence.indicators, values);
   const dataValueCount = values.length;
   const indicatorCount = indicators.length;
   const contentCount = links.contents.length;
