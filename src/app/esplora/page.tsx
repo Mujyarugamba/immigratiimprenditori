@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getExplorerSnapshot } from "@/lib/data/public/explore";
+import { getExplorerIndex } from "@/lib/data/public/explore";
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const TITLE = "Esplora il Centro Studi";
@@ -77,7 +77,7 @@ const modules = [
 ] as const;
 
 export default async function EsploraPage() {
-  const snapshot = await getExplorerSnapshot();
+  const index = await getExplorerIndex();
 
   return (
     <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
@@ -97,19 +97,19 @@ export default async function EsploraPage() {
       <section className="grid gap-px border border-black bg-black md:grid-cols-4">
         <div className="bg-white p-6">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Indicatori pubblicati</p>
-          <strong className="mt-2 block text-3xl text-black">{snapshot.indicators.length}</strong>
+          <strong className="mt-2 block text-3xl text-black">{index.indicators.length}</strong>
         </div>
         <div className="bg-white p-6">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Valori consultabili</p>
-          <strong className="mt-2 block text-3xl text-black">{snapshot.values.length}</strong>
+          <strong className="mt-2 block text-3xl text-black">{index.valueCount}</strong>
         </div>
         <div className="bg-white p-6">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Territori presenti</p>
-          <strong className="mt-2 block text-3xl text-black">{snapshot.territories.length}</strong>
+          <strong className="mt-2 block text-3xl text-black">{index.territories.length}</strong>
         </div>
         <div className="bg-white p-6">
           <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Settori classificati</p>
-          <strong className="mt-2 block text-3xl text-black">{snapshot.sectors.length}</strong>
+          <strong className="mt-2 block text-3xl text-black">{index.sectors.length}</strong>
         </div>
       </section>
 
