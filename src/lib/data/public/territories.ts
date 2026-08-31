@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import {
-  getExplorerSnapshot,
+  getExplorerDimensionValues,
+  getScopedExplorerEvidence,
+  type ExplorerDimensionValue,
   type ExplorerIndicator,
   type ExplorerValue,
 } from "@/lib/data/public/explore";
@@ -42,7 +44,15 @@ type TerritoryEventLink = {
   event_id: string;
 };
 
-function valuesForTerritory(values: ExplorerValue[], territory: PublicTerritory) {
+type TerritoryEvidenceValue = Pick<
+  ExplorerDimensionValue,
+  "indicator_id" | "territory_code" | "territory_label"
+>;
+
+function valuesForTerritory<T extends TerritoryEvidenceValue>(
+  values: T[],
+  territory: PublicTerritory,
+): T[] {
   const code = territory.code?.toUpperCase();
   return values.filter((value) => {
     if (code && value.territory_code?.toUpperCase() === code) return true;
@@ -69,6 +79,24 @@ function indicatorEvidence(
         (a, b) => new Date(b.period_start).getTime() - new Date(a.period_start).getTime(),
       ),
     }));
+}
+
+async function scopedTerritoryEvidence(territory: PublicTerritory) {
+  const requests = [getScopedExplorerEvidence({ territoryLabel: territory.name })];
+  if (territory.code?.trim()) {
+    requests.push(getScopedExplorerEvidence({ territoryCode: territory.code.trim() }));
+  }
+  const results = await Promise.all(requests);
+  const values = new Map<string, ExplorerValue>();
+  const indicators = new Map<string, ExplorerIndicator>();
+  for (const result of results) {
+    for (const value of result.values) values.set(value.id, value);
+    for (const indicator of result.indicators) indicators.set(indicator.id, indicator);
+  }
+  return {
+    values: valuesForTerritory(Array.from(values.values()), territory),
+    indicators: Array.from(indicators.values()),
+  };
 }
 
 async function publicLinkedItems(territoryId: string) {
@@ -193,14 +221,14 @@ async function batchPublicLinkCounts(territoryIds: string[]) {
 
 export async function listPublishedTerritorySummaries(): Promise<TerritorySummary[]> {
   const supabase = await createClient();
-  const [territoryResult, snapshot] = await Promise.all([
+  const [territoryResult, dimensions] = await Promise.all([
     supabase
       .from("geo_territories")
       .select("id, country_code, parent_id, level_kind, code, name, slug")
       .eq("is_active", true)
       .in("level_kind", ["region", "province_state", "metropolitan_area", "municipality_city"])
       .order("name"),
-    getExplorerSnapshot(),
+    getExplorerDimensionValues(),
   ]);
 
   if (territoryResult.error) throw new Error(territoryResult.error.message);
@@ -211,7 +239,7 @@ export async function listPublishedTerritorySummaries(): Promise<TerritorySummar
 
   return territories
     .map((territory) => {
-      const values = valuesForTerritory(snapshot.values, territory);
+      const values = valuesForTerritory(dimensions, territory);
       const dataValueCount = values.length;
       const indicatorCount = new Set(values.map((value) => value.indicator_id)).size;
       const contentCount = contentCounts.get(territory.id) ?? 0;
@@ -241,8 +269,8 @@ export async function getTerritoryDetail(slug: string): Promise<TerritoryDetail 
   if (!territoryRow) return null;
 
   const territory = territoryRow as PublicTerritory;
-  const [snapshot, links, childResult] = await Promise.all([
-    getExplorerSnapshot(),
+  const [evidence, links, childResult] = await Promise.all([
+    scopedTerritoryEvidence(territory),
     publicLinkedItems(territory.id),
     supabase
       .from("geo_territories")
@@ -253,10 +281,9 @@ export async function getTerritoryDetail(slug: string): Promise<TerritoryDetail 
   ]);
 
   if (childResult.error) throw new Error(childResult.error.message);
-  const values = valuesForTerritory(snapshot.values, territory);
-  const indicators = indicatorEvidence(snapshot.indicators, values);
+  const indicators = indicatorEvidence(evidence.indicators, evidence.values);
   const children = (childResult.data ?? []) as PublicTerritory[];
-  const dataValueCount = values.length;
+  const dataValueCount = evidence.values.length;
   const indicatorCount = indicators.length;
   const contentCount = links.contents.length;
   const eventCount = links.events.length;
