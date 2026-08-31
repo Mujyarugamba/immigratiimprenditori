@@ -5,4 +5,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default HomePage;
+export default function HomeLightPreviewPage() {
+  return (
+    <>
+      <link rel="stylesheet" href="/home-light-v1.css" />
+      <HomePage />
+    </>
+  );
+}
