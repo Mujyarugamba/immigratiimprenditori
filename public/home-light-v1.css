@@ -10,6 +10,13 @@
   --preview-warm: #f7f5ef;
   --preview-line: #dfe4e1;
   --preview-hero-photo: url("https://images.pexels.com/photos/3866318/pexels-photo-3866318.jpeg?auto=compress&cs=tinysrgb&w=1800");
+  --preview-editorial-1: url("https://images.pexels.com/photos/3862089/pexels-photo-3862089.jpeg?auto=compress&cs=tinysrgb&w=1000");
+  --preview-editorial-2: url("https://images.pexels.com/photos/34707245/pexels-photo-34707245.jpeg?auto=compress&cs=tinysrgb&w=1000");
+  --preview-editorial-3: url("https://images.pexels.com/photos/34164498/pexels-photo-34164498.jpeg?auto=compress&cs=tinysrgb&w=1000");
+  --preview-voice-1: url("https://images.pexels.com/photos/6457577/pexels-photo-6457577.jpeg?auto=compress&cs=tinysrgb&w=900");
+  --preview-voice-2: url("https://images.pexels.com/photos/3865843/pexels-photo-3865843.jpeg?auto=compress&cs=tinysrgb&w=900");
+  --preview-voice-3: url("https://images.pexels.com/photos/7693688/pexels-photo-7693688.jpeg?auto=compress&cs=tinysrgb&w=900");
+  --preview-voice-4: url("https://images.pexels.com/photos/36729741/pexels-photo-36729741.jpeg?auto=compress&cs=tinysrgb&w=900");
 }
 
 body {
@@ -34,8 +41,7 @@ body {
 }
 .header-support:hover { background: var(--preview-green-deep); }
 
-/* HERO V2 — photo-led, asymmetric, large editorial type.
-   The provisional Pexels image is intentionally generic and will be replaced by owned/editorial material. */
+/* HERO V2 — photo-led, asymmetric, large editorial type. */
 .home-hero,
 .home-hero.has-cover,
 .home-hero:not(.has-cover) {
@@ -169,7 +175,7 @@ body {
   .home-hero { animation: none; }
 }
 
-/* Editorial content: white, restrained, precise. */
+/* Editorial content: real covers win; Pexels only fills empty visual slots. */
 .home-featured {
   padding-top: 48px;
   border-bottom-color: var(--preview-line);
@@ -180,8 +186,18 @@ body {
 .section-heading-line a,
 .editorial-card-meta a,
 .card-link { color: var(--preview-green); }
-.editorial-card-media { background: #eef1ee; }
-.editorial-card-media:not(.has-image)::after { color: #76877f; }
+.editorial-card { overflow: hidden; }
+.editorial-card-media {
+  background: #eef1ee;
+  background-size: cover;
+  background-position: center;
+  transition: transform .55s ease;
+}
+.editorial-card:hover .editorial-card-media { transform: scale(1.025); }
+.featured-grid .editorial-card:nth-child(1) .editorial-card-media:not(.has-image) { background-image: var(--preview-editorial-1); }
+.featured-grid .editorial-card:nth-child(2) .editorial-card-media:not(.has-image) { background-image: var(--preview-editorial-2); background-position: center 38%; }
+.featured-grid .editorial-card:nth-child(3) .editorial-card-media:not(.has-image) { background-image: var(--preview-editorial-3); background-position: center 48%; }
+.featured-grid .editorial-card .editorial-card-media:not(.has-image)::after { content: ""; }
 .editorial-card-event { background: #f6f4ed; }
 .event-date-block {
   color: var(--preview-green-deep);
@@ -214,7 +230,7 @@ body {
 .metric-source { color: #77847f; }
 .metrics-empty { color: #68756f; }
 
-/* Data + people: both stay visually important, but without a dark body panel. */
+/* Data + people: the story mosaic becomes visibly photographic even before owned media arrives. */
 .chart-line { stroke: var(--preview-green); }
 .chart-dot { fill: var(--preview-green); }
 .home-chart-head a { color: var(--preview-green); }
@@ -226,7 +242,18 @@ body {
 .voices-copy p:not(.eyebrow) { color: #5d6863; }
 .voices-copy a { color: var(--preview-green); }
 .voices-placeholder { color: #68756f; }
-.voice-tile { background: #dfe8e4; color: #fff; }
+.voice-tile {
+  background: #dfe8e4;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  transition: transform .45s ease, filter .45s ease;
+}
+.voice-tile:hover { transform: scale(1.018); filter: saturate(1.04); }
+.voices-grid .voice-tile:not(.has-image):nth-child(1) { background-image: var(--preview-voice-1); }
+.voices-grid .voice-tile:not(.has-image):nth-child(2) { background-image: var(--preview-voice-2); }
+.voices-grid .voice-tile:not(.has-image):nth-child(3) { background-image: var(--preview-voice-3); }
+.voices-grid .voice-tile:not(.has-image):nth-child(4) { background-image: var(--preview-voice-4); }
 .voice-tile::before {
   background: linear-gradient(180deg,rgba(8,31,26,0) 42%,rgba(8,31,26,.82) 100%);
 }
