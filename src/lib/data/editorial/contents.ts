@@ -3,6 +3,7 @@ import {
   parsePageParams,
   type PaginatedResult,
 } from "@/lib/data/public/paging";
+import { ensureEditorialInterviewWorkflow } from "@/lib/data/editorial/interviews";
 import { mapPostgresError, type AppError } from "@/lib/errors/app-error";
 import { createClient } from "@/lib/supabase/server";
 
@@ -203,7 +204,31 @@ export async function createEditorialContent(
   if (error) {
     return { ok: false, error: mapPostgresError(error) };
   }
-  return { ok: true, id: data.id as string };
+
+  const contentId = data.id as string;
+  if (input.type_code === "interview") {
+    const workflow = await ensureEditorialInterviewWorkflow(contentId);
+    if (!workflow.ok) {
+      const { error: cleanupError } = await supabase
+        .from("contents")
+        .delete()
+        .eq("id", contentId)
+        .eq("owned_by_editorial", true);
+
+      if (cleanupError) {
+        return {
+          ok: false,
+          error: {
+            code: "conflict",
+            message: `${workflow.error.message} La bozza ${contentId} esiste ma il workflow intervista non è stato inizializzato.`,
+          },
+        };
+      }
+      return { ok: false, error: workflow.error };
+    }
+  }
+
+  return { ok: true, id: contentId };
 }
 
 export async function updateEditorialContent(

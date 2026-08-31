@@ -49,6 +49,25 @@ export async function getEditorialInterviewWorkflow(
   return data as EditorialInterviewWorkflow;
 }
 
+export async function ensureEditorialInterviewWorkflow(
+  contentId: string,
+): Promise<InterviewWorkflowMutationResult> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("content_interview_workflow")
+    .upsert(
+      {
+        content_id: contentId,
+        workflow_status: "candidate",
+        source_origin: "editorial",
+      },
+      { onConflict: "content_id", ignoreDuplicates: true },
+    );
+
+  if (error) return { ok: false, error: mapPostgresError(error) };
+  return { ok: true };
+}
+
 export async function markEditorialInterviewContacted(
   contentId: string,
 ): Promise<InterviewWorkflowMutationResult> {
