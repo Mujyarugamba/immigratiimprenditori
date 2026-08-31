@@ -1,77 +1,14 @@
-name: One-shot authorized Production ledger sync
+name: Completed one-shot Production ledger sync (inert)
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: one-shot-production-ledger-sync-20260831
-  cancel-in-progress: false
-
 jobs:
-  promote:
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'ops/one-shot-production-ledger-sync-20260831'
+  completed:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      EXPECTED_MAIN_SHA: fbdf46f0b3f2e2a99274c3cf1ba1cba855292b2d
-      EXPECTED_PRODUCTION_BEFORE: 2dfc5e9f25e69edecd6bbe31c3ffe314a433aa52
-
     steps:
-      - name: Create canonical production release token
-        id: release-app-token
-        uses: actions/create-github-app-token@v3
-        with:
-          app-id: ${{ vars.PRODUCTION_RELEASE_APP_ID }}
-          private-key: ${{ secrets.PRODUCTION_RELEASE_APP_PRIVATE_KEY }}
-          permission-contents: write
-
-      - name: Checkout approved main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-          token: ${{ steps.release-app-token.outputs.token }}
-          persist-credentials: false
-
-      - name: Verify exact refs and fast-forward eligibility
-        env:
-          RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "${{ github.event.pull_request.base.sha }}" = "$EXPECTED_MAIN_SHA"
-          auth="$(printf 'x-access-token:%s' "$RELEASE_APP_TOKEN" | base64 -w0)"
-          git_app() { git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" "$@"; }
-          git_app fetch --no-tags origin main production
-          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
-          test "$(git rev-parse origin/production)" = "$EXPECTED_PRODUCTION_BEFORE"
-          git merge-base --is-ancestor origin/production origin/main
-          echo "LEDGER_SYNC_PREFLIGHT = PASS"
-
-      - name: Fast-forward protected production
-        env:
-          RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          auth="$(printf 'x-access-token:%s' "$RELEASE_APP_TOKEN" | base64 -w0)"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin "$EXPECTED_MAIN_SHA:refs/heads/production"
-          echo "LEDGER_SYNC_FAST_FORWARD = PASS"
-
-      - name: Verify production exact SHA
-        env:
-          RELEASE_APP_TOKEN: ${{ steps.release-app-token.outputs.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          auth="$(printf 'x-access-token:%s' "$RELEASE_APP_TOKEN" | base64 -w0)"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags origin production
-          test "$(git rev-parse origin/production)" = "$EXPECTED_MAIN_SHA"
-          echo "LEDGER_SYNC_REF_VERIFY = PASS"
+      - run: echo "This temporary release runner is permanently inert."
