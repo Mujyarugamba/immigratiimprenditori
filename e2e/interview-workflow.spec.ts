@@ -187,9 +187,6 @@ test.describe("Interview workflow authenticated E2E", () => {
     ).toBeVisible({ timeout: 30_000 });
     await expect(workflowStatusBadge(page)).toHaveText("Contattato");
 
-    // Exercise the browser-local datetime conversion all the way to the persisted
-    // timestamptz. The expected epoch is computed inside the same browser timezone
-    // that produces the hidden UTC ISO value submitted by the real form.
     const firstSchedule = await browserFutureLocalDateTime(page, 2);
     await page.getByLabel("Data e ora concordate").fill(firstSchedule.local);
     await page.getByRole("button", { name: "Registra programmazione" }).click();
@@ -238,7 +235,51 @@ test.describe("Interview workflow authenticated E2E", () => {
     ).toBeVisible({ timeout: 30_000 });
     await expect(workflowStatusBadge(page)).toHaveText("Approvato");
 
-    // Approval of the interview workflow must never publish the content itself.
     await expect(page.getByText("unpublished · private", { exact: true })).toBeVisible();
+
+    await page.goto("/app/redazione/contenuti/nuovo");
+    await expect(page.getByRole("heading", { name: "Nuovo contenuto editoriale" })).toBeVisible({
+      timeout: 30_000,
+    });
+
+    const createType = page.locator('select[name="type_code"]');
+    const nonInterviewType = await createType.locator("option").evaluateAll((options) =>
+      options
+        .map((option) => (option as HTMLOptionElement).value)
+        .find((value) => value && value !== "interview") ?? "",
+    );
+    expect(nonInterviewType).not.toBe("");
+    await createType.selectOption(nonInterviewType);
+
+    const conversionTitle = `P6 Interview Conversion ${stamp}`;
+    await page.getByRole("textbox", { name: "Titolo", exact: true }).fill(conversionTitle);
+    await page
+      .locator("#body")
+      .fill("Contenuto E2E locale creato con un tipo diverso e poi convertito in intervista.");
+    await page.getByRole("button", { name: "Crea contenuto" }).click();
+    await page.waitForURL(/\/app\/redazione\/contenuti\/[0-9a-f-]{36}/i, {
+      timeout: 45_000,
+    });
+
+    const convertedMatch = page.url().match(/contenuti\/([0-9a-f-]{36})/i);
+    expect(convertedMatch?.[1]).toBeTruthy();
+    const convertedId = convertedMatch![1];
+    contents.push(convertedId);
+
+    expect(workflowSeed(convertedId)).toBe("");
+    await expect(page.getByRole("heading", { name: "Workflow e consensi" })).toHaveCount(0);
+
+    await page.locator('select[name="type_code"]').selectOption("interview");
+    await page.getByRole("button", { name: "Salva modifiche" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Contenuto aggiornato." }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect
+      .poll(() => workflowSeed(convertedId), { timeout: 30_000 })
+      .toBe("candidate|editorial");
+    await expect(page.getByRole("heading", { name: "Workflow e consensi" })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(workflowStatusBadge(page)).toHaveText("Candidato");
   });
 });
