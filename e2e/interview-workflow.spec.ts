@@ -86,6 +86,26 @@ function workflowStatusBadge(page: Page) {
     .locator("span");
 }
 
+async function browserFutureLocalDateTime(page: Page, hoursAhead: number) {
+  return page.evaluate((hours) => {
+    const date = new Date(Date.now() + hours * 60 * 60 * 1000);
+    date.setSeconds(0, 0);
+    const pad = (value: number) => String(value).padStart(2, "0");
+    const local = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return {
+      local,
+      epochSeconds: Math.floor(new Date(local).getTime() / 1000),
+    };
+  }, hoursAhead);
+}
+
+function scheduledEpochSeconds(contentId: string) {
+  const out = psql(
+    `COPY (SELECT floor(extract(epoch from scheduled_for))::bigint FROM public.content_interview_workflow WHERE content_id = '${contentId}') TO STDOUT;`,
+  ).trim();
+  return Number(out);
+}
+
 async function saveConsent(page: Page, label: "Pubblicazione" | "Citazioni") {
   const select = page.getByLabel(label);
   await select.selectOption("granted");
@@ -162,6 +182,29 @@ test.describe("Interview workflow authenticated E2E", () => {
       }),
     ).toBeVisible({ timeout: 30_000 });
     await expect(workflowStatusBadge(page)).toHaveText("Contattato");
+
+    // Exercise the browser-local datetime conversion all the way to the persisted
+    // timestamptz. The expected epoch is computed inside the same browser timezone
+    // that produces the hidden UTC ISO value submitted by the real form.
+    const firstSchedule = await browserFutureLocalDateTime(page, 2);
+    await page.getByLabel("Data e ora concordate").fill(firstSchedule.local);
+    await page.getByRole("button", { name: "Registra programmazione" }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Intervista programmata." }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(workflowStatusBadge(page)).toHaveText("Programmato");
+    await expect
+      .poll(() => scheduledEpochSeconds(contentId), { timeout: 30_000 })
+      .toBe(firstSchedule.epochSeconds);
+
+    const secondSchedule = await browserFutureLocalDateTime(page, 4);
+    await page.getByLabel("Data e ora concordate").fill(secondSchedule.local);
+    await page.getByRole("button", { name: "Ripianifica" }).click();
+    await expect
+      .poll(() => scheduledEpochSeconds(contentId), { timeout: 30_000 })
+      .toBe(secondSchedule.epochSeconds);
+    expect(secondSchedule.epochSeconds).toBeGreaterThan(firstSchedule.epochSeconds);
+    await expect(workflowStatusBadge(page)).toHaveText("Programmato");
 
     await saveConsent(page, "Pubblicazione");
     await expect(page.getByLabel("Pubblicazione")).toHaveValue("granted");
