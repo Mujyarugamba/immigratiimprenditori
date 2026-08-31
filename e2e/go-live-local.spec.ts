@@ -4,7 +4,7 @@ import { psql } from "./helpers/supabase";
 test.describe("Go-live local surfaces", () => {
   test("Observatory, Atlas, routes and stories render as real public surfaces", async ({ page }) => {
     const pages = [
-      ["/osservatorio", /Ricerche e dati/i],
+      ["/osservatorio", /Osservatorio/i],
       ["/atlante", /Atlante dell.imprenditoria migrante/i],
       ["/atlante/rotte", /Rotte imprenditoriali/i],
       ["/storie", /Storie e voci/i],

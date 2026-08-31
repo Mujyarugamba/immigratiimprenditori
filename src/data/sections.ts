@@ -17,9 +17,9 @@ export const sections: Record<string, SectionContent> = {
   },
   osservatorio: {
     slug: "osservatorio",
-    title: "Ricerche e dati",
+    title: "Osservatorio",
     description:
-      "Indicatori, dati e serie storiche per leggere l’imprenditoria migrante con fonti e metodologia esplicite.",
+      "Ricerche, dati, indicatori e serie storiche per leggere l’imprenditoria migrante con fonti e metodologia esplicite.",
     emptyTitle: "Nessun indicatore disponibile.",
   },
 };
