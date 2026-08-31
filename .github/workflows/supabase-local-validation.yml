@@ -171,6 +171,7 @@ jobs:
           cp /tmp/repository-migrations/20260821235000_prioritize_platform_languages.sql supabase/migrations/
           cp /tmp/repository-migrations/20260822*.sql supabase/migrations/
           cp /tmp/repository-migrations/20260824103000_harden_publication_gate_execute_privileges.sql supabase/migrations/
+          cp /tmp/repository-migrations/20260824104000_fix_public_profile_column_grants.sql supabase/migrations/
           cp /tmp/repository-migrations/20260829120000_create_content_ai_translations.sql supabase/migrations/
           cp /tmp/repository-migrations/20260831103000_audit_interview_workflow_activity.sql supabase/migrations/
 
