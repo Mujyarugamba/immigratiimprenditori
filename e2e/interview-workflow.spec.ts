@@ -79,6 +79,13 @@ async function enterEditorialWithMfa(page: Page, email: string) {
   });
 }
 
+function workflowStatusBadge(page: Page) {
+  return page
+    .locator('section[aria-labelledby="interview-workflow-title"] > div')
+    .first()
+    .locator("span");
+}
+
 async function saveConsent(page: Page, label: "Pubblicazione" | "Citazioni") {
   const select = page.getByLabel(label);
   await select.selectOption("granted");
@@ -146,7 +153,7 @@ test.describe("Interview workflow authenticated E2E", () => {
     await page.reload();
 
     await expect(page.getByRole("heading", { name: "Workflow e consensi" })).toBeVisible();
-    await expect(page.getByText("Candidato", { exact: true })).toBeVisible();
+    await expect(workflowStatusBadge(page)).toHaveText("Candidato");
 
     await page.getByRole("button", { name: "Registra contatto effettuato" }).click();
     await expect(
@@ -154,7 +161,7 @@ test.describe("Interview workflow authenticated E2E", () => {
         hasText: "Contatto registrato. Nessun messaggio è stato inviato dal sistema.",
       }),
     ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Contattato", { exact: true })).toBeVisible();
+    await expect(workflowStatusBadge(page)).toHaveText("Contattato");
 
     await saveConsent(page, "Pubblicazione");
     await expect(page.getByLabel("Pubblicazione")).toHaveValue("granted");
@@ -166,13 +173,13 @@ test.describe("Interview workflow authenticated E2E", () => {
     await expect(
       page.getByRole("status").filter({ hasText: "Intervista registrata come svolta." }),
     ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Intervistato", { exact: true })).toBeVisible();
+    await expect(workflowStatusBadge(page)).toHaveText("Intervistato");
 
     await page.getByRole("button", { name: "Avvia fact-check" }).click();
     await expect(
       page.getByRole("status").filter({ hasText: "Fact-check avviato." }),
     ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Fact-check", { exact: true })).toBeVisible();
+    await expect(workflowStatusBadge(page)).toHaveText("Fact-check");
 
     const approve = page.getByRole("button", { name: "Approva workflow intervista" });
     await expect(approve).toBeEnabled();
@@ -182,7 +189,7 @@ test.describe("Interview workflow authenticated E2E", () => {
         hasText: "Workflow intervista approvato. La pubblicazione del contenuto resta separata.",
       }),
     ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Approvato", { exact: true })).toBeVisible();
+    await expect(workflowStatusBadge(page)).toHaveText("Approvato");
 
     // Approval of the interview workflow must never publish the content itself.
     await expect(page.getByText("unpublished · private", { exact: true })).toBeVisible();
