@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+// Visual evaluation branch: stylesheet is intentionally isolated from main.
 export default function HomeLightPreviewPage() {
   return (
     <>
