@@ -36,6 +36,28 @@ async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
   );
 }
 
+function parseRgb(color: string): [number, number, number] {
+  const match = color.match(/^rgba?\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)/i);
+  if (!match) throw new Error(`Unsupported computed color: ${color}`);
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function relativeLuminance([red, green, blue]: [number, number, number]) {
+  const channels = [red, green, blue].map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function contrastRatio(foreground: string, background: string) {
+  const foregroundLuminance = relativeLuminance(parseRgb(foreground));
+  const backgroundLuminance = relativeLuminance(parseRgb(background));
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 test("core search and authentication controls are keyboard reachable", async ({ page }) => {
   await page.goto("/cerca", { waitUntil: "domcontentloaded" });
 
@@ -61,6 +83,15 @@ test("core search and authentication controls are keyboard reachable", async ({ 
     await tabUntilFocused(page, control);
     await expectFocusedInViewport(control);
   }
+
+  const loginColors = await loginSubmit.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return { foreground: styles.color, background: styles.backgroundColor };
+  });
+  expect(
+    contrastRatio(loginColors.foreground, loginColors.background),
+    `login submit contrast ${loginColors.foreground} on ${loginColors.background} should meet WCAG AA for normal text`,
+  ).toBeGreaterThanOrEqual(4.5);
 });
 
 test("contribution form remains keyboard reachable through privacy and submit", async ({ page }) => {
