@@ -1,145 +1,143 @@
-# Centro Studi — runbook migration production e rollback
+# Centro Studi — runbook migration Production e rollback
 
-Stato: **PRODUCTION SCHEMA ALLINEATO AL CUTOFF 20260824104000 / 2 MIGRATION CANDIDATE NON APPLICATE**  
-Data verifica read-only: **31 agosto 2026**
+Stato: **PRODUCTION ACTIVATION COMPLETATA — SCHEMA E APPLICAZIONE ALLINEATI**  
+Data verifica: **31 agosto 2026**
 
-Questo documento disciplina esclusivamente il rilascio del database Centro Studi sul progetto Supabase hosted `hvfvfatlaspcpszgizhg`. Non autorizza alcuna migration o deploy.
+Questo documento disciplina il rilascio del database Centro Studi sul progetto Supabase hosted `hvfvfatlaspcpszgizhg` e registra l'evidenza dell'ultimo rilascio completato. Non autorizza automaticamente release future.
 
-## 1. Fonte canonica
+## 1. Stato Production verificato
 
-- bootstrap standalone: `supabase/baseline/00..03` come descritto in `CS-MIGRATION-MANIFEST.md`;
-- piano machine-readable del delta: `supabase/CS-PRODUCTION-RELEASE.json`;
-- backup/recovery: `docs/security/BACKUP-RECOVERY.md`;
-- governance ibrida review: `docs/editorial/HYBRID-REVIEW-GOVERNANCE.md`;
-- `supabase/migrations/` contiene anche storico pre-SPLIT-3 e **non è una catena da inviare integralmente a production**.
-
-### Regola assoluta
-
-**Non eseguire `supabase db push` sull'intera directory `supabase/migrations/` per questo cutover.** Due file repository con timestamp `20260820170000` e `20260820171000` corrispondono a migration già presenti sul progetto hosted con versioni rispettivamente `20260819102530` e `20260819103031`. Riapplicarli produrrebbe drift o duplicazione.
-
-## 2. Stato hosted osservato
-
-La lettura read-only delle migration hosted del 31/08/2026 mostra come ultima migration:
+La migration history hosted è stata riletta immediatamente prima del rilascio. Il cutoff iniziale era:
 
 `20260824104000_fix_public_profile_column_grants`
 
-Il progetto hosted risulta a **235 migration**. Il cutoff Production osservato è `20260824104000`. Le migration classificate in `appliedReleaseDelta` fino a questo cutoff risultano già applicate e **non** sono candidate.
+Le due migration candidate dichiarate nel piano sono state applicate **una alla volta**, nell'ordine previsto, dopo autorizzazione esplicita:
 
-`candidateDelta` nel file `CS-PRODUCTION-RELEASE.json` contiene attualmente, in ordine:
+1. repository `20260829120000_create_content_ai_translations.sql` → hosted `20260831174853_create_content_ai_translations`;
+2. repository `20260831103000_audit_interview_workflow_activity.sql` → hosted `20260831174953_audit_interview_workflow_activity`.
 
-1. `20260829120000_create_content_ai_translations.sql`;
-2. `20260831103000_audit_interview_workflow_activity.sql`.
+La history hosted finale contiene **237 migration** e termina a:
 
-Entrambe sono **candidate repository non applicate**: la loro presenza nel piano impedisce drift, ma non autorizza alcuna scrittura Production.
+`20260831174953_audit_interview_workflow_activity`
 
-Gli alias storici repository/hosted restano dichiarati in `alreadyAppliedRepositoryAliases` e **non** vanno mescolati con eventuali migration future.
+`supabase/CS-PRODUCTION-RELEASE.json` registra ora `candidateDelta: []`.
 
-Questo dato **deve essere ricontrollato immediatamente prima di qualunque rilascio**. Se la migration hosted più recente o l'elenco differiscono dal piano registrato, fermare il rilascio e rigenerare il piano; non tentare di “riparare” la history a mano. Qualunque file con timestamp `<= 20260824104000` proposto come nuovo candidato deve essere rifiutato, salvo alias storico già classificato.
+## 2. Backup e recovery pre-release
 
-## 3. Precondizioni obbligatorie
+Prima delle scritture Production è stato creato un nuovo logical backup del database Production con ruoli, schema e dati, cifrato GPG AES-256.
 
-Prima di qualsiasi scrittura production devono essere contemporaneamente vere:
+Evidenza pre-release:
 
-1. autorizzazione esplicita al rilascio production;
+- workflow run: `33406592097`, attempt 2;
+- timestamp backup: `20260831T174600Z`;
+- artifact GitHub: `9769054787`;
+- file cifrato: `centro-studi-20260831T174600Z.tar.gz.gpg`;
+- SHA-256 del file cifrato: `3c8353a8891dcb86d6deded137dd584f66f89fbd301ccd48befae5f12a97d1c7`;
+- checksum interno verificato: **PASS**;
+- logical export: **PASS**;
+- encryption: **PASS**;
+- artifact upload: **PASS**.
+
+L'attempt storico risulta globalmente rosso per il vecchio controllo plaintext che includeva erroneamente i file cifrati nel glob `centro-studi-*`; non si tratta di un fallimento del dump, della cifratura o dell'upload. Il workflow corrente su `main` contiene già la correzione di quel falso positivo.
+
+Il meccanismo di recovery era già stato verificato end-to-end sul backup Production tramite restore isolato non-Production:
+
+- restore drill run `33414599035`: **SUCCESS**;
+- restore completo, Auth, TOTP MFA, build, HTTP/security smoke ed E2E autenticato: **PASS**;
+- nessuna scrittura Production durante il drill.
+
+## 3. Verifiche post-migration
+
+### Cache traduzioni AI
+
+Dopo `create_content_ai_translations` sono stati verificati:
+
+- tabella presente;
+- RLS attiva;
+- `anon` e `authenticated`: SELECT consentita, INSERT negata;
+- `service_role`: SELECT/INSERT/UPDATE consentiti;
+- policy `content_ai_translations_public_read` presente;
+- funzione di coerenza lingua/locale presente.
+
+### Workflow interviste
+
+Dopo `audit_interview_workflow_activity` sono stati verificati:
+
+- `enforce_interview_workflow_transition()` presente;
+- `log_interview_workflow_activity()` presente;
+- `enforce_interview_workflow_content_type()` presente;
+- `prevent_interview_content_type_detach()` presente;
+- `ensure_interview_workflow_for_editorial_content()` presente;
+- sei trigger applicativi attesi presenti;
+- DELETE diretto `authenticated` su `content_interview_workflow` negato;
+- EXECUTE diretto `anon/authenticated` sul transition guard negato.
+
+Gli advisor Supabase non hanno introdotto nuovi finding di sicurezza bloccanti. Restano warning/info già noti e un advisory performance informativo sulla FK `content_ai_translations.source_language_id`, che non è stato trasformato in una migration aggiuntiva durante il cutover.
+
+## 4. Release applicativa Production
+
+Commit applicativo approvato:
+
+`2dfc5e9f25e69edecd6bbe31c3ffe314a433aa52`
+
+La promozione ha rispettato il ruleset attivo `Protect production` con `update`, `deletion` e `non_fast_forward` protetti e bypass riservato alla GitHub App di release ID `4774125`.
+
+Evidenza di promozione:
+
+- workflow one-shot autorizzato run `33422006767`: **SUCCESS**;
+- preflight: **PASS**;
+- fast-forward protetto: **PASS**;
+- verifica ref esatto: **PASS**;
+- `production` finale: `2dfc5e9f25e69edecd6bbe31c3ffe314a433aa52`;
+- `main` al momento della release: stesso SHA;
+- Vercel commit status: **SUCCESS — Deployment has completed**.
+
+Il workflow one-shot è stato eseguito da una PR operativa temporanea, PR `#82`, successivamente **chiusa senza merge**. Il relativo file workflow è stato rimosso dal branch operativo e non è mai entrato in `main` o `production`.
+
+## 5. Fonte canonica per release future
+
+- bootstrap standalone: `supabase/baseline/00..03`, come descritto in `CS-MIGRATION-MANIFEST.md`;
+- piano machine-readable: `supabase/CS-PRODUCTION-RELEASE.json`;
+- backup/recovery: `docs/security/BACKUP-RECOVERY.md`;
+- governance ibrida review: `docs/editorial/HYBRID-REVIEW-GOVERNANCE.md`.
+
+### Regola assoluta
+
+**Non eseguire `supabase db push` sull'intera directory `supabase/migrations/`.** La directory contiene anche storia repository con alias rispetto alle versioni hosted. Ogni nuovo rilascio deve usare esclusivamente il delta classificato nel piano canonico.
+
+## 6. Precondizioni obbligatorie per una release futura
+
+Prima di qualsiasi nuova scrittura Production devono essere vere tutte le seguenti condizioni:
+
+1. autorizzazione esplicita al rilascio Production;
 2. commit applicativo candidato identificato e immutabile;
-3. CI applicativo verde, salvo gate editoriali deliberatamente esterni alla migration;
-4. migration history hosted riletta e coincidente con il piano aggiornato;
-5. backup production cifrato completato con SHA-256 verificato;
-6. restore drill del backup eseguito su database non-production;
-7. URL/ID del progetto production verificato due volte;
-8. nessuna migration candidate contiene operazioni distruttive non revisionate;
-9. piano di rollback applicativo e database assegnato a un operatore responsabile;
-10. attivazione di secret/feature production trattata come fase separata.
+3. CI applicativo verde;
+4. migration history hosted riletta e coincidente con il piano;
+5. backup Production cifrato verificato;
+6. restore drill valido su database non-Production;
+7. project ref Production verificato;
+8. nessuna operazione distruttiva non revisionata;
+9. rollback applicativo/database definito;
+10. feature flag e secret Production trattati separatamente.
 
 Se una sola precondizione manca: **ABORT**.
 
-## 4. Preparazione del delta
+## 7. Regole di esecuzione e rollback
 
-Usare esclusivamente l'array ordinato `candidateDelta` in `CS-PRODUCTION-RELEASE.json`.
+Le migration candidate future devono essere applicate una alla volta nell'ordine di `candidateDelta`. Dopo ciascuna migration si verifica esito e history; al primo errore la catena si ferma.
 
-Il gate `scripts/ci/production-migration-plan-smoke.mjs` verifica che:
+Non modificare o rinominare migration già applicate per forzare la coincidenza della history. Per difetti semantici preferire una forward-fix revisionata. In caso di corruzione/perdita dati sospendere il rilascio e usare il backup cifrato come sorgente di recovery, verificandolo prima su un database pulito/non-Production. Un restore o cutover Production richiede sempre autorizzazione esplicita.
 
-- `candidateDelta: []` sia comunque uno stato valido quando non esistono evoluzioni future;
-- tutti i file dichiarati come alias o candidati esistano;
-- l'ordine dei candidati, se presenti, sia cronologico e senza duplicati;
-- nessun candidato abbia timestamp `<=` al cutoff Production corrente;
-- gli alias storici restino separati dall'elenco delle migration future;
-- ogni file repository successivo al cutoff hosted, esclusi gli alias storici, sia classificato come candidato;
-- i gate security/governance critici restino presenti nel repository, inclusa `20260824103000_harden_publication_gate_execute_privileges.sql`, la governance ibrida 4-eyes e la relativa forward-fix del classificatore `NULL`;
-- nessun candidato contenga `DROP TABLE`, `DROP SCHEMA`, `TRUNCATE` o `DROP COLUMN` non consentiti dal gate.
+Per regressioni esclusivamente applicative, ripristinare l'ultimo deploy noto funzionante solo se lo schema rimane compatibile.
 
-Un nuovo file post-cutoff non registrato fa fallire il CI finché il piano non viene aggiornato deliberatamente. La classificazione del file non equivale mai ad autorizzazione di applicazione.
+## 8. Stato di chiusura 31/08/2026
 
-## 5. Esecuzione production — solo dopo autorizzazione
+- backup pre-release cifrato e checksum: **PASS**;
+- restore drill Production-source isolato: **PASS**;
+- migration Production candidate: **2/2 APPLICATE**;
+- controlli RLS/privilegi/trigger: **PASS**;
+- `candidateDelta`: **VUOTO**;
+- branch `production`: **ALLINEATO** al commit applicativo approvato;
+- Vercel deployment: **SUCCESS**.
 
-1. rileggere la migration history hosted e salvarne evidenza;
-2. creare il backup cifrato pre-release e verificarne checksum + indice;
-3. annotare l'ultimo deploy production applicativo noto funzionante;
-4. applicare **una migration alla volta**, nell'ordine esatto del `candidateDelta`;
-5. dopo ogni migration verificare che l'operazione sia terminata senza errore e che la history registri la nuova migration;
-6. al primo errore: non applicare le successive;
-7. concluse le migration, eseguire i controlli database/security prima di qualsiasi deploy applicativo;
-8. solo dopo DB PASS e autorizzazione separata, procedere al deploy applicativo production.
-
-Non modificare versioni o nomi delle migration già applicate per far coincidere artificialmente la history.
-
-## 6. Verifiche post-migration
-
-Controllare almeno:
-
-- schema PostgreSQL senza errori di lint;
-- RLS e privilegi anon/authenticated sulle superfici pubbliche/private;
-- accesso contributor/editor/admin e MFA AAL2 privilegiata;
-- rate limit pubblico e login;
-- audit log e analytics in stato previsto, senza attivare feature production non autorizzate;
-- governance ibrida: contenuto ordinario same-editor consentito, contenuti sensibili/istituzionali bloccati senza seconda approvazione distinta, self-approval negata e approval stale negata dopo modifica;
-- contenuti ordinari senza categoria (`primary_category_code = NULL`) non devono essere classificati sensibili per il solo `NULL`;
-- indicatori Osservatorio bloccati senza seconda approvazione;
-- correzioni `substantive`/`retraction` pubbliche bloccate senza seconda approvazione;
-- se è inclusa la migration interviste: transizioni invalide negate, DELETE diretto `authenticated` negato, timestamp consensi normalizzati, audit append-only presente e `internal_notes` assenti dal payload audit;
-- lettura di Osservatorio, Atlante, rotte, contenuti, autori e open data;
-- nessuna FK/oggetto PonteImprese reintrodotto;
-- conteggi e visibilità dei contenuti coerenti con lo stato editoriale reale;
-- smoke applicativo contro il database production in modalità controllata.
-
-## 7. Abort e rollback
-
-### A. Migration fallisce durante l'esecuzione
-
-- fermare immediatamente la catena;
-- non marcare manualmente la migration come applicata;
-- conservare log ed errore;
-- verificare se la transazione è stata interamente annullata;
-- correggere in una nuova migration revisionata o ripetere solo dopo nuova approvazione.
-
-### B. Migration applicata ma difetto semantico correggibile
-
-Preferire una **forward-fix migration** esplicita. La precedente `20260822213100_fix_hybrid_null_category_classifier.sql` è un esempio storico di questo principio: fu introdotta dopo che il test due-redattori rilevò la semantica SQL `NULL` del classificatore. Non inventare automaticamente una down-migration se non è stata progettata e provata.
-
-### C. Corruzione/perdita dati o incompatibilità non recuperabile con forward-fix sicura
-
-- sospendere il rilascio applicativo;
-- usare il backup cifrato pre-release come sorgente di recovery;
-- ripristinare prima su un database pulito/non-production per verificare l'archivio;
-- il ripristino o cutover production richiede una decisione amministrativa esplicita;
-- non sovrascrivere production alla cieca.
-
-### D. Database corretto, applicazione regressiva
-
-Ripristinare l'applicazione all'ultimo artifact/deploy production noto funzionante. Il rollback applicativo non implica automaticamente il rollback DB: lo schema deve restare compatibile con la versione ripristinata oppure va preparata una correzione controllata.
-
-## 8. Evidenza di chiusura
-
-Registrare per il rilascio:
-
-- commit SHA applicativo;
-- migration hosted iniziale e finale;
-- elenco effettivamente applicato;
-- timestamp e checksum del backup pre-release;
-- esito restore drill;
-- esito smoke DB/security/app;
-- esito governance ibrida 4-eyes, inclusa la regressione `NULL`;
-- eventuali forward-fix;
-- autorizzazione esplicita a deploy/migration production.
-
-Finché queste evidenze non esistono, lo stato resta **PRODUCTION ACTIVATION PENDING**.
+**PRODUCTION ACTIVATION = COMPLETE**
