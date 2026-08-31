@@ -26,6 +26,10 @@ begin
     raise exception 'INTERVIEW_AUDIT_SMOKE_MISSING_CATALOG';
   end if;
 
+  if has_table_privilege('authenticated', 'public.content_interview_workflow', 'DELETE') then
+    raise exception 'INTERVIEW_WORKFLOW_AUTHENTICATED_DELETE_STILL_GRANTED';
+  end if;
+
   insert into public.contents (
     owned_by_editorial,
     owner_person_id,
@@ -78,10 +82,37 @@ begin
     raise exception 'INTERVIEW_AUDIT_CREATE_PAYLOAD_INVALID';
   end if;
 
+  begin
+    update public.content_interview_workflow
+    set workflow_status = 'approved'
+    where content_id = v_content_id;
+    raise exception 'INTERVIEW_WORKFLOW_INVALID_TRANSITION_ACCEPTED';
+  exception
+    when check_violation then null;
+  end;
+
+  begin
+    update public.content_interview_workflow
+    set publication_consent_status = 'granted'
+    where content_id = v_content_id;
+    raise exception 'INTERVIEW_WORKFLOW_CANDIDATE_CONSENT_ACCEPTED';
+  exception
+    when check_violation then null;
+  end;
+
   update public.content_interview_workflow
-  set workflow_status = 'contacted',
-      contacted_at = now()
+  set workflow_status = 'contacted'
   where content_id = v_content_id;
+
+  if not exists (
+    select 1
+    from public.content_interview_workflow
+    where content_id = v_content_id
+      and workflow_status = 'contacted'
+      and contacted_at is not null
+  ) then
+    raise exception 'INTERVIEW_WORKFLOW_CONTACTED_AT_NOT_NORMALIZED';
+  end if;
 
   if not exists (
     select 1
@@ -97,10 +128,28 @@ begin
     raise exception 'INTERVIEW_AUDIT_STATUS_CHANGE_MISSING';
   end if;
 
+  begin
+    update public.content_interview_workflow
+    set publication_consent_status = 'not_required'
+    where content_id = v_content_id;
+    raise exception 'INTERVIEW_WORKFLOW_REQUIRED_CONSENT_NOT_REQUIRED_ACCEPTED';
+  exception
+    when check_violation then null;
+  end;
+
   update public.content_interview_workflow
-  set publication_consent_status = 'granted',
-      publication_consent_at = now()
+  set publication_consent_status = 'granted'
   where content_id = v_content_id;
+
+  if not exists (
+    select 1
+    from public.content_interview_workflow
+    where content_id = v_content_id
+      and publication_consent_status = 'granted'
+      and publication_consent_at is not null
+  ) then
+    raise exception 'INTERVIEW_WORKFLOW_CONSENT_TIMESTAMP_NOT_NORMALIZED';
+  end if;
 
   if not exists (
     select 1
