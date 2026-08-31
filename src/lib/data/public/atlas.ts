@@ -4,7 +4,9 @@ import {
 } from "@/lib/atlas/scope";
 import { createClient } from "@/lib/supabase/server";
 import {
-  getExplorerSnapshot,
+  getExplorerDimensionValues,
+  getScopedExplorerEvidence,
+  type ExplorerDimensionValue,
   type ExplorerIndicator,
   type ExplorerValue,
 } from "@/lib/data/public/explore";
@@ -52,7 +54,9 @@ type GeographyLink = {
   country_code: string | null;
 };
 
-function matchesCountryTerritory(value: ExplorerValue, country: AtlasCountry) {
+type CountryTerritoryValue = Pick<ExplorerDimensionValue, "territory_code">;
+
+function matchesCountryTerritory(value: CountryTerritoryValue, country: AtlasCountry) {
   const code = value.territory_code?.toUpperCase();
   return code === country.code || code === country.iso3;
 }
@@ -81,11 +85,11 @@ function mapIndicatorEvidence(
 
 export async function listAtlasCountrySummaries(): Promise<AtlasCountrySummary[]> {
   const supabase = await createClient();
-  const snapshotPromise = getExplorerSnapshot();
+  const dimensionsPromise = getExplorerDimensionValues();
   const codes = ATLAS_COUNTRIES.map((country) => country.code);
 
-  const [snapshot, contentGeoResult, eventGeoResult] = await Promise.all([
-    snapshotPromise,
+  const [dimensions, contentGeoResult, eventGeoResult] = await Promise.all([
+    dimensionsPromise,
     supabase
       .from("content_geographies")
       .select("content_id, country_code")
@@ -136,7 +140,7 @@ export async function listAtlasCountrySummaries(): Promise<AtlasCountrySummary[]
   const publicEventIds = new Set((eventResult.data ?? []).map((row) => row.id));
 
   return ATLAS_COUNTRIES.map((country) => {
-    const countryValues = snapshot.values.filter((value) =>
+    const countryValues = dimensions.filter((value) =>
       matchesCountryTerritory(value, country),
     );
     const indicatorCount = new Set(countryValues.map((value) => value.indicator_id)).size;
@@ -180,13 +184,12 @@ export async function getAtlasCountryDetail(
   country: AtlasCountry,
 ): Promise<AtlasCountryDetail> {
   const supabase = await createClient();
-  const snapshot = await getExplorerSnapshot();
-  const countryValues = snapshot.values.filter((value) =>
-    matchesCountryTerritory(value, country),
-  );
-  const indicators = mapIndicatorEvidence(snapshot.indicators, countryValues);
+  const evidencePromise = getScopedExplorerEvidence({
+    territoryCodes: [country.code, country.iso3],
+  });
 
-  const [contentGeoResult, eventGeoResult] = await Promise.all([
+  const [evidence, contentGeoResult, eventGeoResult] = await Promise.all([
+    evidencePromise,
     supabase
       .from("content_geographies")
       .select("content_id")
@@ -200,6 +203,10 @@ export async function getAtlasCountryDetail(
   if (contentGeoResult.error) throw new Error(contentGeoResult.error.message);
   if (eventGeoResult.error) throw new Error(eventGeoResult.error.message);
 
+  const countryValues = evidence.values.filter((value) =>
+    matchesCountryTerritory(value, country),
+  );
+  const indicators = mapIndicatorEvidence(evidence.indicators, countryValues);
   const contentIds = Array.from(
     new Set((contentGeoResult.data ?? []).map((row) => row.content_id)),
   );
