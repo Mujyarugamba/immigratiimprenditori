@@ -1,0 +1,105 @@
+name: Production postflight smoke
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  postflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install test dependencies
+        run: npm ci
+      - name: Robots and sitemap smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://www.immigratiimprenditori.it"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+
+          curl --fail --silent --show-error --location --max-time 45 "$base/robots.txt" -o "$tmp/robots.txt"
+          grep -Fq 'Disallow: /app/' "$tmp/robots.txt"
+          grep -Fq 'Disallow: /accedi' "$tmp/robots.txt"
+          grep -Fq 'Sitemap: https://www.immigratiimprenditori.it/sitemap.xml' "$tmp/robots.txt"
+          grep -Fq 'Sitemap: https://www.immigratiimprenditori.it/sitemap-contributors.xml' "$tmp/robots.txt"
+          echo 'PASS robots.txt production policy'
+
+          curl --fail --silent --show-error --location --max-time 45 "$base/sitemap.xml" -o "$tmp/sitemap.xml"
+          for path in /esplora /cultura /ricerca /osservatorio /storie /contribuisci; do
+            grep -Fq "https://www.immigratiimprenditori.it${path}" "$tmp/sitemap.xml"
+          done
+          echo 'PASS sitemap.xml core routes'
+
+      - name: Chrome desktop/mobile postflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from '@playwright/test';
+
+          const base = 'https://www.immigratiimprenditori.it';
+          const core = ['/', '/esplora', '/cultura', '/ricerca', '/osservatorio', '/storie', '/contribuisci', '/accedi'];
+          const browser = await chromium.launch({ channel: 'chrome', headless: true });
+
+          async function checkViewport(name, viewport) {
+            const context = await browser.newContext({ viewport });
+            const page = await context.newPage();
+            const runtimeErrors = [];
+            page.on('pageerror', (error) => runtimeErrors.push(`pageerror: ${error.message}`));
+            page.on('console', (message) => {
+              if (message.type() === 'error') runtimeErrors.push(`console.error: ${message.text()}`);
+            });
+
+            for (const path of core) {
+              runtimeErrors.length = 0;
+              const response = await page.goto(`${base}${path}`, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+              if (!response || response.status() >= 400) {
+                throw new Error(`${name} ${path}: HTTP ${response?.status() ?? 'NO_RESPONSE'}`);
+              }
+              const h1 = page.getByRole('heading', { level: 1 });
+              if (await h1.count() === 0 || !(await h1.first().isVisible())) {
+                throw new Error(`${name} ${path}: visible H1 missing`);
+              }
+              const dims = await page.evaluate(() => ({
+                clientWidth: document.documentElement.clientWidth,
+                scrollWidth: document.documentElement.scrollWidth,
+              }));
+              if (dims.scrollWidth > dims.clientWidth + 1) {
+                throw new Error(`${name} ${path}: horizontal overflow ${dims.scrollWidth} > ${dims.clientWidth}`);
+              }
+              if (runtimeErrors.length) {
+                throw new Error(`${name} ${path}: runtime errors: ${runtimeErrors.join(' | ')}`);
+              }
+              console.log(`PASS ${name} ${path} HTTP ${response.status()} H1+reflow+runtime`);
+            }
+
+            await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+            const hrefs = await page.locator('a[href^="/"]').evaluateAll((links) =>
+              [...new Set(links.map((link) => link.getAttribute('href')).filter(Boolean))]
+                .filter((href) => !href.startsWith('//') && !href.startsWith('/app/'))
+                .slice(0, 40),
+            );
+            for (const href of hrefs) {
+              const response = await context.request.get(`${base}${href}`, { timeout: 45_000, failOnStatusCode: false });
+              if (response.status() >= 400) {
+                throw new Error(`${name} internal link ${href}: HTTP ${response.status()}`);
+              }
+            }
+            console.log(`PASS ${name} home internal links checked=${hrefs.length}`);
+            await context.close();
+          }
+
+          await checkViewport('desktop', { width: 1440, height: 1000 });
+          await checkViewport('mobile', { width: 390, height: 844 });
+          await browser.close();
+          console.log('PRODUCTION_POSTFLIGHT_BROWSER = PASS');
+          NODE
