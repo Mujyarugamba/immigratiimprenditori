@@ -12,6 +12,10 @@ permissions:
   contents: read
   actions: read
 
+concurrency:
+  group: production-backup-restore-drill
+  cancel-in-progress: false
+
 jobs:
   restore-drill:
     # The drill consumes a Production artifact but restores only to the runner's
@@ -23,16 +27,16 @@ jobs:
       BACKUP_RUN_ID: ${{ inputs.backup_run_id }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
 
       - name: Setup pinned Supabase CLI
-        uses: supabase/setup-cli@v3
+        uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3
         with:
           version: 2.115.0
 
@@ -87,7 +91,7 @@ jobs:
           echo "PRODUCTION_RESTORE_DRILL_INPUT_GATE = PASS"
 
       - name: Download exact Production backup artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: centro-studi-encrypted-backup-${{ env.BACKUP_RUN_ID }}
           path: restore-input
