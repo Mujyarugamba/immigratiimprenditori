@@ -161,6 +161,8 @@ jobs:
             supabase/migrations/20260819141022_editorial_inbox_activity.sql
           cp supabase/standalone-evolutions/20260819141338_editorial_contributor_hardening.sql \
             supabase/migrations/20260819141338_editorial_contributor_hardening.sql
+          cp supabase/standalone-evolutions/20260819170614_content_interview_workflow.sql \
+            supabase/migrations/20260819170614_content_interview_workflow.sql
           cp /tmp/repository-migrations/20260820173000_harden_editorial_public_submission.sql \
             supabase/migrations/20260820173000_harden_editorial_public_submission.sql
 
