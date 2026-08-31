@@ -1,0 +1,73 @@
+name: Production auth surfaces smoke
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Smoke public contribution, login and anonymous redazione gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://www.immigratiimprenditori.it"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+
+          check_200() {
+            local path="$1"
+            local body="$2"
+            local headers="$3"
+            local code
+            code="$(curl --fail-with-body --silent --show-error --location \
+              --connect-timeout 15 --max-time 45 \
+              --dump-header "$headers" --output "$body" \
+              --write-out '%{http_code}' "$base$path")"
+            test "$code" = "200" || { echo "FAIL $path HTTP $code"; exit 1; }
+            echo "PASS $path HTTP 200"
+          }
+
+          check_200 "/contribuisci" "$tmp/contribuisci.html" "$tmp/contribuisci.headers"
+          grep -Fq 'Partecipa al Centro Studi' "$tmp/contribuisci.html"
+          grep -Fq 'id="modulo-partecipazione"' "$tmp/contribuisci.html"
+          grep -Fq 'name="submission_kind"' "$tmp/contribuisci.html"
+          grep -Fq 'name="contribution_text"' "$tmp/contribuisci.html"
+          grep -Fq 'name="submitter_name"' "$tmp/contribuisci.html"
+          grep -Fq 'name="submitter_email"' "$tmp/contribuisci.html"
+          grep -Fq 'name="consent_contact"' "$tmp/contribuisci.html"
+          grep -Fq 'Invia alla redazione' "$tmp/contribuisci.html"
+          grep -Fq 'rel="canonical" href="https://www.immigratiimprenditori.it/contribuisci"' "$tmp/contribuisci.html"
+          echo "PASS /contribuisci form + canonical"
+
+          check_200 "/accedi" "$tmp/accedi.html" "$tmp/accedi.headers"
+          grep -Fq 'Accesso redazione' "$tmp/accedi.html"
+          grep -Fq 'id="login-form"' "$tmp/accedi.html"
+          grep -Fq 'name="email"' "$tmp/accedi.html"
+          grep -Fq 'name="password"' "$tmp/accedi.html"
+          grep -Eqi '<meta[^>]+name="robots"[^>]+content="[^"]*noindex' "$tmp/accedi.html"
+          echo "PASS /accedi login form + noindex"
+
+          code="$(curl --silent --show-error --connect-timeout 15 --max-time 45 \
+            --dump-header "$tmp/redazione.headers" --output "$tmp/redazione.body" \
+            --write-out '%{http_code}' "$base/app/redazione")"
+          case "$code" in
+            301|302|303|307|308) ;;
+            *) echo "FAIL /app/redazione anonymous expected redirect, got HTTP $code"; exit 1 ;;
+          esac
+          location="$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]+:[[:space:]]*/, ""); sub(/\r$/, ""); print; exit}' "$tmp/redazione.headers")"
+          echo "$location" | grep -Fq '/accedi?next=/app/redazione'
+          echo "PASS /app/redazione anonymous redirect -> $location"
+
+          final_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 \
+            --output "$tmp/redazione-final.html" --write-out '%{http_code}' "$base/app/redazione")"
+          test "$final_code" = "200"
+          grep -Fq 'Accesso redazione' "$tmp/redazione-final.html"
+          grep -Fq 'id="login-form"' "$tmp/redazione-final.html"
+          echo "PASS anonymous redazione follow-through lands on login"
+
+          echo "PRODUCTION_AUTH_SURFACES_SMOKE = PASS"
