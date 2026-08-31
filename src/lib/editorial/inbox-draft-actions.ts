@@ -127,6 +127,25 @@ export async function createEditorialContentFromInboxAction(
     };
   }
 
+  if (typeCode === "interview") {
+    const { error: workflowError } = await supabase
+      .from("content_interview_workflow")
+      .upsert(
+        { content_id: result.id, workflow_status: "candidate" },
+        { onConflict: "content_id", ignoreDuplicates: true },
+      );
+
+    if (workflowError) {
+      revalidatePath("/app/redazione/inbox");
+      revalidatePath(`/app/redazione/inbox/${inboxId}`);
+      revalidatePath("/app/redazione/contenuti");
+      return {
+        ok: false,
+        message: `Bozza ${result.id} creata e collegata all'Inbox, ma il workflow intervista non è stato inizializzato.`,
+      };
+    }
+  }
+
   revalidatePath("/app/redazione/inbox");
   revalidatePath(`/app/redazione/inbox/${inboxId}`);
   revalidatePath("/app/redazione/contenuti");
