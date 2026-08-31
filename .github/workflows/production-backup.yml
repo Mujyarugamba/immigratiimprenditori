@@ -105,7 +105,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if compgen -G '*.sql' >/dev/null || compgen -G '*.tar.gz' >/dev/null || compgen -G 'centro-studi-*' >/dev/null; then
+          plaintext_dir="$(find . -maxdepth 1 -type d -name 'centro-studi-*' -print -quit)"
+          if compgen -G '*.sql' >/dev/null || compgen -G '*.tar.gz' >/dev/null || [ -n "$plaintext_dir" ]; then
             echo "Plaintext backup material still present" >&2
             ls -la
             exit 1
