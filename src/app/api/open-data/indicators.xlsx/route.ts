@@ -1,7 +1,7 @@
 import {
-  collectPublicExportRows,
+  collectCanonicalPublicExportRecords,
   publicExportFilters,
-} from "@/lib/data/public/export-values";
+} from "@/lib/data/public/exports";
 import { createSimpleXlsx } from "@/lib/export/xlsx";
 
 export const runtime = "nodejs";
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const values = await collectPublicExportRows(publicExportFilters(url.searchParams));
+    const values = await collectCanonicalPublicExportRecords(publicExportFilters(url.searchParams));
 
     const rows: Array<Array<string | number | null>> = [
       [
@@ -28,25 +28,22 @@ export async function GET(request: Request) {
         "business_sector_id",
         "quality_code",
       ],
-      ...values.map((value) => {
-        const indicator = value.observatory_indicators;
-        return [
-          indicator.code,
-          indicator.title,
-          indicator.unit_code,
-          Number(value.numeric_value),
-          value.period_start,
-          value.period_end,
-          value.status,
-          value.territory_level,
-          value.territory_code,
-          value.territory_label,
-          value.country_code,
-          value.country_label,
-          value.business_sector_id,
-          value.quality_code,
-        ];
-      }),
+      ...values.map((value) => [
+        value.indicator_code,
+        value.indicator_title,
+        value.unit_code,
+        value.numeric_value,
+        value.period_start,
+        value.period_end,
+        value.status,
+        value.territory_level,
+        value.territory_code,
+        value.territory_label,
+        value.category_code,
+        value.category_label,
+        value.business_sector_id,
+        value.quality_code,
+      ]),
     ];
 
     const workbook = createSimpleXlsx(rows, "Osservatorio");
