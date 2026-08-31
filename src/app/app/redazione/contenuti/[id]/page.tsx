@@ -13,6 +13,7 @@ import {
   getEditorialContentById,
   listEditorialContentVersions,
 } from "@/lib/data/editorial/contents";
+import { getEditorialInterviewWorkflow } from "@/lib/data/editorial/interviews";
 import {
   getEditorialReviewState,
   isContentAutomaticallySensitive,
@@ -29,24 +30,91 @@ export const metadata: Metadata = {
 
 type Props = { params: Promise<{ id: string }> };
 
+const WORKFLOW_LABELS: Record<string, string> = {
+  candidate: "Candidato",
+  contacted: "Contattato",
+  scheduled: "Programmato",
+  interviewed: "Intervistato",
+  fact_check: "Fact-check",
+  approved: "Approvato",
+  declined: "Declinato",
+  closed: "Chiuso",
+};
+
+const CONSENT_LABELS: Record<string, string> = {
+  pending: "Da acquisire",
+  granted: "Concesso",
+  declined: "Negato",
+  not_required: "Non richiesto",
+};
+
+const ORIGIN_LABELS: Record<string, string> = {
+  editorial: "Redazione",
+  contribution: "Contributo",
+  referral: "Segnalazione",
+  public_source: "Fonte pubblica",
+};
+
+function formatDate(value: string | null) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("it-IT", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
 export default async function ContenutoRedazionePage({ params }: Props) {
   const { id } = await params;
-  const [content, contentTypes, categories, languages, versions, reviewState, session] =
-    await Promise.all([
-      getEditorialContentById(id),
-      listActiveContentTypes(),
-      listActiveContentCategories(),
-      listActiveLanguages(),
-      listEditorialContentVersions(id),
-      getEditorialReviewState("content", id, "publication"),
-      getApplicationSession(),
-    ]);
+  const [
+    content,
+    contentTypes,
+    categories,
+    languages,
+    versions,
+    reviewState,
+    session,
+    interviewWorkflow,
+  ] = await Promise.all([
+    getEditorialContentById(id),
+    listActiveContentTypes(),
+    listActiveContentCategories(),
+    listActiveLanguages(),
+    listEditorialContentVersions(id),
+    getEditorialReviewState("content", id, "publication"),
+    getApplicationSession(),
+    getEditorialInterviewWorkflow(id),
+  ]);
 
   if (!content) notFound();
 
   const automaticReviewRequired = isContentAutomaticallySensitive(content);
   const reviewRequired =
     automaticReviewRequired || reviewState.forceSecondaryReview;
+
+  const consents = interviewWorkflow
+    ? [
+        {
+          label: "Pubblicazione",
+          status: interviewWorkflow.publication_consent_status,
+          at: interviewWorkflow.publication_consent_at,
+        },
+        {
+          label: "Citazioni",
+          status: interviewWorkflow.quote_approval_status,
+          at: interviewWorkflow.quote_approval_at,
+        },
+        {
+          label: "Immagini",
+          status: interviewWorkflow.image_consent_status,
+          at: interviewWorkflow.image_consent_at,
+        },
+        {
+          label: "Video",
+          status: interviewWorkflow.video_consent_status,
+          at: interviewWorkflow.video_consent_at,
+        },
+      ]
+    : [];
 
   return (
     <div>
@@ -62,6 +130,104 @@ export default async function ContenutoRedazionePage({ params }: Props) {
       <p className="text-ink-muted mt-1 text-sm">
         {content.publication_status} · {content.visibility_status}
       </p>
+
+      {content.type_code === "interview" ? (
+        <section
+          className="border-line mt-6 border p-5"
+          aria-labelledby="interview-workflow-title"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-ink-muted text-xs font-semibold uppercase tracking-[0.12em]">
+                Intervista originale
+              </p>
+              <h2
+                id="interview-workflow-title"
+                className="text-ink mt-1 text-lg font-semibold"
+              >
+                Workflow e consensi
+              </h2>
+            </div>
+            {interviewWorkflow ? (
+              <span className="border-line text-ink border px-3 py-1 text-xs font-semibold">
+                {WORKFLOW_LABELS[interviewWorkflow.workflow_status] ??
+                  interviewWorkflow.workflow_status}
+              </span>
+            ) : null}
+          </div>
+
+          {!interviewWorkflow ? (
+            <p className="text-ink-muted mt-4 text-sm">
+              Workflow non inizializzato per questo contenuto. La bozza resta
+              privata e nessun contatto viene implicato automaticamente.
+            </p>
+          ) : (
+            <>
+              <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <dt className="text-ink-muted text-xs uppercase tracking-[0.1em]">
+                    Origine
+                  </dt>
+                  <dd className="text-ink mt-1 font-medium">
+                    {ORIGIN_LABELS[interviewWorkflow.source_origin] ??
+                      interviewWorkflow.source_origin}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-muted text-xs uppercase tracking-[0.1em]">
+                    Contattato
+                  </dt>
+                  <dd className="text-ink mt-1 font-medium">
+                    {formatDate(interviewWorkflow.contacted_at)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-muted text-xs uppercase tracking-[0.1em]">
+                    Programmato
+                  </dt>
+                  <dd className="text-ink mt-1 font-medium">
+                    {formatDate(interviewWorkflow.scheduled_for)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-muted text-xs uppercase tracking-[0.1em]">
+                    Intervistato
+                  </dt>
+                  <dd className="text-ink mt-1 font-medium">
+                    {formatDate(interviewWorkflow.interviewed_at)}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="border-line mt-5 border-t pt-4">
+                <h3 className="text-ink text-sm font-semibold">Consensi</h3>
+                <dl className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {consents.map((consent) => (
+                    <div key={consent.label} className="border-line border p-3">
+                      <dt className="text-ink-muted text-xs uppercase tracking-[0.1em]">
+                        {consent.label}
+                      </dt>
+                      <dd className="text-ink mt-1 text-sm font-semibold">
+                        {CONSENT_LABELS[consent.status] ?? consent.status}
+                      </dd>
+                      {consent.at ? (
+                        <dd className="text-ink-muted mt-1 text-xs">
+                          {formatDate(consent.at)}
+                        </dd>
+                      ) : null}
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              <p className="text-ink-muted mt-4 text-xs">
+                Ultimo aggiornamento: {formatDate(interviewWorkflow.updated_at)}.
+                Questa sezione è informativa: non modifica lo stato del workflow.
+              </p>
+            </>
+          )}
+        </section>
+      ) : null}
 
       <EditorialContentEditForm
         content={content}
