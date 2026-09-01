@@ -10,6 +10,7 @@ import { localizedCtaArrow } from "@/lib/i18n/content-direction";
 import { presentLocalizedContentCards } from "@/lib/i18n/ai-translation/runtime";
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { CREATIVE_FIELDS, eventTranslation } from "@/lib/i18n/public-entity-translations";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
@@ -142,17 +143,6 @@ const messages = {
   },
 } as const;
 
-const creativeFields = [
-  "Audiovisual",
-  "Publishing",
-  "Music",
-  "Live performance",
-  "Design",
-  "Fashion",
-  "Artistic crafts",
-  "Cultural heritage and services",
-] as const;
-
 function isVoice(typeCode: string) {
   return (VOICE_CONTENT_TYPES as readonly string[]).includes(typeCode);
 }
@@ -168,15 +158,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: NAV_MESSAGES[locale].culture,
     description: m.description,
-    alternates: {
-      canonical: `/${locale}/cultura`,
-      languages: languageAlternates("/cultura"),
-    },
-    ...pageSocialMetadata({
-      title: NAV_MESSAGES[locale].culture,
-      description: m.description,
-      pathname: `/${locale}/cultura`,
-    }),
+    alternates: { canonical: `/${locale}/cultura`, languages: languageAlternates("/cultura") },
+    ...pageSocialMetadata({ title: NAV_MESSAGES[locale].culture, description: m.description, pathname: `/${locale}/cultura` }),
   };
 }
 
@@ -202,34 +185,19 @@ export default async function LocalizedCulturePage({ params }: Props) {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">{m.eyebrow}</p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{NAV_MESSAGES[locale].culture}</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">{m.intro}</p>
-        {hasOriginalLanguageContent ? (
-          <p className="mt-3 text-sm leading-6 text-neutral-600">{core.originalLanguageNotice}</p>
-        ) : null}
+        {hasOriginalLanguageContent ? <p className="mt-3 text-sm leading-6 text-neutral-600">{core.originalLanguageNotice}</p> : null}
       </header>
 
       <section className="mt-12">
         <h2 className="text-3xl font-semibold tracking-tight text-black">{m.stories}</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{m.storiesText}</p>
-        {stories.length === 0 ? (
-          <p className="mt-6 border border-black p-6 text-sm text-neutral-600">{m.emptyStories}</p>
-        ) : (
+        {stories.length === 0 ? <p className="mt-6 border border-black p-6 text-sm text-neutral-600">{m.emptyStories}</p> : (
           <div className="mt-6 grid gap-px border border-black bg-black md:grid-cols-2 lg:grid-cols-3">
             {stories.map((item) => (
               <article key={item.id} className="flex min-h-64 flex-col bg-white p-6">
                 <OriginalLanguageText as="h3" languageCode={item.displayLanguageCode} className="text-xl font-semibold leading-7 text-black">{item.title}</OriginalLanguageText>
                 {item.abstract ? <OriginalLanguageText languageCode={item.displayLanguageCode} className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</OriginalLanguageText> : <div className="flex-1" />}
-                {item.isAiTranslation ? (
-                  <EditorialTranslationNotice
-                    locale={locale}
-                    sourceLanguageId={item.language_id}
-                    displayLanguageCode={item.displayLanguageCode}
-                    isAiTranslation
-                    isViewingOriginal={false}
-                    originalHref={`/${locale}/contenuti/${item.slug}?original=1`}
-                    translationHref={`/${locale}/contenuti/${item.slug}`}
-                    compact
-                  />
-                ) : null}
+                {item.isAiTranslation ? <EditorialTranslationNotice locale={locale} sourceLanguageId={item.language_id} displayLanguageCode={item.displayLanguageCode} isAiTranslation isViewingOriginal={false} originalHref={`/${locale}/contenuti/${item.slug}?original=1`} translationHref={`/${locale}/contenuti/${item.slug}`} compact /> : null}
                 <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{m.stories} {arrow}</Link>
               </article>
             ))}
@@ -238,57 +206,35 @@ export default async function LocalizedCulturePage({ params }: Props) {
       </section>
 
       <section className="mt-12 border-t border-black pt-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-semibold tracking-tight text-black">{m.events}</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{m.eventsText}</p>
-          </div>
-          <Link href={`/${locale}/eventi`} className="text-sm font-semibold underline underline-offset-4">{m.allEvents} {arrow}</Link>
-        </div>
-        {events.length === 0 ? (
-          <p className="mt-6 border border-black p-6 text-sm text-neutral-600">{m.emptyEvents}</p>
-        ) : (
+        <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-3xl font-semibold tracking-tight text-black">{m.events}</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{m.eventsText}</p></div><Link href={`/${locale}/eventi`} className="text-sm font-semibold underline underline-offset-4">{m.allEvents} {arrow}</Link></div>
+        {events.length === 0 ? <p className="mt-6 border border-black p-6 text-sm text-neutral-600">{m.emptyEvents}</p> : (
           <div className="mt-6 grid gap-px border border-black bg-black md:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <article key={event.id} className="flex min-h-56 flex-col bg-white p-6">
-                <OriginalLanguageText as="h3" className="text-xl font-semibold leading-7 text-black">{event.title}</OriginalLanguageText>
-                {event.summary ? <OriginalLanguageText className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{event.summary}</OriginalLanguageText> : <div className="flex-1" />}
-                {event.next_edition ? <p className="mt-4 text-xs text-neutral-500">{new Date(event.next_edition.starts_at).toLocaleString(locale)}</p> : null}
-                <Link href={`/${locale}/eventi/${event.id}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{NAV_MESSAGES[locale].events} {arrow}</Link>
-              </article>
-            ))}
+            {events.map((event) => {
+              const translatedEvent = eventTranslation(locale, event.id);
+              const title = translatedEvent?.title ?? event.title;
+              const summary = translatedEvent?.summary ?? event.summary;
+              return (
+                <article key={event.id} className="flex min-h-56 flex-col bg-white p-6">
+                  <h3 className="text-xl font-semibold leading-7 text-black">{title}</h3>
+                  {summary ? <p className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{summary}</p> : <div className="flex-1" />}
+                  {event.next_edition ? <p className="mt-4 text-xs text-neutral-500">{new Date(event.next_edition.starts_at).toLocaleString(locale)}</p> : null}
+                  <Link href={`/${locale}/eventi/${event.id}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{NAV_MESSAGES[locale].events} {arrow}</Link>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
 
       <section className="mt-12 border-t border-black pt-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-semibold tracking-tight text-black">{m.analysis}</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{m.analysisText}</p>
-          </div>
-          <Link href={`/${locale}/contenuti`} className="text-sm font-semibold underline underline-offset-4">{m.allAnalysis} {arrow}</Link>
-        </div>
-        {analysis.length === 0 ? (
-          <p className="mt-6 border border-black p-6 text-sm text-neutral-600">{m.emptyAnalysis}</p>
-        ) : (
+        <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-3xl font-semibold tracking-tight text-black">{m.analysis}</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{m.analysisText}</p></div><Link href={`/${locale}/contenuti`} className="text-sm font-semibold underline underline-offset-4">{m.allAnalysis} {arrow}</Link></div>
+        {analysis.length === 0 ? <p className="mt-6 border border-black p-6 text-sm text-neutral-600">{m.emptyAnalysis}</p> : (
           <div className="mt-6 grid gap-px border border-black bg-black md:grid-cols-2 lg:grid-cols-3">
             {analysis.map((item) => (
               <article key={item.id} className="flex min-h-64 flex-col bg-white p-6">
                 <OriginalLanguageText as="h3" languageCode={item.displayLanguageCode} className="text-xl font-semibold leading-7 text-black">{item.title}</OriginalLanguageText>
                 {item.abstract ? <OriginalLanguageText languageCode={item.displayLanguageCode} className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</OriginalLanguageText> : <div className="flex-1" />}
-                {item.isAiTranslation ? (
-                  <EditorialTranslationNotice
-                    locale={locale}
-                    sourceLanguageId={item.language_id}
-                    displayLanguageCode={item.displayLanguageCode}
-                    isAiTranslation
-                    isViewingOriginal={false}
-                    originalHref={`/${locale}/contenuti/${item.slug}?original=1`}
-                    translationHref={`/${locale}/contenuti/${item.slug}`}
-                    compact
-                  />
-                ) : null}
+                {item.isAiTranslation ? <EditorialTranslationNotice locale={locale} sourceLanguageId={item.language_id} displayLanguageCode={item.displayLanguageCode} isAiTranslation isViewingOriginal={false} originalHref={`/${locale}/contenuti/${item.slug}?original=1`} translationHref={`/${locale}/contenuti/${item.slug}`} compact /> : null}
                 <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{NAV_MESSAGES[locale].analysis} {arrow}</Link>
               </article>
             ))}
@@ -300,9 +246,7 @@ export default async function LocalizedCulturePage({ params }: Props) {
         <h2 className="text-3xl font-semibold tracking-tight text-black">{m.industries}</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{m.industriesText}</p>
         <div className="mt-6 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-4">
-          {creativeFields.map((field) => (
-            <div key={field} className="bg-white px-5 py-5 text-sm font-semibold text-black">{field}</div>
-          ))}
+          {CREATIVE_FIELDS[locale].map((field) => <div key={field} className="bg-white px-5 py-5 text-sm font-semibold text-black">{field}</div>)}
         </div>
       </section>
 

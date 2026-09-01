@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { formatExplorerValue, getExplorerSnapshot } from "@/lib/data/public/explore";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
-import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
+import { indicatorTranslation } from "@/lib/i18n/public-entity-translations";
 
 const text = {
   en: { kicker: "Observatory · Explore", title: "Data Explorer", intro: "Filter values already published by the Research Centre. Definitions and comparability depend on each indicator page; values from different indicators must not be added automatically.", indicator: "Indicator", territory: "Territory", year: "Year", all: "All", filter: "Filter", reset: "Reset", values: "Values", results: "results", category: "Group / category", period: "Period", value: "Value", quality: "Quality", none: "No values match the selected filters.", note: "The Data Explorer does not replace the methodological record. Citizenship, place of birth, foreign enterprise and self-employment describe different statistical populations." },
@@ -26,11 +26,7 @@ export async function generateMetadata({ params }: Pick<Props, "params">): Promi
     title: m.title,
     description: m.intro,
     alternates: { canonical: `/${locale}/esplora/dati`, languages: languageAlternates("/esplora/dati") },
-    ...pageSocialMetadata({
-      title: m.title,
-      description: m.intro,
-      pathname: `/${locale}/esplora/dati`,
-    }),
+    ...pageSocialMetadata({ title: m.title, description: m.intro, pathname: `/${locale}/esplora/dati` }),
   };
 }
 
@@ -60,7 +56,7 @@ export default async function LocalizedDataExplorerPage({ params, searchParams }
       </header>
 
       <form className="mt-8 grid gap-5 border border-black p-5 md:grid-cols-4" method="get">
-        <label className="flex flex-col gap-2 text-sm font-semibold text-black">{m.indicator}<select name="indicatore" defaultValue={filters.indicatore ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal"><option value="">{m.all}</option>{snapshot.indicators.map((indicator) => <option key={indicator.id} value={indicator.slug}>{indicator.title}</option>)}</select></label>
+        <label className="flex flex-col gap-2 text-sm font-semibold text-black">{m.indicator}<select name="indicatore" defaultValue={filters.indicatore ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal"><option value="">{m.all}</option>{snapshot.indicators.map((indicator) => { const translated = indicatorTranslation(locale, indicator.slug); return <option key={indicator.id} value={indicator.slug}>{translated?.title ?? indicator.title}</option>; })}</select></label>
         <label className="flex flex-col gap-2 text-sm font-semibold text-black">{m.territory}<select name="territorio" defaultValue={filters.territorio ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal"><option value="">{m.all}</option>{snapshot.territories.filter((territory) => territory.code).map((territory) => <option key={`${territory.level}-${territory.code}-${territory.label}`} value={territory.code ?? ""}>{territory.label}</option>)}</select></label>
         <label className="flex flex-col gap-2 text-sm font-semibold text-black">{m.year}<select name="anno" defaultValue={filters.anno ?? ""} className="border border-neutral-400 bg-white px-3 py-2.5 font-normal"><option value="">{m.all}</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
         <div className="flex items-end gap-3"><button type="submit" className="border border-black bg-black px-5 py-2.5 text-sm font-semibold text-white">{m.filter}</button><Link href={`/${locale}/esplora/dati`} className="px-2 py-2.5 text-sm underline underline-offset-4">{m.reset}</Link></div>
@@ -71,7 +67,11 @@ export default async function LocalizedDataExplorerPage({ params, searchParams }
         <table className="min-w-full border-collapse text-left text-sm">
           <thead className="bg-neutral-100 text-black"><tr><th className="border-b border-black px-4 py-3">{m.indicator}</th><th className="border-b border-black px-4 py-3">{m.territory}</th><th className="border-b border-black px-4 py-3">{m.category}</th><th className="border-b border-black px-4 py-3">{m.period}</th><th className="border-b border-black px-4 py-3 text-right">{m.value}</th><th className="border-b border-black px-4 py-3">{m.quality}</th></tr></thead>
           <tbody>
-            {filtered.map((value) => { const indicator = indicatorMap.get(value.indicator_id)!; return <tr key={value.id} className="border-b border-neutral-300 last:border-b-0"><td className="px-4 py-3 align-top"><Link href={`/osservatorio/${indicator.slug}`} className="font-semibold underline underline-offset-4"><OriginalLanguageText as="span">{indicator.title}</OriginalLanguageText></Link></td><td className="px-4 py-3 align-top"><OriginalLanguageText as="span">{value.territory_label ?? "—"}</OriginalLanguageText></td><td className="px-4 py-3 align-top"><OriginalLanguageText as="span">{value.country_label ?? "—"}</OriginalLanguageText></td><td className="px-4 py-3 align-top">{value.period_start === value.period_end ? value.period_start : `${value.period_start} → ${value.period_end}`}</td><td className="px-4 py-3 text-right align-top font-semibold">{formatExplorerValue(Number(value.numeric_value), indicator.unit_code, locale)}</td><td className="px-4 py-3 align-top">{value.quality_code}</td></tr>; })}
+            {filtered.map((value) => {
+              const indicator = indicatorMap.get(value.indicator_id)!;
+              const translated = indicatorTranslation(locale, indicator.slug);
+              return <tr key={value.id} className="border-b border-neutral-300 last:border-b-0"><td className="px-4 py-3 align-top"><Link href={`/${locale}/osservatorio/${indicator.slug}`} className="font-semibold underline underline-offset-4">{translated?.title ?? indicator.title}</Link></td><td className="px-4 py-3 align-top">{value.territory_label ?? "—"}</td><td className="px-4 py-3 align-top">{value.country_label ?? "—"}</td><td className="px-4 py-3 align-top">{value.period_start === value.period_end ? value.period_start : `${value.period_start} → ${value.period_end}`}</td><td className="px-4 py-3 text-right align-top font-semibold">{formatExplorerValue(Number(value.numeric_value), indicator.unit_code, locale)}</td><td className="px-4 py-3 align-top">{value.quality_code}</td></tr>;
+            })}
             {filtered.length === 0 ? <tr><td colSpan={6} className="px-4 py-8 text-center text-neutral-600">{m.none}</td></tr> : null}
           </tbody>
         </table>
