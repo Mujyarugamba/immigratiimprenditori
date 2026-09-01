@@ -16,6 +16,12 @@ const areeDiSostegno = [
 
 export default function SostieniPage() {
   const donationsEnabled = canAcceptOnlineDonations();
+  const bankTransferEnabled = Boolean(
+    SUPPORT_CONFIGURATION.bankAccountHolder &&
+      SUPPORT_CONFIGURATION.bankIban &&
+      SUPPORT_CONFIGURATION.bankTransferReason,
+  );
+
   return (
     <main id="contenuto" className="preview-support-page">
       <header className="preview-support-hero">
@@ -27,11 +33,40 @@ export default function SostieniPage() {
       <div className="preview-support-body">
         <section className="preview-support-section"><h2>Che cosa sostieni</h2><div className="preview-support-grid">{areeDiSostegno.map((area) => <article key={area.title}><h3>{area.title}</h3><p>{area.text}</p></article>)}</div></section>
 
-        <section className="preview-support-section"><h2>Sostegno economico online</h2>{donationsEnabled && SUPPORT_CONFIGURATION.paymentUrl ? <div className="preview-support-donation"><p>Il sistema di pagamento online è attivo. Prima di procedere consulta le informazioni pubblicate su finalità e indipendenza editoriale.</p><a href={SUPPORT_CONFIGURATION.paymentUrl} rel="noreferrer">Sostieni online →</a></div> : <div className="preview-support-donation"><strong>Pagamenti online non ancora attivati</strong><p>Non mostriamo un pulsante di pagamento finché intestazione del conto ricevente, provider, dati amministrativi e formulazione fiscale non sono stati verificati insieme.</p></div>}</section>
+        <section className="preview-support-section">
+          <h2>Sostegno economico</h2>
+          <div className="preview-support-grid">
+            <article>
+              <h3>Online con Stripe</h3>
+              {donationsEnabled && SUPPORT_CONFIGURATION.paymentUrl ? (
+                <>
+                  <p>Puoi scegliere liberamente l&apos;importo e completare il pagamento sulla pagina sicura di Stripe.</p>
+                  <a href={SUPPORT_CONFIGURATION.paymentUrl} rel="noreferrer">Sostieni online →</a>
+                </>
+              ) : (
+                <p>Il pagamento online non è attualmente disponibile.</p>
+              )}
+            </article>
 
-        <section className="preview-support-section"><h2>Indipendenza editoriale</h2><p>Sostegni, partnership e sponsorizzazioni non attribuiscono alcun diritto di intervento sulla selezione delle fonti, sui dati, sulle conclusioni, sulle interviste o sulle decisioni della redazione. Il sostegno economico rimane separato dall'attività editoriale e di ricerca.</p><Link href="/politica-editoriale">Leggi la politica editoriale →</Link></section>
+            <article>
+              <h3>Bonifico bancario</h3>
+              {bankTransferEnabled ? (
+                <dl className="preview-support-bank">
+                  <div><dt>Intestatario</dt><dd>{SUPPORT_CONFIGURATION.bankAccountHolder}</dd></div>
+                  <div><dt>IBAN</dt><dd><code>{SUPPORT_CONFIGURATION.bankIban}</code></dd></div>
+                  <div><dt>Causale consigliata</dt><dd>{SUPPORT_CONFIGURATION.bankTransferReason}</dd></div>
+                </dl>
+              ) : (
+                <p>I dati per il bonifico non sono attualmente disponibili.</p>
+              )}
+            </article>
+          </div>
+          <p className="preview-support-fiscal-note">Le informazioni fiscali sull&apos;eventuale detraibilità o deducibilità non sono indicate finché non vengono verificate separatamente.</p>
+        </section>
 
-        <section className="preview-support-section"><h2>Partnership e sostegno istituzionale</h2><p>Enti, fondazioni, università, associazioni e imprese possono sostenere specifiche attività di ricerca, raccolta dati, produzione editoriale o iniziative pubbliche. Ogni collaborazione rispetta la missione e l'indipendenza del Centro Studi.</p><p>Per partnership e rapporti istituzionali: <a href={`mailto:${SUPPORT_CONFIGURATION.partnershipEmail}`}>{SUPPORT_CONFIGURATION.partnershipEmail}</a>.</p></section>
+        <section className="preview-support-section"><h2>Indipendenza editoriale</h2><p>Sostegni, partnership e sponsorizzazioni non attribuiscono alcun diritto di intervento sulla selezione delle fonti, sui dati, sulle conclusioni, sulle interviste o sulle decisioni della redazione. Il sostegno economico rimane separato dall&apos;attività editoriale e di ricerca.</p><Link href="/politica-editoriale">Leggi la politica editoriale →</Link></section>
+
+        <section className="preview-support-section"><h2>Partnership e sostegno istituzionale</h2><p>Enti, fondazioni, università, associazioni e imprese possono sostenere specifiche attività di ricerca, raccolta dati, produzione editoriale o iniziative pubbliche. Ogni collaborazione rispetta la missione e l&apos;indipendenza del Centro Studi.</p><p>Per partnership e rapporti istituzionali: <a href={`mailto:${SUPPORT_CONFIGURATION.partnershipEmail}`}>{SUPPORT_CONFIGURATION.partnershipEmail}</a>.</p></section>
       </div>
     </main>
   );
