@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   description: "Sostieni ImmigratiImprenditori.it e il lavoro del Centro Studi AIPEL su dati, analisi e testimonianze dell'imprenditoria migrante.",
 };
 
+const BANK_ACCOUNT_HOLDER =
+  "Associazione degli Imprenditori e Liberi Professionisti Extracomunitari in Lombardia";
+const BANK_IBAN = "IT77Y3688801600100000119423";
+const BANK_TRANSFER_REASON = "Contributo libero – Centro Studi Immigrati Imprenditori";
+
 const areeDiSostegno = [
   { title: "Ricerca e dati", text: "Raccolta, verifica e aggiornamento di indicatori, serie storiche, fonti e confronti territoriali." },
   { title: "Storie e interviste", text: "Ricerca, preparazione e realizzazione di testimonianze, interviste e storie d'impresa documentate." },
@@ -16,11 +21,6 @@ const areeDiSostegno = [
 
 export default function SostieniPage() {
   const donationsEnabled = canAcceptOnlineDonations();
-  const bankTransferEnabled = Boolean(
-    SUPPORT_CONFIGURATION.bankAccountHolder &&
-      SUPPORT_CONFIGURATION.bankIban &&
-      SUPPORT_CONFIGURATION.bankTransferReason,
-  );
 
   return (
     <main id="contenuto" className="preview-support-page">
@@ -50,15 +50,11 @@ export default function SostieniPage() {
 
             <article>
               <h3>Bonifico bancario</h3>
-              {bankTransferEnabled ? (
-                <dl className="preview-support-bank">
-                  <div><dt>Intestatario</dt><dd>{SUPPORT_CONFIGURATION.bankAccountHolder}</dd></div>
-                  <div><dt>IBAN</dt><dd><code>{SUPPORT_CONFIGURATION.bankIban}</code></dd></div>
-                  <div><dt>Causale consigliata</dt><dd>{SUPPORT_CONFIGURATION.bankTransferReason}</dd></div>
-                </dl>
-              ) : (
-                <p>I dati per il bonifico non sono attualmente disponibili.</p>
-              )}
+              <dl className="preview-support-bank">
+                <div><dt>Intestatario</dt><dd>{BANK_ACCOUNT_HOLDER}</dd></div>
+                <div><dt>IBAN</dt><dd><code>{BANK_IBAN}</code></dd></div>
+                <div><dt>Causale consigliata</dt><dd>{BANK_TRANSFER_REASON}</dd></div>
+              </dl>
             </article>
           </div>
           <p className="preview-support-fiscal-note">Le informazioni fiscali sull&apos;eventuale detraibilità o deducibilità non sono indicate finché non vengono verificate separatamente.</p>
