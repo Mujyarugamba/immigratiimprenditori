@@ -88,8 +88,228 @@
   text-transform:uppercase;
 }
 
+/* Public legacy/detail shells: Atlas countries, routes, territories and technical evidence pages. */
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12{
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  background:var(--ii-paper)!important;
+  color:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div:first-of-type{
+  width:min(calc(100% - 48px),1180px);
+  margin:0 auto!important;
+  padding:26px 0 0!important;
+  color:#5d6963;
+  font-size:10px!important;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div:first-of-type a{
+  color:var(--ii-green)!important;
+  text-decoration:none!important;
+  border-bottom:1px solid rgba(13,61,49,.32);
+  padding-bottom:3px;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  max-width:none!important;
+  margin-top:24px!important;
+  padding:58px max(24px,calc((100vw - 1180px)/2)) 68px!important;
+  border:0!important;
+  background:var(--ii-green)!important;
+  color:#fff!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header::after{
+  content:"DATI · ROTTE · TERRITORI · EVIDENZE";
+  position:absolute;
+  z-index:0;
+  left:-4vw;
+  bottom:-18px;
+  width:max-content;
+  color:rgba(255,255,255,.075);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(62px,8.8vw,138px);
+  font-style:italic;
+  font-weight:500;
+  line-height:.8;
+  white-space:nowrap;
+  pointer-events:none;
+  animation:iiEvidenceRail 18s ease-in-out infinite alternate;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header > *{position:relative;z-index:1}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header > p:first-child{
+  margin:0!important;
+  color:var(--ii-lime)!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.17em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header h1{
+  max-width:1050px;
+  margin:18px 0 0!important;
+  color:#fff!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(56px,7.4vw,112px)!important;
+  font-weight:500!important;
+  line-height:.84!important;
+  letter-spacing:-.055em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header > p:not(:first-child){
+  max-width:820px!important;
+  margin-top:28px!important;
+  color:#d4e0db!important;
+  font-size:16px!important;
+  line-height:1.68!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header a{
+  color:var(--ii-lime)!important;
+  text-decoration:none!important;
+  border-bottom:1px solid rgba(221,234,120,.55);
+  padding-bottom:2px;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > section{
+  width:min(calc(100% - 48px),1180px)!important;
+  margin:0 auto!important;
+  padding-top:66px!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid{
+  display:grid!important;
+  width:min(calc(100% - 48px),1180px)!important;
+  margin:0 auto!important;
+  padding-top:0!important;
+  border-color:var(--ii-ink)!important;
+  background:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid > div{
+  min-height:154px;
+  padding:24px!important;
+  background:#fff!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid > div:nth-child(2n){background:var(--ii-sand)!important}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid > div:nth-child(3){background:var(--ii-lime)!important}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid > div p{
+  color:#64706a!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.13em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid > div strong{
+  margin-top:18px!important;
+  color:var(--ii-green)!important;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(42px,4.6vw,70px)!important;
+  font-weight:500!important;
+  line-height:.9!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .border-b{
+  display:grid;
+  grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr);
+  gap:28px;
+  align-items:end;
+  padding-bottom:18px!important;
+  border-color:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .border-b > div{min-width:0}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .border-b p{
+  color:#69746f!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.15em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section h2{
+  color:var(--ii-ink)!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(32px,3.5vw,54px)!important;
+  font-weight:500!important;
+  line-height:.96!important;
+  letter-spacing:-.035em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .grid.bg-black{
+  margin-top:0!important;
+  border-color:var(--ii-ink)!important;
+  background:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .grid.bg-black > article{
+  min-height:250px;
+  padding:27px!important;
+  background:#fff!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .grid.bg-black > article:nth-child(3n+2){background:var(--ii-sand)!important}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .grid.bg-black > article:nth-child(3n){background:#edf2ee!important}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section article > p:first-child{
+  color:#6a756f!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.13em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section article h2,
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section article h3{
+  color:var(--ii-ink)!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(25px,2.5vw,38px)!important;
+  font-weight:500!important;
+  line-height:1!important;
+  letter-spacing:-.025em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section article p{
+  color:#4e5b55!important;
+  line-height:1.68!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section article .text-3xl{
+  color:var(--ii-green)!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(38px,4vw,60px)!important;
+  font-weight:500!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 a{
+  color:var(--ii-green)!important;
+  text-decoration:none!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 a:hover,
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 a:focus-visible{
+  text-decoration:underline!important;
+  text-underline-offset:4px;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > section.border-t{
+  margin-top:72px!important;
+  padding:36px 0 90px!important;
+  border-color:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > section.border-t p{
+  color:#4e5b55!important;
+  font-size:14px!important;
+  line-height:1.75!important;
+}
+
+@keyframes iiEvidenceRail{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(5vw,-5px,0)}
+}
+
+@media(max-width:900px){
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .border-b{grid-template-columns:1fr}
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header h1{font-size:clamp(50px,11vw,86px)!important}
+}
+
 @media(max-width:640px){
   .institutional-bar nav .header-support-top{display:none!important}
   .preview-support-hero,.preview-support-body{width:calc(100% - 40px)!important}
   .preview-support-hero{padding-top:62px!important}
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div:first-of-type,
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > section,
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header + section.grid{width:calc(100% - 40px)!important}
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header{
+    margin-top:18px!important;
+    padding:46px 20px 54px!important;
+  }
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header::after{font-size:72px;bottom:-6px}
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > section{padding-top:50px!important}
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section > .grid.bg-black > article{min-height:auto}
+}
+
+@media(prefers-reduced-motion:reduce){
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > header::after{animation:none}
 }
