@@ -12,6 +12,7 @@ import "./responsive-overrides.css";
 import "./editorial-identity.css";
 import "./accessibility.css";
 import "./internal-preview-v1.css";
+import "./internal-preview-v2.css";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
@@ -29,18 +30,9 @@ export const metadata: Metadata = {
   publisher: "AIPEL",
   category: "Ricerca e analisi sull'imprenditoria migrante",
   icons: {
-    icon: [
-      {
-        url: "/logo-immigrati-imprenditori.png",
-        type: "image/png",
-      },
-    ],
+    icon: [{ url: "/logo-immigrati-imprenditori.png", type: "image/png" }],
   },
-  alternates: {
-    types: {
-      "application/rss+xml": `${SITE_URL}/feed.xml`,
-    },
-  },
+  alternates: { types: { "application/rss+xml": `${SITE_URL}/feed.xml` } },
   openGraph: {
     type: "website",
     locale: "it_IT",
@@ -48,12 +40,7 @@ export const metadata: Metadata = {
     siteName: "Immigrati Imprenditori",
     title: centroStudiConfig.name,
     description: SITE_DESCRIPTION,
-    images: [
-      {
-        url: "/logo-immigrati-imprenditori.png",
-        alt: "Immigrati Imprenditori",
-      },
-    ],
+    images: [{ url: "/logo-immigrati-imprenditori.png", alt: "Immigrati Imprenditori" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -76,9 +63,7 @@ export const metadata: Metadata = {
 
 function structuredData(locale: string) {
   const searchPath = locale === DEFAULT_LOCALE ? "/cerca" : `/${locale}/cerca`;
-  const verifiedSocialUrls = enabledInstitutionalSocialChannels().map(
-    (channel) => channel.plannedUrl,
-  );
+  const verifiedSocialUrls = enabledInstitutionalSocialChannels().map((channel) => channel.plannedUrl);
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -88,10 +73,7 @@ function structuredData(locale: string) {
         name: "Immigrati Imprenditori",
         url: SITE_URL,
         logo: `${SITE_URL}/logo-immigrati-imprenditori.png`,
-        parentOrganization: {
-          "@type": "Organization",
-          name: "AIPEL",
-        },
+        parentOrganization: { "@type": "Organization", name: "AIPEL" },
         email: "info@immigratiimprenditori.it",
         sameAs: verifiedSocialUrls.length ? verifiedSocialUrls : undefined,
       },
@@ -113,9 +95,7 @@ function structuredData(locale: string) {
   };
 }
 
-export default async function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const requestHeaders = await headers();
   const rawLocale = requestHeaders.get("x-platform-locale") ?? DEFAULT_LOCALE;
   const locale = isPlatformLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
@@ -125,15 +105,10 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={language.direction}>
       <body className="bg-surface text-ink min-h-screen antialiased">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
         <SkipLink />
         <Header />
-        <div id="contenuto-principale" tabIndex={-1}>
-          {children}
-        </div>
+        <div id="contenuto-principale" tabIndex={-1}>{children}</div>
         <Footer />
         <PrivacyFriendlyAnalytics />
       </body>
