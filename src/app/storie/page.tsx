@@ -10,11 +10,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/storie" },
-  ...pageSocialMetadata({
-    title: TITLE,
-    description: DESCRIPTION,
-    pathname: "/storie",
-  }),
+  ...pageSocialMetadata({ title: TITLE, description: DESCRIPTION, pathname: "/storie" }),
 };
 
 function formatDate(value: string | null) {
@@ -24,42 +20,21 @@ function formatDate(value: string | null) {
 
 export default async function StoriePage() {
   const items = await listPublishedContentsByTypes(VOICE_CONTENT_TYPES);
-
   return (
-    <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-      <header className="max-w-4xl border-b border-black pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Centro Studi · Persone</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">Storie e voci</h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Storie d&apos;impresa, interviste e testimonianze affiancano i dati per documentare percorsi, ostacoli,
-          innovazione, fallimenti, crescita, relazioni tra Paesi e trasformazioni dei territori.
-        </p>
-      </header>
-
-      <div className="mt-8 grid gap-px border border-black bg-black md:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
-          <article key={item.id} className="flex min-h-72 flex-col bg-white p-6">
-            <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{item.type_code.replaceAll("_", " ")}</p>
-            <h2 className="mt-2 text-xl font-semibold leading-7 text-black">
-              <Link href={`/contenuti/${item.slug}`} className="underline-offset-4 hover:underline">{item.title}</Link>
-            </h2>
-            {item.abstract ? <p className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</p> : <div className="flex-1" />}
-            <div className="mt-6 flex items-center justify-between gap-4 border-t border-neutral-300 pt-4 text-xs text-neutral-600">
-              <span>{formatDate(item.published_at)}</span>
-              <Link href={`/contenuti/${item.slug}`} className="font-semibold text-black">Apri →</Link>
-            </div>
-          </article>
-        ))}
-        {items.length === 0 ? <p className="bg-white p-8 text-neutral-600">Nessuna storia o intervista disponibile in questa raccolta.</p> : null}
-      </div>
-
-      <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Vuoi proporre una storia o un&apos;intervista?</h2>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          Le proposte entrano nella Inbox redazionale privata e vengono valutate prima di qualsiasi pubblicazione.
-        </p>
-        <Link href="/contribuisci" className="mt-5 inline-block border border-black px-5 py-3 text-sm font-semibold">Partecipa →</Link>
+    <main id="contenuto" className="preview-hub-page">
+      <section className="preview-hub-hero stories">
+        <div className="preview-hub-motion" aria-hidden="true"><span>persone · percorsi · impresa ·</span><span>persone · percorsi · impresa ·</span></div>
+        <div className="preview-hub-inner">
+          <p className="preview-hub-kicker">Centro Studi · Persone</p>
+          <h1>Storie e voci</h1>
+          <p className="hub-intro">Storie d'impresa, interviste e testimonianze affiancano i dati per documentare percorsi, ostacoli, innovazione, fallimenti, crescita, relazioni tra Paesi e trasformazioni dei territori.</p>
+        </div>
       </section>
+
+      <div className="preview-hub-body">
+        {items.length > 0 ? <div className="preview-index-grid">{items.map((item) => <article key={item.id} className="preview-index-card"><p className="index-meta">{item.type_code.replaceAll("_", " ")} {formatDate(item.published_at) ? `· ${formatDate(item.published_at)}` : ""}</p><h2><Link href={`/contenuti/${item.slug}`}>{item.title}</Link></h2>{item.abstract ? <p>{item.abstract}</p> : null}<div className="index-footer"><Link href={`/contenuti/${item.slug}`}>Apri la storia →</Link></div></article>)}</div> : <p>Nessuna storia o intervista disponibile in questa raccolta.</p>}
+        <section className="preview-hub-cta"><h2>Hai una storia da proporre?</h2><p>Le proposte entrano nella Inbox redazionale privata e vengono valutate prima di qualsiasi pubblicazione.</p><Link href="/contribuisci">Contribuisci alla conoscenza →</Link></section>
+      </div>
     </main>
   );
 }
