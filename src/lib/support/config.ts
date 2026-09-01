@@ -8,14 +8,14 @@ export type SupportConfiguration = {
 /**
  * Fail-closed public support configuration.
  *
- * Do not enable online donations until the receiving account, legal holder,
- * provider onboarding, fiscal wording and public payment URL have all been
- * verified. A missing/partial configuration must never render a payment CTA.
+ * Online support is enabled only after verifying the receiving Stripe account,
+ * account holder, live payment capability and public Payment Link.
+ * Fiscal/deductibility claims remain intentionally absent until separately verified.
  */
 export const SUPPORT_CONFIGURATION: SupportConfiguration = {
-  donationsOnlineEnabled: false,
-  provider: null,
-  paymentUrl: null,
+  donationsOnlineEnabled: true,
+  provider: "stripe",
+  paymentUrl: "https://donate.stripe.com/8x25kFgrI4F8ejA1we2Ji00",
   partnershipEmail: "direzione@immigratiimprenditori.it",
 };
 
