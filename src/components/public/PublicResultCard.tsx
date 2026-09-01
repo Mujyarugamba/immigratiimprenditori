@@ -20,15 +20,15 @@ export function PublicResultCard({
   ctaLabel = "Apri",
 }: PublicResultCardProps) {
   return (
-    <Card className="flex h-full flex-col p-5">
+    <Card className="public-result-card flex h-full flex-col p-5">
       <div className="flex flex-1 flex-col gap-3">
-        <h2 className="text-ink text-base font-semibold tracking-tight">
+        <h2 className="public-result-title text-ink text-base font-semibold tracking-tight">
           <Link href={href} className="hover:text-brand transition-colors">
             {title}
           </Link>
         </h2>
         {meta.length > 0 ? (
-          <p className="text-ink-muted text-xs leading-5">{meta.join(" · ")}</p>
+          <p className="public-result-meta text-ink-muted text-xs leading-5">{meta.join(" · ")}</p>
         ) : null}
         {badges.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
@@ -40,16 +40,16 @@ export function PublicResultCard({
           </div>
         ) : null}
         {description ? (
-          <p className="text-ink-muted line-clamp-3 text-sm leading-6">
+          <p className="public-result-description text-ink-muted line-clamp-3 text-sm leading-6">
             {description}
           </p>
         ) : null}
-        <div className="border-line mt-auto border-t pt-3">
+        <div className="public-result-cta border-line mt-auto border-t pt-3">
           <Link
             href={href}
             className="text-brand hover:text-brand-dark text-sm font-semibold"
           >
-            {ctaLabel}
+            {ctaLabel} →
           </Link>
         </div>
       </div>

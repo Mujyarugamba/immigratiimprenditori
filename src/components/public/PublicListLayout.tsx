@@ -41,10 +41,15 @@ export function PublicListLayout<T>({
   banner,
 }: PublicListLayoutProps<T>) {
   return (
-    <main>
-      <Section>
-        <Container>
+    <main className="public-list-page">
+      <section className="public-page-hero-shell">
+        <Container className="public-list-container">
           <PublicPageHeader title={title} description={description} />
+        </Container>
+      </section>
+
+      <Section className="public-list-section">
+        <Container className="public-list-container">
           {banner}
           {filters.length > 0 ? (
             <PublicFilters
@@ -58,10 +63,10 @@ export function PublicListLayout<T>({
             <PublicEmpty title={emptyTitle} description={emptyDescription} />
           ) : (
             <>
-              <p className="text-ink-muted mt-6 text-sm">
+              <p className="public-results-count text-ink-muted mt-6 text-sm">
                 {result.total} risultat{result.total === 1 ? "o" : "i"}
               </p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="public-results-grid mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {result.items.map((item, index) => {
                   const card = mapItem(item);
                   return (
