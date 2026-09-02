@@ -67,16 +67,17 @@ test("homepage renders the institutional editorial shell", async ({ page }) => {
   await expect(page.locator("#contenuto-principale")).toBeFocused();
 });
 
-test("contribution and support surfaces remain safe without live data", async ({ page }) => {
+test("contribution and configured support surfaces remain safe", async ({ page }) => {
   await page.goto("/contribuisci");
-  await expect(page.getByRole("heading", { level: 1, name: "Partecipa al Centro Studi" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Contribuisci alla conoscenza." })).toBeVisible();
   await expect(page.getByRole("button", { name: /Invia alla redazione/i })).toBeVisible();
   await expect(page.getByText(/non comporta pubblicazione automatica/i)).toBeVisible();
 
   await page.goto("/sostieni");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  await expect(page.getByText(/pagamenti online/i)).toBeVisible();
-  await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1, name: "Sostieni il lavoro." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "Online con Stripe" })).toBeVisible();
+  const supportLink = page.getByRole("link", { name: /Sostieni online/i });
+  await expect(supportLink).toHaveAttribute("href", /^https:\/\/donate\.stripe\.com\//);
 });
 
 test("contribution server errors are announced and associated with the form", async ({ page }) => {

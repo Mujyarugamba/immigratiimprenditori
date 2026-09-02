@@ -111,6 +111,16 @@ svg {
     width: min(100% - 24px, 1180px);
   }
 
+  .site-header,
+  .site-footer,
+  .preview-hero-v4,
+  .preview-motion-rail,
+  .preview-visual-statement,
+  .home-page {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .institutional-bar nav {
     flex-wrap: wrap;
     gap: 8px 12px;
@@ -131,6 +141,8 @@ svg {
   .primary-header-inner {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .brand-link {
@@ -146,6 +158,30 @@ svg {
     padding-inline: 10px;
     font-size: 9px;
     white-space: nowrap;
+  }
+
+  .primary-nav,
+  .preview-v4-bottom,
+  .preview-v4-bottom > *,
+  .footer-grid,
+  .footer-grid > *,
+  .footer-bottom,
+  .footer-bottom > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .preview-v4-payoff {
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .preview-v4-actions a,
+  .footer-grid a,
+  .footer-bottom span {
+    overflow-wrap: anywhere;
   }
 
   .home-hero-inner {

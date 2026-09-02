@@ -40,7 +40,7 @@ export function Header() {
           <nav aria-label={a11y.institutionalNavigation}>
             <Link prefetch={false} href={localizedHref(locale, "/cerca")}>{m.search}</Link>
             <Link prefetch={false} href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
-            <Link prefetch={false} href="/politica-editoriale">{m.editorialPolicy}</Link>
+            <Link prefetch={false} href={localizedHref(locale, "/politica-editoriale")}>{m.editorialPolicy}</Link>
             <Link prefetch={false} href="/accedi">{m.login}</Link>
             <LanguageSwitcher />
             <Link

@@ -257,11 +257,11 @@ export default async function HomePage() {
         <div className="site-container home-hero-inner">
           <div className="home-hero-copy">
             <p className="hero-kicker">Dati. Analisi. Voci.</p>
-            <h1>
+            <h2>
               Studiare l&apos;imprenditoria migrante,
               <br />
               <span>in ogni direzione.</span>
-            </h1>
+            </h2>
             <p className="hero-intro">
               Dati verificati, ricerca e testimonianze per capire come persone e
               imprese si muovono, si radicano e creano valore tra Paesi,
