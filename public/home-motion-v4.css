@@ -113,7 +113,7 @@
   .preview-v4-video{object-position:56% center;animation-duration:15s}
   .preview-v4-veil{background:rgba(6,29,24,.3)}
   .preview-v4-meta{top:22px;left:20px;right:20px;font-size:8px}
-  .preview-v4-payoff{top:23%;left:-10vw;right:-10vw}
+  .preview-v4-payoff{top:23%;left:0;right:0;width:100%;max-width:100%;overflow:hidden;contain:inline-size}
   .preview-v4-line{font-size:clamp(58px,17vw,88px);line-height:.82}
   .preview-v4-line-a{margin-left:0}
   .preview-v4-line-b{margin-left:8vw;margin-top:.18em}
