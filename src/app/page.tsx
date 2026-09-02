@@ -28,12 +28,13 @@ export default function HomeMotionPreviewPage() {
         <div className="preview-v4-media" aria-hidden="true">
           <img
             className="preview-v4-mobile-poster"
-            src="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=1000"
+            src="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=500"
             alt=""
-            width={1000}
-            height={1500}
+            width={500}
+            height={819}
+            loading="eager"
             fetchPriority="high"
-            decoding="async"
+            decoding="sync"
           />
           <video
             className="preview-v4-video"
