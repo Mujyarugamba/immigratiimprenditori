@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatExplorerValue } from "@/lib/data/public/explore";
 import { getPublicIndicatorBySlug } from "@/lib/data/public/observatory";
 import { isPlatformLocale } from "@/lib/i18n/config";
-import { formatExplorerValue } from "@/lib/data/public/explore";
 import { indicatorTranslation } from "@/lib/i18n/public-entity-translations";
+import { localizedTerritoryLabel } from "@/lib/i18n/territory-translations";
 import { TRANSLATION_FALLBACK_NOTICE } from "@/lib/i18n/translation-note";
 
 const labels = {
@@ -63,8 +64,8 @@ export default async function LocalizedIndicatorPage({ params }: Props) {
             <tbody>
               {indicator.values.map((value) => (
                 <tr key={value.id} className="border-b border-neutral-300 last:border-b-0">
-                  <td className="px-4 py-3">{value.territory_label ?? "—"}</td>
-                  <td className="px-4 py-3">{value.country_label ?? "—"}</td>
+                  <td className="px-4 py-3">{localizedTerritoryLabel(locale, value.territory_code, value.territory_label)}</td>
+                  <td className="px-4 py-3">{localizedTerritoryLabel(locale, value.country_code, value.country_label)}</td>
                   <td className="px-4 py-3">{value.period_start}</td>
                   <td className="px-4 py-3 text-right font-semibold">{formatExplorerValue(Number(value.numeric_value), indicator.unit_code, locale)}</td>
                   <td className="px-4 py-3">{value.source_name ?? "—"}</td>
