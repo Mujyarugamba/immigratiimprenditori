@@ -36,7 +36,9 @@ export default async function LocalizedQuantitativeMapPage({ params, searchParam
   const indicator = snapshot.indicators.find((item) => item.slug === paramsQuery.indicatore) ?? snapshot.indicators[0];
   const indicatorValues = indicator ? snapshot.values.filter((value) => value.indicator_id === indicator.id) : [];
 
-  const years = Array.from(new Set(indicatorValues.map((value) => String(new Date(value.period_start).getFullYear()))).sort((a, b) => Number(b) - Number(a));
+  const years = Array.from(
+    new Set(indicatorValues.map((value) => String(new Date(value.period_start).getFullYear()))),
+  ).sort((a, b) => Number(b) - Number(a));
   const selectedYear = paramsQuery.anno && years.includes(paramsQuery.anno) ? paramsQuery.anno : years[0];
 
   const categoryMap = new Map<string, string>();
