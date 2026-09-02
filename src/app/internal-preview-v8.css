@@ -136,4 +136,30 @@ a[class~="text-white"]:hover,a[class~="text-white"]:focus-visible{color:var(--ii
   [data-platform-locale] main#contenuto.mx-auto.max-w-7xl.px-4.py-12>form,
   [data-platform-locale] main#contenuto.mx-auto.max-w-7xl.px-4.py-12>div,
   [data-platform-locale] main#contenuto.mx-auto.max-w-7xl.px-4.py-12>p{width:calc(100% - 40px)!important}
+
+  .preview-submit-note a[href^="mailto:"],
+  .preview-support-page a[href^="mailto:"]{
+    display:inline-block!important;
+    max-width:100%!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-all!important;
+  }
+  .preview-contribute-body,
+  .preview-submit-shell,
+  .preview-submit-note{
+    min-width:0;
+    max-width:100%;
+  }
+}
+
+@media(max-width:360px){
+  .preview-contribute-motion{display:none!important}
+  .preview-contribute-hero-inner{min-width:0;max-width:100%;overflow:hidden}
+  .preview-contribute-hero h1{
+    max-width:100%!important;
+    font-size:clamp(44px,14vw,52px)!important;
+    line-height:.88!important;
+    overflow-wrap:anywhere;
+  }
 }
