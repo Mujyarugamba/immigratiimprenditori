@@ -189,7 +189,7 @@ async function main() {
     await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
 
     await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
-    await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
+    await expectText("/sostieni", ["Sostieni il lavoro.", "Online con Stripe", "Sostieni online"]);
 
     const robots = await expectText(
       "/robots.txt",
@@ -262,7 +262,7 @@ async function main() {
         "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
-        "support fail-closed state",
+        "verified live Stripe support path",
         "primary sitemap route",
         "contributor sitemap route",
         "legacy route canonical redirect",
