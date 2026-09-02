@@ -20,6 +20,8 @@ const topics = [
 export default function HomeMotionPreviewPage() {
   return (
     <>
+      <link rel="preconnect" href="https://images.pexels.com" />
+      <link rel="dns-prefetch" href="https://images.pexels.com" />
       <link rel="stylesheet" href="/home-light-v1.css" />
       <link rel="stylesheet" href="/home-motion-v3.css" />
       <link rel="stylesheet" href="/home-motion-v4.css" />
@@ -28,10 +30,10 @@ export default function HomeMotionPreviewPage() {
         <div className="preview-v4-media" aria-hidden="true">
           <img
             className="preview-v4-mobile-poster"
-            src="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=500"
+            src="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=450"
             alt=""
-            width={500}
-            height={819}
+            width={450}
+            height={737}
             loading="eager"
             fetchPriority="high"
             decoding="sync"
