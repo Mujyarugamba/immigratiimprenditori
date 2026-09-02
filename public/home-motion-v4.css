@@ -144,6 +144,20 @@
     max-width:100%;
     overflow-wrap:anywhere;
   }
+
+  .preview-contribute-page,
+  .preview-contribute-body,
+  .preview-submit-shell,
+  .preview-submit-note{
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  .preview-submit-note,
+  .preview-submit-note a{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
 }
 
 @media(max-width:360px){
