@@ -125,6 +125,10 @@
   .preview-motion-rail{height:45px}
 }
 
+@media(max-width:360px){
+  .preview-motion-rail{display:none!important}
+}
+
 @media(prefers-reduced-motion:reduce){
   .preview-v4-video,.preview-v4-line-a,.preview-v4-line-b,.preview-v4-scroll{animation:none!important}
 }
