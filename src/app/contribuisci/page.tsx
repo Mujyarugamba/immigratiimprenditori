@@ -84,7 +84,7 @@ export default async function ContribuisciPage({ searchParams }: Props) {
               <section className="preview-form-section">
                 <div className="preview-form-section-intro"><h3>4. Privacy e autorizzazioni</h3><p>Nessuna proposta viene pubblicata automaticamente.</p></div>
                 <div className="preview-form-checks">
-                  <label><input name="consent_contact" type="checkbox" required /><span>Prendo atto che i recapiti indicati saranno trattati dalla redazione per ricevere, valutare e, se necessario, approfondire questa proposta. Ho letto la <Link href="/privacy">Privacy Policy</Link>. <strong>Obbligatorio.</strong></span></label>
+                  <label><input name="consent_contact" type="checkbox" required /><span>Prendo atto che i recapiti indicati saranno trattati dalla redazione per ricevere, valutare e, se necessario, approfondire questa proposta. Ho letto la <Link href="/privacy">Privacy Policy</Link>. <strong>Obbligatorio per inviare la proposta.</strong></span></label>
                   <label><input name="consent_publication" type="checkbox" /><span>Autorizzo la possibile pubblicazione del materiale inviato, fermo restando il lavoro di verifica, selezione e cura della redazione. Per immagini, audio o video possono essere richieste ulteriori autorizzazioni. <strong>Facoltativo.</strong></span></label>
                 </div>
               </section>
