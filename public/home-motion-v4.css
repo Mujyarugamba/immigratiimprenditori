@@ -78,7 +78,7 @@
 .preview-v4-actions a:hover{border-color:#fff;color:#fff}
 .preview-v4-scroll{position:absolute;z-index:4;right:clamp(20px,3vw,48px);bottom:18px;color:rgba(255,255,255,.72);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;animation:v4Scroll 2.8s ease-in-out infinite}
 
-.preview-motion-rail{background:#ddea78!important;color:#0b3029!important;border-color:#0b3029!important}
+.preview-motion-rail{position:relative;width:100%;max-width:100%;overflow:clip;contain:inline-size paint;background:#ddea78!important;color:#0b3029!important;border-color:#0b3029!important}
 .preview-motion-track{animation-duration:24s!important}
 .preview-motion-track b{color:#e88668!important}
 

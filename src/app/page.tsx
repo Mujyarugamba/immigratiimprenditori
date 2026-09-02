@@ -95,7 +95,7 @@ export default function HomeMotionPreviewPage() {
             Non una sola direzione.
             <em>Un mondo di traiettorie.</em>
           </h2>
-          <Link href="/territori">Esplora territori e rotte →</Link>
+          <Link href="/esplora/territori">Esplora territori e rotte →</Link>
         </div>
       </section>
     </>

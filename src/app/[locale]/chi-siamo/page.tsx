@@ -174,6 +174,7 @@ export default async function LocalizedAboutPage({ params }: Props) {
   const c = copy[locale];
   const profile = INSTITUTIONAL_PROFILE;
   const disclosureComplete = hasCompleteInstitutionalDisclosure();
+  const arrow = locale === "ar" ? "←" : "→";
 
   return (
     <main id="contenuto" className="preview-manifest-page">
@@ -230,8 +231,8 @@ export default async function LocalizedAboutPage({ params }: Props) {
           <div className="manifest-copy space-y-4">
             <p>{c.principle1}</p><p>{c.principle2}</p><p>{c.principle3}</p>
             <div className="manifest-links flex flex-wrap gap-5 text-sm font-semibold">
-              <Link href={`/${locale}/politica-editoriale`}>{c.policy} →</Link>
-              <Link href={`/${locale}/dati-e-fonti`}>{c.sources} →</Link>
+              <Link href={`/${locale}/politica-editoriale`}>{c.policy} {arrow}</Link>
+              <Link href={`/${locale}/dati-e-fonti`}>{c.sources} {arrow}</Link>
             </div>
           </div>
         </section>
