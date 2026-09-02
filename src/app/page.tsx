@@ -26,6 +26,15 @@ export default function HomeMotionPreviewPage() {
 
       <section className="preview-hero-v4" aria-labelledby="preview-hero-title">
         <div className="preview-v4-media" aria-hidden="true">
+          <img
+            className="preview-v4-mobile-poster"
+            src="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=1000"
+            alt=""
+            width={1000}
+            height={1500}
+            fetchPriority="high"
+            decoding="async"
+          />
           <video
             className="preview-v4-video"
             autoPlay
@@ -33,12 +42,12 @@ export default function HomeMotionPreviewPage() {
             loop
             playsInline
             preload="metadata"
-            poster="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000"
             tabIndex={-1}
           >
             <source
               src="https://www.pexels.com/download/video/8869632/"
               type="video/mp4"
+              media="(min-width: 641px)"
             />
           </video>
         </div>
