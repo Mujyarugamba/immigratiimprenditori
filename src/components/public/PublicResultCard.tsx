@@ -9,6 +9,8 @@ type PublicResultCardProps = {
   meta?: string[];
   badges?: string[];
   ctaLabel?: string;
+  ctaArrow?: string;
+  notice?: React.ReactNode;
 };
 
 export function PublicResultCard({
@@ -18,6 +20,8 @@ export function PublicResultCard({
   meta = [],
   badges = [],
   ctaLabel = "Apri",
+  ctaArrow = "→",
+  notice,
 }: PublicResultCardProps) {
   return (
     <Card className="public-result-card flex h-full flex-col p-5">
@@ -44,12 +48,13 @@ export function PublicResultCard({
             {description}
           </p>
         ) : null}
+        {notice}
         <div className="public-result-cta border-line mt-auto border-t pt-3">
           <Link
             href={href}
             className="text-brand hover:text-brand-dark text-sm font-semibold"
           >
-            {ctaLabel} →
+            {ctaLabel} {ctaArrow}
           </Link>
         </div>
       </div>
