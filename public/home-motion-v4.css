@@ -123,6 +123,27 @@
   .preview-v4-actions a{font-size:9px}
   .preview-v4-scroll{display:none}
   .preview-motion-rail{height:45px}
+
+  .preview-visual-statement{
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow:hidden;
+  }
+  .preview-statement-photo,
+  .preview-statement-copy{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  .preview-statement-copy>p,
+  .preview-statement-copy h2,
+  .preview-statement-copy a{
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
 }
 
 @media(max-width:360px){
