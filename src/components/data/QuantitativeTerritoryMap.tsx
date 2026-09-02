@@ -11,6 +11,9 @@ type MapRow = {
 type Props = {
   title: string;
   rows: MapRow[];
+  eyebrow?: string;
+  description?: string;
+  ariaTerritories?: (count: number) => string;
 };
 
 const WIDTH = 960;
@@ -34,7 +37,13 @@ function italyProject(lon: number, lat: number) {
   };
 }
 
-export function QuantitativeTerritoryMap({ title, rows }: Props) {
+export function QuantitativeTerritoryMap({
+  title,
+  rows,
+  eyebrow = "Mappa quantitativa · simboli proporzionali",
+  description = "L'area dei cerchi varia con il valore. I punti sono ancore cartografiche rappresentative del territorio, non centroidi statistici. La mappa mostra un solo indicatore e non somma categorie diverse.",
+  ariaTerritories = (count) => `${count} territori rappresentati.`,
+}: Props) {
   const mappable = rows
     .map((row) => ({ ...row, coordinate: coordinateForTerritoryCode(row.territoryCode) }))
     .filter((row): row is typeof row & { coordinate: { lon: number; lat: number } } => Boolean(row.coordinate));
@@ -47,21 +56,16 @@ export function QuantitativeTerritoryMap({ title, rows }: Props) {
   return (
     <figure className="border border-black bg-white">
       <div className="border-b border-black px-5 py-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-          Mappa quantitativa · simboli proporzionali
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{eyebrow}</p>
         <figcaption className="mt-1 text-lg font-semibold text-black">{title}</figcaption>
-        <p className="mt-2 max-w-4xl text-xs leading-5 text-neutral-600">
-          L&apos;area dei cerchi varia con il valore. I punti sono ancore cartografiche rappresentative del territorio,
-          non centroidi statistici. La mappa mostra un solo indicatore e non somma categorie diverse.
-        </p>
+        <p className="mt-2 max-w-4xl text-xs leading-5 text-neutral-600">{description}</p>
       </div>
       <div className="overflow-x-auto p-3 sm:p-5">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="h-auto min-w-[680px] w-full"
           role="img"
-          aria-label={`${title}. ${mappable.length} territori rappresentati.`}
+          aria-label={`${title}. ${ariaTerritories(mappable.length)}`}
         >
           <rect x="0.5" y="0.5" width={WIDTH - 1} height={HEIGHT - 1} fill="white" stroke="black" />
           {Array.from({ length: 9 }, (_, index) => {
