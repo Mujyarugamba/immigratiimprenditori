@@ -1,6 +1,4 @@
 import { LegalMarkdown } from "@/components/legal/LegalMarkdown";
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
 import { loadPublicLegalMarkdown } from "@/lib/legal/load-public-document";
 import type { LegalDocId } from "@/lib/legal/versions";
 
@@ -10,19 +8,22 @@ type Props = {
   description: string;
 };
 
-export function LegalDocumentPage({ docId, description }: Props) {
+export function LegalDocumentPage({ docId, title, description }: Props) {
   const markdown = loadPublicLegalMarkdown(docId);
   return (
-    <Section>
-      <Container className="max-w-3xl space-y-8">
-        <header className="space-y-2">
-          <p className="text-ink-subtle text-xs font-medium tracking-[0.14em] uppercase">
-            Metodo e fonti
-          </p>
-          <p className="text-ink-muted text-sm leading-6">{description}</p>
-        </header>
-        <LegalMarkdown markdown={markdown} />
-      </Container>
-    </Section>
+    <main className="preview-legal-page">
+      <header className="preview-legal-hero">
+        <div className="preview-legal-hero-inner">
+          <p className="legal-kicker">Centro Studi · Metodo e trasparenza</p>
+          <h1>{title}</h1>
+          <p>{description}</p>
+        </div>
+      </header>
+      <div className="preview-legal-content">
+        <div className="preview-legal-markdown">
+          <LegalMarkdown markdown={markdown} />
+        </div>
+      </div>
+    </main>
   );
 }

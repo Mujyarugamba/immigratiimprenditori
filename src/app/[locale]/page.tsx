@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { CORE_MESSAGES } from "@/lib/i18n/pages";
 import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
+import { HOME_V4_MESSAGES } from "@/lib/i18n/home-v4";
 import { languageAlternates } from "@/lib/i18n/seo";
 import { listHomeContents } from "@/lib/data/public/contents";
 import { getExplorerSnapshot } from "@/lib/data/public/explore";
@@ -38,6 +39,7 @@ export default async function LocalizedHomePage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = CORE_MESSAGES[locale];
+  const v4 = HOME_V4_MESSAGES[locale];
   const metricLabels = metrics[locale];
   const open = COLLECTION_MESSAGES[locale].open;
   const arrow = localizedCtaArrow(locale);
@@ -63,66 +65,106 @@ export default async function LocalizedHomePage({ params }: Props) {
   );
 
   return (
-    <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-      <section className="grid gap-10 border-b border-black pb-12 lg:grid-cols-[1.5fr_1fr]">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">{m.homeKicker}</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-black sm:text-6xl">{m.homeTitle}</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-neutral-700">{m.homeIntro}</p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href={`/${locale}/osservatorio`} className="border border-black bg-black px-5 py-3 text-sm font-semibold text-white">{m.observatoryCta} {arrow}</Link>
-            <Link href={`/${locale}/chi-siamo`} className="border border-black px-5 py-3 text-sm font-semibold">{m.aboutCta}</Link>
+    <>
+      <link rel="stylesheet" href="/home-light-v1.css" />
+      <link rel="stylesheet" href="/home-motion-v3.css" />
+      <link rel="stylesheet" href="/home-motion-v4.css" />
+
+      <main id="contenuto" className="localized-home-v4">
+        <section className="preview-hero-v4" aria-labelledby="localized-preview-hero-title">
+          <div className="preview-v4-media" aria-hidden="true" />
+          <div className="preview-v4-veil" aria-hidden="true" />
+
+          <div className="preview-v4-meta" aria-hidden="true">
+            <span>{v4.metaLeft}</span>
+            <span>{v4.metaRight}</span>
+          </div>
+
+          <div className="preview-v4-payoff" dir={locale === "ar" ? "rtl" : "ltr"}>
+            <h1 id="localized-preview-hero-title">
+              <span className="preview-v4-line preview-v4-line-a">{v4.lineA}</span>
+              <span className="preview-v4-line preview-v4-line-b"><em>{v4.lineB}</em></span>
+            </h1>
+          </div>
+
+          <div className="site-container preview-v4-bottom">
+            <p>{v4.summary}</p>
+            <nav className="preview-v4-actions" aria-label={v4.metaLeft}>
+              <Link href={`/${locale}/osservatorio`}>{v4.observatory} {arrow}</Link>
+              <Link href={`/${locale}/contenuti`}>{v4.research} {arrow}</Link>
+            </nav>
+          </div>
+          <span className="preview-v4-scroll" aria-hidden="true">{v4.scroll}</span>
+        </section>
+
+        <div className="preview-motion-rail" aria-label={v4.railLabel}>
+          <div className="preview-motion-track">
+            {[...v4.topics, ...v4.topics].map((topic, index) => (
+              <span key={`${topic}-${index}`} aria-hidden={index >= v4.topics.length ? "true" : undefined}>
+                {topic}<b aria-hidden="true">✦</b>
+              </span>
+            ))}
           </div>
         </div>
 
-        <aside className="border border-black p-6">
-          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Immigrati Imprenditori</p>
-          <dl className="mt-5 grid grid-cols-2 gap-px bg-black">
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[0]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.indicators.length ?? "—"}</dd></div>
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[1]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.values.length ?? "—"}</dd></div>
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[2]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.territories.length ?? "—"}</dd></div>
-            <div className="bg-white p-4"><dt className="text-xs text-neutral-500">{metricLabels[3]}</dt><dd className="mt-1 text-2xl font-semibold">{snapshot?.sectors.length ?? "—"}</dd></div>
+        <section className="localized-home-snapshot">
+          <div className="localized-home-snapshot-head">
+            <div>
+              <p className="eyebrow">{v4.snapshotKicker}</p>
+              <h2>{v4.snapshotTitle}</h2>
+            </div>
+            <p>{v4.snapshotIntro}</p>
+          </div>
+          <dl className="localized-home-metrics">
+            <div><dt>{metricLabels[0]}</dt><dd>{snapshot?.indicators.length ?? "—"}</dd></div>
+            <div><dt>{metricLabels[1]}</dt><dd>{snapshot?.values.length ?? "—"}</dd></div>
+            <div><dt>{metricLabels[2]}</dt><dd>{snapshot?.territories.length ?? "—"}</dd></div>
+            <div><dt>{metricLabels[3]}</dt><dd>{snapshot?.sectors.length ?? "—"}</dd></div>
           </dl>
-        </aside>
-      </section>
+        </section>
 
-      <section className="mt-10">
-        <div className="flex items-baseline justify-between gap-4 border-b border-black pb-3">
-          <h2 className="text-2xl font-semibold text-black">{m.latestResearch}</h2>
-          <Link href={`/${locale}/contenuti`} className="text-sm font-semibold underline underline-offset-4">{arrow}</Link>
-        </div>
-        {presented.some((item) => !item.isAiTranslation) ? (
-          <p className="mt-4 text-sm leading-6 text-neutral-600">{m.originalLanguageNotice}</p>
-        ) : null}
-        <div className="mt-5 grid gap-px border border-black bg-black md:grid-cols-3">
-          {presented.slice(0, 6).map((item) => (
-            <article key={item.id} className="flex min-h-56 flex-col bg-white p-5">
-              <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{item.type_code.replaceAll("_", " ")}</p>
-              <OriginalLanguageText as="h3" languageCode={item.displayLanguageCode} className="mt-2 text-lg font-semibold leading-6 text-black">{item.title}</OriginalLanguageText>
-              {item.abstract ? <OriginalLanguageText languageCode={item.displayLanguageCode} className="mt-3 flex-1 text-sm leading-6 text-neutral-700">{item.abstract}</OriginalLanguageText> : <div className="flex-1" />}
-              {item.isAiTranslation ? (
-                <EditorialTranslationNotice
-                  locale={locale}
-                  sourceLanguageId={item.language_id}
-                  displayLanguageCode={item.displayLanguageCode}
-                  isAiTranslation
-                  isViewingOriginal={false}
-                  originalHref={`/${locale}/contenuti/${item.slug}?original=1`}
-                  translationHref={`/${locale}/contenuti/${item.slug}`}
-                  compact
-                />
-              ) : null}
-              <Link href={`/${locale}/contenuti/${item.slug}`} className="mt-4 text-sm font-semibold underline underline-offset-4">{open} {arrow}</Link>
-            </article>
-          ))}
-        </div>
-      </section>
+        <section className="localized-home-research">
+          <div className="localized-home-section-title">
+            <h2>{m.latestResearch}</h2>
+            <Link href={`/${locale}/contenuti`}>{open} {arrow}</Link>
+          </div>
+          {presented.some((item) => !item.isAiTranslation) ? (
+            <p className="localized-home-original-note">{m.originalLanguageNotice}</p>
+          ) : null}
+          <div className="localized-home-grid">
+            {presented.slice(0, 6).map((item) => (
+              <article key={item.id} className="localized-home-card">
+                <p>{item.type_code.replaceAll("_", " ")}</p>
+                <OriginalLanguageText as="h3" languageCode={item.displayLanguageCode}>
+                  <Link href={`/${locale}/contenuti/${item.slug}`}>{item.title}</Link>
+                </OriginalLanguageText>
+                {item.abstract ? (
+                  <OriginalLanguageText languageCode={item.displayLanguageCode} className="localized-home-card-copy">{item.abstract}</OriginalLanguageText>
+                ) : <div className="localized-home-card-copy" />}
+                {item.isAiTranslation ? (
+                  <EditorialTranslationNotice
+                    locale={locale}
+                    sourceLanguageId={item.language_id}
+                    displayLanguageCode={item.displayLanguageCode}
+                    isAiTranslation
+                    isViewingOriginal={false}
+                    originalHref={`/${locale}/contenuti/${item.slug}?original=1`}
+                    translationHref={`/${locale}/contenuti/${item.slug}`}
+                    compact
+                  />
+                ) : null}
+                <Link href={`/${locale}/contenuti/${item.slug}`}>{open} {arrow}</Link>
+              </article>
+            ))}
+          </div>
+        </section>
 
-      <section className="mt-10 grid gap-px border border-black bg-black sm:grid-cols-3">
-        <Link href={`/${locale}/esplora`} className="bg-white p-6 text-lg font-semibold">{m.exploreTitle} {arrow}</Link>
-        <Link href={`/${locale}/contribuisci`} className="bg-white p-6 text-lg font-semibold">{m.participateTitle} {arrow}</Link>
-        <Link href={`/${locale}/open-data`} className="bg-white p-6 text-lg font-semibold">{m.openData} {arrow}</Link>
-      </section>
-    </main>
+        <nav className="localized-home-paths" aria-label={m.exploreTitle}>
+          <Link href={`/${locale}/esplora`}>{m.exploreTitle} {arrow}</Link>
+          <Link href={`/${locale}/contribuisci`}>{m.participateTitle} {arrow}</Link>
+          <Link href={`/${locale}/open-data`}>{m.openData} {arrow}</Link>
+        </nav>
+      </main>
+    </>
   );
 }

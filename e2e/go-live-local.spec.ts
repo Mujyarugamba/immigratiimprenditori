@@ -34,7 +34,7 @@ test.describe("Go-live local surfaces", () => {
 
     await page.goto("/storie");
     await expect(
-      page.getByRole("main").getByRole("link", { name: /Partecipa/i }).first(),
+      page.getByRole("main").getByRole("link", { name: /Contribuisci alla conoscenza/i }).first(),
     ).toBeVisible();
 
     // Pre-go-live may legitimately contain zero real stories: outreach starts only

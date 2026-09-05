@@ -6,124 +6,41 @@ import { listPublishedRouteSummaries } from "@/lib/data/public/routes";
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const TITLE = "Atlante dell'imprenditoria migrante";
-const DESCRIPTION =
-  "Paesi e territori letti attraverso dati, ricerche, storie, rotte ed eventi verificati dal Centro Studi Immigrati Imprenditori.";
+const DESCRIPTION = "Paesi e territori letti attraverso dati, ricerche, storie, rotte ed eventi verificati dal Centro Studi Immigrati Imprenditori.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/atlante" },
-  ...pageSocialMetadata({
-    title: TITLE,
-    description: DESCRIPTION,
-    pathname: "/atlante",
-  }),
+  ...pageSocialMetadata({ title: TITLE, description: DESCRIPTION, pathname: "/atlante" }),
 };
 
 export default async function AtlantePage() {
-  const [summaries, routes] = await Promise.all([
-    listAtlasCountrySummaries(),
-    listPublishedRouteSummaries(),
-  ]);
+  const [summaries, routes] = await Promise.all([listAtlasCountrySummaries(), listPublishedRouteSummaries()]);
   const published = summaries.filter((item) => item.hasEvidence);
 
   return (
-    <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-      <header className="max-w-4xl border-b border-black pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-          Osservatorio · Atlante
-        </p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">
-          Atlante dell&apos;imprenditoria migrante
-        </h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          Una lettura geografica che riunisce soltanto evidenze già disponibili:
-          indicatori, analisi, storie, rotte ed eventi. Le schede vengono rese pubbliche
-          quando esiste materiale sostanziale; non vengono create pagine vuote.
-        </p>
-      </header>
-
-      {published.length > 0 ? (
-        <section className="mt-10" aria-labelledby="atlas-map-heading">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                Geografia delle evidenze
-              </p>
-              <h2 id="atlas-map-heading" className="mt-2 text-2xl font-semibold text-black">
-                Paesi e rotte documentate
-              </h2>
-            </div>
-            {routes.length > 0 ? (
-              <Link href="/atlante/rotte" className="text-sm font-semibold underline underline-offset-4">
-                Esplora tutte le rotte →
-              </Link>
-            ) : null}
-          </div>
-          <AtlasRouteMap countries={published} routes={routes} />
-        </section>
-      ) : null}
-
-      <section className="mt-12">
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-black pb-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-              Copertura disponibile
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-black">
-              {published.length} {published.length === 1 ? "Paese" : "Paesi"} con evidenze pubblicate
-            </h2>
-          </div>
-          <Link href="/esplora/dati" className="text-sm font-semibold underline underline-offset-4">
-            Apri il Data Explorer →
-          </Link>
+    <main id="contenuto" className="preview-hub-page">
+      <section className="preview-hub-hero atlas">
+        <div className="preview-hub-motion" aria-hidden="true"><span>Paesi · rotte · territori ·</span><span>Paesi · rotte · territori ·</span></div>
+        <div className="preview-hub-inner">
+          <p className="preview-hub-kicker">Osservatorio · Atlante</p>
+          <h1>Atlante dell'imprenditoria migrante</h1>
+          <p className="hub-intro">Una lettura geografica che riunisce soltanto evidenze già disponibili: indicatori, analisi, storie, rotte ed eventi. Le schede vengono rese pubbliche quando esiste materiale sostanziale.</p>
         </div>
-
-        {published.length > 0 ? (
-          <div className="mt-6 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-3">
-            {published.map((item) => (
-              <article key={item.country.code} className="bg-white p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                  {item.country.code} · {item.country.iso3}
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-black">
-                  <Link href={`/atlante/${item.country.slug}`}>
-                    {item.country.name}
-                  </Link>
-                </h2>
-                <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <dt className="text-neutral-500">Indicatori</dt>
-                    <dd className="mt-1 text-lg font-semibold text-black">{item.indicatorCount}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-neutral-500">Valori dati</dt>
-                    <dd className="mt-1 text-lg font-semibold text-black">{item.dataValueCount}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-neutral-500">Analisi / storie</dt>
-                    <dd className="mt-1 text-lg font-semibold text-black">{item.contentCount}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-neutral-500">Eventi</dt>
-                    <dd className="mt-1 text-lg font-semibold text-black">{item.eventCount}</dd>
-                  </div>
-                </dl>
-                <Link
-                  href={`/atlante/${item.country.slug}`}
-                  className="mt-6 inline-block text-sm font-semibold underline underline-offset-4"
-                >
-                  Apri la scheda Paese →
-                </Link>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-8 max-w-3xl text-base leading-7 text-neutral-700">
-            Nessuna scheda Paese soddisfa ancora il criterio di pubblicazione dell&apos;Atlante.
-          </p>
-        )}
       </section>
+
+      <div className="preview-hub-body">
+        {published.length > 0 ? <section aria-labelledby="atlas-map-heading">
+          <div className="preview-section-head"><div><p className="eyebrow">Geografia delle evidenze</p><h2 id="atlas-map-heading">Paesi e rotte documentate</h2></div>{routes.length > 0 ? <Link href="/atlante/rotte">Esplora tutte le rotte →</Link> : null}</div>
+          <div className="preview-map-shell"><AtlasRouteMap countries={published} routes={routes} /></div>
+        </section> : null}
+
+        <section className="mt-16">
+          <div className="preview-section-head"><div><p className="eyebrow">Copertura disponibile</p><h2>{published.length} {published.length === 1 ? "Paese" : "Paesi"} con evidenze pubblicate</h2></div><Link href="/esplora/dati">Apri il Data Explorer →</Link></div>
+          {published.length > 0 ? <div className="preview-index-grid">{published.map((item) => <article key={item.country.code} className="preview-index-card"><p className="index-meta">{item.country.code} · {item.country.iso3}</p><h2><Link href={`/atlante/${item.country.slug}`}>{item.country.name}</Link></h2><dl className="preview-atlas-country-stats"><div><dt>Indicatori</dt><dd>{item.indicatorCount}</dd></div><div><dt>Valori dati</dt><dd>{item.dataValueCount}</dd></div><div><dt>Analisi / storie</dt><dd>{item.contentCount}</dd></div><div><dt>Eventi</dt><dd>{item.eventCount}</dd></div></dl><div className="index-footer"><Link href={`/atlante/${item.country.slug}`}>Apri la scheda Paese →</Link></div></article>)}</div> : <p>Nessuna scheda Paese soddisfa ancora il criterio di pubblicazione dell'Atlante.</p>}
+        </section>
+      </div>
     </main>
   );
 }

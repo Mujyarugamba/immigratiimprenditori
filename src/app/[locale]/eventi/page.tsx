@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PublicPageHeader } from "@/components/public/PublicPageHeader";
+import { PublicResultCard } from "@/components/public/PublicResultCard";
+import { Container } from "@/components/ui/Container";
+import { Section } from "@/components/ui/Section";
 import { listPublicEvents } from "@/lib/data/public/events";
-import { isPlatformLocale } from "@/lib/i18n/config";
-import { NAV_MESSAGES } from "@/lib/i18n/messages";
-import { CORE_MESSAGES } from "@/lib/i18n/pages";
+import { deliveryModeLabel, resultCountLabel } from "@/lib/i18n/archive-labels";
 import { COLLECTION_MESSAGES } from "@/lib/i18n/collections";
-import { languageAlternates } from "@/lib/i18n/seo";
+import { isPlatformLocale } from "@/lib/i18n/config";
 import { localizedCtaArrow } from "@/lib/i18n/content-direction";
-import { OriginalLanguageText } from "@/components/i18n/OriginalLanguageText";
+import { EDITORIAL_VISUAL_COPY } from "@/lib/i18n/editorial-visual";
+import { NAV_MESSAGES } from "@/lib/i18n/messages";
+import { eventTranslation, eventTypeLabel } from "@/lib/i18n/public-entity-translations";
+import { TRANSLATION_FALLBACK_NOTICE } from "@/lib/i18n/translation-note";
+import { languageAlternates } from "@/lib/i18n/seo";
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const descriptions = {
@@ -29,11 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: NAV_MESSAGES[locale].events,
     description: descriptions[locale],
     alternates: { canonical: `/${locale}/eventi`, languages: languageAlternates("/eventi") },
-    ...pageSocialMetadata({
-      title: NAV_MESSAGES[locale].events,
-      description: descriptions[locale],
-      pathname: `/${locale}/eventi`,
-    }),
+    ...pageSocialMetadata({ title: NAV_MESSAGES[locale].events, description: descriptions[locale], pathname: `/${locale}/eventi` }),
   };
 }
 
@@ -41,31 +42,46 @@ export default async function LocalizedEventsPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const result = await listPublicEvents();
-  const m = NAV_MESSAGES[locale];
-  const core = CORE_MESSAGES[locale];
+  const visual = EDITORIAL_VISUAL_COPY[locale];
   const open = COLLECTION_MESSAGES[locale].open;
   const arrow = localizedCtaArrow(locale);
+  const missingTranslation = result.items.some((event) => !eventTranslation(locale, event.id));
 
   return (
-    <main id="contenuto" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-      <header className="max-w-4xl border-b border-black pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Immigrati Imprenditori · Events</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{m.events}</h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">{descriptions[locale]}</p>
-        <p className="mt-3 text-sm leading-6 text-neutral-600">{core.originalLanguageNotice}</p>
-      </header>
-
-      <div className="mt-8 grid gap-px border border-black bg-black md:grid-cols-2">
-        {result.items.map((event) => (
-          <article key={event.id} className="flex min-h-64 flex-col bg-white p-6">
-            <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">{event.type_code.replaceAll("_", " ")}</p>
-            <OriginalLanguageText as="h2" className="mt-2 text-xl font-semibold leading-7 text-black">{event.title}</OriginalLanguageText>
-            {event.summary ? <OriginalLanguageText className="mt-4 flex-1 text-sm leading-6 text-neutral-700">{event.summary}</OriginalLanguageText> : <div className="flex-1" />}
-            {event.next_edition ? <p className="mt-4 text-xs text-neutral-500">{new Date(event.next_edition.starts_at).toLocaleString(locale)}</p> : null}
-            <Link href={`/${locale}/eventi/${event.id}`} className="mt-5 text-sm font-semibold underline underline-offset-4">{open} {arrow}</Link>
-          </article>
-        ))}
-      </div>
+    <main id="contenuto" className="public-list-page">
+      <section className="public-page-hero-shell">
+        <Container className="public-list-container">
+          <PublicPageHeader title={NAV_MESSAGES[locale].events} description={descriptions[locale]} kicker={visual.kicker} motionWords={visual.motionWords} />
+        </Container>
+      </section>
+      <Section className="public-list-section">
+        <Container className="public-list-container">
+          {missingTranslation ? <p className="mb-5 max-w-3xl text-sm leading-6 text-neutral-600">{TRANSLATION_FALLBACK_NOTICE[locale]}</p> : null}
+          <p className="public-results-count">{resultCountLabel(locale, result.total)}</p>
+          <div className="public-results-grid">
+            {result.items.map((event) => {
+              const translated = eventTranslation(locale, event.id);
+              const meta = event.next_edition ? [
+                new Date(event.next_edition.starts_at).toLocaleString(locale),
+                event.next_edition.city_text ?? event.next_edition.venue_label ?? undefined,
+                event.external_organization_label ?? undefined,
+              ].filter(Boolean) as string[] : event.external_organization_label ? [event.external_organization_label] : [];
+              return (
+                <PublicResultCard
+                  key={event.id}
+                  href={`/${locale}/eventi/${event.id}`}
+                  title={translated?.title ?? event.title}
+                  description={translated?.summary ?? event.summary}
+                  badges={[eventTypeLabel(locale, event.type_code), deliveryModeLabel(locale, event.delivery_mode)]}
+                  meta={meta}
+                  ctaLabel={open}
+                  ctaArrow={arrow}
+                />
+              );
+            })}
+          </div>
+        </Container>
+      </Section>
     </main>
   );
 }

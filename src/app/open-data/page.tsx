@@ -10,11 +10,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/open-data" },
-  ...pageSocialMetadata({
-    title: TITLE,
-    description: DESCRIPTION,
-    pathname: "/open-data",
-  }),
+  ...pageSocialMetadata({ title: TITLE, description: DESCRIPTION, pathname: "/open-data" }),
 };
 
 const FILTERS = [
@@ -27,118 +23,28 @@ const FILTERS = [
 
 export default async function OpenDataPage() {
   const snapshot = await getExplorerSnapshot();
-
   return (
-    <main id="contenuto" className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:py-16">
-      <header className="max-w-4xl border-b border-black pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Osservatorio · Open data</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">Open data</h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">
-          I valori già pubblicati dall&apos;Osservatorio sono disponibili anche in formato strutturato.
-          Le definizioni, le fonti e le note metodologiche restano parte integrante dell&apos;interpretazione del dato.
-        </p>
-      </header>
-
-      <section className="mt-8 grid gap-px border border-black bg-black sm:grid-cols-3">
-        <div className="bg-white p-6">
-          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Indicatori</p>
-          <strong className="mt-2 block text-3xl">{snapshot.indicators.length}</strong>
-        </div>
-        <div className="bg-white p-6">
-          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Record</p>
-          <strong className="mt-2 block text-3xl">{snapshot.values.length}</strong>
-        </div>
-        <div className="bg-white p-6">
-          <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Formati</p>
-          <strong className="mt-2 block text-3xl">JSON · CSV · XLSX</strong>
+    <main id="contenuto" className="preview-hub-page">
+      <section className="preview-hub-hero open-data">
+        <div className="preview-hub-motion" aria-hidden="true"><span>JSON · CSV · XLSX · API ·</span><span>JSON · CSV · XLSX · API ·</span></div>
+        <div className="preview-hub-inner">
+          <p className="preview-hub-kicker">Osservatorio · Open data</p>
+          <h1>Open data</h1>
+          <p className="hub-intro">I valori già pubblicati dall'Osservatorio sono disponibili anche in formato strutturato. Definizioni, fonti e note metodologiche restano parte integrante dell'interpretazione del dato.</p>
         </div>
       </section>
 
-      <section className="mt-10 border-t border-black pt-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Accesso programmabile</p>
-            <h2 className="mt-2 text-2xl font-semibold text-black">API pubblica v1</h2>
-          </div>
-          <Link href="/open-data/api" className="text-sm font-semibold underline underline-offset-4">
-            Documentazione API →
-          </Link>
-        </div>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          La versione <code>v1</code> espone indicatori dell&apos;Osservatorio, Paesi dell&apos;Atlante e rotte
-          origine-destinazione che dispongono di evidenze pubblicate. Il punto di discovery è <code>/api/v1</code>.
-        </p>
-      </section>
+      <section className="preview-data-stats"><div className="preview-data-stat"><p>Indicatori</p><strong>{snapshot.indicators.length}</strong></div><div className="preview-data-stat"><p>Record</p><strong>{snapshot.values.length}</strong></div><div className="preview-data-stat"><p>Formati</p><strong>JSON · CSV · XLSX</strong></div></section>
 
-      <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Dataset pubblico</h2>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          Gli endpoint restituiscono soltanto indicatori pubblicati e valori finali resi pubblici dall&apos;Osservatorio.
-          Non espongono aree riservate, dati personali o contenuti redazionali non pubblicati.
-        </p>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <div className="border border-black p-5">
-            <h3 className="font-semibold text-black">JSON</h3>
-            <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators</code>
-            <a href="/api/open-data/indicators" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Apri JSON →</a>
-          </div>
-          <div className="border border-black p-5">
-            <h3 className="font-semibold text-black">CSV</h3>
-            <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators.csv</code>
-            <a href="/api/open-data/indicators.csv" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Scarica CSV →</a>
-          </div>
-          <div className="border border-black p-5">
-            <h3 className="font-semibold text-black">XLSX</h3>
-            <code className="mt-3 block overflow-x-auto bg-neutral-50 p-3 text-sm">/api/open-data/indicators.xlsx</code>
-            <a href="/api/open-data/indicators.xlsx" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">Scarica Excel →</a>
-          </div>
-        </div>
-      </section>
+      <div className="preview-hub-body">
+        <section className="preview-data-section"><div className="preview-section-head"><div><p className="eyebrow">Accesso programmabile</p><h2>API pubblica v1</h2></div><Link href="/open-data/api">Documentazione API →</Link></div><p>La versione <code>v1</code> espone indicatori dell'Osservatorio, Paesi dell'Atlante e rotte origine-destinazione che dispongono di evidenze pubblicate. Il punto di discovery è <code>/api/v1</code>.</p></section>
 
-      <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Filtri degli endpoint Open Data</h2>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          JSON, CSV e XLSX accettano gli stessi parametri. I filtri possono essere combinati e coincidono con quelli del Data Explorer.
-        </p>
-        <div className="mt-5 overflow-x-auto border border-black">
-          <table className="min-w-full border-collapse text-left text-sm">
-            <thead className="bg-neutral-100">
-              <tr>
-                <th className="border-b border-black px-4 py-3">Parametro</th>
-                <th className="border-b border-black px-4 py-3">Significato</th>
-                <th className="border-b border-black px-4 py-3">Esempio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {FILTERS.map(([name, meaning, example]) => (
-                <tr key={name} className="border-b border-neutral-300 last:border-b-0">
-                  <td className="px-4 py-3"><code>{name}</code></td>
-                  <td className="px-4 py-3">{meaning}</td>
-                  <td className="px-4 py-3"><code>{example}</code></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <code className="mt-5 block overflow-x-auto bg-neutral-50 p-4 text-sm">
-          /api/open-data/indicators.xlsx?indicatore=imprese-straniere-registrate&amp;territorio=IT-25&amp;anno=2025
-        </code>
-      </section>
+        <section className="preview-data-section"><h2>Dataset pubblico</h2><p>Gli endpoint restituiscono soltanto indicatori pubblicati e valori finali resi pubblici dall'Osservatorio. Non espongono aree riservate, dati personali o contenuti redazionali non pubblicati.</p><div className="preview-data-formats"><div className="preview-data-format"><h3>JSON</h3><code>/api/open-data/indicators</code><a href="/api/open-data/indicators">Apri JSON →</a></div><div className="preview-data-format"><h3>CSV</h3><code>/api/open-data/indicators.csv</code><a href="/api/open-data/indicators.csv">Scarica CSV →</a></div><div className="preview-data-format"><h3>XLSX</h3><code>/api/open-data/indicators.xlsx</code><a href="/api/open-data/indicators.xlsx">Scarica Excel →</a></div></div></section>
 
-      <section className="mt-10 border-t border-black pt-8">
-        <h2 className="text-2xl font-semibold text-black">Uso corretto e condizioni di riuso</h2>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">
-          Un valore non va separato dalla definizione dell&apos;indicatore. In particolare cittadinanza, luogo di nascita,
-          impresa straniera e lavoro autonomo non sono categorie equivalenti. Prima di riutilizzare o confrontare i dati,
-          consulta la metodologia e la fonte originale. Le condizioni di riuso e le licenze possono dipendere dalla fonte primaria:
-          la presenza nell&apos;endpoint del Centro Studi non sostituisce i termini della fonte originaria.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
-          <Link href="/dati-e-fonti" className="underline underline-offset-4">Fonti e metodologia →</Link>
-          <Link href="/esplora/dati" className="underline underline-offset-4">Data Explorer →</Link>
-          <Link href="/fonti" className="underline underline-offset-4">Catalogo delle fonti →</Link>
-        </div>
-      </section>
+        <section className="preview-data-section"><h2>Filtri degli endpoint Open Data</h2><p>JSON, CSV e XLSX accettano gli stessi parametri. I filtri possono essere combinati e coincidono con quelli del Data Explorer.</p><div className="overflow-x-auto"><table className="preview-data-table"><thead><tr><th>Parametro</th><th>Significato</th><th>Esempio</th></tr></thead><tbody>{FILTERS.map(([name, meaning, example]) => <tr key={name}><td><code>{name}</code></td><td>{meaning}</td><td><code>{example}</code></td></tr>)}</tbody></table></div><code className="mt-5 block overflow-x-auto bg-[#edf2ee] p-4 text-sm">/api/open-data/indicators.xlsx?indicatore=imprese-straniere-registrate&amp;territorio=IT-25&amp;anno=2025</code></section>
+
+        <section className="preview-data-section"><h2>Uso corretto e condizioni di riuso</h2><p>Un valore non va separato dalla definizione dell'indicatore. In particolare cittadinanza, luogo di nascita, impresa straniera e lavoro autonomo non sono categorie equivalenti. Prima di riutilizzare o confrontare i dati, consulta la metodologia e la fonte originale.</p><div className="mt-5 flex flex-wrap gap-5 text-sm font-semibold"><Link href="/dati-e-fonti">Fonti e metodologia →</Link><Link href="/esplora/dati">Data Explorer →</Link><Link href="/fonti">Catalogo delle fonti →</Link></div></section>
+      </div>
     </main>
   );
 }
