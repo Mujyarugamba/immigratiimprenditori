@@ -20,6 +20,7 @@ import "./internal-preview-v6.css";
 import "./internal-preview-v7.css";
 import "./internal-preview-v8.css";
 import "./internal-preview-v9.css";
+import "./internal-preview-v10.css";
 
 const SITE_URL = "https://www.immigratiimprenditori.it";
 const SITE_DESCRIPTION = centroStudiConfig.description;
