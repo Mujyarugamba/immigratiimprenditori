@@ -13,16 +13,9 @@
   background:#fff!important;
   color:#111!important;
 }
-.preview-support-hero .support-kicker{
-  color:#555!important;
-  opacity:1!important;
-}
-.preview-support-hero h1{
-  color:#111!important;
-}
-.preview-support-hero p{
-  color:#444!important;
-}
+.preview-support-hero .support-kicker{color:#555!important;opacity:1!important}
+.preview-support-hero h1{color:#111!important}
+.preview-support-hero p{color:#444!important}
 .preview-support-body{
   width:min(calc(100% - 48px),1000px)!important;
   margin:0 auto!important;
@@ -30,31 +23,18 @@
   background:#fff!important;
   color:#111!important;
 }
-.preview-support-section{
-  border-top:1px solid #111!important;
-}
+.preview-support-section{border-top:1px solid #111!important}
 .preview-support-section:first-child{border-top:0!important}
 .preview-support-section h2,
 .preview-support-grid h3,
-.preview-support-section strong{
-  color:#111!important;
-}
-.preview-support-grid{
-  border-color:#d8d8d8!important;
-  background:#fff!important;
-}
+.preview-support-section strong{color:#111!important}
+.preview-support-grid{border-color:#d8d8d8!important;background:#fff!important}
 .preview-support-grid article,
 .preview-support-grid article:nth-child(2),
-.preview-support-grid article:nth-child(3){
-  background:#fff!important;
-  border-color:#d8d8d8!important;
-  color:#111!important;
-}
+.preview-support-grid article:nth-child(3){background:#fff!important;border-color:#d8d8d8!important;color:#111!important}
 .preview-support-grid p,
 .preview-support-section p,
-.preview-support-fiscal-note{
-  color:#4b4b4b!important;
-}
+.preview-support-fiscal-note{color:#4b4b4b!important}
 .preview-support-section a,
 .preview-support-grid a{
   color:#111!important;
@@ -67,10 +47,7 @@
 .preview-support-section a:hover,
 .preview-support-section a:focus-visible,
 .preview-support-grid a:hover,
-.preview-support-grid a:focus-visible{
-  color:#0b3029!important;
-  border-color:#0b3029!important;
-}
+.preview-support-grid a:focus-visible{color:#0b3029!important;border-color:#0b3029!important}
 
 /* 2) Bloomberg-style rail: dark institutional green, lime/yellow type, slightly taller. */
 .preview-motion-rail{
@@ -86,27 +63,20 @@
   font-size:12px!important;
   letter-spacing:.15em!important;
 }
-.preview-motion-track b{
-  color:#ddea78!important;
-  opacity:.72;
-}
+.preview-motion-track b{color:#ddea78!important;opacity:.72}
 
 /* 3) Hero positioning: business leadership / innovation, not ethnic-shop imagery. */
 .preview-v4-media{
   background:#283d38 url("https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=2000") center 48%/cover no-repeat!important;
 }
-.preview-v4-video,
-.preview-v4-mobile-poster{
-  display:none!important;
-}
+/* Desktop uses the new static business image; mobile keeps the priority IMG for LCP. */
+.preview-v4-video{display:none!important}
 .preview-v4-veil{
   background:linear-gradient(90deg,rgba(5,27,23,.46) 0%,rgba(5,27,23,.24) 54%,rgba(5,27,23,.18) 100%)!important;
 }
 
 /* 4) Culture: long German compounds must never collide with the second column. */
-.preview-culture-section-head > *{
-  min-width:0;
-}
+.preview-culture-section-head > *{min-width:0}
 .preview-culture-section-head h2{
   max-width:100%;
   overflow-wrap:break-word;
@@ -122,9 +92,7 @@ html[lang="de"] .preview-culture-section-head h2{
   line-height:.96!important;
   letter-spacing:-.035em!important;
 }
-html[lang="de"] .preview-culture-section-head > div:last-child{
-  padding-inline-start:0;
-}
+html[lang="de"] .preview-culture-section-head > div:last-child{padding-inline-start:0}
 html[lang="de"] .preview-culture-section-head a{
   display:inline-block;
   margin-top:8px;
