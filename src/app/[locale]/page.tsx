@@ -72,20 +72,7 @@ export default async function LocalizedHomePage({ params }: Props) {
 
       <main id="contenuto" className="localized-home-v4">
         <section className="preview-hero-v4" aria-labelledby="localized-preview-hero-title">
-          <div className="preview-v4-media" aria-hidden="true">
-            <video
-              className="preview-v4-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000"
-              tabIndex={-1}
-            >
-              <source src="https://www.pexels.com/download/video/8869632/" type="video/mp4" />
-            </video>
-          </div>
+          <div className="preview-v4-media" aria-hidden="true" />
           <div className="preview-v4-veil" aria-hidden="true" />
 
           <div className="preview-v4-meta" aria-hidden="true">
