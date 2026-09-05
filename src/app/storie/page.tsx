@@ -4,7 +4,7 @@ import { listPublishedContentsByTypes, VOICE_CONTENT_TYPES } from "@/lib/data/pu
 import { pageSocialMetadata } from "@/lib/seo/social-metadata";
 
 const TITLE = "Storie e voci | Immigrati Imprenditori";
-const DESCRIPTION = "Storie d'impresa, interviste, testimonianze e contenuti audiovisivi pubblicati dal Centro Studi.";
+const DESCRIPTION = "Interviste e storie d'impresa di founder, imprenditori, manager e professionisti: dalle microimprese alle PMI, startup, industria e imprese ad alta innovazione.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -27,7 +27,7 @@ export default async function StoriePage() {
         <div className="preview-hub-inner">
           <p className="preview-hub-kicker">Centro Studi · Persone</p>
           <h1>Storie e voci</h1>
-          <p className="hub-intro">Storie d'impresa, interviste e testimonianze affiancano i dati per documentare percorsi, ostacoli, innovazione, fallimenti, crescita, relazioni tra Paesi e trasformazioni dei territori.</p>
+          <p className="hub-intro">Interviste e storie d'impresa raccontano founder, imprenditori, manager e professionisti: dalle microimprese alle PMI, startup, industria e imprese ad alta innovazione. Documentiamo decisioni, crescita, mercati, fallimenti, mobilità, reti internazionali e impatto tra Paesi e territori.</p>
         </div>
       </section>
 
