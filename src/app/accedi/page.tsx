@@ -38,6 +38,14 @@ function safeNextPath(raw: string | undefined): string {
 export default async function AccediPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const next = safeNextPath(params.next);
+
+  if (
+    process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" &&
+    next.startsWith("/app/redazione")
+  ) {
+    redirect("/app/redazione");
+  }
+
   const contributorTarget = next.startsWith("/app/contributore");
   const session = await getApplicationSession();
 
