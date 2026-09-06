@@ -148,9 +148,10 @@ html[lang="de"] #events .preview-culture-section-head h2{
   font-size:clamp(36px,3.05vw,50px)!important;
 }
 
-/* Home hero: keep the approved moving Pexels video, with its matching poster as fallback. */
+/* Home hero: poster is an eager, high-priority HTML image so LCP is discoverable
+   from the initial document; the moving video overlays it only above mobile. */
 .preview-v4-media{
-  background:#283d38 url("https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000") center 48%/cover no-repeat!important;
+  background:#283d38!important;
 }
 
 /* Home: remove only the provisional stock imagery below the hero.
@@ -202,10 +203,6 @@ html[lang="de"] #events .preview-culture-section-head h2{
 }
 
 @media(max-width:640px){
-  .preview-v4-media{
-    background:#283d38 url("https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=900") 56% center/cover no-repeat!important;
-  }
-
   /* Keep the lightweight mobile first paint; the full moving hero is desktop/tablet. */
   .preview-v4-line-a,
   .preview-v4-line-b,
