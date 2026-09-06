@@ -21,26 +21,26 @@ const topics = [
 export default function HomeMotionPreviewPage() {
   return (
     <>
-      <link rel="preconnect" href="https://images.pexels.com" />
-      <link rel="dns-prefetch" href="https://images.pexels.com" />
+      <link rel="preconnect" href="https://www.pexels.com" />
+      <link rel="dns-prefetch" href="https://www.pexels.com" />
       <link rel="stylesheet" href="/home-light-v1.css" />
       <link rel="stylesheet" href="/home-motion-v3.css" />
       <link rel="stylesheet" href="/home-motion-v4.css" />
 
       <section className="preview-hero-v4" aria-labelledby="preview-hero-title">
         <div className="preview-v4-media" aria-hidden="true">
-          <img
-            className="preview-v4-mobile-poster"
-            src="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=768"
-            srcSet="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=450 450w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=768 768w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=900 900w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=1400 1400w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=2000 2000w"
-            sizes="100vw"
-            alt=""
-            width={2000}
-            height={3276}
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
-          />
+          <video
+            className="preview-v4-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000"
+            tabIndex={-1}
+          >
+            <source src="https://www.pexels.com/download/video/8869632/" type="video/mp4" />
+          </video>
         </div>
         <div className="preview-v4-veil" aria-hidden="true" />
 
