@@ -26,11 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: m.title,
     description: m.intro,
     alternates: { canonical: `/${locale}/open-data`, languages: languageAlternates("/open-data") },
-    ...pageSocialMetadata({
-      title: m.title,
-      description: m.intro,
-      pathname: `/${locale}/open-data`,
-    }),
+    ...pageSocialMetadata({ title: m.title, description: m.intro, pathname: `/${locale}/open-data` }),
   };
 }
 
@@ -69,8 +65,8 @@ export default async function LocalizedOpenDataPage({ params }: Props) {
         <h2 className="text-2xl font-semibold text-black">{m.correct}</h2>
         <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{m.correctText}</p>
         <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
-          <Link href="/dati-e-fonti" className="underline underline-offset-4">{m.method} {arrow}</Link>
-          <Link href={`/${locale}/esplora`} className="underline underline-offset-4">{m.explorer} {arrow}</Link>
+          <Link href={`/${locale}/dati-e-fonti`} className="underline underline-offset-4">{m.method} {arrow}</Link>
+          <Link href={`/${locale}/esplora/dati`} className="underline underline-offset-4">{m.explorer} {arrow}</Link>
         </div>
       </section>
     </main>

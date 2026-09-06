@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { signInEditorialAction } from "@/lib/auth/actions";
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 type PageProps = {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; reset?: string }>;
 };
 
 const errorMessages: Record<string, string> = {
@@ -24,6 +25,7 @@ const errorMessages: Record<string, string> = {
   rate: "Troppi tentativi di accesso. Riprova più tardi.",
   account: "L’account non è abilitato.",
   role: "Questo account non dispone del ruolo richiesto per questa area.",
+  recovery: "Il link di recupero non è valido o è scaduto. Richiedine uno nuovo.",
 };
 
 function safeNextPath(raw: string | undefined): string {
@@ -36,6 +38,14 @@ function safeNextPath(raw: string | undefined): string {
 export default async function AccediPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const next = safeNextPath(params.next);
+
+  if (
+    process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" &&
+    next.startsWith("/app/redazione")
+  ) {
+    redirect("/app/redazione");
+  }
+
   const contributorTarget = next.startsWith("/app/contributore");
   const session = await getApplicationSession();
 
@@ -51,6 +61,7 @@ export default async function AccediPage({ searchParams }: PageProps) {
   }
 
   const errorMessage = params.error ? errorMessages[params.error] : null;
+  const resetComplete = params.reset === "success";
   const title = contributorTarget ? "Accesso contributore" : "Accesso redazione";
   const description = contributorTarget
     ? "Area riservata ai contributori autorizzati del Centro Studi."
@@ -62,6 +73,12 @@ export default async function AccediPage({ searchParams }: PageProps) {
         <div className="border-line bg-surface-elevated mx-auto max-w-md rounded-md border p-6 shadow-soft sm:p-8">
           <h1 className="text-ink text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="text-ink-muted mt-2 text-sm">{description}</p>
+
+          {resetComplete ? (
+            <p className="mt-4 rounded-md border px-3 py-2 text-sm" role="status">
+              Password aggiornata. Ora puoi accedere con la nuova password.
+            </p>
+          ) : null}
 
           {errorMessage ? (
             <p id="login-form-error" className="mt-4 rounded-md border px-3 py-2 text-sm" role="alert">
@@ -90,9 +107,17 @@ export default async function AccediPage({ searchParams }: PageProps) {
               />
             </div>
             <div>
-              <label htmlFor="password" className="text-ink block text-sm font-medium">
-                Password
-              </label>
+              <div className="flex items-center justify-between gap-4">
+                <label htmlFor="password" className="text-ink block text-sm font-medium">
+                  Password
+                </label>
+                <Link
+                  href={`/recupera-password?next=${encodeURIComponent(next)}`}
+                  className="text-ink-muted text-xs font-medium underline underline-offset-2 hover:text-ink"
+                >
+                  Password dimenticata?
+                </Link>
+              </div>
               <input
                 id="password"
                 name="password"

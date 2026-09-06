@@ -45,14 +45,9 @@ test("homepage renders the institutional editorial surface", async ({ page }) =>
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toHaveAttribute("href", "#contenuto-principale");
 
-  const hero = page.locator(".home-hero");
-  if (await hero.count()) {
-    await expect(hero).toBeVisible();
-    const backgroundImage = await hero.evaluate(
-      (element) => getComputedStyle(element).backgroundImage,
-    );
-    expect(backgroundImage).toBe("none");
-  }
+  const hero = page.locator(".preview-hero-v4");
+  await expect(hero).toBeVisible();
+  await expect(hero.locator(".preview-v4-media")).toBeVisible();
 });
 
 test("skip link transfers keyboard focus to the main content target", async ({ page }) => {
@@ -203,7 +198,7 @@ test("core public surfaces pass the automated accessibility structure gate", asy
 test("contribution page exposes the reviewed intake flow without submitting", async ({ page }) => {
   await page.goto("/contribuisci");
 
-  await expect(page.getByRole("heading", { level: 1, name: "Partecipa al Centro Studi" })).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 1, name: "Contribuisci alla conoscenza." })).toHaveCount(1);
   await expect(page.getByLabel(/Tipo di proposta/i)).toBeVisible();
   await expect(page.getByLabel(/Nome e cognome/i)).toBeVisible();
   await expect(page.getByLabel(/Email/i)).toBeVisible();
@@ -212,12 +207,15 @@ test("contribution page exposes the reviewed intake flow without submitting", as
   await expect(page.getByText(/non comporta pubblicazione automatica/i)).toBeVisible();
 });
 
-test("support page remains fail-closed while online payments are disabled", async ({ page }) => {
+test("support page exposes the verified live Stripe path", async ({ page }) => {
   await page.goto("/sostieni");
 
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  await expect(page.getByText(/pagamenti online/i)).toBeVisible();
-  await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1, name: "Sostieni il lavoro." })).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 3, name: "Online con Stripe" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Sostieni online/i })).toHaveAttribute(
+    "href",
+    /^https:\/\/donate\.stripe\.com\//,
+  );
 });
 
 test("all seven platform languages expose the correct document direction", async ({ page }) => {
@@ -289,25 +287,23 @@ test("go-live core interface renders across all seven platform languages", async
     }
   }
 
-  // React SSR may insert comments between `{label} {arrow}`; assert the
-  // accessible name of the in-page CTA, not a contiguous raw-HTML substring.
   await page.goto("/en/chi-siamo", { waitUntil: "domcontentloaded" });
   await expect(
-    page.getByRole("link", { name: "Explore →", exact: true }),
+    page.getByRole("link", { name: "Editorial policy →", exact: true }),
     "/en/chi-siamo English CTA must keep a forward arrow",
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Explore ←", exact: true }),
+    page.getByRole("link", { name: "Editorial policy ←", exact: true }),
     "/en/chi-siamo English CTA must not mirror the arrow",
   ).toHaveCount(0);
 
   await page.goto("/ar/chi-siamo", { waitUntil: "domcontentloaded" });
   await expect(
-    page.getByRole("link", { name: "استكشف ←", exact: true }),
+    page.getByRole("link", { name: "السياسة التحريرية ←", exact: true }),
     "/ar/chi-siamo Arabic CTA must use an RTL arrow",
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "استكشف →", exact: true }),
+    page.getByRole("link", { name: "السياسة التحريرية →", exact: true }),
     "/ar/chi-siamo Arabic CTA must not keep an LTR arrow",
   ).toHaveCount(0);
 });

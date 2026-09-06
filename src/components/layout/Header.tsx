@@ -8,41 +8,13 @@ import { localeFromPathname, localizedHref } from "@/lib/i18n/navigation";
 import { NAV_MESSAGES } from "@/lib/i18n/messages";
 
 const A11Y_LABELS = {
-  it: {
-    institutionalNavigation: "Navigazione istituzionale",
-    primaryNavigation: "Navigazione principale",
-    home: "Immigrati Imprenditori — Home",
-  },
-  en: {
-    institutionalNavigation: "Institutional navigation",
-    primaryNavigation: "Primary navigation",
-    home: "Immigrati Imprenditori — Home",
-  },
-  fr: {
-    institutionalNavigation: "Navigation institutionnelle",
-    primaryNavigation: "Navigation principale",
-    home: "Immigrati Imprenditori — Accueil",
-  },
-  es: {
-    institutionalNavigation: "Navegación institucional",
-    primaryNavigation: "Navegación principal",
-    home: "Immigrati Imprenditori — Inicio",
-  },
-  de: {
-    institutionalNavigation: "Institutionelle Navigation",
-    primaryNavigation: "Hauptnavigation",
-    home: "Immigrati Imprenditori — Startseite",
-  },
-  ar: {
-    institutionalNavigation: "التنقل المؤسسي",
-    primaryNavigation: "التنقل الرئيسي",
-    home: "Immigrati Imprenditori — الصفحة الرئيسية",
-  },
-  zh: {
-    institutionalNavigation: "机构导航",
-    primaryNavigation: "主导航",
-    home: "Immigrati Imprenditori — 首页",
-  },
+  it: { institutionalNavigation: "Navigazione istituzionale", primaryNavigation: "Navigazione principale", home: "Immigrati Imprenditori — Home" },
+  en: { institutionalNavigation: "Institutional navigation", primaryNavigation: "Primary navigation", home: "Immigrati Imprenditori — Home" },
+  fr: { institutionalNavigation: "Navigation institutionnelle", primaryNavigation: "Navigation principale", home: "Immigrati Imprenditori — Accueil" },
+  es: { institutionalNavigation: "Navegación institucional", primaryNavigation: "Navegación principal", home: "Immigrati Imprenditori — Inicio" },
+  de: { institutionalNavigation: "Institutionelle Navigation", primaryNavigation: "Hauptnavigation", home: "Immigrati Imprenditori — Startseite" },
+  ar: { institutionalNavigation: "التنقل المؤسسي", primaryNavigation: "التنقل الرئيسي", home: "Immigrati Imprenditori — الصفحة الرئيسية" },
+  zh: { institutionalNavigation: "机构导航", primaryNavigation: "主导航", home: "Immigrati Imprenditori — 首页" },
 } as const;
 
 export function Header() {
@@ -50,6 +22,7 @@ export function Header() {
   const locale = localeFromPathname(pathname);
   const m = NAV_MESSAGES[locale];
   const a11y = A11Y_LABELS[locale];
+  const isRedazione = pathname === "/app/redazione" || pathname.startsWith("/app/redazione/");
 
   const mainNav = [
     { label: m.observatory, href: localizedHref(locale, "/osservatorio") },
@@ -68,9 +41,25 @@ export function Header() {
           <nav aria-label={a11y.institutionalNavigation}>
             <Link prefetch={false} href={localizedHref(locale, "/cerca")}>{m.search}</Link>
             <Link prefetch={false} href={localizedHref(locale, "/chi-siamo")}>{m.about}</Link>
-            <Link prefetch={false} href="/politica-editoriale">{m.editorialPolicy}</Link>
+            <Link prefetch={false} href={localizedHref(locale, "/politica-editoriale")}>{m.editorialPolicy}</Link>
             <Link prefetch={false} href="/accedi">{m.login}</Link>
             <LanguageSwitcher />
+            <Link
+              prefetch={false}
+              href={localizedHref(locale, "/sostieni")}
+              className="header-support header-support-top"
+              style={
+                isRedazione
+                  ? {
+                      backgroundColor: "#A87423",
+                      borderColor: "#A87423",
+                      color: "#FFFFFF",
+                    }
+                  : undefined
+              }
+            >
+              {m.support}
+            </Link>
           </nav>
         </div>
       </div>
@@ -101,14 +90,6 @@ export function Header() {
               </Link>
             ))}
           </nav>
-
-          <Link
-            prefetch={false}
-            href={localizedHref(locale, "/sostieni")}
-            className="header-support"
-          >
-            {m.support}
-          </Link>
         </div>
       </div>
     </header>

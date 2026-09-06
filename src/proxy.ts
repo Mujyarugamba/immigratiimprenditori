@@ -12,7 +12,10 @@ const previewReadOnly =
   process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || deployment.isReadOnlyPreview;
 
 export async function proxy(request: NextRequest) {
-  if (previewReadOnly && !SAFE_METHODS.has(request.method.toUpperCase())) {
+  if (
+    previewReadOnly &&
+    !SAFE_METHODS.has(request.method.toUpperCase())
+  ) {
     return new NextResponse("Deploy Preview is read-only.", {
       status: 405,
       headers: {

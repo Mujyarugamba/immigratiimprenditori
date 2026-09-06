@@ -29,13 +29,40 @@ async function expectFocusedInViewport(target: Locator, viewportWidth: number) {
 }
 
 async function expectNoHorizontalDocumentOverflow(page: Page, label: string) {
-  const dimensions = await page.evaluate(() => ({
-    clientWidth: document.documentElement.clientWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-  }));
-  expect(dimensions.scrollWidth, `${label} has horizontal document overflow`).toBeLessThanOrEqual(
-    dimensions.clientWidth + 1,
-  );
+  const diagnostics = await page.evaluate(() => {
+    const root = document.documentElement;
+    const clientWidth = root.clientWidth;
+    const scrollWidth = root.scrollWidth;
+    const offenders = Array.from(document.querySelectorAll<HTMLElement>("body *"))
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const id = element.id ? `#${element.id}` : "";
+        const classes = typeof element.className === "string"
+          ? element.className.trim().split(/\s+/).filter(Boolean).slice(0, 4).map((name) => `.${name}`).join("")
+          : "";
+        return {
+          selector: `${element.tagName.toLowerCase()}${id}${classes}`,
+          left: Math.round(rect.left * 10) / 10,
+          right: Math.round(rect.right * 10) / 10,
+          width: Math.round(rect.width * 10) / 10,
+          clientWidth: element.clientWidth,
+          scrollWidth: element.scrollWidth,
+          overflowX: style.overflowX,
+          position: style.position,
+          whiteSpace: style.whiteSpace,
+        };
+      })
+      .filter((item) => item.right > clientWidth + 1 || item.left < -1 || item.scrollWidth > item.clientWidth + 1)
+      .sort((a, b) => Math.max(b.right, b.scrollWidth) - Math.max(a.right, a.scrollWidth))
+      .slice(0, 20);
+    return { clientWidth, scrollWidth, offenders };
+  });
+
+  expect(
+    diagnostics.scrollWidth,
+    `${label} has horizontal document overflow; offenders=${JSON.stringify(diagnostics.offenders)}`,
+  ).toBeLessThanOrEqual(diagnostics.clientWidth + 1);
 }
 
 async function applyWcagTextSpacing(page: Page) {
@@ -67,16 +94,17 @@ test("homepage renders the institutional editorial shell", async ({ page }) => {
   await expect(page.locator("#contenuto-principale")).toBeFocused();
 });
 
-test("contribution and support surfaces remain safe without live data", async ({ page }) => {
+test("contribution and configured support surfaces remain safe", async ({ page }) => {
   await page.goto("/contribuisci");
-  await expect(page.getByRole("heading", { level: 1, name: "Partecipa al Centro Studi" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Contribuisci alla conoscenza." })).toBeVisible();
   await expect(page.getByRole("button", { name: /Invia alla redazione/i })).toBeVisible();
   await expect(page.getByText(/non comporta pubblicazione automatica/i)).toBeVisible();
 
   await page.goto("/sostieni");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-  await expect(page.getByText(/pagamenti online/i)).toBeVisible();
-  await expect(page.locator('a[href^="https://"][href*="checkout"]')).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1, name: "Sostieni il lavoro." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "Online con Stripe" })).toBeVisible();
+  const supportLink = page.getByRole("link", { name: /Sostieni online/i });
+  await expect(supportLink).toHaveAttribute("href", /^https:\/\/donate\.stripe\.com\//);
 });
 
 test("contribution server errors are announced and associated with the form", async ({ page }) => {

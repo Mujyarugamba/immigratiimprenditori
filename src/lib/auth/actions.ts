@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service";
+import { getSiteUrl } from "@/lib/env";
 
 function safeNextPath(raw: string | null): string {
   const value = (raw ?? "").trim();
@@ -102,6 +103,55 @@ export async function signInEditorialAction(formData: FormData): Promise<void> {
   }
 
   redirect(next);
+}
+
+export async function requestPasswordResetAction(formData: FormData): Promise<void> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const next = safeNextPath(String(formData.get("next") ?? "/app/redazione"));
+
+  if (!email) {
+    redirect(`/recupera-password?error=missing&next=${encodeURIComponent(next)}`);
+  }
+
+  const supabase = await createClient();
+  const recoveryTarget = `/aggiorna-password?next=${encodeURIComponent(next)}`;
+  const callbackUrl = `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(recoveryTarget)}`;
+
+  // Deliberately return the same user-facing result whether the address exists
+  // or not, so the recovery form cannot be used to enumerate authorized users.
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: callbackUrl });
+
+  redirect(`/recupera-password?sent=1&next=${encodeURIComponent(next)}`);
+}
+
+export async function updatePasswordAction(formData: FormData): Promise<void> {
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const next = safeNextPath(String(formData.get("next") ?? "/app/redazione"));
+
+  if (password.length < 12) {
+    redirect(`/aggiorna-password?error=length&next=${encodeURIComponent(next)}`);
+  }
+  if (password !== confirmPassword) {
+    redirect(`/aggiorna-password?error=mismatch&next=${encodeURIComponent(next)}`);
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/accedi?error=recovery&next=${encodeURIComponent(next)}`);
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    redirect(`/aggiorna-password?error=update&next=${encodeURIComponent(next)}`);
+  }
+
+  await supabase.auth.signOut();
+  redirect(`/accedi?reset=success&next=${encodeURIComponent(next)}`);
 }
 
 export async function signOutEditorialAction(): Promise<void> {

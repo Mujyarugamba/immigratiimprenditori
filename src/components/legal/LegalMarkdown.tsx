@@ -6,7 +6,8 @@ type Props = {
 
 /**
  * Minimal markdown renderer for legal pages (headings, paragraphs, lists, tables, links, bold).
- * No HTML passthrough.
+ * No HTML passthrough. The surrounding LegalDocumentPage owns the document H1,
+ * so markdown heading levels are shifted down by one.
  */
 export function LegalMarkdown({ markdown }: Props) {
   const blocks = splitBlocks(markdown);
@@ -32,23 +33,23 @@ function Block({ block }: { block: Block }) {
   }
   if (block.type === "h1") {
     return (
-      <h1 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
-        {inline(block.text)}
-      </h1>
-    );
-  }
-  if (block.type === "h2") {
-    return (
-      <h2 className="text-ink pt-2 text-xl font-semibold tracking-tight">
+      <h2 className="text-ink text-3xl font-semibold tracking-tight sm:text-4xl">
         {inline(block.text)}
       </h2>
     );
   }
-  if (block.type === "h3") {
+  if (block.type === "h2") {
     return (
-      <h3 className="text-ink text-base font-semibold tracking-tight">
+      <h3 className="text-ink pt-2 text-xl font-semibold tracking-tight">
         {inline(block.text)}
       </h3>
+    );
+  }
+  if (block.type === "h3") {
+    return (
+      <h4 className="text-ink text-base font-semibold tracking-tight">
+        {inline(block.text)}
+      </h4>
     );
   }
   if (block.type === "ul") {

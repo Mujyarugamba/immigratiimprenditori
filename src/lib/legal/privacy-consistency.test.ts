@@ -19,7 +19,7 @@ test("mandatory proposal acknowledgement is not presented as optional GDPR conse
   const localized = source("src/app/[locale]/contribuisci/page.tsx");
   assert.match(localized, /name="consent_contact"[^>]*required/);
   assert.match(localized, /href="\/privacy"/);
-  assert.match(localized, /privacy: "Privacy Policy"/);
+  assert.match(localized, /privacy:\s*"Privacy Policy"/);
   assert.doesNotMatch(localized, /I authorize the editorial team to contact me/);
 });
 

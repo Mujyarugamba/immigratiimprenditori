@@ -1,0 +1,120 @@
+/* Preview-only V7: final editorial polish for research grids, knowledge relations and timeline. */
+
+/* Direct research/archive grids, e.g. /ricerca. */
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black{
+  width:min(calc(100% - 48px),1180px)!important;
+  margin:0 auto!important;
+  gap:0!important;
+  border-color:var(--ii-ink)!important;
+  background:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article{
+  min-height:330px!important;
+  padding:28px!important;
+  border:0!important;
+  background:#fff!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article:nth-child(3n+2){background:var(--ii-sand)!important}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article:nth-child(3n){background:#edf2ee!important}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article > p:first-child{
+  color:#68746e!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.14em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article h2{
+  color:var(--ii-ink)!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(28px,3vw,44px)!important;
+  font-weight:500!important;
+  line-height:.98!important;
+  letter-spacing:-.035em!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article > p:not(:first-child){
+  color:#4d5a54!important;
+  font-size:14px!important;
+  line-height:1.7!important;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article > div:last-child{
+  border-color:var(--ii-line)!important;
+  color:#68746e!important;
+}
+
+/* Knowledge graph relation rows: read as an editorial relationship ledger. */
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section .divide-y > article{
+  position:relative;
+  padding:22px 20px!important;
+  border-color:var(--ii-line)!important;
+  background:#fff;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section .divide-y > article:nth-child(2n){background:var(--ii-sand)}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section .divide-y > article a{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(18px,1.8vw,26px);
+  font-weight:500!important;
+  line-height:1.15;
+}
+main#contenuto.mx-auto.max-w-6xl.px-4.py-12 section .divide-y > article span{
+  color:#707b75!important;
+  font-size:9px!important;
+  font-weight:900;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+
+/* Timeline: date rail + editorial chronology. */
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y{
+  width:min(calc(100% - 48px),1040px)!important;
+  margin:0 auto 90px!important;
+  padding-top:0!important;
+  border-color:var(--ii-ink)!important;
+}
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y > article{
+  display:grid!important;
+  grid-template-columns:minmax(135px,.35fr) minmax(0,1.65fr)!important;
+  gap:26px!important;
+  padding:28px 0!important;
+  border-color:var(--ii-line)!important;
+}
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y > article > div:first-child{
+  padding-right:18px;
+  border-right:1px solid var(--ii-line);
+}
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y time{
+  color:var(--ii-green)!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(18px,2vw,27px)!important;
+  font-weight:500!important;
+  line-height:1!important;
+}
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y article > div:first-child p{
+  margin-top:8px!important;
+  color:#707b75!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.14em!important;
+}
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y h2{
+  margin:0!important;
+  color:var(--ii-ink)!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:clamp(26px,3vw,43px)!important;
+  font-weight:500!important;
+  line-height:.98!important;
+  letter-spacing:-.035em!important;
+}
+main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y article > div:last-child > p{
+  color:#4e5b55!important;
+  line-height:1.68!important;
+}
+
+@media(max-width:700px){
+  main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y > article{grid-template-columns:1fr!important;gap:12px!important}
+  main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y > article > div:first-child{border-right:0;border-bottom:1px solid var(--ii-line);padding:0 0 12px}
+}
+
+@media(max-width:640px){
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black,
+  main#contenuto.mx-auto.max-w-5xl.px-4.py-12 > section.border-y{width:calc(100% - 40px)!important}
+  main#contenuto.mx-auto.max-w-6xl.px-4.py-12 > div.grid.bg-black > article{min-height:auto!important;padding:22px!important}
+}

@@ -189,7 +189,7 @@ async function main() {
     await expectText("/ar", ['<html lang="ar" dir="rtl"', 'data-platform-locale="ar"']);
 
     await expectText("/chi-siamo", ["Chi siamo", "Trasparenza istituzionale"]);
-    await expectText("/sostieni", ["Sostieni l&#x27;Osservatorio", "Pagamenti online non ancora attivati"]);
+    await expectText("/sostieni", ["Sostieni il lavoro.", "Online con Stripe", "Sostieni online"]);
 
     const robots = await expectText(
       "/robots.txt",
@@ -233,15 +233,23 @@ async function main() {
       fail(`/rotte: unexpected redirect location ${location}`);
     }
 
-    const protectedLaunch = await fetch(`${ORIGIN}/app/redazione/lancio`, {
+    const editorialLaunch = await fetch(`${ORIGIN}/app/redazione/lancio`, {
       redirect: "manual",
     });
-    if (![307, 308].includes(protectedLaunch.status)) {
-      fail(`/app/redazione/lancio: expected auth redirect, received ${protectedLaunch.status}`);
-    }
-    const protectedLaunchLocation = protectedLaunch.headers.get("location") ?? "";
-    if (!protectedLaunchLocation.includes("/accedi")) {
-      fail(`/app/redazione/lancio: unexpected auth redirect ${protectedLaunchLocation}`);
+    if (PREVIEW_READ_ONLY) {
+      if (editorialLaunch.status !== 200) {
+        fail(`/app/redazione/lancio: read-only preview expected HTTP 200, received ${editorialLaunch.status}`);
+      }
+      expectHeader(editorialLaunch, "x-robots-tag", "noindex, nofollow, noarchive");
+      await expectPreviewMutationBlocked("/app/redazione/lancio");
+    } else {
+      if (![307, 308].includes(editorialLaunch.status)) {
+        fail(`/app/redazione/lancio: expected auth redirect, received ${editorialLaunch.status}`);
+      }
+      const editorialLaunchLocation = editorialLaunch.headers.get("location") ?? "";
+      if (!editorialLaunchLocation.includes("/accedi")) {
+        fail(`/app/redazione/lancio: unexpected auth redirect ${editorialLaunchLocation}`);
+      }
     }
 
     console.log(JSON.stringify({
@@ -254,7 +262,7 @@ async function main() {
           ? "strict CSP with browser Supabase connections disabled"
           : "strict CSP directives, exact Supabase connect origin and unsafe-eval exclusion",
         PREVIEW_READ_ONLY
-          ? "preview mutation firewall for contribution, login and analytics POST"
+          ? "preview mutation firewall for contribution, login, analytics and editorial POST"
           : "normal mutation path is not intercepted by preview firewall",
         PREVIEW_READ_ONLY
           ? "read-only robots noindex without advertised sitemaps"
@@ -262,11 +270,13 @@ async function main() {
         "framework fingerprint header disabled",
         "localized document lang/dir",
         "institutional transparency",
-        "support fail-closed state",
+        "verified live Stripe support path",
         "primary sitemap route",
         "contributor sitemap route",
         "legacy route canonical redirect",
-        "protected number-zero editorial dashboard",
+        PREVIEW_READ_ONLY
+          ? "read-only editorial dashboard visible without write access"
+          : "protected number-zero editorial dashboard",
       ],
     }, null, 2));
   } finally {
