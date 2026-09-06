@@ -148,16 +148,32 @@ html[lang="de"] #events .preview-culture-section-head h2{
   font-size:clamp(36px,3.05vw,50px)!important;
 }
 
-/* Home LCP: one responsive high-priority image paints the hero at every breakpoint. */
+/* Home hero: keep the approved moving Pexels video, with its matching poster as fallback. */
 .preview-v4-media{
-  background:#283d38!important;
+  background:#283d38 url("https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000") center 48%/cover no-repeat!important;
 }
-.preview-v4-mobile-poster{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  object-position:center 48%!important;
+
+/* Home: remove only the provisional stock imagery below the hero.
+   Real editorial covers remain available when a published item actually has one. */
+.home-page .editorial-card-media:not(.has-image){
+  display:none!important;
+  min-height:0!important;
+  background-image:none!important;
+}
+.home-page .voice-tile:not(.has-image){
+  background-image:none!important;
+}
+.preview-statement-photo{
+  display:none!important;
+  min-height:0!important;
+  background-image:none!important;
+}
+.preview-visual-statement{
+  grid-template-columns:minmax(0,1fr)!important;
+  min-height:0!important;
+}
+.preview-statement-copy{
+  min-height:420px;
 }
 
 /* Skip initial layout/paint work for the long Home body while it is off-screen. */
@@ -186,9 +202,11 @@ html[lang="de"] #events .preview-culture-section-head h2{
 }
 
 @media(max-width:640px){
-  .preview-v4-mobile-poster{object-position:56% center!important}
+  .preview-v4-media{
+    background:#283d38 url("https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=900") 56% center/cover no-repeat!important;
+  }
 
-  /* Mobile first paint: avoid immediate compositor work before the hero LCP is painted. */
+  /* Keep the lightweight mobile first paint; the full moving hero is desktop/tablet. */
   .preview-v4-line-a,
   .preview-v4-line-b,
   .preview-v4-scroll,
@@ -199,5 +217,8 @@ html[lang="de"] #events .preview-culture-section-head h2{
   .preview-v4-bottom>p,
   .preview-v4-actions a{
     text-shadow:none!important;
+  }
+  .preview-statement-copy{
+    min-height:340px;
   }
 }
