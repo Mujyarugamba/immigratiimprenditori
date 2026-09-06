@@ -187,4 +187,17 @@ html[lang="de"] #events .preview-culture-section-head h2{
 
 @media(max-width:640px){
   .preview-v4-mobile-poster{object-position:56% center!important}
+
+  /* Mobile first paint: avoid immediate compositor work before the hero LCP is painted. */
+  .preview-v4-line-a,
+  .preview-v4-line-b,
+  .preview-v4-scroll,
+  .preview-motion-track{
+    animation:none!important;
+  }
+  .preview-v4-payoff h1,
+  .preview-v4-bottom>p,
+  .preview-v4-actions a{
+    text-shadow:none!important;
+  }
 }
