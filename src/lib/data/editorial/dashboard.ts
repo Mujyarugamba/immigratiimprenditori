@@ -38,6 +38,7 @@ export type EditorialDashboardOverview = {
   attention: EditorialDashboardAttentionItem[];
   recentDrafts: EditorialDashboardDraftItem[];
   recentRadarToday: EditorialDashboardRadarItem[];
+  previewSnapshot: boolean;
 };
 
 function italyDateKey(date: Date): string {
@@ -53,6 +54,23 @@ function italyDateKey(date: Date): string {
 }
 
 export async function getEditorialDashboardOverview(): Promise<EditorialDashboardOverview> {
+  if (process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true") {
+    return {
+      newInbox: 1,
+      toReview: 31,
+      needsResearch: 5,
+      drafts: 3,
+      aiToReview: 0,
+      aiAvailable: true,
+      radarToday: 0,
+      publishedContents: 21,
+      attention: [],
+      recentDrafts: [],
+      recentRadarToday: [],
+      previewSnapshot: true,
+    };
+  }
+
   const supabase = await createClient();
   const inbox = () => supabase.from("editorial_inbox_items");
   const contents = () => supabase.from("contents");
@@ -131,5 +149,6 @@ export async function getEditorialDashboardOverview(): Promise<EditorialDashboar
       ? []
       : ((recentDraftsResult.data ?? []) as EditorialDashboardDraftItem[]),
     recentRadarToday: radarTodayItems.slice(0, 6),
+    previewSnapshot: false,
   };
 }
