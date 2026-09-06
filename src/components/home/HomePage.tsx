@@ -117,6 +117,23 @@ function scopeKey(value: PublicIndicatorDetail["values"][number]) {
 
 function comparableSeries(indicator: PublicIndicatorDetail | undefined) {
   if (!indicator?.values.length) return [];
+
+  if (indicator.slug === "imprese-straniere-registrate") {
+    return indicator.values
+      .filter(
+        (value) =>
+          value.territory_level === "italy" &&
+          value.territory_code === "IT" &&
+          value.period_start.endsWith("-12-31") &&
+          value.period_end.endsWith("-12-31"),
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.period_start).getTime() - new Date(b.period_start).getTime(),
+      )
+      .slice(-10);
+  }
+
   const latest = indicator.values[0];
   const key = scopeKey(latest);
   return indicator.values
@@ -159,6 +176,12 @@ function MiniTrend({
     first.period_start,
     last.period_start,
   );
+  const sourceLabel =
+    indicator?.slug === "imprese-straniere-registrate"
+      ? "Fonte: InfoCamere / Unioncamere · Registro Imprese"
+      : last.source_name
+        ? `Fonte: ${last.source_name}`
+        : "Fonte nella scheda indicatore";
 
   return (
     <div className="home-chart">
@@ -193,9 +216,7 @@ function MiniTrend({
       </svg>
       <div className="home-chart-foot">
         <span>{firstPeriodLabel}</span>
-        <span>
-          {last.source_name ? `Fonte: ${last.source_name}` : "Fonte nella scheda indicatore"}
-        </span>
+        <span>{sourceLabel}</span>
         <span>{lastPeriodLabel}</span>
       </div>
     </div>
@@ -244,6 +265,11 @@ export default async function HomePage() {
     firstEvent?.external_organization_label ??
     null;
   const trendIndicator =
+    metrics.find(
+      (indicator) =>
+        indicator.slug === "imprese-straniere-registrate" &&
+        comparableSeries(indicator).length >= 2,
+    ) ??
     metrics.find((indicator) => comparableSeries(indicator).length >= 2) ??
     metrics[0];
 
