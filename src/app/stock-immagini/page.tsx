@@ -6,22 +6,28 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const groups = ["Leadership", "Impresa e innovazione", "Milano"] as const;
+const groups = [
+  "Hero e leadership",
+  "Impresa e innovazione",
+  "Tecnologia e dati",
+  "Leadership femminile",
+  "Milano",
+  "Mobilità globale",
+] as const;
 
 export default function EditorialImageStockPage() {
   return (
     <main style={{ background: "#fbfaf4", color: "#15201d", minHeight: "100vh", padding: "48px 24px 96px" }}>
-      <div style={{ width: "min(1280px, 100%)", margin: "0 auto" }}>
+      <div style={{ width: "min(1440px, 100%)", margin: "0 auto" }}>
         <header style={{ borderBottom: "1px solid #15201d", paddingBottom: 24, marginBottom: 36 }}>
           <p style={{ margin: 0, color: "#0b3029", fontSize: 11, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase" }}>
             Fototeca editoriale · Preview interno
           </p>
           <h1 style={{ margin: "12px 0 0", fontFamily: "Georgia, Times New Roman, serif", fontSize: "clamp(42px, 6vw, 82px)", lineHeight: .92, fontWeight: 500 }}>
-            Stock immagini
+            Stock immagini · {EDITORIAL_IMAGE_STOCK.length} proposte
           </h1>
-          <p style={{ maxWidth: 860, margin: "20px 0 0", color: "#56635d", lineHeight: 1.65 }}>
-            Selezione preliminare per Immigrati Imprenditori. Tutte le immagini qui sotto provengono da Pexels e sono indicate come “Free to use”.
-            Le persone ritratte sono modelli o soggetti stock: non devono mai essere presentate come veri imprenditori immigrati né come sostenitori del Centro Studi.
+          <p style={{ maxWidth: 920, margin: "20px 0 0", color: "#56635d", lineHeight: 1.65 }}>
+            Selezione preliminare per Immigrati Imprenditori. Le immagini provengono da Pexels: ogni scheda conserva il link alla pagina originale della fotografia e al relativo stato di utilizzo. La prima scheda H01 è l’immagine business usata nella hero recente.
           </p>
         </header>
 
@@ -32,9 +38,22 @@ export default function EditorialImageStockPage() {
               <span style={{ fontSize: 11, color: "#65716b" }}>{EDITORIAL_IMAGE_STOCK.filter((item) => item.category === group).length} proposte</span>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18, marginTop: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 18, marginTop: 18 }}>
               {EDITORIAL_IMAGE_STOCK.filter((item) => item.category === group).map((item) => (
-                <article key={item.id} style={{ background: "#fff", border: "1px solid #d9e0dc", minWidth: 0 }}>
+                <article
+                  key={item.id}
+                  style={{
+                    background: "#fff",
+                    border: item.featured ? "3px solid #0b3029" : "1px solid #d9e0dc",
+                    minWidth: 0,
+                    position: "relative",
+                  }}
+                >
+                  {item.featured ? (
+                    <span style={{ position: "absolute", zIndex: 2, top: 10, left: 10, background: "#ddea78", color: "#0b3029", padding: "7px 9px", fontSize: 10, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                      Hero attuale
+                    </span>
+                  ) : null}
                   <div style={{ aspectRatio: "16 / 10", overflow: "hidden", background: "#e9eeeb" }}>
                     <img
                       src={item.imageUrl}
@@ -67,9 +86,9 @@ export default function EditorialImageStockPage() {
         ))}
 
         <aside style={{ marginTop: 64, padding: 24, background: "#0b3029", color: "#f7f1e4" }}>
-          <h2 style={{ margin: 0, fontFamily: "Georgia, Times New Roman, serif", fontSize: 28, fontWeight: 500 }}>Regola editoriale</h2>
-          <p style={{ margin: "12px 0 0", maxWidth: 900, lineHeight: 1.65, color: "#dce7e1" }}>
-            Le immagini stock servono per atmosfera, temi e contesto. Le interviste, i profili e le storie di persone reali useranno fotografie del soggetto, immagini autorizzate dall’intervistato oppure materiale con licenza/documentazione specifica.
+          <h2 style={{ margin: 0, fontFamily: "Georgia, Times New Roman, serif", fontSize: 28, fontWeight: 500 }}>Come scegliere</h2>
+          <p style={{ margin: "12px 0 0", maxWidth: 1000, lineHeight: 1.65, color: "#dce7e1" }}>
+            Scrivimi semplicemente i codici: per esempio “tieni H01, H07, W04, M08; scarta B03”. Le immagini stock servono per atmosfera, temi e contesto. Le interviste e i profili reali useranno fotografie autorizzate del soggetto o materiale con documentazione specifica.
           </p>
         </aside>
       </div>
