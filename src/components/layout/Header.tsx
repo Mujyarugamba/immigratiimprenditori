@@ -22,6 +22,7 @@ export function Header() {
   const locale = localeFromPathname(pathname);
   const m = NAV_MESSAGES[locale];
   const a11y = A11Y_LABELS[locale];
+  const isRedazione = pathname === "/app/redazione" || pathname.startsWith("/app/redazione/");
 
   const mainNav = [
     { label: m.observatory, href: localizedHref(locale, "/osservatorio") },
@@ -47,6 +48,15 @@ export function Header() {
               prefetch={false}
               href={localizedHref(locale, "/sostieni")}
               className="header-support header-support-top"
+              style={
+                isRedazione
+                  ? {
+                      backgroundColor: "#A87423",
+                      borderColor: "#A87423",
+                      color: "#FFFFFF",
+                    }
+                  : undefined
+              }
             >
               {m.support}
             </Link>
