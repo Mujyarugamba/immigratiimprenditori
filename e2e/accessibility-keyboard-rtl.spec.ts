@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+const PREVIEW_READ_ONLY = process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true";
+
 async function tabUntilFocused(page: Page, target: Locator, maxTabs = 30) {
   for (let index = 0; index < maxTabs; index += 1) {
     await page.keyboard.press("Tab");
@@ -73,6 +75,14 @@ test("core search and authentication controls are keyboard reachable", async ({ 
   }
 
   await page.goto("/accedi", { waitUntil: "domcontentloaded" });
+
+  if (PREVIEW_READ_ONLY) {
+    await expect(page).toHaveURL(/\/app\/redazione(?:[/?#]|$)/);
+    await expect(page.getByText("Preview Redazione · sola lettura.", { exact: true })).toBeVisible();
+    await expect(page.locator("#email")).toHaveCount(0);
+    await expect(page.locator("#password")).toHaveCount(0);
+    return;
+  }
 
   const email = page.locator("#email");
   const password = page.locator("#password");
