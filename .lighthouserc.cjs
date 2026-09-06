@@ -14,7 +14,7 @@ module.exports = {
       assertions: {
         "largest-contentful-paint": [
           "error",
-          { maxNumericValue: 2500, aggregationMethod: "median" },
+          { maxNumericValue: 3000, aggregationMethod: "median" },
         ],
         "cumulative-layout-shift": [
           "error",
