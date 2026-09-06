@@ -2,12 +2,22 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isPlatformLocale } from "@/lib/i18n/config";
 import { languageAlternates } from "@/lib/i18n/seo";
+import { canAcceptOnlineDonations, SUPPORT_CONFIGURATION } from "@/lib/support/config";
 
 const text = {
   en: {
     title: "Support the Research Centre",
     intro: "Supporting ImmigratiImprenditori.it contributes to the Research Centre's work: research, data collection and verification, interviews, reports and audiovisual production.",
     what: "What your support enables",
+    economic: "Financial support",
+    onlineTitle: "Online with Stripe",
+    onlineText: "You can freely choose the amount and complete the payment on Stripe's secure page.",
+    onlineCta: "Support online →",
+    onlineUnavailable: "Online payment is not currently available.",
+    bankTitle: "Bank transfer",
+    bankText: "To support the Research Centre by bank transfer, contact the Research Centre.",
+    bankCta: "Contact the Research Centre →",
+    fiscalNote: "Tax information on any possible deductibility or tax relief is not stated until it has been separately verified.",
     independence: "Editorial independence",
     independenceText: "Support, partnerships and sponsorships do not confer any right to influence source selection, data, conclusions, interviews or editorial decisions. Economic support remains separate from editorial and research activity.",
     partnership: "Partnerships and institutional support",
@@ -24,6 +34,15 @@ const text = {
     title: "Soutenir le Centre d'études",
     intro: "Soutenir ImmigratiImprenditori.it contribue aux activités du Centre d'études : recherche, collecte et vérification des données, entretiens, rapports et production audiovisuelle.",
     what: "Ce que votre soutien permet",
+    economic: "Soutien financier",
+    onlineTitle: "En ligne avec Stripe",
+    onlineText: "Vous pouvez choisir librement le montant et effectuer le paiement sur la page sécurisée de Stripe.",
+    onlineCta: "Soutenir en ligne →",
+    onlineUnavailable: "Le paiement en ligne n'est pas disponible actuellement.",
+    bankTitle: "Virement bancaire",
+    bankText: "Pour soutenir le Centre d'études par virement bancaire, contactez le Centre d'études.",
+    bankCta: "Contacter le Centre d'études →",
+    fiscalNote: "Les informations fiscales concernant une éventuelle déductibilité ou réduction fiscale ne sont pas indiquées tant qu'elles n'ont pas été vérifiées séparément.",
     independence: "Indépendance éditoriale",
     independenceText: "Les soutiens, partenariats et parrainages ne confèrent aucun droit d'intervention sur le choix des sources, les données, les conclusions, les entretiens ou les décisions de la rédaction. Le soutien économique reste séparé de l'activité éditoriale et de recherche.",
     partnership: "Partenariats et soutien institutionnel",
@@ -40,6 +59,15 @@ const text = {
     title: "Apoya el Centro de Estudios",
     intro: "Apoyar ImmigratiImprenditori.it contribuye a las actividades del Centro de Estudios: investigación, recopilación y verificación de datos, entrevistas, informes y producción audiovisual.",
     what: "Qué hace posible tu apoyo",
+    economic: "Apoyo económico",
+    onlineTitle: "En línea con Stripe",
+    onlineText: "Puedes elegir libremente el importe y completar el pago en la página segura de Stripe.",
+    onlineCta: "Apoyar en línea →",
+    onlineUnavailable: "El pago en línea no está disponible actualmente.",
+    bankTitle: "Transferencia bancaria",
+    bankText: "Para apoyar al Centro de Estudios mediante transferencia bancaria, contacta con el Centro de Estudios.",
+    bankCta: "Contactar con el Centro de Estudios →",
+    fiscalNote: "La información fiscal sobre una posible deducción o desgravación no se indica hasta que se verifique por separado.",
     independence: "Independencia editorial",
     independenceText: "El apoyo, las alianzas y los patrocinios no otorgan ningún derecho de intervención en la selección de fuentes, los datos, las conclusiones, las entrevistas ni las decisiones editoriales. El apoyo económico permanece separado de la actividad editorial y de investigación.",
     partnership: "Alianzas y apoyo institucional",
@@ -56,6 +84,15 @@ const text = {
     title: "Das Studienzentrum unterstützen",
     intro: "Unterstützung für ImmigratiImprenditori.it trägt zur Arbeit des Studienzentrums bei: Forschung, Datenerhebung und -prüfung, Interviews, Berichte und audiovisuelle Produktion.",
     what: "Was Ihre Unterstützung ermöglicht",
+    economic: "Finanzielle Unterstützung",
+    onlineTitle: "Online mit Stripe",
+    onlineText: "Sie können den Betrag frei wählen und die Zahlung auf der sicheren Stripe-Seite abschließen.",
+    onlineCta: "Online unterstützen →",
+    onlineUnavailable: "Online-Zahlung ist derzeit nicht verfügbar.",
+    bankTitle: "Banküberweisung",
+    bankText: "Um das Studienzentrum per Banküberweisung zu unterstützen, kontaktieren Sie das Studienzentrum.",
+    bankCta: "Studienzentrum kontaktieren →",
+    fiscalNote: "Steuerliche Informationen zu einer möglichen Abzugsfähigkeit oder steuerlichen Begünstigung werden erst nach gesonderter Prüfung angegeben.",
     independence: "Redaktionelle Unabhängigkeit",
     independenceText: "Unterstützung, Partnerschaften und Sponsoring verleihen kein Recht, auf Quellenauswahl, Daten, Schlussfolgerungen, Interviews oder redaktionelle Entscheidungen Einfluss zu nehmen. Finanzielle Unterstützung bleibt von redaktioneller und wissenschaftlicher Arbeit getrennt.",
     partnership: "Partnerschaften und institutionelle Unterstützung",
@@ -72,6 +109,15 @@ const text = {
     title: "ادعم مركز الدراسات",
     intro: "يسهم دعم ImmigratiImprenditori.it في أنشطة مركز الدراسات: البحث وجمع البيانات والتحقق منها والمقابلات والتقارير والإنتاج السمعي البصري.",
     what: "ما الذي يتيحه دعمك",
+    economic: "الدعم المالي",
+    onlineTitle: "الدعم عبر Stripe",
+    onlineText: "يمكنك اختيار المبلغ بحرية وإتمام الدفع عبر صفحة Stripe الآمنة.",
+    onlineCta: "ادعم عبر الإنترنت ←",
+    onlineUnavailable: "الدفع عبر الإنترنت غير متاح حاليًا.",
+    bankTitle: "تحويل مصرفي",
+    bankText: "لدعم مركز الدراسات عن طريق التحويل المصرفي، تواصل مع مركز الدراسات.",
+    bankCta: "تواصل مع مركز الدراسات ←",
+    fiscalNote: "لا تُذكر المعلومات الضريبية المتعلقة بأي إمكانية للخصم أو الاستفادة الضريبية قبل التحقق منها بشكل منفصل.",
     independence: "الاستقلال التحريري",
     independenceText: "لا يمنح الدعم أو الشراكات أو الرعاية أي حق في التدخل في اختيار المصادر أو البيانات أو الاستنتاجات أو المقابلات أو قرارات هيئة التحرير. ويظل الدعم المالي منفصلاً عن النشاط التحريري والبحثي.",
     partnership: "الشراكات والدعم المؤسسي",
@@ -88,6 +134,15 @@ const text = {
     title: "支持研究中心",
     intro: "支持 ImmigratiImprenditori.it 将有助于研究中心开展研究、数据收集与核查、访谈、报告和视听内容制作。",
     what: "您的支持用于什么",
+    economic: "经济支持",
+    onlineTitle: "通过 Stripe 在线支持",
+    onlineText: "您可以自由选择金额，并在 Stripe 的安全页面完成支付。",
+    onlineCta: "在线支持 →",
+    onlineUnavailable: "目前暂不提供在线支付。",
+    bankTitle: "银行转账",
+    bankText: "如需通过银行转账支持研究中心，请联系研究中心。",
+    bankCta: "联系研究中心 →",
+    fiscalNote: "在单独核实之前，不提供任何关于税务抵扣或扣除资格的信息。",
     independence: "编辑独立性",
     independenceText: "支持、合作伙伴关系和赞助均不产生干预来源选择、数据、结论、访谈或编辑决策的权利。经济支持与编辑和研究活动保持分离。",
     partnership: "合作伙伴与机构支持",
@@ -115,6 +170,7 @@ export default async function LocalizedSupportPage({ params }: Props) {
   const { locale } = await params;
   if (!isPlatformLocale(locale) || locale === "it") notFound();
   const m = text[locale];
+  const donationsEnabled = canAcceptOnlineDonations();
 
   return (
     <main id="contenuto" className="localized-support-page">
@@ -137,6 +193,30 @@ export default async function LocalizedSupportPage({ params }: Props) {
       </section>
 
       <section className="localized-support-rule">
+        <h2>{m.economic}</h2>
+        <div className="localized-support-grid">
+          <article className="localized-support-card">
+            <h3>{m.onlineTitle}</h3>
+            {donationsEnabled && SUPPORT_CONFIGURATION.paymentUrl ? (
+              <>
+                <p>{m.onlineText}</p>
+                <a className="underline underline-offset-4" href={SUPPORT_CONFIGURATION.paymentUrl} rel="noreferrer">{m.onlineCta}</a>
+              </>
+            ) : (
+              <p>{m.onlineUnavailable}</p>
+            )}
+          </article>
+
+          <article className="localized-support-card">
+            <h3>{m.bankTitle}</h3>
+            <p>{m.bankText}</p>
+            <a className="underline underline-offset-4" href={`mailto:${SUPPORT_CONFIGURATION.partnershipEmail}`}>{m.bankCta}</a>
+          </article>
+        </div>
+        <p className="mt-4 text-sm leading-6 text-neutral-600">{m.fiscalNote}</p>
+      </section>
+
+      <section className="localized-support-rule">
         <h2>{m.independence}</h2>
         <p>{m.independenceText}</p>
       </section>
@@ -144,7 +224,7 @@ export default async function LocalizedSupportPage({ params }: Props) {
       <section className="localized-support-rule">
         <h2>{m.partnership}</h2>
         <p>{m.partnershipText}</p>
-        <p>{m.contact}: <a className="underline underline-offset-4" href="mailto:direzione@immigratiimprenditori.it">direzione@immigratiimprenditori.it</a>.</p>
+        <p>{m.contact}: <a className="underline underline-offset-4" href={`mailto:${SUPPORT_CONFIGURATION.partnershipEmail}`}>{SUPPORT_CONFIGURATION.partnershipEmail}</a>.</p>
       </section>
     </main>
   );
