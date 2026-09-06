@@ -117,23 +117,35 @@ export default async function LocalizedSupportPage({ params }: Props) {
   const m = text[locale];
 
   return (
-    <main id="contenuto" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
-      <header className="max-w-3xl border-b border-black pb-8">
+    <main id="contenuto" className="localized-support-page">
+      <header className="localized-support-header">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">Immigrati Imprenditori · Centro Studi</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-black sm:text-5xl">{m.title}</h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-700">{m.intro}</p>
+        <h1>{m.title}</h1>
+        <p>{m.intro}</p>
       </header>
 
-      <section className="py-10">
-        <h2 className="text-2xl font-semibold tracking-tight text-black">{m.what}</h2>
-        <div className="mt-6 grid gap-px border border-black bg-black sm:grid-cols-2">
-          {m.areas.map(([title, areaText]) => <article key={title} className="bg-white p-6"><h3 className="text-lg font-semibold text-black">{title}</h3><p className="mt-3 text-sm leading-6 text-neutral-700">{areaText}</p></article>)}
+      <section className="localized-support-section">
+        <h2>{m.what}</h2>
+        <div className="localized-support-grid">
+          {m.areas.map(([title, areaText]) => (
+            <article key={title} className="localized-support-card">
+              <h3>{title}</h3>
+              <p>{areaText}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="border-t border-black py-10"><h2 className="text-2xl font-semibold tracking-tight text-black">{m.independence}</h2><p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{m.independenceText}</p></section>
+      <section className="localized-support-rule">
+        <h2>{m.independence}</h2>
+        <p>{m.independenceText}</p>
+      </section>
 
-      <section className="border-t border-black pt-10"><h2 className="text-2xl font-semibold tracking-tight text-black">{m.partnership}</h2><p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{m.partnershipText}</p><p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700">{m.contact}: <a className="underline underline-offset-4" href="mailto:direzione@immigratiimprenditori.it">direzione@immigratiimprenditori.it</a>.</p></section>
+      <section className="localized-support-rule">
+        <h2>{m.partnership}</h2>
+        <p>{m.partnershipText}</p>
+        <p>{m.contact}: <a className="underline underline-offset-4" href="mailto:direzione@immigratiimprenditori.it">direzione@immigratiimprenditori.it</a>.</p>
+      </section>
     </main>
   );
 }
