@@ -21,7 +21,7 @@ const topics = [
 const HERO_POSTER_DESKTOP =
   "https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000";
 const HERO_POSTER_MOBILE =
-  "https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=900";
+  "https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=640";
 
 export default function HomeMotionPreviewPage() {
   return (
@@ -57,7 +57,7 @@ export default function HomeMotionPreviewPage() {
               height="1125"
               loading="eager"
               fetchPriority="high"
-              decoding="async"
+              decoding="sync"
             />
           </picture>
           <video
