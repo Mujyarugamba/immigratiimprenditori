@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import HomePage from "@/components/home/HomePage";
 
 export const metadata: Metadata = {
@@ -30,29 +31,16 @@ export default function HomeMotionPreviewPage() {
         <div className="preview-v4-media" aria-hidden="true">
           <img
             className="preview-v4-mobile-poster"
-            src="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=450"
+            src="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=1400"
+            srcSet="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=450 450w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=900 900w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=1400 1400w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=2000 2000w"
+            sizes="100vw"
             alt=""
-            width={450}
-            height={737}
+            width={2000}
+            height={3276}
             loading="eager"
             fetchPriority="high"
-            decoding="sync"
+            decoding="async"
           />
-          <video
-            className="preview-v4-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            tabIndex={-1}
-          >
-            <source
-              src="https://www.pexels.com/download/video/8869632/"
-              type="video/mp4"
-              media="(min-width: 641px)"
-            />
-          </video>
         </div>
         <div className="preview-v4-veil" aria-hidden="true" />
 
@@ -97,7 +85,9 @@ export default function HomeMotionPreviewPage() {
         </div>
       </div>
 
-      <HomePage />
+      <Suspense fallback={null}>
+        <HomePage />
+      </Suspense>
 
       <section className="preview-visual-statement">
         <div className="preview-statement-photo" aria-hidden="true" />
