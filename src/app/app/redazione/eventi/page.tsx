@@ -113,7 +113,7 @@ export default async function EventiRedazionePage({ searchParams }: Props) {
         <div className="flex items-end">
           <button
             type="submit"
-            className="bg-brand text-brand-fg rounded-md px-4 py-2 text-sm font-medium"
+            className="bg-brand rounded-md px-4 py-2 text-sm font-medium text-white transition hover:brightness-90"
           >
             Filtra
           </button>

@@ -3,6 +3,7 @@ import { resolveDeploymentEnvironment } from "@/lib/deployment/environment";
 import { updateSession } from "@/lib/supabase/proxy";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const PREVIEW_AUTH_POST_PATHS = new Set(["/accedi", "/app/mfa"]);
 const deployment = resolveDeploymentEnvironment(process.env);
 
 // Keep the NEXT_PUBLIC flag as a direct process.env reference: Next.js replaces
@@ -11,8 +12,19 @@ const deployment = resolveDeploymentEnvironment(process.env);
 const previewReadOnly =
   process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true" || deployment.isReadOnlyPreview;
 
+function isPreviewAuthOnlyPost(request: NextRequest) {
+  return (
+    request.method.toUpperCase() === "POST" &&
+    PREVIEW_AUTH_POST_PATHS.has(request.nextUrl.pathname)
+  );
+}
+
 export async function proxy(request: NextRequest) {
-  if (previewReadOnly && !SAFE_METHODS.has(request.method.toUpperCase())) {
+  if (
+    previewReadOnly &&
+    !SAFE_METHODS.has(request.method.toUpperCase()) &&
+    !isPreviewAuthOnlyPost(request)
+  ) {
     return new NextResponse("Deploy Preview is read-only.", {
       status: 405,
       headers: {

@@ -12,11 +12,28 @@ export const metadata: Metadata = {
   },
 };
 
+const previewReadOnly = process.env.NEXT_PUBLIC_PREVIEW_READ_ONLY === "true";
+
 export default async function RedazioneLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  if (previewReadOnly) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-4 border border-ink bg-surface-muted px-4 py-3 text-sm">
+          <strong className="text-ink">Preview Redazione · sola lettura.</strong>{" "}
+          <span className="text-ink-muted">
+            Nessuna operazione modifica il database Production.
+          </span>
+        </div>
+        <EditorialNav />
+        {children}
+      </div>
+    );
+  }
+
   const session = await getApplicationSession();
 
   if (!session) {
@@ -45,8 +62,6 @@ export default async function RedazioneLayout({
     redirect("/app/mfa?next=/app/redazione");
   }
 
-  // At AAL2 the operational role helpers are authoritative. They are also used
-  // by RLS/RPC and therefore keep the server-rendered UI aligned with the DB gate.
   if (!session.isEditor && !session.isApplicationAdmin) {
     redirect("/accedi?error=role&next=/app/redazione");
   }
