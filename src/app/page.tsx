@@ -31,15 +31,15 @@ export default function HomeMotionPreviewPage() {
         <div className="preview-v4-media" aria-hidden="true">
           <img
             className="preview-v4-mobile-poster"
-            src="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=1400"
-            srcSet="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=450 450w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=900 900w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=1400 1400w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=2000 2000w"
+            src="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=768"
+            srcSet="https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=450 450w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=768 768w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=900 900w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=1400 1400w, https://images.pexels.com/photos/34774353/pexels-photo-34774353.jpeg?auto=compress&cs=tinysrgb&w=2000 2000w"
             sizes="100vw"
             alt=""
             width={2000}
             height={3276}
             loading="eager"
             fetchPriority="high"
-            decoding="async"
+            decoding="sync"
           />
         </div>
         <div className="preview-v4-veil" aria-hidden="true" />
