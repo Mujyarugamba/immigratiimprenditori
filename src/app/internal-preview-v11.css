@@ -160,6 +160,12 @@ html[lang="de"] #events .preview-culture-section-head h2{
   object-position:center 48%!important;
 }
 
+/* Skip initial layout/paint work for the long Home body while it is off-screen. */
+.preview-home-deferred{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 4200px;
+}
+
 @media(max-width:900px){
   .localized-support-page{width:calc(100% - 40px)!important;padding:48px 0 72px!important}
   .preview-culture-section-head{grid-template-columns:1fr!important;gap:22px!important}
