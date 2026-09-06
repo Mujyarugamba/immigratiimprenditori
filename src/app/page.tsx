@@ -18,28 +18,62 @@ const topics = [
   "Eventi",
 ];
 
+const HERO_POSTER_DESKTOP =
+  "https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000";
+const HERO_POSTER_MOBILE =
+  "https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=900";
+
 export default function HomeMotionPreviewPage() {
   return (
     <>
-      <link rel="preconnect" href="https://www.pexels.com" />
-      <link rel="dns-prefetch" href="https://www.pexels.com" />
+      <link rel="preconnect" href="https://images.pexels.com" />
+      <link rel="dns-prefetch" href="https://images.pexels.com" />
+      <link
+        rel="preload"
+        as="image"
+        href={HERO_POSTER_MOBILE}
+        media="(max-width: 640px)"
+        fetchPriority="high"
+      />
+      <link
+        rel="preload"
+        as="image"
+        href={HERO_POSTER_DESKTOP}
+        media="(min-width: 641px)"
+        fetchPriority="high"
+      />
       <link rel="stylesheet" href="/home-light-v1.css" />
       <link rel="stylesheet" href="/home-motion-v3.css" />
       <link rel="stylesheet" href="/home-motion-v4.css" />
 
       <section className="preview-hero-v4" aria-labelledby="preview-hero-title">
         <div className="preview-v4-media" aria-hidden="true">
+          <picture className="preview-v4-poster">
+            <source media="(max-width: 640px)" srcSet={HERO_POSTER_MOBILE} />
+            <img
+              src={HERO_POSTER_DESKTOP}
+              alt=""
+              width="2000"
+              height="1125"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+            />
+          </picture>
           <video
             className="preview-v4-video"
             autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
-            poster="https://images.pexels.com/photos/34164499/pexels-photo-34164499.jpeg?auto=compress&cs=tinysrgb&w=2000"
+            preload="none"
             tabIndex={-1}
           >
-            <source src="https://www.pexels.com/download/video/8869632/" type="video/mp4" />
+            <source
+              media="(min-width: 641px)"
+              src="https://www.pexels.com/download/video/8869632/"
+              type="video/mp4"
+            />
           </video>
         </div>
         <div className="preview-v4-veil" aria-hidden="true" />
