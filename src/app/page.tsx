@@ -85,21 +85,23 @@ export default function HomeMotionPreviewPage() {
         </div>
       </div>
 
-      <Suspense fallback={null}>
-        <HomePage />
-      </Suspense>
+      <div className="preview-home-deferred">
+        <Suspense fallback={null}>
+          <HomePage />
+        </Suspense>
 
-      <section className="preview-visual-statement">
-        <div className="preview-statement-photo" aria-hidden="true" />
-        <div className="preview-statement-copy">
-          <p>UN FENOMENO GLOBALE</p>
-          <h2>
-            Non una sola direzione.
-            <em>Un mondo di traiettorie.</em>
-          </h2>
-          <Link href="/esplora/territori">Esplora territori e rotte →</Link>
-        </div>
-      </section>
+        <section className="preview-visual-statement">
+          <div className="preview-statement-photo" aria-hidden="true" />
+          <div className="preview-statement-copy">
+            <p>UN FENOMENO GLOBALE</p>
+            <h2>
+              Non una sola direzione.
+              <em>Un mondo di traiettorie.</em>
+            </h2>
+            <Link href="/esplora/territori">Esplora territori e rotte →</Link>
+          </div>
+        </section>
+      </div>
     </>
   );
 }
